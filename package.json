@@ -1,0 +1,13 @@
+{
+  "name": "@oss/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@nx/workspace": "16.5.5",
+    "nx": "16.5.5",
+    "nx-cloud": "latest"
+  }
+}
