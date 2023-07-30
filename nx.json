@@ -4,35 +4,20 @@
     "default": {
       "runner": "nx-cloud",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ],
-        "accessToken": "MmJhY2I0NTQtMTk5NC00OTlmLTkzY2ItNjg0NDc3NzQ3ZDdjfHJlYWQtd3JpdGU="
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
+        "accessToken": "OWRhYzQ3MGMtMDRlYy00NDY1LWE3YWQtNmZiZmQ2YjU0MzAxfHJlYWQtd3JpdGU="
       }
     }
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
-    "production": [
-      "default"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": ["default"],
     "sharedGlobals": []
   }
 }
