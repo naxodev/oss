@@ -5,6 +5,11 @@
       "schema": "./src/generators/application/schema.json",
       "description": "Cloudflare worker application generator",
       "alias": "app"
+    },
+    "init": {
+      "factory": "./src/generators/init/generator",
+      "schema": "./src/generators/init/schema.json",
+      "description": "init generator"
     }
   }
 }
