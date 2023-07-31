@@ -1,9 +1,10 @@
 {
   "generators": {
-    "worker": {
-      "factory": "./src/generators/worker/generator",
-      "schema": "./src/generators/worker/schema.json",
-      "description": "worker generator"
+    "application": {
+      "factory": "./src/generators/application/generator",
+      "schema": "./src/generators/application/schema.json",
+      "description": "Cloudflare worker application generator",
+      "alias": "app"
     }
   }
 }
