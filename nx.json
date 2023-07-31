@@ -36,5 +36,9 @@
       "!{projectRoot}/src/test-setup.[jt]s"
     ],
     "sharedGlobals": []
+  },
+  "workspaceLayout": {
+    "appsDir": "e2e",
+    "libsDir": "packages"
   }
 }

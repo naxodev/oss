@@ -1,35 +1,35 @@
 {
   "name": "plugins-nx-cloudflare",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/plugins/nx-cloudflare/src",
+  "sourceRoot": "packages/plugins/nx-cloudflare/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/plugins/nx-cloudflare",
-        "main": "libs/plugins/nx-cloudflare/src/index.ts",
-        "tsConfig": "libs/plugins/nx-cloudflare/tsconfig.lib.json",
+        "outputPath": "dist/packages/plugins/nx-cloudflare",
+        "main": "packages/plugins/nx-cloudflare/src/index.ts",
+        "tsConfig": "packages/plugins/nx-cloudflare/tsconfig.lib.json",
         "assets": [
-          "libs/plugins/nx-cloudflare/*.md",
+          "packages/plugins/nx-cloudflare/*.md",
           {
-            "input": "./libs/plugins/nx-cloudflare/src",
+            "input": "./packages/plugins/nx-cloudflare/src",
             "glob": "**/!(*.ts)",
             "output": "./src"
           },
           {
-            "input": "./libs/plugins/nx-cloudflare/src",
+            "input": "./packages/plugins/nx-cloudflare/src",
             "glob": "**/*.d.ts",
             "output": "./src"
           },
           {
-            "input": "./libs/plugins/nx-cloudflare",
+            "input": "./packages/plugins/nx-cloudflare",
             "glob": "generators.json",
             "output": "."
           },
           {
-            "input": "./libs/plugins/nx-cloudflare",
+            "input": "./packages/plugins/nx-cloudflare",
             "glob": "executors.json",
             "output": "."
           }
@@ -45,8 +45,8 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
-          "libs/plugins/nx-cloudflare/**/*.ts",
-          "libs/plugins/nx-cloudflare/package.json"
+          "packages/plugins/nx-cloudflare/**/*.ts",
+          "packages/plugins/nx-cloudflare/package.json"
         ]
       }
     },
@@ -54,7 +54,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "libs/plugins/nx-cloudflare/jest.config.ts",
+        "jestConfig": "packages/plugins/nx-cloudflare/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
