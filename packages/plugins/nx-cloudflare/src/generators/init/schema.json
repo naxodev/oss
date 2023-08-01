@@ -5,9 +5,9 @@
   "type": "object",
   "properties": {
     "unitTestRunner": {
-      "description": "Adds the specified unit test runner.",
       "type": "string",
-      "enum": ["vitest", "none"],
+      "enum": ["vitest", "jest", "none"],
+      "description": "Test runner to use for unit tests.",
       "default": "vitest"
     },
     "skipFormat": {

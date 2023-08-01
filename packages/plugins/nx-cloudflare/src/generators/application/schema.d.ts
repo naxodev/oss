@@ -1,16 +1,16 @@
 export interface Schema {
   name: string;
-  template: 'Fetch handler' | 'Scheduled handler' | 'None';
-  js: boolean;
-  unitTestRunner: 'vitest' | 'none';
+  template?: 'fetch-handler' | 'scheduled-handler' | 'none';
+  js?: boolean;
+  unitTestRunner?: 'vitest' | 'jest' | 'none';
   directory?: string;
   rootProject?: boolean;
   tags?: string;
   frontendProject?: string;
+  skipFormat?: boolean;
   port?: number;
 }
 
 export interface NormalizedSchema extends Schema {
   appProjectRoot: string;
-  parsedTags: string[];
 }

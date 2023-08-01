@@ -34,8 +34,10 @@ export async function initGenerator(tree: Tree, schema: Schema) {
   const initTask = await nodeInitGenerator(tree, {
     ...schema,
     skipFormat: true,
-    unitTestRunner: 'none',
+    unitTestRunner:
+      schema.unitTestRunner == 'vitest' ? 'none' : schema.unitTestRunner,
   });
+
   const installTask = updateDependencies(tree);
   if (!schema.skipFormat) {
     await formatFiles(tree);

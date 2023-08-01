@@ -16,7 +16,7 @@ describe('init', () => {
     addDependenciesToPackageJson(
       tree,
       {
-        '@naxo/nx-cloudflare': nxCloudflareVersion,
+        '@naxodev/nx-cloudflare': nxCloudflareVersion,
         [existing]: existingVersion,
       },
       { [existing]: existingVersion }
@@ -28,16 +28,16 @@ describe('init', () => {
     expect(packageJson.devDependencies['wrangler']).toBeDefined();
     // add tslib
     expect(packageJson.dependencies['tslib']).toBeDefined();
-    // move `@naxo/nx-cloudflare` to dev
-    expect(packageJson.dependencies['@naxo/nx-cloudflare']).toBeUndefined();
-    expect(packageJson.devDependencies['@naxo/nx-cloudflare']).toBeDefined();
+    // move `@naxodev/nx-cloudflare` to dev
+    expect(packageJson.dependencies['@naxodev/nx-cloudflare']).toBeUndefined();
+    expect(packageJson.devDependencies['@naxodev/nx-cloudflare']).toBeDefined();
     // move `@cloudflare/workers-types` to dev
     expect(
       packageJson.dependencies['@cloudflare/workers-types']
     ).toBeUndefined();
-    expect(packageJson.devDependencies['@naxo/nx-cloudflare']).toBeDefined();
-    // add express types
-    expect(packageJson.devDependencies['@types/express']).toBeDefined();
+    expect(
+      packageJson.devDependencies['@cloudflare/workers-types']
+    ).toBeDefined();
     // keep existing packages
     expect(packageJson.devDependencies[existing]).toBeDefined();
     expect(packageJson.dependencies[existing]).toBeDefined();
