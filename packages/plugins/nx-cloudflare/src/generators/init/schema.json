@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "Init",
+  "title": "Init Nx Cloudflare Plugin",
+  "type": "object",
+  "properties": {
+    "unitTestRunner": {
+      "type": "string",
+      "enum": ["vitest", "jest", "none"],
+      "description": "Test runner to use for unit tests.",
+      "default": "vitest"
+    },
+    "skipFormat": {
+      "description": "Skip formatting files.",
+      "type": "boolean",
+      "default": false
+    },
+    "js": {
+      "type": "boolean",
+      "default": false,
+      "description": "Use JavaScript instead of TypeScript"
+    }
+  },
+  "required": ["name"]
+}

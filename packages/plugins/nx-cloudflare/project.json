@@ -46,7 +46,8 @@
       "options": {
         "lintFilePatterns": [
           "packages/plugins/nx-cloudflare/**/*.ts",
-          "packages/plugins/nx-cloudflare/package.json"
+          "packages/plugins/nx-cloudflare/package.json",
+          "packages/plugins/nx-cloudflare/generators.json"
         ]
       }
     },

@@ -2,14 +2,19 @@
   "name": "@oss/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "test": "nx test plugins-nx-cloudflare"
+  },
   "private": true,
   "devDependencies": {
+    "@nx/angular": "^16.6.0",
     "@nx/eslint-plugin": "16.5.5",
     "@nx/jest": "16.5.5",
     "@nx/js": "16.5.5",
     "@nx/linter": "16.5.5",
+    "@nx/node": "^16.6.0",
     "@nx/plugin": "^16.5.5",
+    "@nx/vite": "^16.6.0",
     "@nx/workspace": "16.5.5",
     "@swc-node/register": "~1.4.2",
     "@swc/cli": "~0.1.62",
