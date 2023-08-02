@@ -4,6 +4,12 @@
   "title": "Serve executor",
   "description": "",
   "type": "object",
-  "properties": {},
+  "properties": {
+    "port": {
+      "description": "The port which the worker will be run on development mode",
+      "type": "number",
+      "default": 8787
+    }
+  },
   "required": []
 }

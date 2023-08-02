@@ -48,7 +48,7 @@
     "port": {
       "description": "The port which the worker will be run on development mode",
       "type": "number",
-      "default": 3000
+      "default": 8787
     },
     "directory": {
       "description": "The directory of the new application.",
