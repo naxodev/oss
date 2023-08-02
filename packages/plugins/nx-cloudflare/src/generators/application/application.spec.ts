@@ -64,6 +64,7 @@ describe('app', () => {
     it('should generate files', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        unitTestRunner: 'jest',
       });
       expect(tree.exists(`my-worker-app/jest.config.ts`)).toBeTruthy();
       expect(tree.exists('my-worker-app/src/index.ts')).toBeTruthy();
@@ -91,6 +92,7 @@ describe('app', () => {
 
       const tsconfigApp = readJson(tree, 'my-worker-app/tsconfig.app.json');
       expect(tsconfigApp.compilerOptions.outDir).toEqual('../dist/out-tsc');
+      // expect(tsconfigApp.compilerOptions.target).toEqual('es2021');
       expect(tsconfigApp.extends).toEqual('./tsconfig.json');
       expect(tsconfigApp.exclude).toEqual([
         'jest.config.ts',
@@ -135,6 +137,15 @@ describe('app', () => {
       `);
     });
 
+    it('should not generate files when template is none', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        template: 'none',
+      });
+      expect(tree.exists('my-worker-app/src/index.ts')).toBeFalsy();
+      expect(tree.exists('my-worker-app/src/index.test.ts')).toBeFalsy();
+    });
+
     it('should extend from root tsconfig.json when no tsconfig.base.json', async () => {
       tree.rename('tsconfig.base.json', 'tsconfig.json');
 
@@ -152,6 +163,7 @@ describe('app', () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         directory: 'myDir',
+        unitTestRunner: 'jest',
       });
       const project = readProjectConfiguration(tree, 'my-dir-my-worker-app');
 
@@ -175,6 +187,7 @@ describe('app', () => {
         name: 'myWorkerApp',
         directory: 'myDir',
         tags: 'one,two',
+        unitTestRunner: 'jest',
       });
       const projects = Object.fromEntries(getProjects(tree));
       expect(projects).toMatchObject({
@@ -194,6 +207,7 @@ describe('app', () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         directory: 'myDir',
+        unitTestRunner: 'jest',
       });
 
       // Make sure these exist
@@ -214,8 +228,13 @@ describe('app', () => {
         },
         {
           path: 'my-dir/my-worker-app/tsconfig.app.json',
+          lookupFn: (json) => json.compilerOptions.target,
+          expectedValue: 'es2021',
+        },
+        {
+          path: 'my-dir/my-worker-app/tsconfig.app.json',
           lookupFn: (json) => json.compilerOptions.types,
-          expectedValue: ['node'],
+          expectedValue: ['node', '@cloudflare/workers-types'],
         },
         {
           path: 'my-dir/my-worker-app/tsconfig.app.json',
@@ -321,6 +340,7 @@ describe('app', () => {
         name: 'myWorkerApp',
         tags: 'one,two',
         swcJest: true,
+        unitTestRunner: 'jest',
       } as Schema);
 
       expect(tree.read(`my-worker-app/jest.config.ts`, 'utf-8'))
@@ -341,37 +361,12 @@ describe('app', () => {
     });
   });
 
-  describe('--babelJest (deprecated)', () => {
-    it('should use babel for jest', async () => {
-      await applicationGenerator(tree, {
-        name: 'myWorkerApp',
-        tags: 'one,two',
-        babelJest: true,
-      } as Schema);
-
-      expect(tree.read(`my-worker-app/jest.config.ts`, 'utf-8'))
-        .toMatchInlineSnapshot(`
-        "/* eslint-disable */
-        export default {
-          displayName: 'my-worker-app',
-          preset: '../jest.preset.js',
-          testEnvironment: 'node',
-          transform: {
-            '^.+\\\\.[tj]s$': 'babel-jest',
-          },
-          moduleFileExtensions: ['ts', 'js', 'html'],
-          coverageDirectory: '../coverage/my-worker-app',
-        };
-        "
-      `);
-    });
-  });
-
   describe('--js flag', () => {
     it('should generate js files instead of ts files', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         js: true,
+        unitTestRunner: 'jest',
       } as Schema);
 
       expect(tree.exists(`my-worker-app/jest.config.js`)).toBeTruthy();
@@ -413,6 +408,7 @@ describe('app', () => {
         name: 'myWorkerApp',
         directory: 'myDir',
         js: true,
+        unitTestRunner: 'jest',
       } as Schema);
       expect(tree.exists(`my-dir/my-worker-app/jest.config.js`)).toBeTruthy();
       expect(tree.exists('my-dir/my-worker-app/src/index.js')).toBeTruthy();
@@ -428,9 +424,6 @@ describe('app', () => {
         name: 'myWorkerApp',
         pascalCaseFiles: true,
       } as Schema);
-
-      // @TODO how to spy on context ?
-      // expect(contextLoggerSpy).toHaveBeenCalledWith('NOTE: --pascalCaseFiles is a noop')
     });
   });
 
@@ -464,6 +457,7 @@ describe('app', () => {
       await applicationGenerator(tree, {
         name: 'api',
         template,
+        unitTestRunner: 'jest',
       });
 
       const project = readProjectConfiguration(tree, 'api');

@@ -18,12 +18,35 @@ import type { NormalizedSchema, Schema } from './schema';
 import { join } from 'path';
 import initGenerator from '../init/init';
 
-function addTypes(tree: Tree, options: NormalizedSchema) {
+function updateTsAppConfig(tree: Tree, options: NormalizedSchema) {
   updateJson(
     tree,
     join(options.appProjectRoot, 'tsconfig.app.json'),
     (json) => {
-      json.compilerOptions.types = [...json.compilerOptions.types];
+      json.compilerOptions = {
+        ...json.compilerOptions,
+        esModuleInterop: true,
+        target: 'es2021',
+        lib: ['es2021'],
+        module: 'es2022',
+        moduleResolution: 'node',
+        resolveJsonModule: true,
+
+        allowJs: true,
+        checkJs: false,
+        noEmit: true,
+
+        isolatedModules: true,
+        allowSyntheticDefaultImports: true,
+        forceConsistentCasingInFileNames: true,
+
+        strict: true,
+        skipLibCheck: true,
+      };
+      json.compilerOptions.types = [
+        ...json.compilerOptions.types,
+        '@cloudflare/workers-types',
+      ];
       return json;
     }
   );
@@ -66,31 +89,6 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
   }
 }
 
-// function updateTsConfigOptions(tree: Tree, options: NormalizedSchema) {
-//   updateJson(tree, `${options.appProjectRoot}/tsconfig.json`, (json) => {
-//     if (options.rootProject) {
-//       return {
-//         compilerOptions: {
-//           ...tsConfigBaseOptions,
-//           ...json.compilerOptions,
-//           esModuleInterop: true,
-//         },
-//         ...json,
-//         extends: undefined,
-//         exclude: ['node_modules', 'tmp'],
-//       };
-//     } else {
-//       return {
-//         ...json,
-//         compilerOptions: {
-//           ...json.compilerOptions,
-//           esModuleInterop: true,
-//         },
-//       };
-//     }
-//   });
-// }
-
 function addTargets(tree: Tree, appName: string) {
   try {
     const projectConfiguration = readProjectConfiguration(tree, appName);
@@ -118,22 +116,25 @@ function addTargets(tree: Tree, appName: string) {
 
 export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = normalizeOptions(tree, schema);
+
   const initTask = await initGenerator(tree, {
     ...options,
     skipFormat: true,
     unitTestRunner:
-      schema.unitTestRunner == 'vitest' ? 'none' : schema.unitTestRunner,
+      options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
   });
   const applicationTask = await nodeApplicationGenerator(tree, {
-    ...schema,
+    ...options,
     framework: 'none',
     skipFormat: true,
     unitTestRunner:
-      schema.unitTestRunner == 'vitest' ? 'none' : schema.unitTestRunner,
+      options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
     e2eTestRunner: 'none',
+    name: schema.name,
   });
+
   addCloudflareFiles(tree, options);
-  addTypes(tree, options);
+  updateTsAppConfig(tree, options);
   addTargets(tree, options.name);
 
   if (!options.skipFormat) {

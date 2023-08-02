@@ -17,3 +17,7 @@ backend-worker
 // if test is jest, remove the vite imports on test files
 
 // update tsconfig
+
+// ensure wrangler
+
+// test different test types
