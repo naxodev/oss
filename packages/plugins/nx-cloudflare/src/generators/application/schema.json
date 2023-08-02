@@ -15,12 +15,7 @@
     },
     "js": {
       "type": "boolean",
-      "description": "",
-      "$default": {
-        "$source": "argv",
-        "index": 0
-      },
-      "x-prompt": "What name would you like to use?"
+      "description": "Use JavaScript instead of TypeScript"
     },
     "tags": {
       "type": "string",

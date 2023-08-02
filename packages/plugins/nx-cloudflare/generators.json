@@ -1,13 +1,13 @@
 {
   "generators": {
     "application": {
-      "factory": "./src/generators/application/generator",
+      "factory": "./src/generators/application/application",
       "schema": "./src/generators/application/schema.json",
       "description": "Cloudflare worker application generator",
-      "alias": "app"
+      "aliases": ["app"]
     },
     "init": {
-      "factory": "./src/generators/init/generator",
+      "factory": "./src/generators/init/init",
       "schema": "./src/generators/init/schema.json",
       "description": "Init generator",
       "hidden": true
