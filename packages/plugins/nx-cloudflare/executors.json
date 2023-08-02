@@ -3,7 +3,7 @@
     "serve": {
       "implementation": "./src/executors/serve/executor",
       "schema": "./src/executors/serve/schema.json",
-      "description": "serve executor"
+      "description": "Serve cloudflare locally"
     },
     "publish": {
       "implementation": "./src/executors/publish/executor",
