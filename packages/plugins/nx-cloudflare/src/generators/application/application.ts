@@ -130,8 +130,6 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
   const initTask = await initGenerator(tree, {
     ...options,
     skipFormat: true,
-    unitTestRunner:
-      options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
   });
 
   const applicationTask = await nodeApplicationGenerator(tree, {
