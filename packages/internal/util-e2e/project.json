@@ -1,0 +1,16 @@
+{
+  "name": "internal-util-e2e",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/internal/util-e2e/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/internal/util-e2e/**/*.ts"]
+      }
+    }
+  },
+  "tags": ["scope:internal", "type:package"]
+}
