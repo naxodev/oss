@@ -161,6 +161,7 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
       uiFramework: 'none',
       project: options.name,
       coverageProvider: 'v8',
+      testEnvironment: 'edge-runtime',
     });
   }
 
