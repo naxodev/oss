@@ -12,6 +12,7 @@ import {
   updateJson,
   updateProjectConfiguration,
 } from '@nx/devkit';
+import { vitestGenerator } from '@nx/vite';
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node';
 import type { NormalizedSchema, Schema } from './schema';
 import { join } from 'path';
@@ -153,6 +154,14 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
 
   if (!options.skipFormat) {
     await formatFiles(tree);
+  }
+
+  if (options.unitTestRunner === 'vitest') {
+    vitestGenerator(tree, {
+      uiFramework: 'none',
+      project: options.name,
+      coverageProvider: 'v8',
+    });
   }
 
   return async () => {
