@@ -59,6 +59,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
     join(options.appProjectRoot, `src/main.${options.js ? 'js' : 'ts'}`)
   );
 
+  // General configuration files for workers
   generateFiles(
     tree,
     join(__dirname, './files/common'),
@@ -70,7 +71,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
     }
   );
 
-  // TODO: if the testRunner is none, delete the test files
+  // Generate template files with workers code
   if (options.template && options.template !== 'none') {
     generateFiles(
       tree,
@@ -80,8 +81,6 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
         ...options,
         tmpl: '',
         name: options.name,
-        root: options.appProjectRoot,
-        offset: offsetFromRoot(options.appProjectRoot),
         vitestImports: options.unitTestRunner === 'vitest' ? vitestImports : '',
       }
     );

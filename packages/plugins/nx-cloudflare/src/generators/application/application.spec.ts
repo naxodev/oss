@@ -178,6 +178,21 @@ describe('app', () => {
       const tsconfig = readJson(tree, 'my-worker-app/tsconfig.json');
       expect(tsconfig.extends).toBe('../tsconfig.json');
     });
+
+    it('should create the common configuration files', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+      });
+      expect(tree.exists('my-worker-app/.gitignore')).toBeTruthy();
+      expect(tree.exists('my-worker-app/package.json')).toBeTruthy();
+      expect(tree.read('my-worker-app/wrangler.toml', 'utf-8'))
+        .toMatchInlineSnapshot(`
+"name = "my-worker-app"
+compatibility_date = "2023-07-31"
+
+"
+`);
+    });
   });
 
   describe('nested', () => {
@@ -472,10 +487,10 @@ describe('app', () => {
 
   describe.each([
     ['fetch-handler' as const, true],
-    ['scheduled-handler' as const, false],
+    ['scheduled-handler' as const, true],
     ['none' as const, false],
-  ])('--unitTestRunner', (template, checkSpecFile) => {
-    it('should generate test target and spec file by default', async () => {
+  ])('--template', (template, checkFile) => {
+    it('should generate the correct snippet of code', async () => {
       await applicationGenerator(tree, {
         name: 'api',
         template,
@@ -485,8 +500,10 @@ describe('app', () => {
       const project = readProjectConfiguration(tree, 'api');
       expect(project.targets.test).toBeDefined();
 
-      if (checkSpecFile) {
-        expect(tree.exists(`api/src/index.test.ts`)).toBeTruthy();
+      if (checkFile) {
+        expect(tree.exists(`api/src/index.ts`)).toBeTruthy();
+      } else {
+        expect(tree.exists(`api/src/index.ts`)).toBeFalsy();
       }
     });
   });
