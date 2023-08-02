@@ -15,8 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@naxodev/nx-cloudflare": ["packages/plugins/nx-cloudflare/src/index.ts"],
-      "@oss/internal/util-e2e": ["packages/internal/util-e2e/src/index.ts"]
+      "@naxodev/nx-cloudflare": ["packages/plugins/nx-cloudflare/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
