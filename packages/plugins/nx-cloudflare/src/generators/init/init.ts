@@ -18,7 +18,7 @@ function updateDependencies(tree: Tree, schema: Schema) {
   removeDependenciesFromPackageJson(tree, ['@naxodev/nx-cloudflare'], []);
 
   const vitePackage =
-    schema.unitTestRunner === 'vitest' ? { vite: '^0.33.0' } : {};
+    schema.unitTestRunner === 'vitest' ? { vitest: '^0.33.0' } : {};
 
   return addDependenciesToPackageJson(
     tree,
