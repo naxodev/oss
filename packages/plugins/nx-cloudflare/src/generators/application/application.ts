@@ -17,6 +17,7 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nx/node';
 import type { NormalizedSchema, Schema } from './schema';
 import { join } from 'path';
 import initGenerator from '../init/init';
+import { vitestImports } from './utils/vitest-imports';
 
 function updateTsAppConfig(tree: Tree, options: NormalizedSchema) {
   updateJson(
@@ -69,6 +70,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
     }
   );
 
+  // TODO: if the testRunner is none, delete the test files
   if (options.template && options.template !== 'none') {
     generateFiles(
       tree,
@@ -80,6 +82,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
         name: options.name,
         root: options.appProjectRoot,
         offset: offsetFromRoot(options.appProjectRoot),
+        vitestImports: options.unitTestRunner === 'vitest' ? vitestImports : '',
       }
     );
   }
@@ -117,15 +120,21 @@ function addTargets(tree: Tree, options: NormalizedSchema) {
   }
 }
 
+function removeTestFiles(tree: Tree, options: NormalizedSchema) {
+  tree.delete(join(options.appProjectRoot, 'src', 'index.test.ts'));
+}
+
 export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = normalizeOptions(tree, schema);
 
+  // Set up the needed packages.
   const initTask = await initGenerator(tree, {
     ...options,
     skipFormat: true,
     unitTestRunner:
       options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
   });
+
   const applicationTask = await nodeApplicationGenerator(tree, {
     ...options,
     framework: 'none',
@@ -139,6 +148,10 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
   addCloudflareFiles(tree, options);
   updateTsAppConfig(tree, options);
   addTargets(tree, options);
+
+  if (options.unitTestRunner === 'none') {
+    removeTestFiles(tree, options);
+  }
 
   if (!options.skipFormat) {
     await formatFiles(tree);

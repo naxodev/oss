@@ -150,6 +150,24 @@ describe('app', () => {
       expect(tree.exists('my-worker-app/src/index.test.ts')).toBeFalsy();
     });
 
+    it('should not generate import vitest when testRunner is jest', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        unitTestRunner: 'jest',
+      });
+      expect(
+        tree.read(`my-worker-app/src/index.test.ts`, 'utf-8')
+      ).not.toContain('vitest');
+    });
+
+    it('should not have test files if the unitTestRunner is none', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        unitTestRunner: 'none',
+      });
+      expect(tree.exists(`my-worker-app/src/index.test.ts`)).toBeFalsy();
+    });
+
     it('should extend from root tsconfig.json when no tsconfig.base.json', async () => {
       tree.rename('tsconfig.base.json', 'tsconfig.json');
 
