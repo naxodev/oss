@@ -9,7 +9,8 @@
     "init": {
       "factory": "./src/generators/init/generator",
       "schema": "./src/generators/init/schema.json",
-      "description": "init generator"
+      "description": "Init generator",
+      "hidden": true
     }
   }
 }

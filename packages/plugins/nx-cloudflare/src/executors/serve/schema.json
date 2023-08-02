@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "version": 2,
+  "title": "Serve executor",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "port": {
+      "description": "The port which the worker will be run on development mode",
+      "type": "number",
+      "default": 8787
+    }
+  },
+  "required": []
+}
