@@ -89,14 +89,17 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
   }
 }
 
-function addTargets(tree: Tree, appName: string) {
+function addTargets(tree: Tree, options: NormalizedSchema) {
   try {
-    const projectConfiguration = readProjectConfiguration(tree, appName);
+    const projectConfiguration = readProjectConfiguration(tree, options.name);
 
     projectConfiguration.targets = {
       ...(projectConfiguration.targets ?? {}),
       serve: {
         executor: '@naxodev/nx-cloudflare:serve',
+        options: {
+          port: options.port,
+        },
       },
 
       deploy: {
@@ -108,7 +111,7 @@ function addTargets(tree: Tree, appName: string) {
       delete projectConfiguration.targets.build;
     }
 
-    updateProjectConfiguration(tree, appName, projectConfiguration);
+    updateProjectConfiguration(tree, options.name, projectConfiguration);
   } catch (e) {
     console.error(e);
   }
@@ -135,7 +138,7 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
 
   addCloudflareFiles(tree, options);
   updateTsAppConfig(tree, options);
-  addTargets(tree, options.name);
+  addTargets(tree, options);
 
   if (!options.skipFormat) {
     await formatFiles(tree);

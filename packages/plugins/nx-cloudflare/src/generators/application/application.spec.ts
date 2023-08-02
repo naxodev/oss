@@ -24,6 +24,7 @@ describe('app', () => {
     it('should update project config', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        port: 3001,
       });
       const project = readProjectConfiguration(tree, 'my-worker-app');
       expect(project.root).toEqual('my-worker-app');
@@ -31,6 +32,9 @@ describe('app', () => {
         expect.objectContaining({
           serve: {
             executor: '@naxodev/nx-cloudflare:serve',
+            options: {
+              port: 3001,
+            },
           },
 
           deploy: {
