@@ -6,7 +6,6 @@ import {
   getWorkspaceLayout,
   joinPathFragments,
   names,
-  offsetFromRoot,
   readProjectConfiguration,
   toJS,
   Tree,
