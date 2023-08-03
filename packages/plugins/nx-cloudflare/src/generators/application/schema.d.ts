@@ -2,7 +2,7 @@ export interface Schema {
   name: string;
   template?: 'fetch-handler' | 'scheduled-handler' | 'none';
   js?: boolean;
-  unitTestRunner?: 'vitest' | 'jest' | 'none';
+  unitTestRunner?: 'vitest' | 'none';
   directory?: string;
   rootProject?: boolean;
   tags?: string;

@@ -2,4 +2,4 @@
 export const nxCloudflareVersion = require('../../package.json').version;
 
 export const wranglerVersion = '^3.4.0';
-export const cloudflareWorkersTypeVersions = '^5.1.6';
+export const cloudflareWorkersTypeVersions = '^4.20230724.0';

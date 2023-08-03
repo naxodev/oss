@@ -1,12 +1,12 @@
 {
   "executors": {
     "serve": {
-      "implementation": "./src/executors/serve/executor",
+      "implementation": "./src/executors/serve/serve",
       "schema": "./src/executors/serve/schema.json",
       "description": "Serve cloudflare locally"
     },
     "publish": {
-      "implementation": "./src/executors/publish/executor",
+      "implementation": "./src/executors/publish/publish",
       "schema": "./src/executors/publish/schema.json",
       "description": "publish executor"
     }

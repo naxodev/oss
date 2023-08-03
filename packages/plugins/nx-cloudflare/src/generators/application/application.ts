@@ -6,7 +6,7 @@ import {
   getWorkspaceLayout,
   joinPathFragments,
   names,
-  offsetFromRoot,
+  ProjectConfiguration,
   readProjectConfiguration,
   toJS,
   Tree,
@@ -93,7 +93,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
 
 function addTargets(tree: Tree, options: NormalizedSchema) {
   try {
-    const projectConfiguration = readProjectConfiguration(tree, options.name);
+    let projectConfiguration = readProjectConfiguration(tree, options.name);
 
     projectConfiguration.targets = {
       ...(projectConfiguration.targets ?? {}),
@@ -113,10 +113,35 @@ function addTargets(tree: Tree, options: NormalizedSchema) {
       delete projectConfiguration.targets.build;
     }
 
+    if (options.unitTestRunner === 'vitest') {
+      projectConfiguration = addVitestTarget(
+        projectConfiguration,
+        options.appProjectRoot
+      );
+    }
+
     updateProjectConfiguration(tree, options.name, projectConfiguration);
   } catch (e) {
     console.error(e);
   }
+}
+
+function addVitestTarget(
+  projectConfiguration: ProjectConfiguration,
+  projectRoot: string
+): ProjectConfiguration {
+  projectConfiguration.targets = {
+    ...(projectConfiguration.targets ?? {}),
+    test: {
+      executor: 'nx:run-commands',
+      options: {
+        cwd: projectRoot,
+        command: 'vitest run',
+      },
+    },
+  };
+
+  return projectConfiguration;
 }
 
 function removeTestFiles(tree: Tree, options: NormalizedSchema) {
@@ -130,8 +155,6 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
   const initTask = await initGenerator(tree, {
     ...options,
     skipFormat: true,
-    unitTestRunner:
-      options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
   });
 
   const applicationTask = await nodeApplicationGenerator(tree, {

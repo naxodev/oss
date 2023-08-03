@@ -14,8 +14,11 @@ import {
   wranglerVersion,
 } from '../../utils/versions';
 
-function updateDependencies(tree: Tree) {
+function updateDependencies(tree: Tree, schema: Schema) {
   removeDependenciesFromPackageJson(tree, ['@naxodev/nx-cloudflare'], []);
+
+  const vitePackage =
+    schema.unitTestRunner === 'vitest' ? { vitest: '^0.33.0' } : {};
 
   return addDependenciesToPackageJson(
     tree,
@@ -26,6 +29,7 @@ function updateDependencies(tree: Tree) {
       wrangler: wranglerVersion,
       '@cloudflare/workers-types': cloudflareWorkersTypeVersions,
       '@naxodev/nx-cloudflare': nxCloudflareVersion,
+      ...vitePackage,
     }
   );
 }
@@ -38,7 +42,7 @@ export async function initGenerator(tree: Tree, schema: Schema) {
       schema.unitTestRunner == 'vitest' ? 'none' : schema.unitTestRunner,
   });
 
-  const installTask = updateDependencies(tree);
+  const installTask = updateDependencies(tree, schema);
   if (!schema.skipFormat) {
     await formatFiles(tree);
   }

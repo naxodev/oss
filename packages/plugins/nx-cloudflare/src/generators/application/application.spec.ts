@@ -68,9 +68,7 @@ describe('app', () => {
     it('should generate files', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
-        unitTestRunner: 'jest',
       });
-      expect(tree.exists(`my-worker-app/jest.config.ts`)).toBeTruthy();
       expect(tree.exists('my-worker-app/src/index.ts')).toBeTruthy();
       expect(tree.exists('my-worker-app/src/index.test.ts')).toBeTruthy();
 
@@ -87,16 +85,13 @@ describe('app', () => {
             {
               "path": "./tsconfig.app.json",
             },
-            {
-              "path": "./tsconfig.spec.json",
-            },
           ],
         }
       `);
 
       const tsconfigApp = readJson(tree, 'my-worker-app/tsconfig.app.json');
       expect(tsconfigApp.compilerOptions.outDir).toEqual('../dist/out-tsc');
-      // expect(tsconfigApp.compilerOptions.target).toEqual('es2021');
+      expect(tsconfigApp.compilerOptions.target).toEqual('es2021');
       expect(tsconfigApp.extends).toEqual('./tsconfig.json');
       expect(tsconfigApp.exclude).toEqual([
         'jest.config.ts',
@@ -150,15 +145,16 @@ describe('app', () => {
       expect(tree.exists('my-worker-app/src/index.test.ts')).toBeFalsy();
     });
 
-    it('should not generate import vitest when testRunner is jest', async () => {
-      await applicationGenerator(tree, {
-        name: 'myWorkerApp',
-        unitTestRunner: 'jest',
-      });
-      expect(
-        tree.read(`my-worker-app/src/index.test.ts`, 'utf-8')
-      ).not.toContain('vitest');
-    });
+    // TODO: Uncomment when Jest support is added back
+    // it('should not generate import vitest when testRunner is jest', async () => {
+    //   await applicationGenerator(tree, {
+    //     name: 'myWorkerApp',
+    //     unitTestRunner: 'jest',
+    //   });
+    //   expect(
+    //     tree.read(`my-worker-app/src/index.test.ts`, 'utf-8')
+    //   ).not.toContain('vitest');
+    // });
 
     it('should not have test files if the unitTestRunner is none', async () => {
       await applicationGenerator(tree, {
@@ -200,7 +196,6 @@ compatibility_date = "2023-07-31"
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         directory: 'myDir',
-        unitTestRunner: 'jest',
       });
       const project = readProjectConfiguration(tree, 'my-dir-my-worker-app');
 
@@ -224,7 +219,6 @@ compatibility_date = "2023-07-31"
         name: 'myWorkerApp',
         directory: 'myDir',
         tags: 'one,two',
-        unitTestRunner: 'jest',
       });
       const projects = Object.fromEntries(getProjects(tree));
       expect(projects).toMatchObject({
@@ -244,12 +238,10 @@ compatibility_date = "2023-07-31"
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         directory: 'myDir',
-        unitTestRunner: 'jest',
       });
 
       // Make sure these exist
       [
-        `my-dir/my-worker-app/jest.config.ts`,
         'my-dir/my-worker-app/src/index.ts',
         'my-dir/my-worker-app/src/index.test.ts',
       ].forEach((path) => {
@@ -371,42 +363,41 @@ compatibility_date = "2023-07-31"
     });
   });
 
-  describe('--swcJest', () => {
-    it('should use @swc/jest for jest', async () => {
-      await applicationGenerator(tree, {
-        name: 'myWorkerApp',
-        tags: 'one,two',
-        swcJest: true,
-        unitTestRunner: 'jest',
-      } as Schema);
-
-      expect(tree.read(`my-worker-app/jest.config.ts`, 'utf-8'))
-        .toMatchInlineSnapshot(`
-        "/* eslint-disable */
-        export default {
-          displayName: 'my-worker-app',
-          preset: '../jest.preset.js',
-          testEnvironment: 'node',
-          transform: {
-            '^.+\\\\.[tj]s$': '@swc/jest',
-          },
-          moduleFileExtensions: ['ts', 'js', 'html'],
-          coverageDirectory: '../coverage/my-worker-app',
-        };
-        "
-      `);
-    });
-  });
+  // TODO: Uncomment when jest support is added back
+  // describe('--swcJest', () => {
+  //   it('should use @swc/jest for jest', async () => {
+  //     await applicationGenerator(tree, {
+  //       name: 'myWorkerApp',
+  //       tags: 'one,two',
+  //       swcJest: true,
+  //       unitTestRunner: 'jest',
+  //     } as Schema);
+  //
+  //     expect(tree.read(`my-worker-app/jest.config.ts`, 'utf-8'))
+  //       .toMatchInlineSnapshot(`
+  //       "/* eslint-disable */
+  //       export default {
+  //         displayName: 'my-worker-app',
+  //         preset: '../jest.preset.js',
+  //         testEnvironment: 'node',
+  //         transform: {
+  //           '^.+\\\\.[tj]s$': '@swc/jest',
+  //         },
+  //         moduleFileExtensions: ['ts', 'js', 'html'],
+  //         coverageDirectory: '../coverage/my-worker-app',
+  //       };
+  //       "
+  //     `);
+  //   });
+  // });
 
   describe('--js flag', () => {
     it('should generate js files instead of ts files', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         js: true,
-        unitTestRunner: 'jest',
       } as Schema);
 
-      expect(tree.exists(`my-worker-app/jest.config.js`)).toBeTruthy();
       expect(tree.exists('my-worker-app/src/index.js')).toBeTruthy();
       expect(tree.exists('my-worker-app/src/index.test.js')).toBeTruthy();
 
@@ -445,9 +436,7 @@ compatibility_date = "2023-07-31"
         name: 'myWorkerApp',
         directory: 'myDir',
         js: true,
-        unitTestRunner: 'jest',
       } as Schema);
-      expect(tree.exists(`my-dir/my-worker-app/jest.config.js`)).toBeTruthy();
       expect(tree.exists('my-dir/my-worker-app/src/index.js')).toBeTruthy();
       expect(
         tree.exists('my-dir/my-worker-app/src/index.test.js')
@@ -494,7 +483,6 @@ compatibility_date = "2023-07-31"
       await applicationGenerator(tree, {
         name: 'api',
         template,
-        unitTestRunner: 'jest',
       });
 
       const project = readProjectConfiguration(tree, 'api');
