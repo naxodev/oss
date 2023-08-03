@@ -136,7 +136,7 @@ function addVitestTarget(
       executor: 'nx:run-commands',
       options: {
         cwd: projectRoot,
-        command: 'vitest',
+        command: 'vitest run',
       },
     },
   };
