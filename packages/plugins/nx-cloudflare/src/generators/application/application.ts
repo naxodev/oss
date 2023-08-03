@@ -6,13 +6,13 @@ import {
   getWorkspaceLayout,
   joinPathFragments,
   names,
+  ProjectConfiguration,
   readProjectConfiguration,
   toJS,
   Tree,
   updateJson,
   updateProjectConfiguration,
 } from '@nx/devkit';
-import { vitestGenerator } from '@nx/vite';
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node';
 import type { NormalizedSchema, Schema } from './schema';
 import { join } from 'path';
@@ -93,7 +93,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
 
 function addTargets(tree: Tree, options: NormalizedSchema) {
   try {
-    const projectConfiguration = readProjectConfiguration(tree, options.name);
+    let projectConfiguration = readProjectConfiguration(tree, options.name);
 
     projectConfiguration.targets = {
       ...(projectConfiguration.targets ?? {}),
@@ -113,10 +113,35 @@ function addTargets(tree: Tree, options: NormalizedSchema) {
       delete projectConfiguration.targets.build;
     }
 
+    if (options.unitTestRunner === 'vitest') {
+      projectConfiguration = addVitestTarget(
+        projectConfiguration,
+        options.appProjectRoot
+      );
+    }
+
     updateProjectConfiguration(tree, options.name, projectConfiguration);
   } catch (e) {
     console.error(e);
   }
+}
+
+function addVitestTarget(
+  projectConfiguration: ProjectConfiguration,
+  projectRoot: string
+): ProjectConfiguration {
+  projectConfiguration.targets = {
+    ...(projectConfiguration.targets ?? {}),
+    test: {
+      executor: 'nx:run-commands',
+      options: {
+        cwd: projectRoot,
+        command: 'vitest',
+      },
+    },
+  };
+
+  return projectConfiguration;
 }
 
 function removeTestFiles(tree: Tree, options: NormalizedSchema) {
@@ -152,15 +177,6 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
 
   if (!options.skipFormat) {
     await formatFiles(tree);
-  }
-
-  if (options.unitTestRunner === 'vitest') {
-    vitestGenerator(tree, {
-      uiFramework: 'none',
-      project: options.name,
-      coverageProvider: 'v8',
-      testEnvironment: 'edge-runtime',
-    });
   }
 
   return async () => {
