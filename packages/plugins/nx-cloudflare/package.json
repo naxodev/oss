@@ -34,10 +34,6 @@
   "dependencies": {
     "tslib": "^2.3.0",
     "@nx/devkit": "^16.6.0",
-    "typescript": "5.1.6"
-  },
-  "peerDependencies": {
-    "nx": "^16.6.0",
-    "@nx/linter": "^16.6.0"
+    "@nx/node": "^16.6.0"
   }
 }
