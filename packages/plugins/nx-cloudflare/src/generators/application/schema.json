@@ -41,7 +41,7 @@
       "x-priority": "important"
     },
     "port": {
-      "description": "The port which the worker will be run on development mode",
+      "description": "The port in which the worker will be run on development mode",
       "type": "number",
       "default": 8787
     },
