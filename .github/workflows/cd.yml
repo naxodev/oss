@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  - workflow_dispatch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          git_bot_token: ${{ secrets.GIT_BOT_TOKEN }}
+
+      - name: Release
+        env:
+          NODE_AUTH_TOKEN: ${{ inputs.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        # Use npx instead of yarn because yarn automagically sets NPM_* environment variables
+        # like NPM_CONFIG_REGISTRY so npm publish ends up ignoring the .npmrc file
+        # which is set up by `setup-node` action.
+        shell: bash
+        run: npx nx affected --base=last-release --target=version
+
+      - name: Tag last-release
+        shell: bash
+        run: git tag -f last-release
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ inputs.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+          force: true
+          tags: true

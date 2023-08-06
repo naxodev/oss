@@ -36,10 +36,6 @@
         ]
       }
     },
-    "publish": {
-      "command": "node tools/scripts/publish.mjs plugins-nx-cloudflare {args.ver} {args.tag}",
-      "dependsOn": ["build"]
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
@@ -67,9 +63,35 @@
       }
     },
     "version": {
+      "dependsOn": ["build"],
       "executor": "@jscutlery/semver:version",
       "options": {
-        "preset": "conventional"
+        "preset": "conventional",
+        "tagPrefix": "v",
+        "noVerify": true,
+        "push": true,
+        "preid": "beta",
+        "syncVersions": false,
+        "commitMessageFormat": "release(${projectName}): 🎸 cut release to ${version}",
+        "postTargets": [
+          "plugins-nx-cloudflare:github",
+          "plugins-nx-cloudflare:publish"
+        ]
+      }
+    },
+    "github": {
+      "executor": "@jscutlery/semver:github",
+      "options": {
+        "tag": "${tag}",
+        "notes": "${notes}"
+      }
+    },
+    "publish": {
+      "executor": "ngx-deploy-npm:deploy",
+      "options": {
+        "access": "public",
+        "tag": "next",
+        "distFolderPath": "dist/packages/ngworker/lumberjack"
       }
     }
   },
