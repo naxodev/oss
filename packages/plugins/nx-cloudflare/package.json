@@ -2,7 +2,7 @@
   "name": "@naxodev/nx-cloudflare",
   "description": "Nx plugin for Cloudflare",
   "homepage": "https://github.com/naxodev/oss/tree/main/packages/plugins/nx-cloudflare",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha-4",
   "author": "Nacho Vazquez",
   "type": "commonjs",
   "license": "MIT",
@@ -17,7 +17,8 @@
     "nx-plugin",
     "cloudflare",
     "worker",
-    "cloudflare worker"
+    "cloudflare worker",
+    "monorepo"
   ],
   "contributors": [
     {
@@ -34,6 +35,7 @@
   "dependencies": {
     "tslib": "^2.3.0",
     "@nx/devkit": "^16.6.0",
-    "@nx/node": "^16.6.0"
+    "@nx/node": "^16.6.0",
+    "@nx/web": "^16.6.0"
   }
 }

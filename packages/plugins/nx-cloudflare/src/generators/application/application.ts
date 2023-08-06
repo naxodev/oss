@@ -68,6 +68,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
       ...options,
       tmpl: '',
       name: options.name,
+      extension: options.js ? 'js' : 'ts',
     }
   );
 
