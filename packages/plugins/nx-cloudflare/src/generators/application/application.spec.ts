@@ -37,8 +37,8 @@ describe('app', () => {
             },
           },
 
-          deploy: {
-            executor: '@naxodev/nx-cloudflare:deploy',
+          publish: {
+            executor: '@naxodev/nx-cloudflare:publish',
           },
         })
       );

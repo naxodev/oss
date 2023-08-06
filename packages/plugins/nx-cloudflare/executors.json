@@ -6,7 +6,7 @@
       "description": "Serve cloudflare worker locally"
     },
     "publish": {
-      "implementation": "./src/executors/publish/publish",
+      "implementation": "./src/executors/publish/publish.impl",
       "schema": "./src/executors/publish/schema.json",
       "description": "Publish worker to Cloudflare"
     }

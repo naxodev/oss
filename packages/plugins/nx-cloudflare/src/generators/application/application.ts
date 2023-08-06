@@ -105,8 +105,8 @@ function addTargets(tree: Tree, options: NormalizedSchema) {
         },
       },
 
-      deploy: {
-        executor: '@naxodev/nx-cloudflare:deploy',
+      publish: {
+        executor: '@naxodev/nx-cloudflare:publish',
       },
     };
 
