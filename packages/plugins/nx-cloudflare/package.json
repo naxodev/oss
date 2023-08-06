@@ -2,7 +2,7 @@
   "name": "@naxodev/nx-cloudflare",
   "description": "Nx plugin for Cloudflare",
   "homepage": "https://github.com/naxodev/oss/tree/main/packages/plugins/nx-cloudflare",
-  "version": "0.0.1-alpha-4",
+  "version": "0.0.1-alpha-5",
   "author": "Nacho Vazquez",
   "type": "commonjs",
   "license": "MIT",
