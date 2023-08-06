@@ -185,6 +185,7 @@ describe('app', () => {
         .toMatchInlineSnapshot(`
 "name = "my-worker-app"
 compatibility_date = "2023-07-31"
+main = "src/index.ts"
 
 "
 `);
@@ -441,6 +442,23 @@ compatibility_date = "2023-07-31"
       expect(
         tree.exists('my-dir/my-worker-app/src/index.test.js')
       ).toBeTruthy();
+    });
+
+    it('should create the common configuration files', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        js: true,
+      });
+      expect(tree.exists('my-worker-app/.gitignore')).toBeTruthy();
+      expect(tree.exists('my-worker-app/package.json')).toBeTruthy();
+      expect(tree.read('my-worker-app/wrangler.toml', 'utf-8'))
+        .toMatchInlineSnapshot(`
+"name = "my-worker-app"
+compatibility_date = "2023-07-31"
+main = "src/index.js"
+
+"
+`);
     });
   });
 
