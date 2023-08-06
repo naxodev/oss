@@ -17,6 +17,8 @@ export default async function* serveExecutor(
     wranglerOptions.push(`--port=${options.port}`);
   }
 
+  console.log('starting server');
+
   const wranglerBin = require.resolve('wranger/dist/bin/wrangler');
 
   yield* createAsyncIterable<{ success: boolean; baseUrl: string }>(
@@ -25,8 +27,10 @@ export default async function* serveExecutor(
         cwd: projectRoot,
         stdio: 'inherit',
       });
+      console.log('enter here 1');
 
       server.once('exit', (code) => {
+        console.log('enter here 2');
         if (code === 0) {
           done();
         } else {
@@ -44,6 +48,8 @@ export default async function* serveExecutor(
       process.on('SIGINT', () => killServer());
       process.on('SIGTERM', () => killServer());
       process.on('SIGHUP', () => killServer());
+
+      console.log('enter here 3');
 
       await waitForPortOpen(options.port);
 

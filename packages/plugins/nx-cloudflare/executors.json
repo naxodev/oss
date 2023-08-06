@@ -1,14 +1,14 @@
 {
   "executors": {
     "serve": {
-      "implementation": "./src/executors/serve/serve",
+      "implementation": "./src/executors/serve/serve.impl",
       "schema": "./src/executors/serve/schema.json",
-      "description": "Serve cloudflare locally"
+      "description": "Serve cloudflare worker locally"
     },
     "publish": {
       "implementation": "./src/executors/publish/publish",
       "schema": "./src/executors/publish/schema.json",
-      "description": "publish executor"
+      "description": "Publish worker to Cloudflare"
     }
   }
 }
