@@ -89,9 +89,7 @@
     "publish": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
-        "access": "public",
-        "tag": "next",
-        "distFolderPath": "dist/packages/ngworker/lumberjack"
+        "access": "public"
       }
     }
   },
