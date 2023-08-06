@@ -1,12 +1,13 @@
 import { ExecutorContext } from '@nx/devkit';
 import { Schema } from './schema';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { fork } from 'child_process';
+import { createAsyncIterable } from '@nx/devkit/src/utils/async-iterable';
+import { waitForPortOpen } from '@nx/web/src/utils/wait-for-port-open';
 
-export default async function serveExecutor(
+export default async function* serveExecutor(
   options: Schema,
   context: ExecutorContext
-): Promise<{ success: boolean }> {
+) {
   const projectRoot =
     context.projectsConfigurations.projects[context.projectName].root;
 
@@ -16,15 +17,40 @@ export default async function serveExecutor(
     wranglerOptions.push(`--port=${options.port}`);
   }
 
-  const { stdout, stderr } = await promisify(exec)(
-    `wrangler dev ${wranglerOptions.join(' ')}`,
-    {
-      cwd: projectRoot,
+  const wranglerBin = require.resolve('wranger/dist/bin/wrangler');
+
+  yield* createAsyncIterable<{ success: boolean; baseUrl: string }>(
+    async ({ done, next, error }) => {
+      const server = fork(wranglerBin, ['dev', ...wranglerOptions], {
+        cwd: projectRoot,
+        stdio: 'inherit',
+      });
+
+      server.once('exit', (code) => {
+        if (code === 0) {
+          done();
+        } else {
+          error(new Error(`Cloudflare worker exited with code ${code}`));
+        }
+      });
+
+      const killServer = () => {
+        if (server.connected) {
+          server.kill('SIGTERM');
+        }
+      };
+
+      process.on('exit', () => killServer());
+      process.on('SIGINT', () => killServer());
+      process.on('SIGTERM', () => killServer());
+      process.on('SIGHUP', () => killServer());
+
+      await waitForPortOpen(options.port);
+
+      next({
+        success: true,
+        baseUrl: `http://localhost:${options.port}`,
+      });
     }
   );
-  console.log(stdout);
-  console.error(stderr);
-
-  const success = !stderr;
-  return { success };
 }
