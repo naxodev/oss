@@ -19,7 +19,7 @@ export default async function* serveExecutor(
 
   console.log('starting server');
 
-  const wranglerBin = require.resolve('wranger/bin/wrangler');
+  const wranglerBin = require.resolve('wrangler/bin/wrangler');
 
   yield* createAsyncIterable<{ success: boolean; baseUrl: string }>(
     async ({ done, next, error }) => {
