@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.2.0](https://github.com/naxodev/oss/compare/v0.1.0...v0.2.0) (2023-08-07)
+
+
+### Features
+
+* add cloudflare accountId option to the generator schema ([#14](https://github.com/naxodev/oss/issues/14)) ([4f11eb9](https://github.com/naxodev/oss/commit/4f11eb96680da51a85bbf85f2795d659ab9777e9))
+
 ## 0.1.0 (2023-08-06)
 
 
