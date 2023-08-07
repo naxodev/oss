@@ -187,6 +187,7 @@ describe('app', () => {
 compatibility_date = "2023-07-31"
 main = "src/index.ts"
 
+
 "
 `);
     });
@@ -456,6 +457,25 @@ main = "src/index.ts"
 "name = "my-worker-app"
 compatibility_date = "2023-07-31"
 main = "src/index.js"
+
+
+"
+`);
+    });
+
+    it('should add the account_id field to wrangler.toml when specified', async () => {
+      const accountId = 'fake40q5pchj988766d696c1ajek9mcd';
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        js: true,
+        accountId,
+      });
+      expect(tree.read('my-worker-app/wrangler.toml', 'utf-8'))
+        .toMatchInlineSnapshot(`
+"name = "my-worker-app"
+compatibility_date = "2023-07-31"
+main = "src/index.js"
+account_id = "${accountId}"
 
 "
 `);

@@ -18,6 +18,7 @@ import type { NormalizedSchema, Schema } from './schema';
 import { join } from 'path';
 import initGenerator from '../init/init';
 import { vitestImports } from './utils/vitest-imports';
+import { getAccountId } from './utils/get-account-id';
 
 function updateTsAppConfig(tree: Tree, options: NormalizedSchema) {
   updateJson(
@@ -69,6 +70,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
       tmpl: '',
       name: options.name,
       extension: options.js ? 'js' : 'ts',
+      accountId: options.accountId ? getAccountId(options.accountId) : '',
     }
   );
 

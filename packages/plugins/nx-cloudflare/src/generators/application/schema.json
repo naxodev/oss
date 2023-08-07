@@ -45,6 +45,10 @@
       "type": "number",
       "default": 8787
     },
+    "accountId": {
+      "description": "The Cloudflare account identifier where the worker will be deployed",
+      "type": "string"
+    },
     "directory": {
       "description": "The directory of the new application.",
       "type": "string",

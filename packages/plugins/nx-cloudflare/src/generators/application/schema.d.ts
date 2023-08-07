@@ -9,6 +9,7 @@ export interface Schema {
   frontendProject?: string;
   skipFormat?: boolean;
   port?: number;
+  accountId?: string;
 }
 
 export interface NormalizedSchema extends Schema {

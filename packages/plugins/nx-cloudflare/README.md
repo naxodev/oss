@@ -51,6 +51,7 @@ The available options are the following:
 | name            | string                                 | \*required    | What name would you like to use?                                                          |
 | template        | fetch-handler, scheduled-handler, none | fetch-handler | Which worker template do you want to use?                                                 |
 | port            | number                                 | 8787          | The port in which the worker will be run on development mode                              |
+| accountId       | string                                 | null          | The Cloudflare account identifier where the worker will be deployed                       |
 | js              | boolean                                | false         | Use JavaScript instead of TypeScript                                                      |
 | tags            | string                                 | null          | Add tags to the application (used for linting).                                           |
 | frontendProject | string                                 | null          | Frontend project that needs to access this application. This sets up proxy configuration. |
