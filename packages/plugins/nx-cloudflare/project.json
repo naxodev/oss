@@ -75,7 +75,7 @@
         "commitMessageFormat": "release(${projectName}): 🎸 cut release to ${version}",
         "postTargets": [
           "plugins-nx-cloudflare:github",
-          "plugins-nx-cloudflare:publish"
+          "plugins-nx-cloudflare:npm-publish"
         ]
       }
     },
@@ -86,11 +86,15 @@
         "notes": "${notes}"
       }
     },
-    "publish": {
+    "npm-publish": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
         "access": "public"
       }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs plugins-nx-cloudflare {args.ver} {args.tag}",
+      "dependsOn": ["build"]
     }
   },
   "tags": ["scope:public", "type:plugin"]
