@@ -4,3 +4,5 @@
 /tmp
 /.github
 pnpm-lock.yaml
+
+**/CHANGELOG.md
