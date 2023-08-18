@@ -14,6 +14,25 @@ import {
   wranglerVersion,
 } from '../../utils/versions';
 
+export async function initGenerator(tree: Tree, schema: Schema) {
+  const initTask = await nodeInitGenerator(tree, {
+    ...schema,
+    skipFormat: true,
+    unitTestRunner:
+      schema.unitTestRunner == 'vitest' ? 'none' : schema.unitTestRunner,
+  });
+
+  const installTask = updateDependencies(tree, schema);
+  if (!schema.skipFormat) {
+    await formatFiles(tree);
+  }
+
+  return async () => {
+    await initTask();
+    await installTask();
+  };
+}
+
 function updateDependencies(tree: Tree, schema: Schema) {
   removeDependenciesFromPackageJson(tree, ['@naxodev/nx-cloudflare'], []);
 
@@ -32,25 +51,6 @@ function updateDependencies(tree: Tree, schema: Schema) {
       ...vitePackage,
     }
   );
-}
-
-export async function initGenerator(tree: Tree, schema: Schema) {
-  const initTask = await nodeInitGenerator(tree, {
-    ...schema,
-    skipFormat: true,
-    unitTestRunner:
-      schema.unitTestRunner == 'vitest' ? 'none' : schema.unitTestRunner,
-  });
-
-  const installTask = updateDependencies(tree, schema);
-  if (!schema.skipFormat) {
-    await formatFiles(tree);
-  }
-
-  return async () => {
-    await initTask();
-    await installTask();
-  };
 }
 
 export default initGenerator;

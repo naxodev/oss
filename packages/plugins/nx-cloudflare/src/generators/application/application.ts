@@ -20,6 +20,44 @@ import initGenerator from '../init/init';
 import { vitestImports } from './utils/vitest-imports';
 import { getAccountId } from './utils/get-account-id';
 
+export async function applicationGenerator(tree: Tree, schema: Schema) {
+  const options = normalizeOptions(tree, schema);
+
+  // Set up the needed packages.
+  const initTask = await initGenerator(tree, {
+    ...options,
+    skipFormat: true,
+  });
+
+  const applicationTask = await nodeApplicationGenerator(tree, {
+    ...options,
+    framework: 'none',
+    skipFormat: true,
+    unitTestRunner:
+      options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
+    e2eTestRunner: 'none',
+    name: schema.name,
+  });
+
+  addCloudflareFiles(tree, options);
+  updateTsAppConfig(tree, options);
+  addTargets(tree, options);
+
+  if (options.unitTestRunner === 'none') {
+    removeTestFiles(tree, options);
+  }
+
+  if (!options.skipFormat) {
+    await formatFiles(tree);
+  }
+
+  return async () => {
+    await initTask();
+    await applicationTask();
+  };
+}
+
+// Modify the default tsconfig.app.json generate by the node application generator to support workers.
 function updateTsAppConfig(tree: Tree, options: NormalizedSchema) {
   updateJson(
     tree,
@@ -54,6 +92,7 @@ function updateTsAppConfig(tree: Tree, options: NormalizedSchema) {
   );
 }
 
+// Adds the needed files from the common folder and the selected template folder
 function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
   // Delete main.ts. Workers convention is a file named `index.js` or `index.ts
   tree.delete(
@@ -89,11 +128,13 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
     );
   }
 
+  // Modify the files extension and content to use vanilla JavaScript
   if (options.js) {
     toJS(tree);
   }
 }
 
+// Adds the targets to the project configuration
 function addTargets(tree: Tree, options: NormalizedSchema) {
   try {
     let projectConfiguration = readProjectConfiguration(tree, options.name);
@@ -151,46 +192,7 @@ function removeTestFiles(tree: Tree, options: NormalizedSchema) {
   tree.delete(join(options.appProjectRoot, 'src', 'index.test.ts'));
 }
 
-export async function applicationGenerator(tree: Tree, schema: Schema) {
-  const options = normalizeOptions(tree, schema);
-
-  // Set up the needed packages.
-  const initTask = await initGenerator(tree, {
-    ...options,
-    skipFormat: true,
-  });
-
-  const applicationTask = await nodeApplicationGenerator(tree, {
-    ...options,
-    framework: 'none',
-    skipFormat: true,
-    unitTestRunner:
-      options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
-    e2eTestRunner: 'none',
-    name: schema.name,
-  });
-
-  addCloudflareFiles(tree, options);
-  updateTsAppConfig(tree, options);
-  addTargets(tree, options);
-
-  if (options.unitTestRunner === 'none') {
-    removeTestFiles(tree, options);
-  }
-
-  if (!options.skipFormat) {
-    await formatFiles(tree);
-  }
-
-  return async () => {
-    await initTask();
-    await applicationTask();
-  };
-}
-
-export default applicationGenerator;
-export const applicationSchematic = convertNxGenerator(applicationGenerator);
-
+// Transform the options to the normalized schema. Loads defaults options.
 function normalizeOptions(host: Tree, options: Schema): NormalizedSchema {
   const { layoutDirectory, projectDirectory } = extractLayoutDirectory(
     options.directory
@@ -220,3 +222,6 @@ function normalizeOptions(host: Tree, options: Schema): NormalizedSchema {
     port: options.port ?? 3000,
   };
 }
+
+export default applicationGenerator;
+export const applicationSchematic = convertNxGenerator(applicationGenerator);
