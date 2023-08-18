@@ -19,6 +19,11 @@
       "type": "boolean",
       "default": false,
       "description": "Use JavaScript instead of TypeScript"
+    },
+    "template": {
+      "description": "Generate the initial worker using a template.",
+      "type": "string",
+      "enum": ["fetch-handler", "scheduled-handler", "hono", "none"]
     }
   },
   "required": ["name"]
