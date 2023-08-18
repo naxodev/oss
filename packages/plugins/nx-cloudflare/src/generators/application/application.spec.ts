@@ -515,6 +515,7 @@ account_id = "${accountId}"
   describe.each([
     ['fetch-handler' as const, true],
     ['scheduled-handler' as const, true],
+    ['hono' as const, true],
     ['none' as const, false],
   ])('--template', (template, checkFile) => {
     it('should generate the correct snippet of code', async () => {
