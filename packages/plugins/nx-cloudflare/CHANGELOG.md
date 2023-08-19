@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.3.0](https://github.com/naxodev/oss/compare/v0.2.0...v0.3.0) (2023-08-19)
+
+
+### Features
+
+* add hono template ([#16](https://github.com/naxodev/oss/issues/16)) ([5485e10](https://github.com/naxodev/oss/commit/5485e1055f62c731dbfa5ade037160a4d4927301))
+
 ## [0.2.0](https://github.com/naxodev/oss/compare/v0.1.0...v0.2.0) (2023-08-07)
 
 
