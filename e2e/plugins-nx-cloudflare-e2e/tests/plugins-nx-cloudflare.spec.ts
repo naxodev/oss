@@ -1,29 +1,117 @@
-import { execSync } from 'child_process';
-import { rmSync } from 'fs';
+import {
+  uniq,
+  fileExists,
+  tmpProjPath,
+  runNxCommand,
+} from '@nx/plugin/testing';
+import {
+  newNxProject,
+  installPlugin,
+  cleanup,
+  promisifiedTreeKill,
+  runCommandUntil,
+  killPorts,
+} from '@naxodev/e2e/utils';
+import { join } from 'path';
 
-import { createTestProject, installPlugin } from '../utils';
-
-describe('plugins-nx-cloudflare', () => {
-  let projectDirectory: string;
-
-  beforeAll(() => {
-    projectDirectory = createTestProject();
-    installPlugin(projectDirectory, 'nx-cloudflare');
+describe('Cloudflare Worker Applications', () => {
+  beforeEach(() => {
+    newNxProject();
+    installPlugin('nx-cloudflare');
   });
 
-  afterAll(() => {
-    // Cleanup the test project
-    rmSync(projectDirectory, {
-      recursive: true,
-      force: true,
-    });
-  });
+  afterEach(() => cleanup());
 
-  it('should be installed', () => {
-    // pnpm ls will fail if the package is not installed properly
-    execSync('pnpm ls @naxodev/nx-cloudflare', {
-      cwd: projectDirectory,
-      stdio: 'inherit',
-    });
-  });
+  it('should be able to generate an empty application', async () => {
+    const workerapp = uniq('workerapp');
+
+    runNxCommand(
+      `generate @naxodev/nx-cloudflare:app ${workerapp} --template="none"`
+    );
+
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${workerapp}/project.json`))
+    ).toBeTruthy();
+  }, 30_000);
+
+  it('should be able to generate an fetch-handler application', async () => {
+    const workerapp = uniq('workerapp');
+    const port = 8787;
+
+    runNxCommand(
+      `generate @naxodev/nx-cloudflare:app ${workerapp} --template="fetch-handler"`
+    );
+
+    const lintResults = runNxCommand(`lint ${workerapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${workerapp}`
+    );
+
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
+    ).toBeTruthy();
+
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
+      output.includes(`wrangler dev now uses local mode by default`)
+    );
+
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
+  }, 120_000);
+
+  it('should be able to generate an scheduled-handler application', async () => {
+    const workerapp = uniq('workerapp');
+    const port = 8787;
+
+    runNxCommand(
+      `generate @naxodev/nx-cloudflare:app ${workerapp} --template="scheduled-handler"`
+    );
+
+    const lintResults = runNxCommand(`lint ${workerapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${workerapp}`
+    );
+
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
+    ).toBeTruthy();
+
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
+      output.includes(`wrangler dev now uses local mode by default`)
+    );
+
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
+  }, 120_000);
+
+  it('should be able to generate an hono application', async () => {
+    const workerapp = uniq('workerapp');
+    const port = 8787;
+
+    runNxCommand(
+      `generate @naxodev/nx-cloudflare:app ${workerapp} --template="hono"`
+    );
+
+    const lintResults = runNxCommand(`lint ${workerapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${workerapp}`
+    );
+
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
+    ).toBeTruthy();
+
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
+      output.includes(`wrangler dev now uses local mode by default`)
+    );
+
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
+  }, 120_000);
 });

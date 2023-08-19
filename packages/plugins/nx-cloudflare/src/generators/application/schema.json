@@ -35,7 +35,7 @@
     "template": {
       "description": "Generate the initial worker using a template.",
       "type": "string",
-      "enum": ["fetch-handler", "scheduled-handler", "none"],
+      "enum": ["fetch-handler", "scheduled-handler", "hono", "none"],
       "default": "fetch-handler",
       "x-prompt": "Which worker template do you want to use?",
       "x-priority": "important"

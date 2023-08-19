@@ -1,4 +1,7 @@
 {
   "name": "<%=name %>",
-  "private": true
+  "private": true,
+  "scripts": {
+    <%-vitestScript %>
+   }
 }

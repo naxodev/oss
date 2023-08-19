@@ -298,6 +298,8 @@ main = "src/index.ts"
       expect(tree.exists('my-worker-app/jest.config.ts')).toBeFalsy();
       const project = readProjectConfiguration(tree, 'my-worker-app');
       expect(project.targets.test).toBeUndefined();
+      const packageJSON = devkit.readJson(tree, 'my-worker-app/package.json');
+      expect(packageJSON.scripts.test).toBeUndefined();
       expect(project.targets.lint).toMatchInlineSnapshot(`
         {
           "executor": "@nx/linter:eslint",
@@ -515,6 +517,7 @@ account_id = "${accountId}"
   describe.each([
     ['fetch-handler' as const, true],
     ['scheduled-handler' as const, true],
+    ['hono' as const, true],
     ['none' as const, false],
   ])('--template', (template, checkFile) => {
     it('should generate the correct snippet of code', async () => {
@@ -524,7 +527,9 @@ account_id = "${accountId}"
       });
 
       const project = readProjectConfiguration(tree, 'api');
-      expect(project.targets.test).toBeDefined();
+      expect(project.targets.test).toBeUndefined();
+      const packageJSON = devkit.readJson(tree, 'api/package.json');
+      expect(packageJSON.scripts.test).toBeDefined();
 
       if (checkFile) {
         expect(tree.exists(`api/src/index.ts`)).toBeTruthy();

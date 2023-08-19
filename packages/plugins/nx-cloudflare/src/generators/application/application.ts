@@ -6,7 +6,6 @@ import {
   getWorkspaceLayout,
   joinPathFragments,
   names,
-  ProjectConfiguration,
   readProjectConfiguration,
   toJS,
   Tree,
@@ -19,137 +18,7 @@ import { join } from 'path';
 import initGenerator from '../init/init';
 import { vitestImports } from './utils/vitest-imports';
 import { getAccountId } from './utils/get-account-id';
-
-function updateTsAppConfig(tree: Tree, options: NormalizedSchema) {
-  updateJson(
-    tree,
-    join(options.appProjectRoot, 'tsconfig.app.json'),
-    (json) => {
-      json.compilerOptions = {
-        ...json.compilerOptions,
-        esModuleInterop: true,
-        target: 'es2021',
-        lib: ['es2021'],
-        module: 'es2022',
-        moduleResolution: 'node',
-        resolveJsonModule: true,
-
-        allowJs: true,
-        checkJs: false,
-        noEmit: true,
-
-        isolatedModules: true,
-        allowSyntheticDefaultImports: true,
-        forceConsistentCasingInFileNames: true,
-
-        strict: true,
-        skipLibCheck: true,
-      };
-      json.compilerOptions.types = [
-        ...json.compilerOptions.types,
-        '@cloudflare/workers-types',
-      ];
-      return json;
-    }
-  );
-}
-
-function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
-  // Delete main.ts. Workers convention is a file named `index.js` or `index.ts
-  tree.delete(
-    join(options.appProjectRoot, `src/main.${options.js ? 'js' : 'ts'}`)
-  );
-
-  // General configuration files for workers
-  generateFiles(
-    tree,
-    join(__dirname, './files/common'),
-    options.appProjectRoot,
-    {
-      ...options,
-      tmpl: '',
-      name: options.name,
-      extension: options.js ? 'js' : 'ts',
-      accountId: options.accountId ? getAccountId(options.accountId) : '',
-    }
-  );
-
-  // Generate template files with workers code
-  if (options.template && options.template !== 'none') {
-    generateFiles(
-      tree,
-      join(__dirname, `./files/${options.template}`),
-      join(options.appProjectRoot, 'src'),
-      {
-        ...options,
-        tmpl: '',
-        name: options.name,
-        vitestImports: options.unitTestRunner === 'vitest' ? vitestImports : '',
-      }
-    );
-  }
-
-  if (options.js) {
-    toJS(tree);
-  }
-}
-
-function addTargets(tree: Tree, options: NormalizedSchema) {
-  try {
-    let projectConfiguration = readProjectConfiguration(tree, options.name);
-
-    projectConfiguration.targets = {
-      ...(projectConfiguration.targets ?? {}),
-      serve: {
-        executor: '@naxodev/nx-cloudflare:serve',
-        options: {
-          port: options.port,
-        },
-      },
-
-      publish: {
-        executor: '@naxodev/nx-cloudflare:publish',
-      },
-    };
-
-    if (projectConfiguration.targets.build) {
-      delete projectConfiguration.targets.build;
-    }
-
-    if (options.unitTestRunner === 'vitest') {
-      projectConfiguration = addVitestTarget(
-        projectConfiguration,
-        options.appProjectRoot
-      );
-    }
-
-    updateProjectConfiguration(tree, options.name, projectConfiguration);
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-function addVitestTarget(
-  projectConfiguration: ProjectConfiguration,
-  projectRoot: string
-): ProjectConfiguration {
-  projectConfiguration.targets = {
-    ...(projectConfiguration.targets ?? {}),
-    test: {
-      executor: 'nx:run-commands',
-      options: {
-        cwd: projectRoot,
-        command: 'vitest run',
-      },
-    },
-  };
-
-  return projectConfiguration;
-}
-
-function removeTestFiles(tree: Tree, options: NormalizedSchema) {
-  tree.delete(join(options.appProjectRoot, 'src', 'index.test.ts'));
-}
+import { vitestScript } from './utils/vitest-script';
 
 export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = normalizeOptions(tree, schema);
@@ -188,9 +57,118 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
   };
 }
 
-export default applicationGenerator;
-export const applicationSchematic = convertNxGenerator(applicationGenerator);
+// Modify the default tsconfig.app.json generate by the node application generator to support workers.
+function updateTsAppConfig(tree: Tree, options: NormalizedSchema) {
+  updateJson(
+    tree,
+    join(options.appProjectRoot, 'tsconfig.app.json'),
+    (json) => {
+      json.compilerOptions = {
+        ...json.compilerOptions,
+        esModuleInterop: true,
+        target: 'es2021',
+        lib: ['es2021'],
+        module: 'es2022',
+        moduleResolution: 'node',
+        resolveJsonModule: true,
 
+        allowJs: true,
+        checkJs: false,
+        noEmit: true,
+
+        isolatedModules: true,
+        allowSyntheticDefaultImports: true,
+        forceConsistentCasingInFileNames: true,
+
+        strict: true,
+        skipLibCheck: true,
+      };
+      json.compilerOptions.types = [
+        ...json.compilerOptions.types,
+        '@cloudflare/workers-types',
+      ];
+      return json;
+    }
+  );
+}
+
+// Adds the needed files from the common folder and the selected template folder
+function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
+  // Delete main.ts. Workers convention is a file named `index.js` or `index.ts
+  tree.delete(
+    join(options.appProjectRoot, `src/main.${options.js ? 'js' : 'ts'}`)
+  );
+
+  // General configuration files for workers
+  generateFiles(
+    tree,
+    join(__dirname, './files/common'),
+    options.appProjectRoot,
+    {
+      ...options,
+      tmpl: '',
+      name: options.name,
+      extension: options.js ? 'js' : 'ts',
+      accountId: options.accountId ? getAccountId(options.accountId) : '',
+      vitestScript: options.unitTestRunner === 'vitest' ? vitestScript : '',
+    }
+  );
+
+  // Generate template files with workers code
+  if (options.template && options.template !== 'none') {
+    generateFiles(
+      tree,
+      join(__dirname, `./files/${options.template}`),
+      join(options.appProjectRoot, 'src'),
+      {
+        ...options,
+        tmpl: '',
+        name: options.name,
+        vitestImports: options.unitTestRunner === 'vitest' ? vitestImports : '',
+      }
+    );
+  }
+
+  // Modify the files extension and content to use vanilla JavaScript
+  if (options.js) {
+    toJS(tree);
+  }
+}
+
+// Adds the targets to the project configuration
+function addTargets(tree: Tree, options: NormalizedSchema) {
+  try {
+    const projectConfiguration = readProjectConfiguration(tree, options.name);
+
+    projectConfiguration.targets = {
+      ...(projectConfiguration.targets ?? {}),
+      serve: {
+        executor: '@naxodev/nx-cloudflare:serve',
+        options: {
+          port: options.port,
+        },
+      },
+
+      publish: {
+        executor: '@naxodev/nx-cloudflare:publish',
+      },
+    };
+
+    if (projectConfiguration.targets.build) {
+      delete projectConfiguration.targets.build;
+    }
+
+    updateProjectConfiguration(tree, options.name, projectConfiguration);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function removeTestFiles(tree: Tree, options: NormalizedSchema) {
+  tree.delete(join(options.appProjectRoot, 'src', 'index.test.ts'));
+}
+
+// Transform the options to the normalized schema. Loads defaults options.
 function normalizeOptions(host: Tree, options: Schema): NormalizedSchema {
   const { layoutDirectory, projectDirectory } = extractLayoutDirectory(
     options.directory
@@ -220,3 +198,6 @@ function normalizeOptions(host: Tree, options: Schema): NormalizedSchema {
     port: options.port ?? 3000,
   };
 }
+
+export default applicationGenerator;
+export const applicationSchematic = convertNxGenerator(applicationGenerator);

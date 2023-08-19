@@ -10,29 +10,10 @@ import { tslibVersion } from '@nx/node/src/utils/versions';
 import type { Schema } from './schema';
 import {
   cloudflareWorkersTypeVersions,
+  honoVersion,
   nxCloudflareVersion,
   wranglerVersion,
 } from '../../utils/versions';
-
-function updateDependencies(tree: Tree, schema: Schema) {
-  removeDependenciesFromPackageJson(tree, ['@naxodev/nx-cloudflare'], []);
-
-  const vitePackage =
-    schema.unitTestRunner === 'vitest' ? { vitest: '^0.33.0' } : {};
-
-  return addDependenciesToPackageJson(
-    tree,
-    {
-      tslib: tslibVersion,
-    },
-    {
-      wrangler: wranglerVersion,
-      '@cloudflare/workers-types': cloudflareWorkersTypeVersions,
-      '@naxodev/nx-cloudflare': nxCloudflareVersion,
-      ...vitePackage,
-    }
-  );
-}
 
 export async function initGenerator(tree: Tree, schema: Schema) {
   const initTask = await nodeInitGenerator(tree, {
@@ -51,6 +32,29 @@ export async function initGenerator(tree: Tree, schema: Schema) {
     await initTask();
     await installTask();
   };
+}
+
+function updateDependencies(tree: Tree, schema: Schema) {
+  removeDependenciesFromPackageJson(tree, ['@naxodev/nx-cloudflare'], []);
+
+  const vitePackage =
+    schema.unitTestRunner === 'vitest' ? { vitest: '^0.33.0' } : {};
+
+  const honoPackage = schema.template === 'hono' ? { hono: honoVersion } : {};
+
+  return addDependenciesToPackageJson(
+    tree,
+    {
+      tslib: tslibVersion,
+      ...honoPackage,
+    },
+    {
+      wrangler: wranglerVersion,
+      '@cloudflare/workers-types': cloudflareWorkersTypeVersions,
+      '@naxodev/nx-cloudflare': nxCloudflareVersion,
+      ...vitePackage,
+    }
+  );
 }
 
 export default initGenerator;
