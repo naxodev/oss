@@ -1,5 +1,10 @@
 import { uniq, fileExists, runNxCommand } from '@nx/plugin/testing';
-import { newNxProject, installPlugin, cleanup } from '@naxodev/e2e/utils';
+import {
+  newNxProject,
+  installPlugin,
+  cleanup,
+  runNxCommandWithNpx,
+} from '@naxodev/e2e/utils';
 import * as http from 'http';
 
 function getData(port: number, path = '/api'): Promise<any> {
@@ -32,12 +37,12 @@ describe('Cloudflare Worker Applications', () => {
   it('should be able to generate an empty application', async () => {
     const workerapp = uniq('workerapp');
 
-    runNxCommand(
+    runNxCommandWithNpx(
       `generate @naxodev/nx-cloudflare:app ${workerapp} --template="none"`
     );
 
-    const lintResults = runNxCommand(`lint ${workerapp}`);
-    expect(lintResults).toContain('All files pass linting.');
+    const lintResults = runNxCommandWithNpx(`lint ${workerapp}`);
+    expect(lintResults).toContain('Al files pass linting.');
 
     expect(fileExists('apps/workerapp/project.json')).toBeTruthy();
   }, 30_000);
