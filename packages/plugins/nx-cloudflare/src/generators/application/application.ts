@@ -6,7 +6,6 @@ import {
   getWorkspaceLayout,
   joinPathFragments,
   names,
-  ProjectConfiguration,
   readProjectConfiguration,
   toJS,
   Tree,
@@ -19,6 +18,7 @@ import { join } from 'path';
 import initGenerator from '../init/init';
 import { vitestImports } from './utils/vitest-imports';
 import { getAccountId } from './utils/get-account-id';
+import { vitestScript } from './utils/vitest-script';
 
 export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = normalizeOptions(tree, schema);
@@ -110,6 +110,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
       name: options.name,
       extension: options.js ? 'js' : 'ts',
       accountId: options.accountId ? getAccountId(options.accountId) : '',
+      vitestScript: options.unitTestRunner === 'vitest' ? vitestScript : '',
     }
   );
 
@@ -137,7 +138,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
 // Adds the targets to the project configuration
 function addTargets(tree: Tree, options: NormalizedSchema) {
   try {
-    let projectConfiguration = readProjectConfiguration(tree, options.name);
+    const projectConfiguration = readProjectConfiguration(tree, options.name);
 
     projectConfiguration.targets = {
       ...(projectConfiguration.targets ?? {}),
@@ -157,35 +158,10 @@ function addTargets(tree: Tree, options: NormalizedSchema) {
       delete projectConfiguration.targets.build;
     }
 
-    if (options.unitTestRunner === 'vitest') {
-      projectConfiguration = addVitestTarget(
-        projectConfiguration,
-        options.appProjectRoot
-      );
-    }
-
     updateProjectConfiguration(tree, options.name, projectConfiguration);
   } catch (e) {
     console.error(e);
   }
-}
-
-function addVitestTarget(
-  projectConfiguration: ProjectConfiguration,
-  projectRoot: string
-): ProjectConfiguration {
-  projectConfiguration.targets = {
-    ...(projectConfiguration.targets ?? {}),
-    test: {
-      executor: 'nx:run-commands',
-      options: {
-        cwd: projectRoot,
-        command: 'vitest run',
-      },
-    },
-  };
-
-  return projectConfiguration;
 }
 
 function removeTestFiles(tree: Tree, options: NormalizedSchema) {
