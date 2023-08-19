@@ -34,8 +34,9 @@
   "executors": "./executors.json",
   "dependencies": {
     "tslib": "^2.3.0",
-    "@nx/devkit": "^16.6.0",
-    "@nx/node": "^16.6.0",
-    "@nx/web": "^16.6.0"
+    "@nx/devkit": ">= 16.0.0",
+    "@nx/node": ">= 16.0.0",
+    "@nx/web": ">= 16.0.0",
+    "wrangler": ">= 3.0.0"
   }
 }
