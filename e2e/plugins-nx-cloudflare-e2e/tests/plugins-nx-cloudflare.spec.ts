@@ -51,12 +51,14 @@ describe('Cloudflare Worker Applications', () => {
       fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
     ).toBeTruthy();
 
-    const p = await runCommandUntil(`serve ${workerapp}`, (output) =>
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
       output.includes(`wrangler dev now uses local mode by default`)
     );
 
-    await promisifiedTreeKill(p.pid!, 'SIGKILL');
-    await killPorts(port);
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
   }, 120_000);
 
   it('should be able to generate an scheduled-handler application', async () => {
@@ -76,12 +78,14 @@ describe('Cloudflare Worker Applications', () => {
       fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
     ).toBeTruthy();
 
-    const p = await runCommandUntil(`serve ${workerapp}`, (output) =>
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
       output.includes(`wrangler dev now uses local mode by default`)
     );
 
-    await promisifiedTreeKill(p.pid!, 'SIGKILL');
-    await killPorts(port);
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
   }, 120_000);
 
   it('should be able to generate an hono application', async () => {
@@ -101,11 +105,13 @@ describe('Cloudflare Worker Applications', () => {
       fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
     ).toBeTruthy();
 
-    const p = await runCommandUntil(`serve ${workerapp}`, (output) =>
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
       output.includes(`wrangler dev now uses local mode by default`)
     );
 
-    await promisifiedTreeKill(p.pid!, 'SIGKILL');
-    await killPorts(port);
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
   }, 120_000);
 });
