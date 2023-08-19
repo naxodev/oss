@@ -21,8 +21,6 @@ function runNxNewCommand(args?: string, silent?: boolean) {
  * Deletes the e2e directory
  */
 export function cleanup(): void {
-  const localTmpDir = dirname(tmpProjPath());
-  console.log('Cleaning up test project', localTmpDir);
   removeSync(dirname(tmpProjPath()));
 }
 
