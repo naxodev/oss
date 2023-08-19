@@ -3,20 +3,6 @@ import { removeSync, mkdirSync } from 'fs-extra';
 import { execSync } from 'child_process';
 import { tmpProjPath } from '@nx/plugin/testing';
 
-function runNxNewCommand(args?: string, silent?: boolean) {
-  const localTmpDir = dirname(tmpProjPath());
-
-  execSync(
-    `npx --yes create-nx-workspace@latest proj --preset empty --no-nxCloud --no-interactive`,
-    {
-      cwd: localTmpDir,
-      stdio: 'inherit',
-      env: process.env,
-    }
-  );
-  console.log(`Created test project in "${localTmpDir}"`);
-}
-
 /**
  * Deletes the e2e directory
  */
@@ -43,4 +29,18 @@ export function installPlugin(pluginName: string) {
     stdio: 'inherit',
     env: process.env,
   });
+}
+
+function runNxNewCommand(args?: string, silent?: boolean) {
+  const localTmpDir = dirname(tmpProjPath());
+
+  execSync(
+    `npx --yes create-nx-workspace@latest proj --preset empty --no-nxCloud --no-interactive`,
+    {
+      cwd: localTmpDir,
+      stdio: 'inherit',
+      env: process.env,
+    }
+  );
+  console.log(`Created test project in "${localTmpDir}"`);
 }

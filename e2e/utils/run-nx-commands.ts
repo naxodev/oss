@@ -85,7 +85,6 @@ export function getPackageManagerCommand({
   list: string;
   runLerna: string;
 } {
-  const npmMajorVersion = getNpmMajorVersion();
   const yarnMajorVersion = getYarnMajorVersion(path);
   const isYarnWorkspace = fileExists(join(path, 'package.json'))
     ? readJson('package.json').workspaces
