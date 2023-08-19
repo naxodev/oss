@@ -8,8 +8,8 @@ import {
   newNxProject,
   installPlugin,
   cleanup,
-  runCommandUntil,
   promisifiedTreeKill,
+  runCommandUntil,
   killPorts,
 } from '@naxodev/e2e/utils';
 import * as http from 'http';
@@ -73,23 +73,23 @@ describe('Cloudflare Worker Applications', () => {
       fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
     ).toBeTruthy();
 
-    const testResults = runNxCommand(`test ${workerapp}`);
-    console.log(testResults);
-    expect(testResults).toContain(
-      `Successfully ran target test for project ${workerapp}`
-    );
-    //
-    // const p = await runCommandUntil(`serve ${workerapp}`, (output) =>
-    //   output.includes(`Listening at http://localhost:${port}`)
+    // const testResults = runNxCommand(`test ${workerapp}`);
+    // console.log(testResults);
+    // expect(testResults).toContain(
+    //   `Successfully ran target test for project ${workerapp}`
     // );
-    // const result = await getData(port);
-    // expect(result.message).toMatch(`Welcome to ${workerapp}!`);
-    //
-    // try {
-    //   await promisifiedTreeKill(p.pid!, 'SIGKILL');
-    //   await killPorts(port);
-    // } finally {
-    //   process.env.port = originalEnvPort;
-    // }
-  }, 30_000);
+
+    const p = await runCommandUntil(`serve ${workerapp}`, (output) =>
+      output.includes(`Listening at http://localhost:${port}`)
+    );
+    const result = await getData(port);
+    expect(result.message).toMatch(`Welcome to ${workerapp}!`);
+
+    try {
+      await promisifiedTreeKill(p.pid!, 'SIGKILL');
+      await killPorts(port);
+    } finally {
+      process.env.port = originalEnvPort;
+    }
+  }, 120_000);
 });
