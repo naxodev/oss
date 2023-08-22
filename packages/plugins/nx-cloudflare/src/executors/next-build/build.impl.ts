@@ -51,6 +51,8 @@ export default async function buildExecutor(
 
   const { experimentalAppOnly, profile, debug, outputPath } = options;
 
+  console.log(outputPath);
+
   // Set output path here since it can also be set via CLI
   // We can retrieve it inside plugins/with-nx
   process.env.NX_NEXT_OUTPUT_PATH ??= outputPath;
@@ -60,8 +62,8 @@ export default async function buildExecutor(
     detectPackageManager() === 'yarn' &&
     gte(getPackageManagerVersion('yarn', workspaceRoot), '2.0.0');
   const buildCommand = isYarnBerry
-    ? `yarn @cloudflare/next-on-pages ${projectRoot}`
-    : 'npx @cloudflare/next-on-pages';
+    ? `yarn @cloudflare/next-on-pages ${projectRoot} -o=${outputPath}`
+    : `npx @cloudflare/next-on-pages -o=${outputPath}`;
 
   const command = `${buildCommand} ${args.join(' ')}`;
   const execSyncOptions: ExecSyncOptions = {
