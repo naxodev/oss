@@ -9,7 +9,7 @@ import {
   writeJsonFile,
 } from '@nx/devkit';
 import { createLockFile, createPackageJson, getLockFileName } from '@nx/js';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { copySync, existsSync, mkdir, writeFileSync } from 'fs-extra';
 import { gte } from 'semver';
 import { directoryExists } from '@nx/workspace/src/utilities/fileutils';
@@ -51,8 +51,6 @@ export default async function buildExecutor(
 
   const { experimentalAppOnly, profile, debug, outputPath } = options;
 
-  console.log(outputPath);
-
   // Set output path here since it can also be set via CLI
   // We can retrieve it inside plugins/with-nx
   process.env.NX_NEXT_OUTPUT_PATH ??= outputPath;
@@ -61,9 +59,10 @@ export default async function buildExecutor(
   const isYarnBerry =
     detectPackageManager() === 'yarn' &&
     gte(getPackageManagerVersion('yarn', workspaceRoot), '2.0.0');
+  const outDir = join(outputPath);
   const buildCommand = isYarnBerry
-    ? `yarn @cloudflare/next-on-pages ${projectRoot} -o=${outputPath}`
-    : `npx @cloudflare/next-on-pages -o=${outputPath}`;
+    ? `yarn @cloudflare/next-on-pages ${projectRoot} -o=${outDir}`
+    : `npx @cloudflare/next-on-pages -o=${outDir}`;
 
   const command = `${buildCommand} ${args.join(' ')}`;
   const execSyncOptions: ExecSyncOptions = {
