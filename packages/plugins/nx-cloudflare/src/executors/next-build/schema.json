@@ -2,8 +2,8 @@
   "version": 2,
   "outputCapture": "pipe",
   "$schema": "http://json-schema.org/schema",
-  "title": "Next Cloudflare Build",
-  "description": "Build a Next.js app using Cloudflare builder.",
+  "title": "Nx Next Cloudflare Build",
+  "description": "Build a Next.js app using Cloudflare Next on Pages builder.",
   "type": "object",
   "properties": {
     "outputPath": {
