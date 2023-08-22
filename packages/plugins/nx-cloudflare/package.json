@@ -11,14 +11,16 @@
     "url": "https://github.com/naxodev/oss.git",
     "directory": "packages/plugins/nx-cloudflare"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
-    "nx",
-    "plugin",
-    "nx-plugin",
-    "cloudflare",
-    "worker",
-    "cloudflare worker",
-    "monorepo"
+    "Nx",
+    "Plugin",
+    "Cloudflare",
+    "Worker",
+    "Monorepo",
+    "Next"
   ],
   "contributors": [
     {
@@ -32,8 +34,20 @@
   },
   "generators": "./generators.json",
   "executors": "./executors.json",
+  "peerDependencies": {
+    "@cloudflare/next-on-pages": "^1.0.0"
+  },
   "dependencies": {
     "tslib": "^2.3.0",
+    "@svgr/webpack": "^8.0.1",
+    "chalk": "^4.1.0",
+    "copy-webpack-plugin": "^10.2.4",
+    "dotenv": "~10.0.0",
+    "fs-extra": "^11.1.0",
+    "ignore": "^5.0.4",
+    "semver": "7.5.3",
+    "url-loader": "^4.1.1",
+    "webpack-merge": "^5.8.0",
     "@nx/devkit": ">= 16.0.0",
     "@nx/node": ">= 16.0.0",
     "@nx/web": ">= 16.0.0",
