@@ -9,7 +9,7 @@ import {
   writeJsonFile,
 } from '@nx/devkit';
 import { createLockFile, createPackageJson, getLockFileName } from '@nx/js';
-import { dirname, join } from 'path';
+import { join } from 'path';
 import { copySync, existsSync, mkdir, writeFileSync } from 'fs-extra';
 import { gte } from 'semver';
 import { directoryExists } from '@nx/workspace/src/utilities/fileutils';
@@ -50,19 +50,20 @@ export default async function buildExecutor(
   }
 
   const { experimentalAppOnly, profile, debug, outputPath } = options;
+  // Set the outputPath to the projectRoot to bypass cloudflare builded limitations.
+  options.outputPath = projectRoot;
 
   // Set output path here since it can also be set via CLI
   // We can retrieve it inside plugins/with-nx
-  process.env.NX_NEXT_OUTPUT_PATH ??= outputPath;
+  process.env.NX_NEXT_OUTPUT_PATH ??= projectRoot;
 
   const args = createCliOptions({ experimentalAppOnly, profile, debug });
   const isYarnBerry =
     detectPackageManager() === 'yarn' &&
     gte(getPackageManagerVersion('yarn', workspaceRoot), '2.0.0');
-  const outDir = join(outputPath);
   const buildCommand = isYarnBerry
-    ? `yarn @cloudflare/next-on-pages ${projectRoot} -o=${outDir}`
-    : `npx @cloudflare/next-on-pages -o=${outDir}`;
+    ? `yarn @cloudflare/next-on-pages ${projectRoot}`
+    : 'npx @cloudflare/next-on-pages';
 
   const command = `${buildCommand} ${args.join(' ')}`;
   const execSyncOptions: ExecSyncOptions = {
@@ -98,22 +99,26 @@ export default async function buildExecutor(
   };
 
   updatePackageJson(builtPackageJson, context);
-  writeJsonFile(`${options.outputPath}/package.json`, builtPackageJson);
+  writeJsonFile(`${projectRoot}/package.json`, builtPackageJson);
 
   if (options.generateLockfile) {
     const lockFile = createLockFile(builtPackageJson);
-    writeFileSync(`${options.outputPath}/${getLockFileName()}`, lockFile, {
+    writeFileSync(`${projectRoot}/${getLockFileName()}`, lockFile, {
       encoding: 'utf-8',
     });
   }
 
   // If output path is different from source path, then copy over the config and public files.
   // This is the default behavior when running `nx build <app>`.
-  if (options.outputPath.replace(/\/$/, '') !== projectRoot) {
+  if (outputPath.replace(/\/$/, '') !== projectRoot) {
     createNextConfigFile(options, context);
-    copySync(join(projectRoot, 'public'), join(options.outputPath, 'public'), {
+    copySync(join(projectRoot, 'public'), join(outputPath, 'public'), {
       dereference: true,
     });
+    copySync(join(projectRoot, '.vercel'), join(outputPath, '.vercel'), {
+      dereference: true,
+    });
+    process.env.NX_NEXT_OUTPUT_PATH ??= outputPath;
   }
   return { success: true };
 }

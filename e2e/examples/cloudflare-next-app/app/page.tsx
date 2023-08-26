@@ -1,6 +1,19 @@
+export const runtime = 'edge';
+
 import styles from './page.module.css';
 
+async function getData() {
+  const res: { message: string } = await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ message: 'This is a message from the server' });
+    }, 1000);
+  });
+
+  return res;
+}
+
 export default async function Index() {
+  const data = await getData();
   /*
    * Replace the elements below with your own.
    *
@@ -16,6 +29,8 @@ export default async function Index() {
               Welcome cloudflare-next-app 👋
             </h1>
           </div>
+
+          <p id="message">Message from the edge: {data.message}</p>
 
           <div id="hero" className="rounded">
             <div className="text-container">
