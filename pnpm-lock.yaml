@@ -103,6 +103,9 @@ devDependencies:
   '@types/react-dom':
     specifier: 18.2.6
     version: 18.2.6
+  '@types/semver':
+    specifier: ^7.5.0
+    version: 7.5.0
   '@typescript-eslint/eslint-plugin':
     specifier: 5.62.0
     version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.46.0)(typescript@5.1.6)

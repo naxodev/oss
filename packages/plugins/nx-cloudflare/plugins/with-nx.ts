@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * WARNING: Do not add development dependencies to top-level imports.
  * Instead, `require` them inline during the build phase.
@@ -20,7 +23,15 @@ export interface WithNxContext {
   libsDir: string;
 }
 
-function regexEqual(x, y) {
+function regexEqual(
+  x: {
+    source: string;
+    global: boolean;
+    ignoreCase: boolean;
+    multiline: boolean;
+  },
+  y: RegExp
+) {
   return (
     x instanceof RegExp &&
     y instanceof RegExp &&
@@ -241,7 +252,7 @@ export function getNextConfig(
       ];
 
       const nextCssLoaders = config.module.rules.find(
-        (rule) => typeof rule.oneOf === 'object'
+        (rule: { oneOf: any }) => typeof rule.oneOf === 'object'
       );
 
       // webpack config is not as expected
@@ -251,7 +262,7 @@ export function getNextConfig(
        *  1. Modify css loader to enable module support for workspace libs
        */
       const nextCssLoader = nextCssLoaders.oneOf.find(
-        (rule) =>
+        (rule: { sideEffects: boolean; test: any }) =>
           rule.sideEffects === false && regexEqual(rule.test, /\.module\.css$/)
       );
       // Might not be found if Next.js webpack config changes in the future
@@ -266,7 +277,7 @@ export function getNextConfig(
        *  2. Modify sass loader to enable module support for workspace libs
        */
       const nextSassLoader = nextCssLoaders.oneOf.find(
-        (rule) =>
+        (rule: { sideEffects: boolean; test: any }) =>
           rule.sideEffects === false &&
           regexEqual(rule.test, /\.module\.(scss|sass)$/)
       );
@@ -282,7 +293,7 @@ export function getNextConfig(
        *  3. Modify error loader to ignore css modules used by workspace libs
        */
       const nextErrorCssModuleLoader = nextCssLoaders.oneOf.find(
-        (rule) =>
+        (rule: { use: { loader: string; options: { reason: string } } }) =>
           rule.use &&
           rule.use.loader === 'error-loader' &&
           rule.use.options &&
@@ -300,10 +311,11 @@ export function getNextConfig(
       /**
        * 4. Modify css loader to allow global css from node_modules to be imported from workspace libs
        */
-      const nextGlobalCssLoader = nextCssLoaders.oneOf.find((rule) =>
-        rule.include?.and?.find((include) =>
-          regexEqual(include, /node_modules/)
-        )
+      const nextGlobalCssLoader = nextCssLoaders.oneOf.find(
+        (rule: { include: { and: any[] } }) =>
+          rule.include?.and?.find((include) =>
+            regexEqual(include, /node_modules/)
+          )
       );
       // Might not be found if Next.js webpack config changes in the future
       if (nextGlobalCssLoader && nextGlobalCssLoader.issuer) {
@@ -375,7 +387,7 @@ function getNxEnvironmentVariables() {
 }
 
 function addNxEnvVariables(config: any) {
-  const maybeDefinePlugin = config.plugins?.find((plugin) => {
+  const maybeDefinePlugin = config.plugins?.find((plugin: any) => {
     return plugin.definitions?.['process.env.NODE_ENV'];
   });
 
