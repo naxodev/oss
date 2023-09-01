@@ -81,7 +81,7 @@ nx publish <my-app>
 
 ### Build Next application.
 
-> This feature is experimental. We appreciate that you let us know of any issues that you find.
+> This feature is ⚠️ **experimental**. We appreciate that you let us know of any issues that you find.
 
 To start using the Cloudflare Pages Next builder, start by replacing the builder executor in your application `project.json`.
 
