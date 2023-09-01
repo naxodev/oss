@@ -4,5 +4,7 @@
 /tmp
 /.github
 pnpm-lock.yaml
+.vercel
+.next
 
 **/CHANGELOG.md
