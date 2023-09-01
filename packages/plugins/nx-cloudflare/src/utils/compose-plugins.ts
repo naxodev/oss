@@ -15,7 +15,7 @@ export function composePlugins(
     ): Promise<NextConfig> {
       let config = baseConfig;
       for (const plugin of plugins) {
-        const fn = await plugin;
+        const fn = plugin;
         const configOrFn = fn(config);
         if (typeof configOrFn === 'function') {
           config = await configOrFn(phase, context);

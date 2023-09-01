@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextConfig } from 'next';
 import { resolve } from 'path';
 import { Configuration } from 'webpack';
@@ -21,7 +22,7 @@ export function createWebpackConfig(
   projectRoot: string,
   fileReplacements: FileReplacement[] = [],
   assets: any = null
-): (a, b) => Configuration {
+): (a: any, b: any) => Configuration {
   return function webpackConfig(
     config: Configuration,
     {
