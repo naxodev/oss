@@ -24,7 +24,8 @@ Nx plugin for Cloudflare, in particular Cloudflare workers.
 - ✅ Include Fetch Handler template
 - ✅ Include Scheduled Handler template
 - ✅ Vitest tests support
-- ✅ Serve and Publish executors
+- ✅ Serve and Publish executors for workers.
+- ✅ [Experimental] Cloudflare Pages builder for Next.JS projects.
 
 ## Installation
 
@@ -77,6 +78,33 @@ The available options are the following:
 ```bash
 nx publish <my-app>
 ```
+
+### Build Next application.
+
+> This feature is ⚠️ **experimental**. We appreciate that you let us know of any issues that you find.
+
+To start using the Cloudflare Pages Next builder, start by replacing the builder executor in your application `project.json`.
+
+```json
+  ...
+  "targets": {
+    ...
+    "build": {
+      "executor": "@naxodev/nx-cloudflare:next-build",
+      ...
+    },
+    ...
+```
+
+Notice that you can use the same configurations as in the `@nx/next:build` executor.
+
+Now you can run the build command.
+
+```sh
+nx build <app-name>
+```
+
+And upload the content of the folder `.vercel/output/static` contained in the folder matching your configured output path.
 
 ## Acknowledgement
 
