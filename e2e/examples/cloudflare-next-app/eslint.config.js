@@ -14,7 +14,6 @@ module.exports = [
     'next/core-web-vitals'
   ),
   { languageOptions: { globals: { ...globals.jest } } },
-  { rules: { '@next/next/no-html-link-for-pages': 'off' } },
   {
     files: [
       'e2e/examples/cloudflare-next-app/**/*.ts',
@@ -22,12 +21,7 @@ module.exports = [
       'e2e/examples/cloudflare-next-app/**/*.js',
       'e2e/examples/cloudflare-next-app/**/*.jsx',
     ],
-    rules: {
-      '@next/next/no-html-link-for-pages': [
-        'error',
-        'e2e/examples/cloudflare-next-app/pages',
-      ],
-    },
+    rules: { '@next/next/no-html-link-for-pages': 'off' },
   },
   {
     files: [
@@ -43,5 +37,10 @@ module.exports = [
     ],
     rules: {},
   },
-  { ignores: ['e2e/examples/cloudflare-next-app/.next/**/*'] },
+  {
+    ignores: [
+      'e2e/examples/cloudflare-next-app/.next/**/*',
+      'e2e/examples/cloudflare-next-app/.vercel/**/*',
+    ],
+  },
 ];
