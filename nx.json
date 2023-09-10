@@ -40,6 +40,7 @@
     "sharedGlobals": []
   },
   "workspaceLayout": {
+    "projectNameAndRootFormat": "derived",
     "appsDir": "e2e",
     "libsDir": "packages"
   },
