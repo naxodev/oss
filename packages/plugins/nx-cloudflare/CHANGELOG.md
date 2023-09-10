@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.6.0](https://github.com/naxodev/oss/compare/v0.5.0...v0.6.0) (2023-09-10)
+
+
+### Features
+
+* **core:** use the latest version of core dependencies ([#21](https://github.com/naxodev/oss/issues/21)) ([10bda3e](https://github.com/naxodev/oss/commit/10bda3e61fe8d37a8f4d3e6f5f64d59687260f6c))
+
 ## [0.5.0](https://github.com/naxodev/oss/compare/v0.4.0...v0.5.0) (2023-09-10)
 
 
