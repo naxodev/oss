@@ -72,7 +72,7 @@
     "url-loader": "^4.1.1",
     "verdaccio": "^5.0.4",
     "webpack": "^5.88.2",
-    "wrangler": "^3.6.0"
+    "wrangler": "^3.7.0"
   },
   "dependencies": {
     "react": "18.2.0",
