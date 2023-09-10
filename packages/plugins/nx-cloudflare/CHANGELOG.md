@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.5.0](https://github.com/naxodev/oss/compare/v0.4.0...v0.5.0) (2023-09-10)
+
+
+### Features
+
+* update to nx 16.8 and use the new next build format ([#20](https://github.com/naxodev/oss/issues/20)) ([207215a](https://github.com/naxodev/oss/commit/207215abc000c75633d2420c5946e12954b1d4e8))
+
 ## [0.4.0](https://github.com/naxodev/oss/compare/v0.3.0...v0.4.0) (2023-09-01)
 
 
