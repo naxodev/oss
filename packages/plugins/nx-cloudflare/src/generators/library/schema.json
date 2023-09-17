@@ -33,7 +33,7 @@
     },
     "unitTestRunner": {
       "type": "string",
-      "enum": ["jest", "vitest", "none"],
+      "enum": ["vitest", "none"],
       "description": "Test runner to use for unit tests.",
       "x-prompt": "Which unit test runner would you like to use?"
     },
@@ -46,22 +46,6 @@
       "type": "boolean",
       "default": false,
       "x-priority": "internal"
-    },
-    "includeBabelRc": {
-      "type": "boolean",
-      "description": "Include a .babelrc configuration to compile TypeScript files"
-    },
-    "testEnvironment": {
-      "type": "string",
-      "enum": ["jsdom", "node"],
-      "description": "The test environment to use if unitTestRunner is set to jest or vitest.",
-      "default": "node"
-    },
-    "pascalCaseFiles": {
-      "type": "boolean",
-      "description": "Use pascal case file names.",
-      "alias": "P",
-      "default": false
     },
     "js": {
       "type": "boolean",

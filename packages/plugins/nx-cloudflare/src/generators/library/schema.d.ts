@@ -4,13 +4,10 @@ export interface NxCloudflareLibraryGeneratorSchema {
   projectNameAndRootFormat?: ProjectNameAndRootFormat;
   skipFormat?: boolean;
   tags?: string;
-  includeBabelRc?: boolean;
-  unitTestRunner?: 'jest' | 'vitest' | 'none';
+  unitTestRunner?: 'vitest' | 'none';
   linter?: Linter;
-  testEnvironment?: 'jsdom' | 'node';
   importPath?: string;
   js?: boolean;
-  pascalCaseFiles?: boolean;
   strict?: boolean;
   publishable?: boolean;
   buildable?: boolean;
