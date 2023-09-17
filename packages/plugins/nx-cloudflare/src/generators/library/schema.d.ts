@@ -10,12 +10,7 @@ export interface NxCloudflareLibraryGeneratorSchema {
   js?: boolean;
   strict?: boolean;
   publishable?: boolean;
-  buildable?: boolean;
-  setParserOptionsProject?: boolean;
-  config?: 'workspace' | 'project' | 'npm-scripts';
-  compiler?: Compiler;
   bundler?: Bundler;
-  skipTypeCheck?: boolean;
   minimal?: boolean;
   rootProject?: boolean;
   simpleName?: boolean;
