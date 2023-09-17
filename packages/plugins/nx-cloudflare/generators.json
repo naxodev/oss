@@ -11,6 +11,12 @@
       "schema": "./src/generators/init/schema.json",
       "description": "Init generator",
       "hidden": true
+    },
+    "library": {
+      "factory": "./src/generators/library/generator",
+      "schema": "./src/generators/library/schema.json",
+      "description": "library generator",
+      "aliases": ["lib"]
     }
   }
 }

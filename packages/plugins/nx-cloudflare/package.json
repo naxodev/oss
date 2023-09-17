@@ -45,6 +45,7 @@
     "@cloudflare/next-on-pages": "^1.6.1"
   },
   "dependencies": {
+    "@nx/devkit": ">= 16.0.0 <= 17.0.0",
     "tslib": "^2.3.0",
     "@svgr/webpack": "^8.0.1",
     "copy-webpack-plugin": "^11.0.0",
@@ -52,7 +53,6 @@
     "fs-extra": "^11.1.0",
     "semver": "^7.5.4",
     "url-loader": "^4.1.1",
-    "@nx/devkit": ">= 16.0.0 <= 17.0.0",
     "@nx/node": ">= 16.0.0 <= 17.0.0",
     "wrangler": ">= 3.8.0 <=  4.0.0"
   }
