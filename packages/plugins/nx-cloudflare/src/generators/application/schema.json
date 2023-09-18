@@ -1,7 +1,8 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "Application",
-  "title": "",
+  "$id": "NxCloudflareWorkerApplication",
+  "title": "Create a Cloudflare Worker Application",
+  "description": "Create a Cloudflare Worker Application",
   "type": "object",
   "properties": {
     "name": {
@@ -16,6 +17,11 @@
     "js": {
       "type": "boolean",
       "description": "Use JavaScript instead of TypeScript"
+    },
+    "projectNameAndRootFormat": {
+      "description": "Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`).",
+      "type": "string",
+      "enum": ["as-provided", "derived"]
     },
     "tags": {
       "type": "string",

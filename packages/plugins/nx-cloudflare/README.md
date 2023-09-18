@@ -16,15 +16,16 @@
 
 <hr>
 
-Nx plugin for Cloudflare, in particular Cloudflare workers.
+Nx plugin for Cloudflare.
 
 ## Features
 
 - ✅ Generate Cloudflare Worker Application
-- ✅ Include Fetch Handler template
-- ✅ Include Scheduled Handler template
-- ✅ Vitest tests support
-- ✅ Serve and Publish executors for workers.
+  - ✅ Include Fetch Handler template
+  - ✅ Include Scheduled Handler template
+  - ✅ Vitest tests support
+  - ✅ Serve and Publish executors for workers.
+- ✅ Generate Cloudflare Worker Library
 - ✅ [Experimental] Cloudflare Pages builder for Next.JS projects.
 
 ## Installation
@@ -39,29 +40,32 @@ Nx Cloudflare is published as the `@naxodev/nx-cloudflare` package.
 
 ## Usage
 
-### Generating new Cloudflare Worker Application
+### Cloudflare Worker Application
+
+#### Generating a new Cloudflare Worker Application
 
 ```bash
 nx g @naxodev/nx-cloudflare:application my-worker-app
 ```
 
-The available options are the following:
+Available options:
 
-| Option          | Type                                         | Default       | Description                                                                               |
-| --------------- | -------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------- |
-| name            | string                                       | \*required    | What name would you like to use?                                                          |
-| template        | fetch-handler, scheduled-handler, hono, none | fetch-handler | Which worker template do you want to use?                                                 |
-| port            | number                                       | 8787          | The port in which the worker will be run on development mode                              |
-| accountId       | string                                       | null          | The Cloudflare account identifier where the worker will be deployed                       |
-| js              | boolean                                      | false         | Use JavaScript instead of TypeScript                                                      |
-| tags            | string                                       | null          | Add tags to the application (used for linting).                                           |
-| frontendProject | string                                       | null          | Frontend project that needs to access this application. This sets up proxy configuration. |
-| unitTestRunner  | vitest, none                                 | vitest        | Test runner to use for unit tests.                                                        |
-| directory       | string                                       | null          | The directory of the new application.                                                     |
-| rootProject     | boolean                                      | false         | Create worker application at the root of the workspace                                    |
-| skipFormat      | boolean                                      | false         | Skip formatting files.                                                                    |
+| Option                   | Type                                         | Default       | Description                                                                                                                                                                            |
+| ------------------------ | -------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name                     | string                                       | \*required    | What name would you like to use?                                                                                                                                                       |
+| template                 | fetch-handler, scheduled-handler, hono, none | fetch-handler | Which worker template do you want to use?                                                                                                                                              |
+| projectNameAndRootFormat | as-provided, derived                         | as-provided   | Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`). |
+| port                     | number                                       | 8787          | The port in which the worker will be run on development mode                                                                                                                           |
+| accountId                | string                                       | null          | The Cloudflare account identifier where the worker will be deployed                                                                                                                    |
+| js                       | boolean                                      | false         | Use JavaScript instead of TypeScript                                                                                                                                                   |
+| tags                     | string                                       | null          | Add tags to the application (used for linting).                                                                                                                                        |
+| frontendProject          | string                                       | null          | Frontend project that needs to access this application. This sets up proxy configuration.                                                                                              |
+| unitTestRunner           | vitest, none                                 | vitest        | Test runner to use for unit tests.                                                                                                                                                     |
+| directory                | string                                       | null          | The directory of the new application.                                                                                                                                                  |
+| rootProject              | boolean                                      | false         | Create worker application at the root of the workspace                                                                                                                                 |
+| skipFormat               | boolean                                      | false         | Skip formatting files.                                                                                                                                                                 |
 
-### Serve worker on dev mode
+#### Serve worker on dev mode
 
 ```bash
 nx serve <my-app>
@@ -73,13 +77,42 @@ The available options are the following:
 | ------ | ------ | ------- | ------------------------------------------------------------ |
 | port   | number | 8787    | The port in which the worker will be run on development mode |
 
-### Publish worker to Cloudflare
+### Cloudflare Worker Library
+
+#### Generating a new Cloudflare Worker Library
+
+```bash
+nx g @naxodev/nx-cloudflare:library my-worker-lib
+```
+
+Available options:
+
+| Option                   | Type                                  | Default     | Description                                                                                                                                                                            |
+| ------------------------ | ------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name                     | string                                | \*required  | What name would you like to use?                                                                                                                                                       |
+| directory                | string                                | null        | The directory of the new application.                                                                                                                                                  |
+| projectNameAndRootFormat | as-provided, derived                  | as-provided | Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`). |
+| linter                   | eslint, none                          | eslint      | The tool to use for running lint checks.                                                                                                                                               |
+| unitTestRunner           | vitest, none                          | vitest      | Test runner to use for unit tests.                                                                                                                                                     |
+| tags                     | string                                | null        | Add tags to the application (used for linting).                                                                                                                                        |
+| skipFormat               | boolean                               | false       | Skip formatting files.                                                                                                                                                                 |
+| js                       | boolean                               | false       | Use JavaScript instead of TypeScript                                                                                                                                                   |
+| strict                   | boolean                               | true        | Whether to enable tsconfig strict mode or not.                                                                                                                                         |
+| publishable              | boolean                               | false       | Generate a publishable library.                                                                                                                                                        |
+| importPath               | string                                | null        | The library name used to import it, like @myorg/my-awesome-lib. Required for publishable library.                                                                                      |
+| bundler                  | swc, tsc, rollup, vite, esbuild, none | tsc         | Which bundler would you like to use to build the library? Choose 'none' to skip build setup.                                                                                           |
+| minimal                  | boolean                               | false       | Generate a library with a minimal setup. No README.md generated.                                                                                                                       |
+| simpleName               | boolean                               | false       | Don't include the directory in the generated file name.                                                                                                                                |
+
+#### Publish worker to Cloudflare
 
 ```bash
 nx publish <my-app>
 ```
 
-### Build Next application.
+### NextJS on Cloudflare
+
+#### Build Next application.
 
 > This feature is ⚠️ **experimental**. We appreciate that you let us know of any issues that you find.
 
@@ -124,4 +157,5 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/NachoVazquez"><img src="https://avatars3.githubusercontent.com/u/9338604?v=4?s=100" width="100px;" alt="Nacho Vazquez"/><br /><sub><b>Nacho Vazquez</b></sub></a><br /><a href="https://github.com/ngworker/lumberjack/issues?q=author%3ANachoVazquez" title="Bug reports">🐛</a> <a href="https://github.com/ngworker/lumberjack/commits?author=NachoVazquez" title="Code">💻</a> <a href="https://github.com/ngworker/lumberjack/commits?author=NachoVazquez" title="Documentation">📖</a> <a href="#example-NachoVazquez" title="Examples">💡</a> <a href="#ideas-NachoVazquez" title="Ideas, Planning, & Feedback">🤔</a> <a href="#mentoring-NachoVazquez" title="Mentoring">🧑‍🏫</a> <a href="#maintenance-NachoVazquez" title="Maintenance">🚧</a> <a href="#projectManagement-NachoVazquez" title="Project Management">📆</a> <a href="https://github.com/ngworker/lumberjack/pulls?q=is%3Apr+reviewed-by%3ANachoVazquez" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/ngworker/lumberjack/commits?author=NachoVazquez" title="Tests">⚠️</a> <a href="#tool-NachoVazquez" title="Tools">🔧</a> <a href="#userTesting-NachoVazquez" title="User Testing">📓</a></td>
+
       <td align="center" valign="top" width="14.28%
