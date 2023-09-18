@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.7.0](https://github.com/naxodev/oss/compare/v0.6.0...v0.7.0) (2023-09-18)
+
+
+### Features
+
+* add worker library generator ([#23](https://github.com/naxodev/oss/issues/23)) ([4a4ad71](https://github.com/naxodev/oss/commit/4a4ad713f432d3a1ae8ab05000f646d93017258e))
+
 ## [0.6.0](https://github.com/naxodev/oss/compare/v0.5.0...v0.6.0) (2023-09-10)
 
 
