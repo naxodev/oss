@@ -1,12 +1,4 @@
-import {
-  Tree,
-  extractLayoutDirectory,
-  formatFiles,
-  getWorkspaceLayout,
-  joinPathFragments,
-  names,
-  updateJson,
-} from '@nx/devkit';
+import { Tree, ensurePackage, formatFiles, updateJson } from '@nx/devkit';
 import type {
   NormalizedSchema,
   NxCloudflareLibraryGeneratorSchema,
@@ -15,6 +7,7 @@ import { libraryGenerator } from '@nx/js';
 import { join } from 'path';
 import initGenerator from '../init/init';
 import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
+import { Linter } from '@nx/js/src/utils/schema';
 
 export async function nxCloudflareWorkerLibraryGenerator(
   tree: Tree,
@@ -45,9 +38,38 @@ async function normalizeOptions(
   tree: Tree,
   options: NxCloudflareLibraryGeneratorSchema
 ): Promise<NormalizedSchema> {
-  const { projectName, projectRoot } = await determineProjectNameAndRootOptions(
-    tree,
-    {
+  options.projectNameAndRootFormat =
+    options.projectNameAndRootFormat ?? 'as-provided';
+
+  // ensure programmatic runs have an expected default
+  if (!options.config) {
+    options.config = 'project';
+  }
+
+  if (options.publishable) {
+    if (!options.importPath) {
+      throw new Error(
+        `For publishable libs you have to provide a proper "--importPath" which needs to be a valid npm package name (e.g. my-awesome-lib or @myorg/my-lib)`
+      );
+    }
+
+    if (options.bundler === 'none') {
+      options.bundler = 'tsc';
+    }
+  }
+
+  if (options.config === 'npm-scripts') {
+    options.unitTestRunner = 'none';
+    options.linter = Linter.None;
+    options.bundler = 'none';
+  }
+
+  if (!options.linter && options.config !== 'npm-scripts') {
+    options.linter = Linter.EsLint;
+  }
+
+  const { projectName, projectRoot, importPath } =
+    await determineProjectNameAndRootOptions(tree, {
       name: options.name,
       projectType: 'library',
       directory: options.directory,
@@ -55,13 +77,16 @@ async function normalizeOptions(
       projectNameAndRootFormat: options.projectNameAndRootFormat,
       rootProject: options.rootProject,
       callingGenerator: '@nx/js:library',
-    }
-  );
+    });
+  options.rootProject = projectRoot === '.';
+
+  options.minimal ??= false;
 
   return {
     ...options,
-    libProjectRoot: projectRoot,
     name: projectName,
+    libProjectRoot: projectRoot,
+    importPath,
   };
 }
 

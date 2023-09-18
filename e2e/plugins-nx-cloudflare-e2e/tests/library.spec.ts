@@ -19,7 +19,7 @@ describe('Cloudflare Worker Library', () => {
     const workerlib = uniq('workerlib');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:lib --name ${workerlib} --directory="libs/${workerlib}"`
+      `generate @naxodev/nx-cloudflare:lib --name=${workerlib} --directory="libs/${workerlib}" --unitTestRunner="none"`
     );
 
     expect(
