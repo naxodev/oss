@@ -7,7 +7,6 @@ import { libraryGenerator } from '@nx/js';
 import { join } from 'path';
 import initGenerator from '../init/init';
 import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
-import { Linter } from '@nx/js/src/utils/schema';
 
 export async function nxCloudflareWorkerLibraryGenerator(
   tree: Tree,
@@ -60,12 +59,12 @@ async function normalizeOptions(
 
   if (options.config === 'npm-scripts') {
     options.unitTestRunner = 'none';
-    options.linter = Linter.None;
+    options.linter = 'none';
     options.bundler = 'none';
   }
 
   if (!options.linter && options.config !== 'npm-scripts') {
-    options.linter = Linter.EsLint;
+    options.linter = 'none';
   }
 
   const { projectName, projectRoot, importPath } =
