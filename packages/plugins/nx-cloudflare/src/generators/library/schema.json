@@ -68,31 +68,6 @@
       "description": "The library name used to import it, like @myorg/my-awesome-lib. Required for publishable library.",
       "x-priority": "important"
     },
-    "buildable": {
-      "type": "boolean",
-      "default": true,
-      "description": "Generate a buildable library.",
-      "x-deprecated": "Use the `bundler` option for greater control (swc, tsc, rollup, vite, esbuild, none)."
-    },
-    "setParserOptionsProject": {
-      "type": "boolean",
-      "description": "Whether or not to configure the ESLint `parserOptions.project` option. We do not do this by default for lint performance reasons.",
-      "default": false
-    },
-    "config": {
-      "type": "string",
-      "enum": ["workspace", "project", "npm-scripts"],
-      "default": "project",
-      "description": "Determines whether the project's executors should be configured in `workspace.json`, `project.json` or as npm scripts.",
-      "x-priority": "internal"
-    },
-    "compiler": {
-      "type": "string",
-      "enum": ["tsc", "swc"],
-      "default": "tsc",
-      "description": "The compiler used by the build and test targets",
-      "x-deprecated": "Use the `bundler` option for greater control (swc, tsc, rollup, vite, esbuild, none)."
-    },
     "bundler": {
       "description": "The bundler to use. Choosing 'none' means this library is not buildable.",
       "type": "string",
@@ -100,11 +75,6 @@
       "default": "tsc",
       "x-prompt": "Which bundler would you like to use to build the library? Choose 'none' to skip build setup.",
       "x-priority": "important"
-    },
-    "skipTypeCheck": {
-      "type": "boolean",
-      "description": "Whether to skip TypeScript type checking for SWC compiler.",
-      "default": false
     },
     "minimal": {
       "type": "boolean",
@@ -115,6 +85,13 @@
       "description": "Don't include the directory in the generated file name.",
       "type": "boolean",
       "default": false
+    },
+    "config": {
+      "type": "string",
+      "enum": ["workspace", "project", "npm-scripts"],
+      "default": "project",
+      "description": "Determines whether the project's executors should be configured in `workspace.json`, `project.json` or as npm scripts.",
+      "x-priority": "internal"
     }
   },
   "required": ["name"]

@@ -1,4 +1,4 @@
-import { Tree, ensurePackage, formatFiles, updateJson } from '@nx/devkit';
+import { Tree, formatFiles, updateJson } from '@nx/devkit';
 import type {
   NormalizedSchema,
   NxCloudflareLibraryGeneratorSchema,

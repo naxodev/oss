@@ -12,6 +12,7 @@ export interface NxCloudflareLibraryGeneratorSchema {
   publishable?: boolean;
   bundler?: Bundler;
   minimal?: boolean;
+  config?: 'workspace' | 'project' | 'npm-scripts';
   rootProject?: boolean;
   simpleName?: boolean;
 }
