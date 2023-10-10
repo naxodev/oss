@@ -26,7 +26,7 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps/${workerapp}" --template="none"`
+      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="none"`
     );
 
     expect(
@@ -39,7 +39,7 @@ describe('Cloudflare Worker Applications', () => {
     const port = 8787;
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps/${workerapp}" --template="fetch-handler"`
+      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="fetch-handler"`
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
@@ -66,7 +66,7 @@ describe('Cloudflare Worker Applications', () => {
     const port = 8787;
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps/${workerapp}" --template="scheduled-handler"`
+      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="scheduled-handler"`
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
@@ -93,7 +93,7 @@ describe('Cloudflare Worker Applications', () => {
     const port = 8787;
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps/${workerapp}" --template="hono"`
+      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="hono"`
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
