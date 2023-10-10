@@ -4,7 +4,6 @@ import {
   tmpProjPath,
   runNxCommand,
   ensureNxProject,
-  listFiles,
   cleanup,
 } from '@nx/plugin/testing';
 import {
@@ -53,67 +52,67 @@ describe('Cloudflare Worker Applications', () => {
       fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
     ).toBeTruthy();
 
-    // const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
-    //   output.includes(`wrangler dev now uses local mode by default`)
-    // );
-    //
-    // if (p.pid) {
-    //   await promisifiedTreeKill(p.pid, 'SIGKILL');
-    //   await killPorts(port);
-    // }
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
+      output.includes(`wrangler dev now uses local mode by default`)
+    );
+
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
   }, 120_000);
 
-  // it('should be able to generate an scheduled-handler application', async () => {
-  //   const workerapp = uniq('workerapp');
-  //   const port = 8787;
-  //
-  //   runNxCommand(
-  //     `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="scheduled-handler"`
-  //   );
-  //
-  //   const lintResults = runNxCommand(`lint ${workerapp}`);
-  //   expect(lintResults).toContain(
-  //     `NX   Successfully ran target lint for project ${workerapp}`
-  //   );
-  //
-  //   expect(
-  //     fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
-  //   ).toBeTruthy();
-  //
-  //   const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
-  //     output.includes(`wrangler dev now uses local mode by default`)
-  //   );
-  //
-  //   if (p.pid) {
-  //     await promisifiedTreeKill(p.pid, 'SIGKILL');
-  //     await killPorts(port);
-  //   }
-  // }, 120_000);
-  //
-  // it('should be able to generate an hono application', async () => {
-  //   const workerapp = uniq('workerapp');
-  //   const port = 8787;
-  //
-  //   runNxCommand(
-  //     `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="hono"`
-  //   );
-  //
-  //   const lintResults = runNxCommand(`lint ${workerapp}`);
-  //   expect(lintResults).toContain(
-  //     `NX   Successfully ran target lint for project ${workerapp}`
-  //   );
-  //
-  //   expect(
-  //     fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
-  //   ).toBeTruthy();
-  //
-  //   const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
-  //     output.includes(`wrangler dev now uses local mode by default`)
-  //   );
-  //
-  //   if (p.pid) {
-  //     await promisifiedTreeKill(p.pid, 'SIGKILL');
-  //     await killPorts(port);
-  //   }
-  // }, 120_000);
+  it('should be able to generate an scheduled-handler application', async () => {
+    const workerapp = uniq('workerapp');
+    const port = 8787;
+
+    runNxCommand(
+      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="scheduled-handler"`
+    );
+
+    const lintResults = runNxCommand(`lint ${workerapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${workerapp}`
+    );
+
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
+    ).toBeTruthy();
+
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
+      output.includes(`wrangler dev now uses local mode by default`)
+    );
+
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
+  }, 120_000);
+
+  it('should be able to generate an hono application', async () => {
+    const workerapp = uniq('workerapp');
+    const port = 8787;
+
+    runNxCommand(
+      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="hono"`
+    );
+
+    const lintResults = runNxCommand(`lint ${workerapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${workerapp}`
+    );
+
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))
+    ).toBeTruthy();
+
+    const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
+      output.includes(`wrangler dev now uses local mode by default`)
+    );
+
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+      await killPorts(port);
+    }
+  }, 120_000);
 });
