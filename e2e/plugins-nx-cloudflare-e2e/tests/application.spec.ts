@@ -53,7 +53,7 @@ describe('Cloudflare Worker Applications', () => {
     ).toBeTruthy();
 
     const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
-      output.includes(`wrangler dev now uses local mode by default`)
+      output.includes(`Ready on http://0.0.0.0`)
     );
 
     if (p.pid) {
@@ -80,7 +80,7 @@ describe('Cloudflare Worker Applications', () => {
     ).toBeTruthy();
 
     const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
-      output.includes(`wrangler dev now uses local mode by default`)
+      output.includes(`Ready on http://0.0.0.0`)
     );
 
     if (p.pid) {
@@ -107,7 +107,7 @@ describe('Cloudflare Worker Applications', () => {
     ).toBeTruthy();
 
     const p = await runCommandUntil(`serve ${workerapp}`, (output: string) =>
-      output.includes(`wrangler dev now uses local mode by default`)
+      output.includes(`Ready on http://0.0.0.0`)
     );
 
     if (p.pid) {
