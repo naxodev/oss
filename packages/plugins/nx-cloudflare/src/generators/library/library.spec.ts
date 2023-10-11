@@ -116,9 +116,6 @@ describe('lib', () => {
               "noImplicitReturns": true,
               "noPropertyAccessFromIndexSignature": true,
               "strict": true,
-              "types": [
-                "vitest",
-              ],
             },
             "extends": "../tsconfig.base.json",
             "files": [],

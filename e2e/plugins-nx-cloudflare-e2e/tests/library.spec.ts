@@ -3,14 +3,17 @@ import {
   fileExists,
   tmpProjPath,
   runNxCommand,
+  ensureNxProject,
+  cleanup,
 } from '@nx/plugin/testing';
-import { newNxProject, installPlugin, cleanup } from '@naxodev/e2e/utils';
 import { join } from 'path';
 
 describe('Cloudflare Worker Library', () => {
   beforeEach(() => {
-    newNxProject();
-    installPlugin('nx-cloudflare');
+    ensureNxProject(
+      '@naxodev/nx-cloudflare',
+      'dist/packages/plugins/nx-cloudflare'
+    );
   });
 
   afterEach(() => cleanup());
