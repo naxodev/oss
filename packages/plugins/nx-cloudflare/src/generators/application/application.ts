@@ -1,10 +1,7 @@
 import {
   convertNxGenerator,
-  extractLayoutDirectory,
   formatFiles,
   generateFiles,
-  getWorkspaceLayout,
-  joinPathFragments,
   names,
   readProjectConfiguration,
   toJS,
@@ -150,8 +147,8 @@ function addTargets(tree: Tree, options: NormalizedSchema) {
         },
       },
 
-      publish: {
-        executor: '@naxodev/nx-cloudflare:publish',
+      deploy: {
+        executor: '@naxodev/nx-cloudflare:deploy',
       },
     };
 
