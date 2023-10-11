@@ -8,7 +8,8 @@
     "deploy": {
       "implementation": "./src/executors/deploy/deploy.impl",
       "schema": "./src/executors/deploy/schema.json",
-      "description": "Deploy worker to Cloudflare"
+      "description": "Deploy worker to Cloudflare",
+      "aliases": ["publish"]
     },
     "next-build": {
       "implementation": "./src/executors/next-build/build.impl",
