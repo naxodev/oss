@@ -3,12 +3,13 @@
     "serve": {
       "implementation": "./src/executors/serve/serve.impl",
       "schema": "./src/executors/serve/schema.json",
-      "description": "Serve cloudflare worker locally"
+      "description": "Serve cloudflare worker"
     },
-    "publish": {
-      "implementation": "./src/executors/publish/publish.impl",
-      "schema": "./src/executors/publish/schema.json",
-      "description": "Publish worker to Cloudflare"
+    "deploy": {
+      "implementation": "./src/executors/deploy/deploy.impl",
+      "schema": "./src/executors/deploy/schema.json",
+      "description": "Deploy worker to Cloudflare",
+      "aliases": ["publish"]
     },
     "next-build": {
       "implementation": "./src/executors/next-build/build.impl",

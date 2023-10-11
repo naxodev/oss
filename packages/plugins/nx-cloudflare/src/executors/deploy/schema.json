@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
   "version": 2,
-  "title": "Serve executor",
+  "title": "Deploy executor",
   "description": "",
   "type": "object",
   "properties": {
@@ -12,11 +12,15 @@
     "noBundle": {
       "type": "boolean",
       "default": false,
-      "description": "Skip Wrangler’s build steps and show a preview of the script without modification. Particularly useful when using custom builds."
+      "description": "Skip Wrangler’s build steps and directly deploy script without modification. Particularly useful when using custom builds."
     },
     "env": {
       "type": "string",
       "description": "Perform on a specific environment."
+    },
+    "outdir": {
+      "type": "string",
+      "description": "Path to directory where Wrangler will write the bundled Worker files."
     },
     "compatibilityDate": {
       "type": "string",
@@ -33,40 +37,6 @@
       "type": "boolean",
       "default": true,
       "description": "Use the latest version of the Workers runtime."
-    },
-    "ip": {
-      "type": "string",
-      "description": "IP address to listen on, defaults to localhost."
-    },
-    "port": {
-      "type": "number",
-      "description": "Port to listen on.",
-      "default": 8787
-    },
-    "inspectorPort": {
-      "type": "number",
-      "description": "Port for devtools to connect to."
-    },
-    "routes": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Routes to upload."
-    },
-    "host": {
-      "type": "string",
-      "description": "Host to forward requests to, defaults to the zone of the project."
-    },
-    "localProtocol": {
-      "type": "string",
-      "enum": ["http", "https"],
-      "default": "http",
-      "description": "Protocol to listen to requests on."
-    },
-    "localUpstream": {
-      "type": "string",
-      "description": "Host to act as origin in local mode, defaults to dev.host or route."
     },
     "assets": {
       "type": "string",
@@ -90,12 +60,6 @@
       },
       "description": "Array of .gitignore-style patterns that match file or directory names from the sites directory. Matched items will not be uploaded."
     },
-    "upstreamProtocol": {
-      "type": "string",
-      "enum": ["http", "https"],
-      "default": "https",
-      "description": "Protocol to forward requests to host on."
-    },
     "var": {
       "type": "array",
       "items": {
@@ -110,37 +74,36 @@
       },
       "description": "Array of key:value pairs to replace global identifiers in your code."
     },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cron schedules to attach to the deployed Worker. Refer to Cron Trigger Examples."
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Routes where this Worker will be deployed."
+    },
     "tsconfig": {
       "type": "string",
       "description": "Path to a custom tsconfig.json file."
     },
     "minify": {
       "type": "boolean",
-      "description": "Minify the script."
+      "description": "Minify the bundled script before deploying."
     },
     "nodeCompat": {
       "type": "boolean",
       "description": "Enable node.js compatibility."
     },
-    "persistTo": {
-      "type": "string",
-      "description": "Specify directory to use for local persistence."
-    },
-    "remote": {
+    "keepVars": {
       "type": "boolean",
       "default": false,
-      "description": "Develop against remote resources and data stored on Cloudflare’s network."
-    },
-    "testScheduled": {
-      "type": "boolean",
-      "default": false,
-      "description": "Exposes a /__scheduled fetch route which will trigger a scheduled event (cron trigger) for testing during development."
-    },
-    "logLevel": {
-      "type": "string",
-      "enum": ["debug", "info", "log", "warn", "error", "none"],
-      "default": "log",
-      "description": "Specify Wrangler’s logging level."
+      "description": "It is recommended best practice to treat your Wrangler developer environment as a source of truth for your Worker configuration, and avoid making changes via the Cloudflare dashboard. If you change your environment variables or bindings in the Cloudflare dashboard, Wrangler will override them the next time you deploy. If you want to disable this behavior set keepVars to true."
     }
   },
   "required": []

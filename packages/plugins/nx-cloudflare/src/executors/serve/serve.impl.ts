@@ -1,21 +1,18 @@
 import { ExecutorContext } from '@nx/devkit';
-import { Schema } from './schema';
+import { ServeSchema } from './schema';
 import { fork } from 'child_process';
 import { createAsyncIterable } from '@nx/devkit/src/utils/async-iterable';
 import { waitForPortOpen } from '@nx/web/src/utils/wait-for-port-open';
+import { createCliOptions } from '../../utils/create-cli-options';
 
 export default async function* serveExecutor(
-  options: Schema,
+  options: ServeSchema,
   context: ExecutorContext
 ) {
   const projectRoot =
     context.projectsConfigurations.projects[context.projectName].root;
 
-  const wranglerOptions = [];
-
-  if (options.port) {
-    wranglerOptions.push(`--port=${options.port}`);
-  }
+  const wranglerOptions = createCliOptions({ ...options });
 
   const wranglerBin = require.resolve('wrangler/bin/wrangler');
 
