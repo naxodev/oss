@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.8.0](https://github.com/naxodev/oss/compare/v0.7.1...v0.8.0) (2023-10-11)
+
+
+### Features
+
+* add serve and deploy args from wrangler ([#27](https://github.com/naxodev/oss/issues/27)) ([beb2483](https://github.com/naxodev/oss/commit/beb24836b1890f97f834b8f54c75e8eb3b84420a))
+
 ## [0.7.1](https://github.com/naxodev/oss/compare/v0.7.0...v0.7.1) (2023-10-11)
 
 ## [0.7.0](https://github.com/naxodev/oss/compare/v0.6.0...v0.7.0) (2023-09-18)
