@@ -7,13 +7,15 @@ export function createCliOptions<
 
   for (const key in obj) {
     const value = obj[key];
-    // kebab-case
-    const arg = names(key).fileName;
+    if (value) {
+      // kebab-case
+      const arg = names(key).fileName;
 
-    if (Array.isArray(value)) {
-      args.push(`--${arg}=${value.map((v) => v.trim()).join(',')}`);
-    } else {
-      args.push(`--${arg}=${value}`);
+      if (Array.isArray(value)) {
+        args.push(`--${arg}=${value.map((v) => v.trim()).join(',')}`);
+      } else {
+        args.push(`--${arg}=${value}`);
+      }
     }
   }
 

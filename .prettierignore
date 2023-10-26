@@ -8,3 +8,5 @@ pnpm-lock.yaml
 .next
 
 **/CHANGELOG.md
+
+/.nx/cache

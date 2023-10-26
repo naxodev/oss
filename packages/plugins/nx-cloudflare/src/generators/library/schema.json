@@ -47,6 +47,24 @@
       "default": false,
       "x-priority": "internal"
     },
+    "skipPackageJson": {
+      "description": "Do not add dependencies to `package.json`.",
+      "type": "boolean",
+      "default": false,
+      "x-priority": "internal"
+    },
+    "skipTsConfig": {
+      "type": "boolean",
+      "description": "Do not update tsconfig.json for development experience.",
+      "default": false,
+      "x-priority": "internal"
+    },
+    "pascalCaseFiles": {
+      "type": "boolean",
+      "description": "Use pascal case file names.",
+      "alias": "P",
+      "default": false
+    },
     "js": {
       "type": "boolean",
       "description": "Generate JavaScript files rather than TypeScript files.",
@@ -68,6 +86,18 @@
       "description": "The library name used to import it, like @myorg/my-awesome-lib. Required for publishable library.",
       "x-priority": "important"
     },
+    "setParserOptionsProject": {
+      "type": "boolean",
+      "description": "Whether or not to configure the ESLint `parserOptions.project` option. We do not do this by default for lint performance reasons.",
+      "default": false
+    },
+    "config": {
+      "type": "string",
+      "enum": ["workspace", "project", "npm-scripts"],
+      "default": "project",
+      "description": "Determines whether the project's executors should be configured in `workspace.json`, `project.json` or as npm scripts.",
+      "x-priority": "internal"
+    },
     "bundler": {
       "description": "The bundler to use. Choosing 'none' means this library is not buildable.",
       "type": "string",
@@ -75,6 +105,11 @@
       "default": "tsc",
       "x-prompt": "Which bundler would you like to use to build the library? Choose 'none' to skip build setup.",
       "x-priority": "important"
+    },
+    "skipTypeCheck": {
+      "type": "boolean",
+      "description": "Whether to skip TypeScript type checking for SWC compiler.",
+      "default": false
     },
     "minimal": {
       "type": "boolean",
@@ -85,13 +120,6 @@
       "description": "Don't include the directory in the generated file name.",
       "type": "boolean",
       "default": false
-    },
-    "config": {
-      "type": "string",
-      "enum": ["workspace", "project", "npm-scripts"],
-      "default": "project",
-      "description": "Determines whether the project's executors should be configured in `workspace.json`, `project.json` or as npm scripts.",
-      "x-priority": "internal"
     }
   },
   "required": ["name"]
