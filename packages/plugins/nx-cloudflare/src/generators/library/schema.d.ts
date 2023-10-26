@@ -2,17 +2,22 @@ export interface NxCloudflareLibraryGeneratorSchema {
   name: string;
   directory?: string;
   projectNameAndRootFormat?: ProjectNameAndRootFormat;
-  skipFormat?: boolean;
-  tags?: string;
-  unitTestRunner?: 'vitest' | 'none';
   linter?: Linter;
-  importPath?: string;
+  unitTestRunner?: 'vitest' | 'none';
+  tags?: string;
+  skipFormat?: boolean;
+  skipPackageJson?: boolean;
+  skipTsConfig?: boolean;
+  pascalCaseFiles?: boolean;
   js?: boolean;
   strict?: boolean;
   publishable?: boolean;
-  bundler?: Bundler;
-  minimal?: boolean;
+  importPath?: string;
+  setParserOptionsProject?: boolean;
   config?: 'workspace' | 'project' | 'npm-scripts';
+  bundler?: Bundler;
+  skipTypeCheck?: boolean;
+  minimal?: boolean;
   rootProject?: boolean;
   simpleName?: boolean;
 }

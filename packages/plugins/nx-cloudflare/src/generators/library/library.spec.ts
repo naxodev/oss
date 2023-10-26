@@ -12,11 +12,14 @@ import libraryGenerator from './library';
 describe('lib', () => {
   let tree: Tree;
   const defaultOptions: Omit<NxCloudflareLibraryGeneratorSchema, 'name'> = {
-    unitTestRunner: 'vitest',
+    skipTsConfig: false,
+    unitTestRunner: 'none',
     skipFormat: false,
     linter: 'eslint',
     js: false,
+    pascalCaseFiles: false,
     strict: true,
+    config: 'project',
   };
 
   beforeEach(() => {
@@ -25,12 +28,62 @@ describe('lib', () => {
     tree.write('/.gitignore', '');
   });
 
+  describe('configs', () => {
+    it('should generate an empty ts lib using --config=npm-scripts', async () => {
+      await libraryGenerator(tree, {
+        ...defaultOptions,
+        name: 'my-lib',
+        config: 'npm-scripts',
+        projectNameAndRootFormat: 'as-provided',
+      });
+      expect(readJson(tree, '/my-lib/package.json')).toEqual({
+        name: '@proj/my-lib',
+        version: '0.0.1',
+        type: 'commonjs',
+        scripts: {
+          build: "echo 'implement build'",
+          test: "echo 'implement test'",
+        },
+        dependencies: {},
+      });
+
+      expect(tree.exists('my-lib/src/index.ts')).toBeTruthy();
+      expect(tree.exists('my-lib/src/lib/my-lib.ts')).toBeTruthy();
+
+      // unitTestRunner property is ignored.
+      // It only works with our executors.
+      expect(tree.exists('my-lib/src/lib/my-lib.spec.ts')).toBeFalsy();
+    });
+
+    it('should generate an empty ts lib using --config=project', async () => {
+      await libraryGenerator(tree, {
+        ...defaultOptions,
+        name: 'my-lib',
+        config: 'project',
+        projectNameAndRootFormat: 'as-provided',
+      });
+      const projectConfig = readProjectConfiguration(tree, 'my-lib');
+      expect(projectConfig.root).toEqual('my-lib');
+    });
+
+    it('should generate an empty ts lib using --config=workspace', async () => {
+      await libraryGenerator(tree, {
+        ...defaultOptions,
+        name: 'my-lib',
+        config: 'workspace',
+        projectNameAndRootFormat: 'as-provided',
+      });
+      const projectConfig = readProjectConfiguration(tree, 'my-lib');
+      expect(projectConfig.root).toEqual('my-lib');
+    });
+  });
+
   describe('shared options', () => {
     describe('not-nested', () => {
       it('should update tags', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           tags: 'one,two',
           projectNameAndRootFormat: 'as-provided',
         });
@@ -45,7 +98,7 @@ describe('lib', () => {
       it('should update root tsconfig.base.json', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
         const tsconfigJson = readJson(tree, '/tsconfig.base.json');
@@ -54,10 +107,10 @@ describe('lib', () => {
         ]);
       });
 
-      it('should update tsconfig.lib.json with worker types', async () => {
+      it('should update root tsconfig.lib.json', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
         const tsconfigJson = readJson(tree, 'my-lib/tsconfig.lib.json');
@@ -72,7 +125,7 @@ describe('lib', () => {
 
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
 
@@ -90,7 +143,7 @@ describe('lib', () => {
 
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
         const tsconfigJson = readJson(tree, '/tsconfig.base.json');
@@ -102,7 +155,7 @@ describe('lib', () => {
       it('should create a local tsconfig.json', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
         const tsconfigJson = readJson(tree, 'my-lib/tsconfig.json');
@@ -124,9 +177,6 @@ describe('lib', () => {
               {
                 "path": "./tsconfig.lib.json",
               },
-              {
-                "path": "./tsconfig.spec.json",
-              },
             ],
           }
         `);
@@ -137,7 +187,7 @@ describe('lib', () => {
 
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
 
@@ -150,7 +200,7 @@ describe('lib', () => {
       it('should update tags', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           tags: 'one',
           projectNameAndRootFormat: 'as-provided',
@@ -164,7 +214,7 @@ describe('lib', () => {
 
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib2',
+          name: 'my-lib2',
           directory: 'my-dir/my-lib-2',
           tags: 'one,two',
           projectNameAndRootFormat: 'as-provided',
@@ -183,15 +233,12 @@ describe('lib', () => {
       it('should generate files', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
         expect(tree.exists('my-dir/my-lib/src/index.ts')).toBeTruthy();
         expect(tree.exists('my-dir/my-lib/src/lib/my-lib.ts')).toBeTruthy();
-        expect(
-          tree.exists('my-dir/my-lib/src/lib/my-lib.spec.ts')
-        ).toBeTruthy();
         expect(tree.exists('my-dir/my-lib/src/index.ts')).toBeTruthy();
         expect(tree.exists(`my-dir/my-lib/.eslintrc.json`)).toBeTruthy();
         expect(tree.exists(`my-dir/my-lib/package.json`)).toBeTruthy();
@@ -200,8 +247,9 @@ describe('lib', () => {
       it('should update project configuration', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
+          config: 'workspace',
           projectNameAndRootFormat: 'as-provided',
         });
 
@@ -213,7 +261,7 @@ describe('lib', () => {
       it('should update root tsconfig.base.json', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
@@ -224,27 +272,12 @@ describe('lib', () => {
         expect(tsconfigJson.compilerOptions.paths['my-lib/*']).toBeUndefined();
       });
 
-      it('should update tsconfig.lib.json with worker types', async () => {
-        await libraryGenerator(tree, {
-          ...defaultOptions,
-          name: 'myLib',
-          directory: 'my-dir/my-lib',
-          projectNameAndRootFormat: 'as-provided',
-        });
-
-        const tsconfigJson = readJson(tree, 'my-dir/my-lib/tsconfig.lib.json');
-        expect(tsconfigJson.compilerOptions.types).toEqual([
-          'node',
-          '@cloudflare/workers-types',
-        ]);
-      });
-
       it('should update root tsconfig.json when no tsconfig.base.json', async () => {
         tree.rename('tsconfig.base.json', 'tsconfig.json');
 
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
@@ -259,7 +292,7 @@ describe('lib', () => {
       it('should create a local tsconfig.json', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
@@ -269,16 +302,13 @@ describe('lib', () => {
           {
             path: './tsconfig.lib.json',
           },
-          {
-            path: './tsconfig.spec.json',
-          },
         ]);
       });
 
       it('should extend from root tsconfig.base.json', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
@@ -287,12 +317,27 @@ describe('lib', () => {
         expect(tsconfigJson.extends).toBe('../../tsconfig.base.json');
       });
 
+      it('should update tsconfig.lib.json', async () => {
+        await libraryGenerator(tree, {
+          ...defaultOptions,
+          name: 'my-lib',
+          directory: 'my-dir/my-lib',
+          projectNameAndRootFormat: 'as-provided',
+        });
+
+        const tsconfigJson = readJson(tree, 'my-dir/my-lib/tsconfig.lib.json');
+        expect(tsconfigJson.compilerOptions.types).toEqual([
+          'node',
+          '@cloudflare/workers-types',
+        ]);
+      });
+
       it('should extend from root tsconfig.json when no tsconfig.base.json', async () => {
         tree.rename('tsconfig.base.json', 'tsconfig.json');
 
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
@@ -306,7 +351,7 @@ describe('lib', () => {
       it('should update the projects tsconfig with strict false', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           strict: false,
           projectNameAndRootFormat: 'as-provided',
         });
@@ -333,7 +378,7 @@ describe('lib', () => {
       it('should default to strict true', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
         const tsconfigJson = readJson(tree, '/my-lib/tsconfig.json');
@@ -353,7 +398,7 @@ describe('lib', () => {
       it('should update the tsconfig with the given import path', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           importPath: '@myorg/lib',
           projectNameAndRootFormat: 'as-provided',
@@ -390,7 +435,7 @@ describe('lib', () => {
       it('should provide a default import path using npm scope', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
 
@@ -408,12 +453,35 @@ describe('lib', () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
           rootProject: true,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
 
         const tsconfigJson = readJson(tree, '/tsconfig.base.json');
         expect(tsconfigJson.compilerOptions.paths['@acme/core']).toBeDefined();
+      });
+    });
+
+    describe('--pascalCaseFiles', () => {
+      it('should generate files with upper case names', async () => {
+        await libraryGenerator(tree, {
+          ...defaultOptions,
+          name: 'my-lib',
+          pascalCaseFiles: true,
+          projectNameAndRootFormat: 'as-provided',
+        });
+        expect(tree.exists('my-lib/src/lib/MyLib.ts')).toBeTruthy();
+      });
+
+      it('should generate files with upper case names for nested libs as well', async () => {
+        await libraryGenerator(tree, {
+          ...defaultOptions,
+          name: 'my-lib',
+          directory: 'my-dir/my-lib',
+          pascalCaseFiles: true,
+          projectNameAndRootFormat: 'as-provided',
+        });
+        expect(tree.exists('my-dir/my-lib/src/lib/MyLib.ts')).toBeTruthy();
       });
     });
   });
@@ -422,7 +490,7 @@ describe('lib', () => {
     it('should add eslint dependencies', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,
-        name: 'myLib',
+        name: 'my-lib',
         projectNameAndRootFormat: 'as-provided',
       });
 
@@ -436,11 +504,11 @@ describe('lib', () => {
       it('should update configuration', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
         expect(readProjectConfiguration(tree, 'my-lib').targets.lint).toEqual({
-          executor: '@nx/eslint:eslint',
+          executor: '@nx/eslint:lint',
           outputs: ['{options.outputFile}'],
           options: {
             lintFilePatterns: ['my-lib/**/*.ts', 'my-lib/package.json'],
@@ -451,7 +519,7 @@ describe('lib', () => {
       it('should create a local .eslintrc.json', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
 
@@ -494,14 +562,7 @@ describe('lib', () => {
                 ],
                 "parser": "jsonc-eslint-parser",
                 "rules": {
-                  "@nx/dependency-checks": [
-                    "error",
-                    {
-                      "ignoredFiles": [
-                        "{projectRoot}/vite.config.{js,ts,mjs,mts}",
-                      ],
-                    },
-                  ],
+                  "@nx/dependency-checks": "error",
                 },
               },
             ],
@@ -514,13 +575,13 @@ describe('lib', () => {
       it('should update configuration', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
 
         expect(readProjectConfiguration(tree, 'my-lib').targets.lint).toEqual({
-          executor: '@nx/eslint:eslint',
+          executor: '@nx/eslint:lint',
           outputs: ['{options.outputFile}'],
           options: {
             lintFilePatterns: [
@@ -534,7 +595,7 @@ describe('lib', () => {
       it('should create a local .eslintrc.json', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           projectNameAndRootFormat: 'as-provided',
         });
@@ -578,14 +639,7 @@ describe('lib', () => {
                 ],
                 "parser": "jsonc-eslint-parser",
                 "rules": {
-                  "@nx/dependency-checks": [
-                    "error",
-                    {
-                      "ignoredFiles": [
-                        "{projectRoot}/vite.config.{js,ts,mjs,mts}",
-                      ],
-                    },
-                  ],
+                  "@nx/dependency-checks": "error",
                 },
               },
             ],
@@ -598,19 +652,18 @@ describe('lib', () => {
       it('should generate js files instead of ts files', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           js: true,
           projectNameAndRootFormat: 'as-provided',
         });
         expect(tree.exists('my-lib/src/index.js')).toBeTruthy();
         expect(tree.exists('my-lib/src/lib/my-lib.js')).toBeTruthy();
-        expect(tree.exists('my-lib/src/lib/my-lib.spec.js')).toBeTruthy();
       });
 
       it('should update tsconfig.json with compilerOptions.allowJs: true', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           js: true,
           projectNameAndRootFormat: 'as-provided',
         });
@@ -622,7 +675,7 @@ describe('lib', () => {
       it('should update tsconfig.lib.json include with src/**/*.js glob', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           js: true,
           projectNameAndRootFormat: 'as-provided',
         });
@@ -635,7 +688,7 @@ describe('lib', () => {
       it('should update root tsconfig.json with a js file path', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           js: true,
           projectNameAndRootFormat: 'as-provided',
         });
@@ -648,23 +701,20 @@ describe('lib', () => {
       it('should generate js files for nested libs as well', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           js: true,
           projectNameAndRootFormat: 'as-provided',
         });
         expect(tree.exists('my-dir/my-lib/src/index.js')).toBeTruthy();
         expect(tree.exists('my-dir/my-lib/src/lib/my-lib.js')).toBeTruthy();
-        expect(
-          tree.exists('my-dir/my-lib/src/lib/my-lib.spec.js')
-        ).toBeTruthy();
         expect(tree.exists('my-dir/my-lib/src/index.js')).toBeTruthy();
       });
 
       it('should configure the project for linting js files', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'myLib',
+          name: 'my-lib',
           directory: 'my-dir/my-lib',
           js: true,
           projectNameAndRootFormat: 'as-provided',
@@ -712,14 +762,7 @@ describe('lib', () => {
                 ],
                 "parser": "jsonc-eslint-parser",
                 "rules": {
-                  "@nx/dependency-checks": [
-                    "error",
-                    {
-                      "ignoredFiles": [
-                        "{projectRoot}/vite.config.{js,ts,mjs,mts}",
-                      ],
-                    },
-                  ],
+                  "@nx/dependency-checks": "error",
                 },
               },
             ],
@@ -729,121 +772,11 @@ describe('lib', () => {
     });
   });
 
-  describe('--bundler=vite', () => {
-    it('should add build and test targets with vite and vitest', async () => {
-      await libraryGenerator(tree, {
-        ...defaultOptions,
-        name: 'myLib',
-        bundler: 'vite',
-        unitTestRunner: undefined,
-        projectNameAndRootFormat: 'as-provided',
-      });
-
-      const project = readProjectConfiguration(tree, 'my-lib');
-      expect(project.targets.build).toMatchObject({
-        executor: '@nx/vite:build',
-      });
-      expect(project.targets.test).toMatchObject({
-        executor: '@nx/vite:test',
-      });
-      expect(tree.exists('my-lib/vite.config.ts')).toBeTruthy();
-      expect(readJson(tree, 'my-lib/.eslintrc.json').overrides).toContainEqual({
-        files: ['*.json'],
-        parser: 'jsonc-eslint-parser',
-        rules: {
-          '@nx/dependency-checks': [
-            'error',
-            {
-              ignoredFiles: ['{projectRoot}/vite.config.{js,ts,mjs,mts}'],
-            },
-          ],
-        },
-      });
-    });
-
-    it.each`
-      unitTestRunner | executor
-      ${'none'}      | ${undefined}
-    `(
-      'should respect unitTestRunner if passed',
-      async ({ unitTestRunner, executor }) => {
-        await libraryGenerator(tree, {
-          ...defaultOptions,
-          name: 'myLib',
-          bundler: 'vite',
-          unitTestRunner,
-          projectNameAndRootFormat: 'as-provided',
-        });
-
-        const project = readProjectConfiguration(tree, 'my-lib');
-        expect(project.targets.test?.executor).toEqual(executor);
-      }
-    );
-  });
-
-  describe('--bundler=esbuild', () => {
-    it('should add build with esbuild', async () => {
-      await libraryGenerator(tree, {
-        ...defaultOptions,
-        name: 'myLib',
-        bundler: 'esbuild',
-        unitTestRunner: 'none',
-        projectNameAndRootFormat: 'as-provided',
-      });
-
-      const project = readProjectConfiguration(tree, 'my-lib');
-      expect(project.targets.build).toMatchObject({
-        executor: '@nx/esbuild:esbuild',
-      });
-      expect(readJson(tree, 'my-lib/.eslintrc.json').overrides).toContainEqual({
-        files: ['*.json'],
-        parser: 'jsonc-eslint-parser',
-        rules: {
-          '@nx/dependency-checks': [
-            'error',
-            {
-              ignoredFiles: ['{projectRoot}/esbuild.config.{js,ts,mjs,mts}'],
-            },
-          ],
-        },
-      });
-    });
-  });
-
-  describe('--bundler=rollup', () => {
-    it('should add build with rollup', async () => {
-      await libraryGenerator(tree, {
-        ...defaultOptions,
-        name: 'myLib',
-        bundler: 'rollup',
-        unitTestRunner: 'none',
-        projectNameAndRootFormat: 'as-provided',
-      });
-
-      const project = readProjectConfiguration(tree, 'my-lib');
-      expect(project.targets.build).toMatchObject({
-        executor: '@nx/rollup:rollup',
-      });
-      expect(readJson(tree, 'my-lib/.eslintrc.json').overrides).toContainEqual({
-        files: ['*.json'],
-        parser: 'jsonc-eslint-parser',
-        rules: {
-          '@nx/dependency-checks': [
-            'error',
-            {
-              ignoredFiles: ['{projectRoot}/rollup.config.{js,ts,mjs,mts}'],
-            },
-          ],
-        },
-      });
-    });
-  });
-
   describe('--minimal', () => {
     it('should generate a README.md when minimal is set to false', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,
-        name: 'myLib',
+        name: 'my-lib',
         minimal: false,
         projectNameAndRootFormat: 'as-provided',
       });
@@ -854,7 +787,7 @@ describe('lib', () => {
     it('should not generate a README.md when minimal is set to true', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,
-        name: 'myLib',
+        name: 'my-lib',
         minimal: true,
         projectNameAndRootFormat: 'as-provided',
       });
@@ -865,7 +798,7 @@ describe('lib', () => {
     it('should generate a README.md and add it to the build assets when buildable is true and minimal is false', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,
-        name: 'myLib',
+        name: 'my-lib',
         bundler: 'tsc',
         minimal: false,
         projectNameAndRootFormat: 'as-provided',
@@ -882,7 +815,7 @@ describe('lib', () => {
     it('should not generate a README.md when both bundler and minimal are set', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,
-        name: 'myLib',
+        name: 'my-lib',
         bundler: 'tsc',
         minimal: true,
         projectNameAndRootFormat: 'as-provided',
@@ -899,7 +832,7 @@ describe('lib', () => {
     it('should generate a simple name', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,
-        name: 'myLib',
+        name: 'my-lib',
         simpleName: true,
         directory: 'web/my-lib',
         projectNameAndRootFormat: 'as-provided',
