@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Welcome to Cloudflare Workers! This is your first worker.
  *
