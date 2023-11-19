@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.0.1](https://github.com/naxodev/oss/compare/v1.0.0...v1.0.1) (2023-11-19)
+
+
+### Bug Fixes
+
+* next-on-pages executor ([#31](https://github.com/naxodev/oss/issues/31)) ([ce80105](https://github.com/naxodev/oss/commit/ce80105225f148a9acef10ba4263b48561f18c27))
+
 ## [1.0.0](https://github.com/naxodev/oss/compare/v0.8.1...v1.0.0) (2023-10-26)
 
 ## [0.8.1](https://github.com/naxodev/oss/compare/v0.8.0...v0.8.1) (2023-10-26)
