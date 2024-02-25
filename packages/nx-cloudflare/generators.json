@@ -1,0 +1,21 @@
+{
+  "generators": {
+    "application": {
+      "factory": "./src/generators/application/generator",
+      "schema": "./src/generators/application/schema.json",
+      "description": "application generator",
+      "aliases": ["app"]
+    },
+    "init": {
+      "factory": "./src/generators/init/generator",
+      "schema": "./src/generators/init/schema.json",
+      "description": "init generator"
+    },
+    "library": {
+      "factory": "./src/generators/library/generator",
+      "schema": "./src/generators/library/schema.json",
+      "description": "library generator",
+      "aliases": ["lib"]
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Deploy executor",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the Worker."
+    },
+    "noBundle": {
+      "type": "boolean",
+      "default": false,
+      "description": "Skip Wrangler’s build steps and directly deploy script without modification. Particularly useful when using custom builds."
+    },
+    "env": {
+      "type": "string",
+      "description": "Perform on a specific environment."
+    },
+    "outdir": {
+      "type": "string",
+      "description": "Path to directory where Wrangler will write the bundled Worker files."
+    },
+    "compatibilityDate": {
+      "type": "string",
+      "description": "A date in the form yyyy-mm-dd, which will be used to determine which version of the Workers runtime is used."
+    },
+    "compatibilityFlags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Flags to use for compatibility checks."
+    },
+    "latest": {
+      "type": "boolean",
+      "default": true,
+      "description": "Use the latest version of the Workers runtime."
+    },
+    "assets": {
+      "type": "string",
+      "description": "Root folder of static assets to be served. Unlike --site, --assets does not require a Worker script to serve your assets."
+    },
+    "site": {
+      "type": "string",
+      "description": "Root folder of static assets for Workers Sites."
+    },
+    "siteInclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of .gitignore-style patterns that match file or directory names from the sites directory. Only matched items will be uploaded."
+    },
+    "siteExclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of .gitignore-style patterns that match file or directory names from the sites directory. Matched items will not be uploaded."
+    },
+    "var": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of key:value pairs to inject as variables into your code. The value will always be passed as a string to your Worker."
+    },
+    "define": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of key:value pairs to replace global identifiers in your code."
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cron schedules to attach to the deployed Worker. Refer to Cron Trigger Examples."
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Routes where this Worker will be deployed."
+    },
+    "tsconfig": {
+      "type": "string",
+      "description": "Path to a custom tsconfig.json file."
+    },
+    "minify": {
+      "type": "boolean",
+      "description": "Minify the bundled script before deploying."
+    },
+    "nodeCompat": {
+      "type": "boolean",
+      "description": "Enable node.js compatibility."
+    },
+    "keepVars": {
+      "type": "boolean",
+      "default": false,
+      "description": "It is recommended best practice to treat your Wrangler developer environment as a source of truth for your Worker configuration, and avoid making changes via the Cloudflare dashboard. If you change your environment variables or bindings in the Cloudflare dashboard, Wrangler will override them the next time you deploy. If you want to disable this behavior set keepVars to true."
+    }
+  },
+  "required": []
+}
