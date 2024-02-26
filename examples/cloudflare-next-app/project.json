@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "examples/cloudflare-next-app",
   "projectType": "application",
+  "implicitDependencies": ["nx-cloudflare"],
   "targets": {
     "build": {
       "executor": "@naxodev/nx-cloudflare:next-build",
