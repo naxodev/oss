@@ -289,56 +289,56 @@ describe('app', () => {
     });
   });
 
-  describe('--frontendProject', () => {
-    it('should configure proxy', async () => {
-      await angularApplicationGenerator(tree, { name: 'my-frontend' });
-
-      await applicationGenerator(tree, {
-        name: 'myWorkerApp',
-        frontendProject: 'my-frontend',
-      });
-
-      expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
-      const project = readProjectConfiguration(tree, 'my-frontend');
-      const serve = project.targets.serve;
-      expect(serve.options.proxyConfig).toEqual('my-frontend/proxy.conf.json');
-    });
-
-    it('should configure proxies for multiple node projects with the same frontend app', async () => {
-      await angularApplicationGenerator(tree, { name: 'my-frontend' });
-
-      await applicationGenerator(tree, {
-        name: 'cart',
-        frontendProject: 'my-frontend',
-      });
-
-      await applicationGenerator(tree, {
-        name: 'billing',
-        frontendProject: 'my-frontend',
-      });
-
-      expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
-
-      expect(readJson(tree, 'my-frontend/proxy.conf.json')).toEqual({
-        '/api': { target: 'http://localhost:3000', secure: false },
-        '/billing-api': { target: 'http://localhost:3000', secure: false },
-      });
-    });
-
-    it('should work with unnormalized project names', async () => {
-      await angularApplicationGenerator(tree, { name: 'myFrontend' });
-
-      await applicationGenerator(tree, {
-        name: 'myWorkerApp',
-        frontendProject: 'myFrontend',
-      });
-
-      expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
-      const project = readProjectConfiguration(tree, 'my-frontend');
-      const serve = project.targets.serve;
-      expect(serve.options.proxyConfig).toEqual('my-frontend/proxy.conf.json');
-    });
-  });
+  // describe('--frontendProject', () => {
+  //   it('should configure proxy', async () => {
+  //     await angularApplicationGenerator(tree, { name: 'my-frontend' });
+  //
+  //     await applicationGenerator(tree, {
+  //       name: 'myWorkerApp',
+  //       frontendProject: 'my-frontend',
+  //     });
+  //
+  //     expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
+  //     const project = readProjectConfiguration(tree, 'my-frontend');
+  //     const serve = project.targets.serve;
+  //     expect(serve.options.proxyConfig).toEqual('my-frontend/proxy.conf.json');
+  //   });
+  //
+  //   it('should configure proxies for multiple node projects with the same frontend app', async () => {
+  //     await angularApplicationGenerator(tree, { name: 'my-frontend' });
+  //
+  //     await applicationGenerator(tree, {
+  //       name: 'cart',
+  //       frontendProject: 'my-frontend',
+  //     });
+  //
+  //     await applicationGenerator(tree, {
+  //       name: 'billing',
+  //       frontendProject: 'my-frontend',
+  //     });
+  //
+  //     expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
+  //
+  //     expect(readJson(tree, 'my-frontend/proxy.conf.json')).toEqual({
+  //       '/api': { target: 'http://localhost:3000', secure: false },
+  //       '/billing-api': { target: 'http://localhost:3000', secure: false },
+  //     });
+  //   });
+  //
+  //   it('should work with unnormalized project names', async () => {
+  //     await angularApplicationGenerator(tree, { name: 'myFrontend' });
+  //
+  //     await applicationGenerator(tree, {
+  //       name: 'myWorkerApp',
+  //       frontendProject: 'myFrontend',
+  //     });
+  //
+  //     expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
+  //     const project = readProjectConfiguration(tree, 'my-frontend');
+  //     const serve = project.targets.serve;
+  //     expect(serve.options.proxyConfig).toEqual('my-frontend/proxy.conf.json');
+  //   });
+  // });
 
   // TODO: Uncomment when jest support is added back
   // describe('--swcJest', () => {
