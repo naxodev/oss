@@ -7,7 +7,7 @@ import { execFileSync } from 'child_process';
 
 export default async () => {
   // local registry target to run
-  const localRegistryTarget = '@oss/source:local-registry';
+  const localRegistryTarget = '@naxodev/oss:local-registry';
   // storage folder for the local registry
   const storage = './tmp/local-registry/storage';
 

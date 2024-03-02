@@ -38,8 +38,10 @@ testem.log
 .DS_Store
 Thumbs.db
 
+.nx/cache
+
 # Next.js
 .next
 .vercel
 
-.nx/cache
+.angular

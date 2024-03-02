@@ -1,0 +1,32 @@
+{
+  "name": "cloudflare-next-app",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "examples/cloudflare-next-app",
+  "projectType": "application",
+  "implicitDependencies": ["nx-cloudflare"],
+  "targets": {
+    "build": {
+      "executor": "@naxodev/nx-cloudflare:next-build",
+      "outputs": ["{options.outputPath}"],
+      "dependsOn": ["^build"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "{workspaceRoot}/dist/examples/cloudflare-next-app"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "e2e/examples/cloudflare-next-app"
+        },
+        "production": {}
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "examples/cloudflare-next-app/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

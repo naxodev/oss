@@ -1,0 +1,28 @@
+{
+  "name": "@naxodev/nx-cloudflare",
+  "version": "0.0.1",
+  "dependencies": {
+    "@nx/devkit": "18.0.6",
+    "wrangler": "^3.28.1",
+    "dotenv": "^16.4.4",
+    "@nx/js": "18.0.6",
+    "fs-extra": "^11.2.0",
+    "semver": "^7.6.0",
+    "@nx/workspace": "18.0.6",
+    "typescript": "~5.3.2",
+    "nx": "18.0.6",
+    "@nx/web": "18.0.6",
+    "next": "14.0.4",
+    "webpack": "^5.90.1",
+    "copy-webpack-plugin": "^12.0.2",
+    "tslib": "^2.3.0",
+    "@nx/node": "18.0.6",
+    "@svgr/webpack": "^8.1.0",
+    "url-loader": "^4.1.1"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts",
+  "executors": "./executors.json",
+  "generators": "./generators.json"
+}

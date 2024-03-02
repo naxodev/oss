@@ -1,5 +1,5 @@
 {
-  "name": "@oss/source",
+  "name": "@naxodev/oss",
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "targets": {
     "local-registry": {
