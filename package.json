@@ -7,18 +7,18 @@
   "devDependencies": {
     "@angular-devkit/core": "~17.1.0",
     "@cloudflare/next-on-pages": "^1.9.0",
-    "@nx/angular": "18.0.5",
-    "@nx/eslint": "18.0.5",
-    "@nx/eslint-plugin": "18.0.5",
-    "@nx/jest": "18.0.5",
-    "@nx/js": "18.0.5",
-    "@nx/next": "18.0.5",
-    "@nx/node": "18.0.5",
-    "@nx/plugin": "18.0.5",
-    "@nx/react": "18.0.5",
-    "@nx/vite": "18.0.5",
-    "@nx/web": "18.0.5",
-    "@nx/workspace": "18.0.5",
+    "@nx/angular": "18.0.6",
+    "@nx/eslint": "18.0.6",
+    "@nx/eslint-plugin": "18.0.6",
+    "@nx/jest": "18.0.6",
+    "@nx/js": "18.0.6",
+    "@nx/next": "18.0.6",
+    "@nx/node": "18.0.6",
+    "@nx/plugin": "18.0.6",
+    "@nx/react": "18.0.6",
+    "@nx/vite": "18.0.6",
+    "@nx/web": "18.0.6",
+    "@nx/workspace": "18.0.6",
     "@svgr/webpack": "^8.1.0",
     "@swc-node/register": "~1.8.0",
     "@swc/cli": "~0.1.62",
@@ -53,7 +53,7 @@
     "jest-environment-jsdom": "^29.4.1",
     "jest-environment-node": "^29.4.1",
     "kill-port": "^2.0.1",
-    "nx": "18.0.5",
+    "nx": "18.0.6",
     "prettier": "^2.6.2",
     "semver": "^7.6.0",
     "tcp-port-used": "^1.0.2",
@@ -69,7 +69,7 @@
     "wrangler": "^3.28.1"
   },
   "dependencies": {
-    "@nx/devkit": "18.0.5",
+    "@nx/devkit": "18.0.6",
     "@types/fs-extra": "^11.0.4",
     "next": "14.0.4",
     "react": "18.2.0",
@@ -80,3 +80,4 @@
     "includedScripts": []
   }
 }
+
