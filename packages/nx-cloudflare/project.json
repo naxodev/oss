@@ -36,19 +36,36 @@
         ]
       }
     },
+    "version": {
+      "dependsOn": ["build"],
+      "executor": "@jscutlery/semver:version",
+      "options": {
+        "preset": "conventional",
+        "tagPrefix": "v",
+        "noVerify": true,
+        "push": true,
+        "preid": "beta",
+        "syncVersions": false,
+        "commitMessageFormat": "release(${projectName}): 🎸 cut release to ${version}",
+        "postTargets": ["nx-cloudflare:github", "nx-cloudflare:npm-publish"]
+      }
+    },
+    "github": {
+      "executor": "@jscutlery/semver:github",
+      "options": {
+        "tag": "${tag}",
+        "notes": "${notes}"
+      }
+    },
+    "npm-publish": {
+      "executor": "ngx-deploy-npm:deploy",
+      "options": {
+        "access": "public"
+      }
+    },
     "publish": {
       "command": "node tools/scripts/publish.mjs nx-cloudflare {args.ver} {args.tag}",
       "dependsOn": ["build"]
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "packages/nx-cloudflare/jest.config.ts"
-      }
     }
   },
   "tags": ["scope:public", "type:plugin"]
