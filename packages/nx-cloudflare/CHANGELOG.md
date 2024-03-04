@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.1](https://github.com/naxodev/oss/compare/v2.0.0...v2.0.1) (2024-03-04)
+
+
+### Bug Fixes
+
+* nx-cloudflare Readme ([72f8e27](https://github.com/naxodev/oss/commit/72f8e2768e8c69f1de734fdef4e9b5f589107694))
+
 ## [2.0.0](https://github.com/naxodev/oss/compare/v1.0.2...v2.0.0) (2024-03-02)
 
 

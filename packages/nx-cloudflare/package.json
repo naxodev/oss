@@ -1,6 +1,6 @@
 {
   "name": "@naxodev/nx-cloudflare",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "dependencies": {
     "@nx/devkit": "18.0.6",
     "wrangler": "^3.28.1",
