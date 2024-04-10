@@ -79,7 +79,7 @@
     "wrangler": "^3.48.0"
   },
   "dependencies": {
-    "@nx/devkit": "18.0.6",
+    "@nx/devkit": "18.2.4",
     "@types/fs-extra": "^11.0.4",
     "hono": "^4.2.3",
     "next": "14.0.4",
