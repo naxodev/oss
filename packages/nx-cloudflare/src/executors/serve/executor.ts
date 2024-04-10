@@ -18,6 +18,7 @@ export default async function* serveExecutor(
 
   yield* createAsyncIterable<{ success: boolean; baseUrl: string }>(
     async ({ done, next, error }) => {
+      process.env.PWD = projectRoot;
       const server = fork(wranglerBin, ['dev', ...wranglerOptions], {
         cwd: projectRoot,
         stdio: 'inherit',

@@ -6,4 +6,4 @@ This is my OSS workspace. I plan to add a misc of packages to this workspace. Ch
 
 This is a Nx plugin for Cloudflare. In particular Cloudflare workers.
 
-[Read more](./packages/plugins/nx-cloudflare/README.md)
+[Read more](./packages/nx-cloudflare/README.md)

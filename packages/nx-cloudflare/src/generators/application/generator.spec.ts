@@ -7,7 +7,6 @@ import {
 } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 
-import { applicationGenerator as angularApplicationGenerator } from '@nx/angular/generators';
 import { Schema } from './schema';
 import { applicationGenerator } from './generator';
 
