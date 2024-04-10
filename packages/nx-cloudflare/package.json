@@ -1,9 +1,17 @@
 {
   "name": "@naxodev/nx-cloudflare",
   "version": "2.0.1",
+  "description": "Nx plugin for Cloudflare",
+  "homepage": "https://github.com/naxodev/oss/tree/main/packages/nx-cloudflare",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:naxodev/oss.git",
+    "directory": "packages/nx-cloudflare"
+  },
+  "license": "MIT",
   "dependencies": {
-    "@nx/devkit": "18.0.6",
-    "wrangler": "^3.28.1",
+    "@nx/devkit": "18.2.4",
+    "wrangler": "^3.48.0",
     "dotenv": "^16.4.4",
     "@nx/js": "18.2.4",
     "fs-extra": "^11.2.0",
@@ -19,6 +27,23 @@
     "@nx/node": "18.2.4",
     "@svgr/webpack": "^8.1.0",
     "url-loader": "^4.1.1"
+  },
+  "keywords": [
+    "nx",
+    "cloudflare",
+    "workers",
+    "next",
+    "plugin"
+  ],
+  "contributors": [
+    {
+      "name": "Nacho Vazquez",
+      "email": "nacho.vazquez.dev@gmail.com",
+      "url": "https://github.com/NachoVazquez"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/naxodev/oss/issues?q=is:issue+is:open+sort:updated-desc"
   },
   "type": "commonjs",
   "main": "./src/index.js",
