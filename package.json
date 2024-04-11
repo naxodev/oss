@@ -15,7 +15,7 @@
     "@jscutlery/semver": "^5.2.0",
     "@nx/angular": "18.2.4",
     "@nx/devkit": "18.2.4",
-    "@nx/esbuild": "18.0.6",
+    "@nx/esbuild": "18.2.4",
     "@nx/eslint": "18.2.4",
     "@nx/eslint-plugin": "18.2.4",
     "@nx/jest": "18.2.4",

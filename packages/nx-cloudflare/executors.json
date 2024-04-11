@@ -8,12 +8,13 @@
     "deploy": {
       "implementation": "./src/executors/deploy/executor",
       "schema": "./src/executors/deploy/schema.json",
-      "description": "deploy executor"
+      "description": "Deploy worker to Cloudflare",
+      "aliases": ["publish"]
     },
     "next-build": {
       "implementation": "./src/executors/next-build/executor",
       "schema": "./src/executors/next-build/schema.json",
-      "description": "next-build executor"
+      "description": "Build a Next.js app using Cloudflare Next on Pages builder."
     }
   }
 }

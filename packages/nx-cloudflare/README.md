@@ -24,7 +24,7 @@ Nx plugin for Cloudflare.
   - ✅ Include Fetch Handler template
   - ✅ Include Scheduled Handler template
   - ✅ Vitest tests support
-  - ✅ Serve and Publish executors for workers.
+  - ✅ Serve and Deploy executors for workers.
 - ✅ Generate Cloudflare Worker Library
 - ✅ [Experimental] Cloudflare Pages builder for Next.JS projects.
 
@@ -113,10 +113,10 @@ The available options are the following:
 | testScheduled                         | boolean                                         | false   | Exposes a /**scheduled fetch route which will trigger a scheduled event (cron trigger) for testing during development. To simulate different cron patterns, a cron query parameter can be passed in: /**scheduled?cron=\*+\*+\*+\*+\*.                                                                                                                                                       |
 | logLevel                              | "debug," "info," "log," "warn," "error," "none" | "log"   | Specify Wrangler’s logging level.                                                                                                                                                                                                                                                                                                                                                            |
 
-#### Publish worker to Cloudflare
+#### Deploy worker to Cloudflare
 
 ```bash
-nx publish <my-app>
+nx deploy <my-app>
 ```
 
 The available options are the following:
