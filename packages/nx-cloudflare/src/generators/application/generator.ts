@@ -1,9 +1,12 @@
 import {
   convertNxGenerator,
+  ensurePackage,
   formatFiles,
   generateFiles,
+  GeneratorCallback,
   names,
   readProjectConfiguration,
+  runTasksInSerial,
   toJS,
   Tree,
   updateJson,
@@ -17,25 +20,57 @@ import { vitestImports } from './utils/vitest-imports';
 import { getAccountId } from './utils/get-account-id';
 import { vitestScript } from './utils/vitest-script';
 import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
+import { nxVersion } from '@nx/node/src/utils/versions';
 
 export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = await normalizeOptions(tree, schema);
 
-  // Set up the needed packages.
-  const initTask = await initGenerator(tree, {
-    ...options,
-    skipFormat: true,
-  });
+  const tasks: GeneratorCallback[] = [];
 
-  const applicationTask = await nodeApplicationGenerator(tree, {
-    ...options,
-    framework: 'none',
-    skipFormat: true,
-    unitTestRunner:
-      options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
-    e2eTestRunner: 'none',
-    name: schema.name,
-  });
+  // Set up the needed packages.
+  tasks.push(
+    await initGenerator(tree, {
+      ...options,
+      skipFormat: true,
+    })
+  );
+
+  tasks.push(
+    await nodeApplicationGenerator(tree, {
+      ...options,
+      framework: 'none',
+      skipFormat: true,
+      unitTestRunner:
+        options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
+      e2eTestRunner: 'none',
+      name: schema.name,
+    })
+  );
+
+  if (options.unitTestRunner === 'vitest') {
+    const { vitestGenerator, createOrEditViteConfig } = ensurePackage(
+      '@nx/vite',
+      nxVersion
+    );
+    const vitestTask = await vitestGenerator(tree, {
+      project: options.name,
+      uiFramework: 'none',
+      coverageProvider: 'v8',
+      skipFormat: true,
+      testEnvironment: 'node',
+    });
+    tasks.push(vitestTask);
+    createOrEditViteConfig(
+      tree,
+      {
+        project: options.name,
+        includeLib: false,
+        includeVitest: true,
+        testEnvironment: 'node',
+      },
+      true
+    );
+  }
 
   addCloudflareFiles(tree, options);
   updateTsAppConfig(tree, options);
@@ -49,10 +84,7 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
     await formatFiles(tree);
   }
 
-  return async () => {
-    await initTask();
-    await applicationTask();
-  };
+  return runTasksInSerial(...tasks);
 }
 
 // Modify the default tsconfig.app.json generate by the node application generator to support workers.
