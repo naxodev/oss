@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.1.0](https://github.com/naxodev/oss/compare/v2.0.1...v2.1.0) (2024-04-12)
+
+
+### Features
+
+* install vitest using crystal ([#41](https://github.com/naxodev/oss/issues/41)) ([72b6a97](https://github.com/naxodev/oss/commit/72b6a97d904950cccc856edef4de050f93e7a595))
+
 ## [2.0.1](https://github.com/naxodev/oss/compare/v2.0.0...v2.0.1) (2024-03-04)
 
 
