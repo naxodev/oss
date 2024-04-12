@@ -35,9 +35,6 @@ export async function initGenerator(tree: Tree, schema: InitGeneratorSchema) {
 function updateDependencies(tree: Tree, schema: InitGeneratorSchema) {
   removeDependenciesFromPackageJson(tree, ['@naxodev/nx-cloudflare'], []);
 
-  const vitePackage =
-    schema.unitTestRunner === 'vitest' ? { vitest: '^0.33.0' } : {};
-
   const honoPackage = schema.template === 'hono' ? { hono: honoVersion } : {};
 
   return addDependenciesToPackageJson(
@@ -50,7 +47,6 @@ function updateDependencies(tree: Tree, schema: InitGeneratorSchema) {
       wrangler: wranglerVersion,
       '@cloudflare/workers-types': cloudflareWorkersTypeVersions,
       '@naxodev/nx-cloudflare': nxCloudflareVersion,
-      ...vitePackage,
     }
   );
 }
