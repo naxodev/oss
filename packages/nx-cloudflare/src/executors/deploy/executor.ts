@@ -1,7 +1,8 @@
 import { DeployExecutorSchema } from './schema';
-import { ExecutorContext } from '@nx/devkit';
+import { ExecutorContext, workspaceRoot } from '@nx/devkit';
 import { fork } from 'child_process';
 import { createCliOptions } from '../../utils/create-cli-options';
+import { resolve as pathResolve } from 'path';
 
 export default async function deployExecutor(
   options: DeployExecutorSchema,
@@ -17,7 +18,8 @@ export default async function deployExecutor(
   }
 
   const args = createCliOptions({ ...options });
-  const p = runWrangler(args, projectRoot);
+  const cwd = pathResolve(workspaceRoot, projectRoot);
+  const p = runWrangler(args, cwd);
   p.stdout.on('data', (message) => {
     process.stdout.write(message);
   });
