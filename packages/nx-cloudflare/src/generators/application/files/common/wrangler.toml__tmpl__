@@ -1,5 +1,5 @@
 name = "<%=name %>"
-compatibility_date = "2023-07-31"
+compatibility_date = "2024-04-19"
 main = "src/index.<%=extension %>"
 <%-accountId %>
 
