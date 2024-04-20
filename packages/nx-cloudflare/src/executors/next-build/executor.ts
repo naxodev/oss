@@ -6,10 +6,11 @@ import {
   getPackageManagerCommand,
   logger,
   readJsonFile,
+  workspaceRoot,
   writeJsonFile,
 } from '@nx/devkit';
 import { createLockFile, createPackageJson, getLockFileName } from '@nx/js';
-import { join } from 'path';
+import { join, resolve as pathResolve } from 'path';
 import {
   copySync,
   ensureDirSync,
@@ -142,11 +143,13 @@ function runCliBuild(projectRoot: string, options: NextBuildBuilderOptions) {
 
   const args = createCliOptions({ experimentalAppOnly, profile, debug });
 
+  const cwd = pathResolve(workspaceRoot, projectRoot);
+
   const pmc = getPackageManagerCommand('npm');
   const execSyncOptions: ExecSyncOptions = {
     stdio: ['inherit', 'inherit', 'inherit'],
     encoding: 'utf-8',
-    cwd: projectRoot,
+    cwd,
   };
 
   execSync(
