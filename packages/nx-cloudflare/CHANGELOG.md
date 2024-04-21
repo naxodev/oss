@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.2.0](https://github.com/naxodev/oss/compare/v2.1.0...v2.2.0) (2024-04-21)
+
+
+### Features
+
+* update packages ([#44](https://github.com/naxodev/oss/issues/44)) ([bb71b17](https://github.com/naxodev/oss/commit/bb71b1738625b7bccf8bc68e93659b73f91e9828))
+
+
+### Bug Fixes
+
+* compatibility warning on deploy ([#43](https://github.com/naxodev/oss/issues/43)) ([4ff171c](https://github.com/naxodev/oss/commit/4ff171c82f5d3edaaa5582894ec410aa10b3bfce))
+
 ## [2.1.0](https://github.com/naxodev/oss/compare/v2.0.1...v2.1.0) (2024-04-12)
 
 
