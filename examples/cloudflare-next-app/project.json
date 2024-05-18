@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "examples/cloudflare-next-app",
   "projectType": "application",
+  "tags": [],
   "implicitDependencies": ["nx-cloudflare"],
   "targets": {
     "build": {
@@ -27,6 +28,5 @@
         "jestConfig": "examples/cloudflare-next-app/jest.config.ts"
       }
     }
-  },
-  "tags": []
+  }
 }

@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/nx-cloudflare/src",
   "projectType": "library",
+  "tags": ["scope:public", "type:plugin"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -67,6 +68,5 @@
       "command": "node tools/scripts/publish.mjs nx-cloudflare {args.ver} {args.tag}",
       "dependsOn": ["build"]
     }
-  },
-  "tags": ["scope:public", "type:plugin"]
+  }
 }

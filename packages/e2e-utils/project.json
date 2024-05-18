@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/e2e-utils/src",
   "projectType": "library",
+  "tags": [],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
@@ -11,6 +12,5 @@
         "jestConfig": "packages/e2e-utils/jest.config.ts"
       }
     }
-  },
-  "tags": []
+  }
 }
