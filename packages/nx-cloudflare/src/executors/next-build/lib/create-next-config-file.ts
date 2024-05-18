@@ -16,9 +16,9 @@ import {
   writeFileSync,
 } from 'fs-extra';
 import { dirname, extname, join, relative } from 'path';
-import { findNodes } from 'nx/src/utils/typescript';
 
 import type { NextBuildBuilderOptions } from '../../../utils/types';
+import { findNodes } from '@nx/js';
 
 export function createNextConfigFile(
   options: NextBuildBuilderOptions,
