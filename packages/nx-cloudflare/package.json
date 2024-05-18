@@ -21,7 +21,12 @@
     "tslib": "^2.3.0",
     "@nx/node": "19.0.4",
     "@svgr/webpack": "^8.1.0",
-    "url-loader": "^4.1.1"
+    "url-loader": "^4.1.1",
+    "nx": "19.0.4",
+    "wrangler": "^3.57.0",
+    "dotenv": "^16.4.4",
+    "@nx/workspace": "19.0.4",
+    "@nx/web": "19.0.4"
   },
   "keywords": [
     "nx",
