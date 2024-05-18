@@ -2,6 +2,17 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [3.0.0](https://github.com/naxodev/oss/compare/v2.2.0...v3.0.0) (2024-05-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to nx 19 (#46)
+
+### Features
+
+* upgrade to nx 19 ([#46](https://github.com/naxodev/oss/issues/46)) ([da51f24](https://github.com/naxodev/oss/commit/da51f24498aa8762d3bbb35f7726ed1eb0a3193c))
+
 ## [2.2.0](https://github.com/naxodev/oss/compare/v2.1.0...v2.2.0) (2024-04-21)
 
 
