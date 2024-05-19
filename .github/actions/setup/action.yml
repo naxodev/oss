@@ -23,7 +23,7 @@ runs:
       uses: nrwl/nx-set-shas@v3
 
 
-    - name: Setup git user to "🤖 naxode bot"
+    - name: Setup git user to "🤖 naxodev bot"
       shell: bash
       run: git config user.email "-" && git config user.name "🤖 naxodev bot"
 
