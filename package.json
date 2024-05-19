@@ -64,6 +64,7 @@
     "kill-port": "^2.0.1",
     "ngx-deploy-npm": "^7.1.0",
     "nx": "19.0.4",
+    "nx-cloud": "^19.0.0",
     "prettier": "^2.6.2",
     "semver": "^7.6.0",
     "tcp-port-used": "^1.0.2",
