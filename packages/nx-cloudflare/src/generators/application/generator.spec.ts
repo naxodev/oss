@@ -249,7 +249,11 @@ describe('app', () => {
         {
           path: 'my-dir/my-worker-app/tsconfig.app.json',
           lookupFn: (json) => json.compilerOptions.types,
-          expectedValue: ['node', '@cloudflare/workers-types'],
+          expectedValue: [
+            'node',
+            '@cloudflare/workers-types/experimental',
+            '@cloudflare/vitest-pool-workers',
+          ],
         },
         {
           path: 'my-dir/my-worker-app/tsconfig.app.json',
