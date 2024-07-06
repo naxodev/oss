@@ -2,6 +2,8 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [3.0.1](https://github.com/naxodev/oss/compare/v3.0.0...v3.0.1) (2024-07-06)
+
 ## [3.0.0](https://github.com/naxodev/oss/compare/v2.2.0...v3.0.0) (2024-05-18)
 
 
