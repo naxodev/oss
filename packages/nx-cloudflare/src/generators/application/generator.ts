@@ -199,6 +199,7 @@ function addTargets(tree: Tree, options: NormalizedSchema) {
 
 function removeTestFiles(tree: Tree, options: NormalizedSchema) {
   tree.delete(join(options.appProjectRoot, 'src', 'index.test.ts'));
+  tree.delete(join(options.appProjectRoot, 'src', 'index.integration.test.ts'));
 }
 
 // Transform the options to the normalized schema. Loads defaults options.
@@ -227,6 +228,7 @@ async function normalizeOptions(
     name: appProjectName,
     frontendProject: options.frontendProject,
     appProjectRoot,
+    projectNameAndRootFormat: options.projectNameAndRootFormat ?? 'as-provided',
     unitTestRunner: options.unitTestRunner ?? 'vitest',
     rootProject: options.rootProject ?? false,
     template: options.template ?? 'fetch-handler',

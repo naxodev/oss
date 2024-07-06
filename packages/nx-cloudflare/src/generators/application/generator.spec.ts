@@ -69,6 +69,9 @@ describe('app', () => {
       });
       expect(tree.exists('myWorkerApp/src/index.ts')).toBeTruthy();
       expect(tree.exists('myWorkerApp/src/index.test.ts')).toBeTruthy();
+      expect(
+        tree.exists('myWorkerApp/src/index.integration.test.ts')
+      ).toBeTruthy();
 
       const tsconfig = readJson(tree, 'myWorkerApp/tsconfig.json');
       expect(tsconfig).toMatchInlineSnapshot(`
@@ -146,6 +149,9 @@ describe('app', () => {
       });
       expect(tree.exists('myWorkerApp/src/index.ts')).toBeFalsy();
       expect(tree.exists('myWorkerApp/src/index.test.ts')).toBeFalsy();
+      expect(
+        tree.exists('myWorkerApp/src/index.integration.test.ts')
+      ).toBeFalsy();
     });
 
     it('should not have test files if the unitTestRunner is none', async () => {
@@ -156,6 +162,9 @@ describe('app', () => {
         unitTestRunner: 'none',
       });
       expect(tree.exists(`myWorkerApp/src/index.test.ts`)).toBeFalsy();
+      expect(
+        tree.exists(`myWorkerApp/src/index.integration.test.ts`)
+      ).toBeFalsy();
     });
 
     it('should extend from root tsconfig.json when no tsconfig.base.json', async () => {
@@ -277,6 +286,7 @@ describe('app', () => {
       [
         'myDir/myWorkerApp/src/index.ts',
         'myDir/myWorkerApp/src/index.test.ts',
+        'myDir/myWorkerApp/src/index.integration.test.ts',
       ].forEach((path) => {
         expect(tree.exists(path)).toBeTruthy();
       });
@@ -351,6 +361,9 @@ describe('app', () => {
 
       expect(tree.exists('myWorkerApp/src/index.js')).toBeTruthy();
       expect(tree.exists('myWorkerApp/src/index.test.js')).toBeTruthy();
+      expect(
+        tree.exists('myWorkerApp/src/index.integration.test.js')
+      ).toBeTruthy();
 
       const tsConfig = readJson(tree, 'myWorkerApp/tsconfig.json');
       expect(tsConfig.compilerOptions).toEqual({
@@ -393,6 +406,9 @@ describe('app', () => {
       } as Schema);
       expect(tree.exists('myDir/myWorkerApp/src/index.js')).toBeTruthy();
       expect(tree.exists('myDir/myWorkerApp/src/index.test.js')).toBeTruthy();
+      expect(
+        tree.exists('myDir/myWorkerApp/src/index.integration.test.js')
+      ).toBeTruthy();
     });
 
     it('should create the common configuration files', async () => {
