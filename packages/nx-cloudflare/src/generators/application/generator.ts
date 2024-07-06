@@ -4,7 +4,6 @@ import {
   formatFiles,
   generateFiles,
   GeneratorCallback,
-  names,
   readProjectConfiguration,
   runTasksInSerial,
   toJS,
@@ -18,7 +17,6 @@ import { join } from 'path';
 import initGenerator from '../init/generator';
 import { vitestImports } from './utils/vitest-imports';
 import { getAccountId } from './utils/get-account-id';
-import { vitestScript } from './utils/vitest-script';
 import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
 import { nxVersion } from '@nx/node/src/utils/versions';
 
@@ -58,6 +56,11 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
       coverageProvider: 'v8',
       skipFormat: true,
       testEnvironment: 'node',
+      poolOptions: {
+        workers: {
+          wrangler: { configPath: './wrangler.toml' },
+        },
+      },
     });
     tasks.push(vitestTask);
     createOrEditViteConfig(
@@ -141,7 +144,6 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
       name: options.name,
       extension: options.js ? 'js' : 'ts',
       accountId: options.accountId ? getAccountId(options.accountId) : '',
-      vitestScript: options.unitTestRunner === 'vitest' ? vitestScript : '',
     }
   );
 
@@ -222,10 +224,8 @@ async function normalizeOptions(
   return {
     addPlugin: process.env.NX_ADD_PLUGINS !== 'false',
     ...options,
-    name: names(appProjectName).fileName,
-    frontendProject: options.frontendProject
-      ? names(options.frontendProject).fileName
-      : undefined,
+    name: appProjectName,
+    frontendProject: options.frontendProject,
     appProjectRoot,
     unitTestRunner: options.unitTestRunner ?? 'vitest',
     rootProject: options.rootProject ?? false,

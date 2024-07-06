@@ -17,7 +17,6 @@ describe('lib', () => {
     skipFormat: false,
     linter: 'eslint',
     js: false,
-    pascalCaseFiles: false,
     strict: true,
     config: 'project',
   };
@@ -39,7 +38,7 @@ describe('lib', () => {
       expect(readJson(tree, '/my-lib/package.json')).toEqual({
         name: '@proj/my-lib',
         version: '0.0.1',
-        type: 'commonjs',
+        private: true,
         scripts: {
           build: "echo 'implement build'",
           test: "echo 'implement test'",
@@ -433,29 +432,6 @@ describe('lib', () => {
         expect(tsconfigJson.compilerOptions.paths['@acme/core']).toBeDefined();
       });
     });
-
-    describe('--pascalCaseFiles', () => {
-      it('should generate files with upper case names', async () => {
-        await libraryGenerator(tree, {
-          ...defaultOptions,
-          name: 'my-lib',
-          pascalCaseFiles: true,
-          projectNameAndRootFormat: 'as-provided',
-        });
-        expect(tree.exists('my-lib/src/lib/MyLib.ts')).toBeTruthy();
-      });
-
-      it('should generate files with upper case names for nested libs as well', async () => {
-        await libraryGenerator(tree, {
-          ...defaultOptions,
-          name: 'my-lib',
-          directory: 'my-dir/my-lib',
-          pascalCaseFiles: true,
-          projectNameAndRootFormat: 'as-provided',
-        });
-        expect(tree.exists('my-dir/my-lib/src/lib/MyLib.ts')).toBeTruthy();
-      });
-    });
   });
 
   describe('--linter', () => {
@@ -758,35 +734,6 @@ describe('lib', () => {
             'error',
             {
               ignoredFiles: ['{projectRoot}/esbuild.config.{js,ts,mjs,mts}'],
-            },
-          ],
-        },
-      });
-    });
-  });
-
-  describe('--bundler=rollup', () => {
-    it('should add build with rollup', async () => {
-      await libraryGenerator(tree, {
-        ...defaultOptions,
-        name: 'my-lib',
-        bundler: 'rollup',
-        unitTestRunner: 'none',
-        projectNameAndRootFormat: 'as-provided',
-      });
-
-      const project = readProjectConfiguration(tree, 'my-lib');
-      expect(project.targets.build).toMatchObject({
-        executor: '@nx/rollup:rollup',
-      });
-      expect(readJson(tree, 'my-lib/.eslintrc.json').overrides).toContainEqual({
-        files: ['*.json'],
-        parser: 'jsonc-eslint-parser',
-        rules: {
-          '@nx/dependency-checks': [
-            'error',
-            {
-              ignoredFiles: ['{projectRoot}/rollup.config.{js,ts,mjs,mts}'],
             },
           ],
         },

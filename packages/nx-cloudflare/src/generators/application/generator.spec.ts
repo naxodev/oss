@@ -23,10 +23,12 @@ describe('app', () => {
     it('should update project config', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
         port: 3001,
       });
-      const project = readProjectConfiguration(tree, 'my-worker-app');
-      expect(project.root).toEqual('my-worker-app');
+      const project = readProjectConfiguration(tree, 'myWorkerApp');
+      expect(project.root).toEqual('myWorkerApp');
       expect(project.targets).toEqual(
         expect.objectContaining({
           serve: {
@@ -47,11 +49,13 @@ describe('app', () => {
     it('should update tags', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
         tags: 'one,two',
       });
       const projects = Object.fromEntries(getProjects(tree));
       expect(projects).toMatchObject({
-        'my-worker-app': {
+        myWorkerApp: {
           tags: ['one', 'two'],
         },
       });
@@ -60,11 +64,13 @@ describe('app', () => {
     it('should generate files', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
       });
-      expect(tree.exists('my-worker-app/src/index.ts')).toBeTruthy();
-      expect(tree.exists('my-worker-app/src/index.test.ts')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/src/index.ts')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/src/index.test.ts')).toBeTruthy();
 
-      const tsconfig = readJson(tree, 'my-worker-app/tsconfig.json');
+      const tsconfig = readJson(tree, 'myWorkerApp/tsconfig.json');
       expect(tsconfig).toMatchInlineSnapshot(`
         {
           "compilerOptions": {
@@ -77,11 +83,14 @@ describe('app', () => {
             {
               "path": "./tsconfig.app.json",
             },
+            {
+              "path": "./tsconfig.spec.json",
+            },
           ],
         }
       `);
 
-      const tsconfigApp = readJson(tree, 'my-worker-app/tsconfig.app.json');
+      const tsconfigApp = readJson(tree, 'myWorkerApp/tsconfig.app.json');
       expect(tsconfigApp.compilerOptions.outDir).toEqual('../dist/out-tsc');
       expect(tsconfigApp.compilerOptions.target).toEqual('es2021');
       expect(tsconfigApp.extends).toEqual('./tsconfig.json');
@@ -90,7 +99,7 @@ describe('app', () => {
         'src/**/*.spec.ts',
         'src/**/*.test.ts',
       ]);
-      const eslintrc = readJson(tree, 'my-worker-app/.eslintrc.json');
+      const eslintrc = readJson(tree, 'myWorkerApp/.eslintrc.json');
       expect(eslintrc).toMatchInlineSnapshot(`
         {
           "extends": [
@@ -131,29 +140,22 @@ describe('app', () => {
     it('should not generate files when template is none', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
         template: 'none',
       });
-      expect(tree.exists('my-worker-app/src/index.ts')).toBeFalsy();
-      expect(tree.exists('my-worker-app/src/index.test.ts')).toBeFalsy();
+      expect(tree.exists('myWorkerApp/src/index.ts')).toBeFalsy();
+      expect(tree.exists('myWorkerApp/src/index.test.ts')).toBeFalsy();
     });
-
-    // TODO: Uncomment when Jest support is added back
-    // it('should not generate import vitest when testRunner is jest', async () => {
-    //   await applicationGenerator(tree, {
-    //     name: 'myWorkerApp',
-    //     unitTestRunner: 'jest',
-    //   });
-    //   expect(
-    //     tree.read(`my-worker-app/src/index.test.ts`, 'utf-8')
-    //   ).not.toContain('vitest');
-    // });
 
     it('should not have test files if the unitTestRunner is none', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
         unitTestRunner: 'none',
       });
-      expect(tree.exists(`my-worker-app/src/index.test.ts`)).toBeFalsy();
+      expect(tree.exists(`myWorkerApp/src/index.test.ts`)).toBeFalsy();
     });
 
     it('should extend from root tsconfig.json when no tsconfig.base.json', async () => {
@@ -161,25 +163,67 @@ describe('app', () => {
 
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
       });
 
-      const tsconfig = readJson(tree, 'my-worker-app/tsconfig.json');
+      const tsconfig = readJson(tree, 'myWorkerApp/tsconfig.json');
       expect(tsconfig.extends).toBe('../tsconfig.json');
     });
 
     it('should create the common configuration files', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
       });
-      expect(tree.exists('my-worker-app/.gitignore')).toBeTruthy();
-      expect(tree.exists('my-worker-app/package.json')).toBeTruthy();
-      expect(tree.read('my-worker-app/wrangler.toml', 'utf-8'))
+      expect(tree.exists('myWorkerApp/.gitignore')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/package.json')).toBeTruthy();
+      expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8'))
         .toMatchInlineSnapshot(`
-        "name = "my-worker-app"
-        compatibility_date = "2023-07-31"
+        "name = "myWorkerApp"
+        compatibility_date = "2024-01-01"
+        compatibility_flags = ["nodejs_compat"]
         main = "src/index.ts"
 
 
+        "
+      `);
+    });
+
+    it('should generate a modified vite config file to allow the poolOptions when vitest is the test runner', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
+      });
+      expect(tree.read('myWorkerApp/vite.config.ts', 'utf-8'))
+        .toMatchInlineSnapshot(`
+        "import { defineConfig } from 'vite';
+
+        import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+
+        export default defineConfig({
+          root: __dirname,
+          cacheDir: '../node_modules/.vite/myWorkerApp',
+
+          plugins: [nxViteTsPaths()],
+
+          // Uncomment this if you are using workers.
+          // worker: {
+          //  plugins: [ nxViteTsPaths() ],
+          // },
+
+          test: {
+            watch: false,
+            globals: true,
+            cache: { dir: '../node_modules/.vitest/myWorkerApp' },
+            environment: 'node',
+            include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+            reporters: ['default'],
+            coverage: { reportsDirectory: '../coverage/myWorkerApp', provider: 'v8' },
+          },
+        });
         "
       `);
     });
@@ -189,26 +233,28 @@ describe('app', () => {
     it('should update project config', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
-        directory: 'myDir',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myDir/myWorkerApp',
       });
-      const project = readProjectConfiguration(tree, 'my-dir-my-worker-app');
+      const project = readProjectConfiguration(tree, 'myWorkerApp');
 
-      expect(project.root).toEqual('my-dir/my-worker-app');
+      expect(project.root).toEqual('myDir/myWorkerApp');
 
-      expect(() =>
-        readProjectConfiguration(tree, 'my-dir-my-worker-app-e2e')
-      ).toThrow(/Cannot find/);
+      expect(() => readProjectConfiguration(tree, 'myWorkerApp-e2e')).toThrow(
+        /Cannot find/
+      );
     });
 
     it('should update tags', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
-        directory: 'myDir',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myDir/myWorkerApp',
         tags: 'one,two',
       });
       const projects = Object.fromEntries(getProjects(tree));
       expect(projects).toMatchObject({
-        'my-dir-my-worker-app': {
+        myWorkerApp: {
           tags: ['one', 'two'],
         },
       });
@@ -223,13 +269,14 @@ describe('app', () => {
 
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
-        directory: 'myDir',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myDir/myWorkerApp',
       });
 
       // Make sure these exist
       [
-        'my-dir/my-worker-app/src/index.ts',
-        'my-dir/my-worker-app/src/index.test.ts',
+        'myDir/myWorkerApp/src/index.ts',
+        'myDir/myWorkerApp/src/index.test.ts',
       ].forEach((path) => {
         expect(tree.exists(path)).toBeTruthy();
       });
@@ -237,17 +284,17 @@ describe('app', () => {
       // Make sure these have properties
       [
         {
-          path: 'my-dir/my-worker-app/tsconfig.app.json',
+          path: 'myDir/myWorkerApp/tsconfig.app.json',
           lookupFn: (json) => json.compilerOptions.outDir,
           expectedValue: '../../dist/out-tsc',
         },
         {
-          path: 'my-dir/my-worker-app/tsconfig.app.json',
+          path: 'myDir/myWorkerApp/tsconfig.app.json',
           lookupFn: (json) => json.compilerOptions.target,
           expectedValue: 'es2021',
         },
         {
-          path: 'my-dir/my-worker-app/tsconfig.app.json',
+          path: 'myDir/myWorkerApp/tsconfig.app.json',
           lookupFn: (json) => json.compilerOptions.types,
           expectedValue: [
             'node',
@@ -256,7 +303,7 @@ describe('app', () => {
           ],
         },
         {
-          path: 'my-dir/my-worker-app/tsconfig.app.json',
+          path: 'myDir/myWorkerApp/tsconfig.app.json',
           lookupFn: (json) => json.exclude,
           expectedValue: [
             'jest.config.ts',
@@ -265,7 +312,7 @@ describe('app', () => {
           ],
         },
         {
-          path: 'my-dir/my-worker-app/.eslintrc.json',
+          path: 'myDir/myWorkerApp/.eslintrc.json',
           lookupFn: (json) => json.extends,
           expectedValue: ['../../.eslintrc.json'],
         },
@@ -277,117 +324,41 @@ describe('app', () => {
     it('should not generate test configuration', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myWorkerApp',
         unitTestRunner: 'none',
       });
       expect(tree.exists('jest.config.ts')).toBeFalsy();
-      expect(tree.exists('my-worker-app/src/test-setup.ts')).toBeFalsy();
-      expect(tree.exists('my-worker-app/src/test.ts')).toBeFalsy();
-      expect(tree.exists('my-worker-app/tsconfig.spec.json')).toBeFalsy();
-      expect(tree.exists('my-worker-app/jest.config.ts')).toBeFalsy();
-      const project = readProjectConfiguration(tree, 'my-worker-app');
+      expect(tree.exists('myWorkerApp/src/test-setup.ts')).toBeFalsy();
+      expect(tree.exists('myWorkerApp/src/test.ts')).toBeFalsy();
+      expect(tree.exists('myWorkerApp/tsconfig.spec.json')).toBeFalsy();
+      expect(tree.exists('myWorkerApp/jest.config.ts')).toBeFalsy();
+      expect(tree.exists('myWorkerApp/vite.config.ts')).toBeFalsy();
+      const project = readProjectConfiguration(tree, 'myWorkerApp');
       expect(project.targets.test).toBeUndefined();
-      const packageJSON = devkit.readJson(tree, 'my-worker-app/package.json');
-      expect(packageJSON.scripts.test).toBeUndefined();
       expect(project.targets.lint).toMatchInlineSnapshot(`undefined`);
     });
   });
-
-  // describe('--frontendProject', () => {
-  //   it('should configure proxy', async () => {
-  //     await angularApplicationGenerator(tree, { name: 'my-frontend' });
-  //
-  //     await applicationGenerator(tree, {
-  //       name: 'myWorkerApp',
-  //       frontendProject: 'my-frontend',
-  //     });
-  //
-  //     expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
-  //     const project = readProjectConfiguration(tree, 'my-frontend');
-  //     const serve = project.targets.serve;
-  //     expect(serve.options.proxyConfig).toEqual('my-frontend/proxy.conf.json');
-  //   });
-  //
-  //   it('should configure proxies for multiple node projects with the same frontend app', async () => {
-  //     await angularApplicationGenerator(tree, { name: 'my-frontend' });
-  //
-  //     await applicationGenerator(tree, {
-  //       name: 'cart',
-  //       frontendProject: 'my-frontend',
-  //     });
-  //
-  //     await applicationGenerator(tree, {
-  //       name: 'billing',
-  //       frontendProject: 'my-frontend',
-  //     });
-  //
-  //     expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
-  //
-  //     expect(readJson(tree, 'my-frontend/proxy.conf.json')).toEqual({
-  //       '/api': { target: 'http://localhost:3000', secure: false },
-  //       '/billing-api': { target: 'http://localhost:3000', secure: false },
-  //     });
-  //   });
-  //
-  //   it('should work with unnormalized project names', async () => {
-  //     await angularApplicationGenerator(tree, { name: 'myFrontend' });
-  //
-  //     await applicationGenerator(tree, {
-  //       name: 'myWorkerApp',
-  //       frontendProject: 'myFrontend',
-  //     });
-  //
-  //     expect(tree.exists('my-frontend/proxy.conf.json')).toBeTruthy();
-  //     const project = readProjectConfiguration(tree, 'my-frontend');
-  //     const serve = project.targets.serve;
-  //     expect(serve.options.proxyConfig).toEqual('my-frontend/proxy.conf.json');
-  //   });
-  // });
-
-  // TODO: Uncomment when jest support is added back
-  // describe('--swcJest', () => {
-  //   it('should use @swc/jest for jest', async () => {
-  //     await applicationGenerator(tree, {
-  //       name: 'myWorkerApp',
-  //       tags: 'one,two',
-  //       swcJest: true,
-  //       unitTestRunner: 'jest',
-  //     } as Schema);
-  //
-  //     expect(tree.read(`my-worker-app/jest.config.ts`, 'utf-8'))
-  //       .toMatchInlineSnapshot(`
-  //       "/* eslint-disable */
-  //       export default {
-  //         displayName: 'my-worker-app',
-  //         preset: '../jest.preset.js',
-  //         testEnvironment: 'node',
-  //         transform: {
-  //           '^.+\\\\.[tj]s$': '@swc/jest',
-  //         },
-  //         moduleFileExtensions: ['ts', 'js', 'html'],
-  //         coverageDirectory: '../coverage/my-worker-app',
-  //       };
-  //       "
-  //     `);
-  //   });
-  // });
 
   describe('--js flag', () => {
     it('should generate js files instead of ts files', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myWorkerApp',
         js: true,
       } as Schema);
 
-      expect(tree.exists('my-worker-app/src/index.js')).toBeTruthy();
-      expect(tree.exists('my-worker-app/src/index.test.js')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/src/index.js')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/src/index.test.js')).toBeTruthy();
 
-      const tsConfig = readJson(tree, 'my-worker-app/tsconfig.json');
+      const tsConfig = readJson(tree, 'myWorkerApp/tsconfig.json');
       expect(tsConfig.compilerOptions).toEqual({
         allowJs: true,
         esModuleInterop: true,
       });
 
-      const tsConfigApp = readJson(tree, 'my-worker-app/tsconfig.app.json');
+      const tsConfigApp = readJson(tree, 'myWorkerApp/tsconfig.app.json');
       expect(tsConfigApp.include).toEqual(['src/**/*.ts', 'src/**/*.js']);
       expect(tsConfigApp.exclude).toEqual([
         'jest.config.ts',
@@ -401,9 +372,11 @@ describe('app', () => {
     it('should add project config', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myWorkerApp',
         js: true,
       } as Schema);
-      const project = readProjectConfiguration(tree, 'my-worker-app');
+      const project = readProjectConfiguration(tree, 'myWorkerApp');
       const buildTarget = project.targets.build;
       const serveTarget = project.targets.serve;
 
@@ -414,26 +387,28 @@ describe('app', () => {
     it('should generate js files for nested libs as well', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
-        directory: 'myDir',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myDir/myWorkerApp',
         js: true,
       } as Schema);
-      expect(tree.exists('my-dir/my-worker-app/src/index.js')).toBeTruthy();
-      expect(
-        tree.exists('my-dir/my-worker-app/src/index.test.js')
-      ).toBeTruthy();
+      expect(tree.exists('myDir/myWorkerApp/src/index.js')).toBeTruthy();
+      expect(tree.exists('myDir/myWorkerApp/src/index.test.js')).toBeTruthy();
     });
 
     it('should create the common configuration files', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myWorkerApp',
         js: true,
       });
-      expect(tree.exists('my-worker-app/.gitignore')).toBeTruthy();
-      expect(tree.exists('my-worker-app/package.json')).toBeTruthy();
-      expect(tree.read('my-worker-app/wrangler.toml', 'utf-8'))
+      expect(tree.exists('myWorkerApp/.gitignore')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/package.json')).toBeTruthy();
+      expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8'))
         .toMatchInlineSnapshot(`
-        "name = "my-worker-app"
-        compatibility_date = "2023-07-31"
+        "name = "myWorkerApp"
+        compatibility_date = "2024-01-01"
+        compatibility_flags = ["nodejs_compat"]
         main = "src/index.js"
 
 
@@ -445,13 +420,16 @@ describe('app', () => {
       const accountId = 'fake40q5pchj988766d696c1ajek9mcd';
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myWorkerApp',
         js: true,
         accountId,
       });
-      expect(tree.read('my-worker-app/wrangler.toml', 'utf-8'))
+      expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8'))
         .toMatchInlineSnapshot(`
-        "name = "my-worker-app"
-        compatibility_date = "2023-07-31"
+        "name = "myWorkerApp"
+        compatibility_date = "2024-01-01"
+        compatibility_flags = ["nodejs_compat"]
         main = "src/index.js"
         account_id = "fake40q5pchj988766d696c1ajek9mcd"
 
@@ -460,20 +438,15 @@ describe('app', () => {
     });
   });
 
-  describe('--pascalCaseFiles', () => {
-    it(`should notify that this flag doesn't do anything`, async () => {
-      await applicationGenerator(tree, {
-        name: 'myWorkerApp',
-        pascalCaseFiles: true,
-      } as Schema);
-    });
-  });
-
   describe('--skipFormat', () => {
     it('should format files by default', async () => {
       jest.spyOn(devkit, 'formatFiles');
 
-      await applicationGenerator(tree, { name: 'myWorkerApp' });
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myWorkerApp',
+      });
 
       expect(devkit.formatFiles).toHaveBeenCalled();
     });
@@ -483,6 +456,8 @@ describe('app', () => {
 
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'myWorkerApp',
         skipFormat: true,
       });
 
@@ -499,13 +474,16 @@ describe('app', () => {
     it('should generate the correct snippet of code', async () => {
       await applicationGenerator(tree, {
         name: 'api',
+        projectNameAndRootFormat: 'as-provided',
+        directory: 'api',
         template,
+        unitTestRunner: 'none',
       });
 
       const project = readProjectConfiguration(tree, 'api');
       expect(project.targets.test).toBeUndefined();
       const packageJSON = devkit.readJson(tree, 'api/package.json');
-      expect(packageJSON.scripts.test).toBeDefined();
+      expect(packageJSON.name).toEqual('api');
 
       if (checkFile) {
         expect(tree.exists(`api/src/index.ts`)).toBeTruthy();

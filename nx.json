@@ -62,6 +62,12 @@
         "devTargetName": "dev",
         "startTargetName": "start"
       }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      }
     }
   ],
   "generators": {
