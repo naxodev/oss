@@ -5,6 +5,9 @@
   "sourceRoot": "packages/nx-cloudflare-e2e/src",
   "implicitDependencies": ["nx-cloudflare"],
   "targets": {
+    "test": {
+      "command": "echo 'Use e2e instead'"
+    },
     "e2e": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
