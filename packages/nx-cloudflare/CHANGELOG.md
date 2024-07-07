@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [3.1.1](https://github.com/naxodev/oss/compare/v3.1.0...v3.1.1) (2024-07-07)
+
+
+### Bug Fixes
+
+* vitest workerd configuration ([#55](https://github.com/naxodev/oss/issues/55)) ([02ef07f](https://github.com/naxodev/oss/commit/02ef07fb57dfa446686ee9eb0de79d1c176801cf))
+
 ## [3.1.0](https://github.com/naxodev/oss/compare/v3.0.0...v3.1.0) (2024-07-07)
 
 
