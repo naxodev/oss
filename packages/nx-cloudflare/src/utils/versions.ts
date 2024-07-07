@@ -5,3 +5,4 @@ export const wranglerVersion = '^3.62.0';
 export const cloudflareWorkersTypeVersions = '^4.20240512.0';
 export const honoVersion = '^4.4.9';
 export const vitestPoolWorkersVersion = '^0.4.7';
+export const vitestVersion = '1.5.0';
