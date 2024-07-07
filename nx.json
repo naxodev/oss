@@ -84,7 +84,10 @@
     "projects": ["nx-cloudflare"],
     "projectsRelationship": "independent",
     "version": {
-      "conventionalCommits": true
+      "conventionalCommits": true,
+      "generatorOptions": {
+        "updateDependents": true
+      }
     },
     "git": {
       "commit": true,
