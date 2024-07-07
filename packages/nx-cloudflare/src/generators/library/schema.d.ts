@@ -8,7 +8,6 @@ export interface NxCloudflareLibraryGeneratorSchema {
   skipFormat?: boolean;
   skipPackageJson?: boolean;
   skipTsConfig?: boolean;
-  pascalCaseFiles?: boolean;
   js?: boolean;
   strict?: boolean;
   publishable?: boolean;

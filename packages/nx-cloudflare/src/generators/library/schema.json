@@ -59,12 +59,6 @@
       "default": false,
       "x-priority": "internal"
     },
-    "pascalCaseFiles": {
-      "type": "boolean",
-      "description": "Use pascal case file names.",
-      "alias": "P",
-      "default": false
-    },
     "js": {
       "type": "boolean",
       "description": "Generate JavaScript files rather than TypeScript files.",
@@ -101,7 +95,7 @@
     "bundler": {
       "description": "The bundler to use. Choosing 'none' means this library is not buildable.",
       "type": "string",
-      "enum": ["swc", "tsc", "rollup", "vite", "esbuild", "none"],
+      "enum": ["swc", "tsc", "vite", "esbuild", "none"],
       "default": "tsc",
       "x-prompt": "Which bundler would you like to use to build the library? Choose 'none' to skip build setup.",
       "x-priority": "important"

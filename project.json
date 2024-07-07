@@ -2,6 +2,9 @@
   "name": "@naxodev/oss",
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "targets": {
+    "test": {
+      "command": "echo 'no test for root project'"
+    },
     "local-registry": {
       "executor": "@nx/js:verdaccio",
       "options": {

@@ -41,7 +41,13 @@ describe('init', () => {
         packageJson.dependencies['@cloudflare/workers-types']
       ).toBeUndefined();
       expect(
+        packageJson.dependencies['@cloudflare/vitest-pool-workers']
+      ).toBeUndefined();
+      expect(
         packageJson.devDependencies['@cloudflare/workers-types']
+      ).toBeDefined();
+      expect(
+        packageJson.devDependencies['@cloudflare/vitest-pool-workers']
       ).toBeDefined();
       // keep existing packages
       expect(packageJson.devDependencies[existing]).toBeDefined();

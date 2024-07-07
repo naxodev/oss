@@ -96,7 +96,8 @@ function updateTsLibConfig(tree: Tree, options: NormalizedSchema) {
     (json) => {
       json.compilerOptions.types = [
         ...json.compilerOptions.types,
-        '@cloudflare/workers-types',
+        '@cloudflare/workers-types/experimental',
+        '@cloudflare/vitest-pool-workers',
       ];
       return json;
     }
