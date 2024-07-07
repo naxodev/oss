@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [3.1.0](https://github.com/naxodev/oss/compare/v3.0.0...v3.1.0) (2024-07-07)
+
+
+### Features
+
+* improve generated tests by using Vitest and workerd ([#53](https://github.com/naxodev/oss/issues/53)) ([54be56b](https://github.com/naxodev/oss/commit/54be56bdfc0e684b90cd9b4297d77e3af9200ef7)), closes [nrwl/nx#23435](https://github.com/nrwl/nx/issues/23435)
+
 ## [3.0.1](https://github.com/naxodev/oss/compare/v3.0.0...v3.0.1) (2024-07-06)
 
 ## [3.0.0](https://github.com/naxodev/oss/compare/v2.2.0...v3.0.0) (2024-05-18)
