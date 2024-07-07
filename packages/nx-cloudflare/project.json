@@ -48,7 +48,7 @@
         "preid": "beta",
         "syncVersions": false,
         "commitMessageFormat": "release(${projectName}): 🎸 cut release to ${version}",
-        "postTargets": ["nx-cloudflare:github", "nx-cloudflare:npm-publish"]
+        "postTargets": ["nx-cloudflare:github"]
       }
     },
     "github": {
