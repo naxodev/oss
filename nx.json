@@ -78,5 +78,23 @@
       }
     }
   },
-  "nxCloudAccessToken": "OWEyN2E2OTktMWM2Ni00MmQwLWE1YmEtNjI2MDMwNDg1MWVjfHJlYWQtd3JpdGU="
+  "nxCloudAccessToken": "OWEyN2E2OTktMWM2Ni00MmQwLWE1YmEtNjI2MDMwNDg1MWVjfHJlYWQtd3JpdGU=",
+  "release": {
+    "releaseTagPattern": "v{version}",
+    "projects": ["nx-cloudflare"],
+    "projectsRelationship": "independent",
+    "version": {
+      "conventionalCommits": true
+    },
+    "git": {
+      "commit": true,
+      "commitArgs": "--no-verify"
+    },
+    "changelog": {
+      "automaticFromRef": true,
+      "projectChangelogs": {
+        "createRelease": "github"
+      }
+    }
+  }
 }
