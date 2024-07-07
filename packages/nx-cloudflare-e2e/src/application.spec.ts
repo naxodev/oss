@@ -39,6 +39,10 @@ describe('Cloudflare Worker Applications', () => {
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${workerapp}`
     );
+    const testsResults = runNxCommand(`test ${workerapp}`);
+    expect(testsResults).toContain(
+      `NX   Successfully ran target test for project ${workerapp}`
+    );
 
     expect(
       fileExists(join(tmpProjPath(), `apps/${workerapp}/src/index.ts`))

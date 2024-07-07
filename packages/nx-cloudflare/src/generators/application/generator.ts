@@ -56,11 +56,6 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
       coverageProvider: 'v8',
       skipFormat: true,
       testEnvironment: 'node',
-      poolOptions: {
-        workers: {
-          wrangler: { configPath: './wrangler.toml' },
-        },
-      },
     });
     tasks.push(vitestTask);
     createOrEditViteConfig(

@@ -188,6 +188,7 @@ describe('app', () => {
       });
       expect(tree.exists('myWorkerApp/.gitignore')).toBeTruthy();
       expect(tree.exists('myWorkerApp/package.json')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/vitest.config.ts')).toBeTruthy();
       expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8'))
         .toMatchInlineSnapshot(`
         "name = "myWorkerApp"
@@ -200,37 +201,23 @@ describe('app', () => {
       `);
     });
 
-    it('should generate a modified vite config file to allow the poolOptions when vitest is the test runner', async () => {
+    it('should generate a vitest config file to allow the poolOptions when vitest is the test runner', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         directory: 'myWorkerApp',
         projectNameAndRootFormat: 'as-provided',
       });
-      expect(tree.read('myWorkerApp/vite.config.ts', 'utf-8'))
+      expect(tree.read('myWorkerApp/vitest.config.ts', 'utf-8'))
         .toMatchInlineSnapshot(`
-        "import { defineConfig } from 'vite';
+        "import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config';
 
-        import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-
-        export default defineConfig({
-          root: __dirname,
-          cacheDir: '../node_modules/.vite/myWorkerApp',
-
-          plugins: [nxViteTsPaths()],
-
-          // Uncomment this if you are using workers.
-          // worker: {
-          //  plugins: [ nxViteTsPaths() ],
-          // },
-
+        export default defineWorkersConfig({
           test: {
-            watch: false,
-            globals: true,
-            cache: { dir: '../node_modules/.vitest/myWorkerApp' },
-            environment: 'node',
-            include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-            reporters: ['default'],
-            coverage: { reportsDirectory: '../coverage/myWorkerApp', provider: 'v8' },
+            poolOptions: {
+              workers: {
+                wrangler: { configPath: './wrangler.toml' },
+              },
+            },
           },
         });
         "
@@ -420,6 +407,7 @@ describe('app', () => {
       });
       expect(tree.exists('myWorkerApp/.gitignore')).toBeTruthy();
       expect(tree.exists('myWorkerApp/package.json')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/vitest.config.js')).toBeTruthy();
       expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8'))
         .toMatchInlineSnapshot(`
         "name = "myWorkerApp"

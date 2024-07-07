@@ -13,6 +13,7 @@ import {
   honoVersion,
   nxCloudflareVersion,
   vitestPoolWorkersVersion,
+  vitestVersion,
   wranglerVersion,
 } from '../../utils/versions';
 
@@ -49,6 +50,7 @@ function updateDependencies(tree: Tree, schema: InitGeneratorSchema) {
       '@cloudflare/workers-types': cloudflareWorkersTypeVersions,
       '@cloudflare/vitest-pool-workers': vitestPoolWorkersVersion,
       '@naxodev/nx-cloudflare': nxCloudflareVersion,
+      vitest: vitestVersion,
     }
   );
 }
