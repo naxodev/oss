@@ -188,6 +188,7 @@ describe('app', () => {
       });
       expect(tree.exists('myWorkerApp/.gitignore')).toBeTruthy();
       expect(tree.exists('myWorkerApp/package.json')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/vitest.config.ts')).toBeTruthy();
       expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8'))
         .toMatchInlineSnapshot(`
         "name = "myWorkerApp"
@@ -420,6 +421,7 @@ describe('app', () => {
       });
       expect(tree.exists('myWorkerApp/.gitignore')).toBeTruthy();
       expect(tree.exists('myWorkerApp/package.json')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/vitest.config.js')).toBeTruthy();
       expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8'))
         .toMatchInlineSnapshot(`
         "name = "myWorkerApp"
