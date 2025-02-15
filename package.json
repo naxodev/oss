@@ -7,8 +7,8 @@
   "devDependencies": {
     "@angular-devkit/core": "~17.3.7",
     "@cloudflare/next-on-pages": "^1.12.0",
-    "@cloudflare/vitest-pool-workers": "^0.4.7",
-    "@cloudflare/workers-types": "^4.20240512.0",
+    "@cloudflare/vitest-pool-workers": "^0.4.31",
+    "@cloudflare/workers-types": "^4.20250214.0",
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^17.8.1",
     "@eslint/eslintrc": "^2.1.2",
@@ -78,11 +78,11 @@
     "vite": "~5.0.0",
     "vitest": "1.6.0",
     "webpack": "^5.90.1",
-    "wrangler": "^3.62.0"
+    "wrangler": "^3.109.1"
   },
   "dependencies": {
     "@types/fs-extra": "^11.0.4",
-    "hono": "^4.4.9",
+    "hono": "^4.7.1",
     "next": "14.2.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
