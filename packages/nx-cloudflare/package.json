@@ -19,14 +19,14 @@
     "tslib": "^2.3.0",
     "@svgr/webpack": "^8.1.0",
     "url-loader": "^4.1.1",
-    "wrangler": "^3.57.0",
+    "wrangler": "^3.109.1",
     "dotenv": "^16.4.4",
-    "@nx/js": "^19.0.0",
-    "nx": "^19.0.0",
-    "@nx/workspace": "^19.0.0",
-    "@nx/web": "^19.0.0",
-    "@nx/node": "^19.0.0",
-    "@nx/devkit": "^19.0.0"
+    "@nx/js": "^20.0.0",
+    "nx": "^20.0.0",
+    "@nx/workspace": "^20.0.0",
+    "@nx/web": "^20.0.0",
+    "@nx/node": "^20.0.0",
+    "@nx/devkit": "^20.0.0"
   },
   "keywords": [
     "nx",

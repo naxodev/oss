@@ -1,4 +1,4 @@
-import { Tree, formatFiles, updateJson } from '@nx/devkit';
+import { Tree, formatFiles, names, updateJson } from '@nx/devkit';
 import type {
   NormalizedSchema,
   NxCloudflareLibraryGeneratorSchema,
@@ -6,7 +6,17 @@ import type {
 import { libraryGenerator } from '@nx/js';
 import { join } from 'path';
 import initGenerator from '../init/generator';
-import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
+import {
+  determineProjectNameAndRootOptions,
+  ensureProjectName,
+} from '@nx/devkit/src/generators/project-name-and-root-utils';
+import { getImportPath } from '@nx/js/src/utils/get-import-path';
+import { normalizeLinterOption } from '@nx/js/src/utils/generator-prompts';
+import {
+  isUsingTsSolutionSetup,
+  isUsingTypeScriptPlugin,
+} from '@nx/js/src/utils/typescript/ts-solution-setup';
+import { promptWhenInteractive } from '@nx/devkit/src/generators/prompt';
 
 export async function nxCloudflareWorkerLibraryGenerator(
   tree: Tree,
@@ -37,8 +47,46 @@ async function normalizeOptions(
   tree: Tree,
   options: NxCloudflareLibraryGeneratorSchema
 ): Promise<NormalizedSchema> {
-  options.projectNameAndRootFormat =
-    options.projectNameAndRootFormat ?? 'as-provided';
+  await ensureProjectName(tree, options, 'library');
+
+  options.linter = await normalizeLinterOption(tree, options.linter);
+
+  const hasPlugin = isUsingTypeScriptPlugin(tree);
+  const isUsingTsSolutionConfig = isUsingTsSolutionSetup(tree);
+
+  if (isUsingTsSolutionConfig) {
+    options.unitTestRunner ??= await promptWhenInteractive<{
+      unitTestRunner: 'none' | 'vitest';
+    }>(
+      {
+        type: 'autocomplete',
+        name: 'unitTestRunner',
+        message: `Which unit test runner would you like to use?`,
+        choices: [{ name: 'none' }, { name: 'vitest' }, { name: 'jest' }],
+        initial: 0,
+      },
+      { unitTestRunner: 'none' }
+    ).then(({ unitTestRunner }) => unitTestRunner);
+  } else {
+    options.unitTestRunner ??= await promptWhenInteractive<{
+      unitTestRunner: 'none' | 'vitest';
+    }>(
+      {
+        type: 'autocomplete',
+        name: 'unitTestRunner',
+        message: `Which unit test runner would you like to use?`,
+        choices: [{ name: 'jest' }, { name: 'vitest' }, { name: 'none' }],
+        initial: 0,
+      },
+      { unitTestRunner: undefined }
+    ).then(({ unitTestRunner }) => unitTestRunner);
+
+    if (!options.unitTestRunner && options.bundler === 'vite') {
+      options.unitTestRunner = 'vitest';
+    } else if (!options.unitTestRunner && options.config !== 'npm-scripts') {
+      options.unitTestRunner = 'vitest';
+    }
+  }
 
   // ensure programmatic runs have an expected default
   if (!options.config) {
@@ -53,8 +101,15 @@ async function normalizeOptions(
     }
 
     if (options.bundler === 'none') {
-      options.bundler = 'tsc';
+      throw new Error(
+        `Publishable libraries can't be generated with "--bundler=none". Please select a valid bundler.`
+      );
     }
+  }
+
+  // This is to preserve old behavior, buildable: false
+  if (options.publishable === false) {
+    options.bundler = 'none';
   }
 
   if (options.config === 'npm-scripts') {
@@ -63,45 +118,65 @@ async function normalizeOptions(
     options.bundler = 'none';
   }
 
-  if (!options.linter && options.config !== 'npm-scripts') {
-    options.linter = 'none';
+  if (
+    (options.bundler === 'swc' || options.bundler === 'rollup') &&
+    (options.skipTypeCheck == null || !isUsingTsSolutionConfig)
+  ) {
+    options.skipTypeCheck = false;
   }
 
-  const { projectName, projectRoot, importPath } =
-    await determineProjectNameAndRootOptions(tree, {
-      name: options.name,
-      projectType: 'library',
-      directory: options.directory,
-      importPath: options.importPath,
-      projectNameAndRootFormat: options.projectNameAndRootFormat,
-      rootProject: options.rootProject,
-      callingGenerator: '@nx/js:library',
-    });
+  const {
+    projectName,
+    names: projectNames,
+    projectRoot,
+    importPath,
+  } = await determineProjectNameAndRootOptions(tree, {
+    name: options.name,
+    projectType: 'library',
+    directory: options.directory,
+    importPath: options.importPath,
+    rootProject: options.rootProject,
+  });
   options.rootProject = projectRoot === '.';
+  const fileName = names(
+    options.simpleName
+      ? projectNames.projectSimpleName
+      : projectNames.projectFileName
+  ).fileName;
+
+  const parsedTags = options.tags
+    ? options.tags.split(',').map((s) => s.trim())
+    : [];
 
   options.minimal ??= false;
 
+  // We default to generate a project.json file if the new setup is not being used
+  options.useProjectJson ??= !isUsingTsSolutionConfig;
+
   return {
     ...options,
-    name: projectName,
-    libProjectRoot: projectRoot,
+    fileName,
+    name: isUsingTsSolutionConfig
+      ? getImportPath(tree, projectName)
+      : projectName,
+    projectNames,
+    projectRoot,
+    parsedTags,
     importPath,
+    hasPlugin,
+    isUsingTsSolutionConfig,
   };
 }
 
 function updateTsLibConfig(tree: Tree, options: NormalizedSchema) {
-  updateJson(
-    tree,
-    join(options.libProjectRoot, 'tsconfig.lib.json'),
-    (json) => {
-      json.compilerOptions.types = [
-        ...json.compilerOptions.types,
-        '@cloudflare/workers-types/experimental',
-        '@cloudflare/vitest-pool-workers',
-      ];
-      return json;
-    }
-  );
+  updateJson(tree, join(options.projectRoot, 'tsconfig.lib.json'), (json) => {
+    json.compilerOptions.types = [
+      ...json.compilerOptions.types,
+      '@cloudflare/workers-types/experimental',
+      '@cloudflare/vitest-pool-workers',
+    ];
+    return json;
+  });
 }
 
 export default nxCloudflareWorkerLibraryGenerator;
