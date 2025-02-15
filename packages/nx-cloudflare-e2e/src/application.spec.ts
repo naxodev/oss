@@ -20,7 +20,7 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="none"`
+      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="none"`
     );
 
     expect(
@@ -32,7 +32,7 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="fetch-handler"`
+      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="fetch-handler"`
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
@@ -61,7 +61,7 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="scheduled-handler"`
+      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="scheduled-handler"`
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
@@ -86,7 +86,7 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name ${workerapp} --directory="apps" --template="hono"`
+      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="hono"`
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
