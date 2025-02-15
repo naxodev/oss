@@ -202,20 +202,14 @@ async function normalizeOptions(
   host: Tree,
   options: Schema
 ): Promise<NormalizedSchema> {
-  const {
-    projectName: appProjectName,
-    projectRoot: appProjectRoot,
-    projectNameAndRootFormat,
-  } = await determineProjectNameAndRootOptions(host, {
-    name: options.name,
-    projectType: 'application',
-    directory: options.directory,
-    projectNameAndRootFormat: options.projectNameAndRootFormat,
-    rootProject: options.rootProject,
-    callingGenerator: '@nx/node:application',
-  });
+  const { projectName: appProjectName, projectRoot: appProjectRoot } =
+    await determineProjectNameAndRootOptions(host, {
+      name: options.name,
+      projectType: 'application',
+      directory: options.directory,
+      rootProject: options.rootProject,
+    });
   options.rootProject = appProjectRoot === '.';
-  options.projectNameAndRootFormat = projectNameAndRootFormat;
 
   return {
     addPlugin: process.env.NX_ADD_PLUGINS !== 'false',
@@ -223,7 +217,6 @@ async function normalizeOptions(
     name: appProjectName,
     frontendProject: options.frontendProject,
     appProjectRoot,
-    projectNameAndRootFormat: options.projectNameAndRootFormat ?? 'as-provided',
     unitTestRunner: options.unitTestRunner ?? 'vitest',
     rootProject: options.rootProject ?? false,
     template: options.template ?? 'fetch-handler',

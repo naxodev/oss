@@ -1,13 +1,16 @@
+import type { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
+
+export type Bundler = 'swc' | 'tsc' | 'rollup' | 'vite' | 'esbuild' | 'none';
+
 export interface NxCloudflareLibraryGeneratorSchema {
-  name: string;
-  directory?: string;
-  projectNameAndRootFormat?: ProjectNameAndRootFormat;
-  linter?: Linter;
-  unitTestRunner?: 'vitest' | 'none';
-  tags?: string;
+  directory: string;
+  name?: string;
   skipFormat?: boolean;
-  skipPackageJson?: boolean;
+  linter?: Linter;
+  tags?: string;
   skipTsConfig?: boolean;
+  skipPackageJson?: boolean;
+  unitTestRunner?: 'vitest' | 'none';
   js?: boolean;
   strict?: boolean;
   publishable?: boolean;
@@ -19,8 +22,16 @@ export interface NxCloudflareLibraryGeneratorSchema {
   minimal?: boolean;
   rootProject?: boolean;
   simpleName?: boolean;
+  useProjectJson?: boolean;
 }
 
 export interface NormalizedSchema extends NxCloudflareLibraryGeneratorSchema {
-  libProjectRoot: string;
+  name: string;
+  projectNames: ProjectNameAndRootOptions['names'];
+  fileName: string;
+  projectRoot: string;
+  parsedTags: string[];
+  importPath?: string;
+  hasPlugin: boolean;
+  isUsingTsSolutionConfig: boolean;
 }
