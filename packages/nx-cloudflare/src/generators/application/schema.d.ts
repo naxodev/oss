@@ -5,7 +5,7 @@ export interface Schema {
   template?: 'fetch-handler' | 'scheduled-handler' | 'hono' | 'none';
   js?: boolean;
   unitTestRunner?: 'vitest' | 'none';
-  directory?: string;
+  directory: string;
   projectNameAndRootFormat?: ProjectNameAndRootFormat;
   rootProject?: boolean;
   tags?: string;
