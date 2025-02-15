@@ -20,7 +20,8 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="none"`
+      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="none"`,
+      { env: { NX_ADD_PLUGINS: 'true' } }
     );
 
     expect(
@@ -32,7 +33,8 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="fetch-handler"`
+      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="none"`,
+      { env: { NX_ADD_PLUGINS: 'true' } }
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
@@ -61,7 +63,8 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="scheduled-handler"`
+      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="none"`,
+      { env: { NX_ADD_PLUGINS: 'true' } }
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
@@ -86,7 +89,8 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="hono"`
+      `generate @naxodev/nx-cloudflare:app --directory="apps/${workerapp}" --name=${workerapp} --template="none"`,
+      { env: { NX_ADD_PLUGINS: 'true' } }
     );
 
     const lintResults = runNxCommand(`lint ${workerapp}`);
