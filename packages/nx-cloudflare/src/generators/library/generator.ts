@@ -8,7 +8,7 @@ import { join } from 'path';
 import initGenerator from '../init/generator';
 import {
   determineProjectNameAndRootOptions,
-  ensureProjectName,
+  ensureRootProjectName,
 } from '@nx/devkit/src/generators/project-name-and-root-utils';
 import { getImportPath } from '@nx/js/src/utils/get-import-path';
 import { normalizeLinterOption } from '@nx/js/src/utils/generator-prompts';
@@ -47,7 +47,7 @@ async function normalizeOptions(
   tree: Tree,
   options: NxCloudflareLibraryGeneratorSchema
 ): Promise<NormalizedSchema> {
-  await ensureProjectName(tree, options, 'library');
+  await ensureRootProjectName(options, 'library');
 
   options.linter = await normalizeLinterOption(tree, options.linter);
 
@@ -78,7 +78,7 @@ async function normalizeOptions(
         choices: [{ name: 'jest' }, { name: 'vitest' }, { name: 'none' }],
         initial: 0,
       },
-      { unitTestRunner: undefined }
+      { unitTestRunner: 'none' }
     ).then(({ unitTestRunner }) => unitTestRunner);
 
     if (!options.unitTestRunner && options.bundler === 'vite') {
