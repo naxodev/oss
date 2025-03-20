@@ -27,12 +27,12 @@
           {
             "input": "./packages/nx-cloudflare",
             "glob": "generators.json",
-            "output": "."
+            "output": "./"
           },
           {
             "input": "./packages/nx-cloudflare",
             "glob": "executors.json",
-            "output": "."
+            "output": "./"
           }
         ]
       }

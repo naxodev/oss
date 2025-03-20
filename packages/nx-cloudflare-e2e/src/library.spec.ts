@@ -31,7 +31,7 @@ describe('Cloudflare Worker Library', () => {
     const workerlib = uniq('workerlib');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:lib --name=${workerlib} --unitTestRunner="none"`
+      `generate @naxodev/nx-cloudflare:lib ${workerlib} --unitTestRunner="none"`
     );
 
     // Default directory should be the library name

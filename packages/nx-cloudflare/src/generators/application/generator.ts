@@ -17,7 +17,10 @@ import { join } from 'path';
 import initGenerator from '../init/generator';
 import { vitestImports } from './utils/vitest-imports';
 import { getAccountId } from './utils/get-account-id';
-import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
+import {
+  determineProjectNameAndRootOptions,
+  ensureRootProjectName,
+} from '@nx/devkit/src/generators/project-name-and-root-utils';
 import { nxVersion } from '@nx/node/src/utils/versions';
 
 export async function applicationGenerator(tree: Tree, schema: Schema) {
@@ -204,20 +207,19 @@ async function normalizeOptions(
   host: Tree,
   options: Schema
 ): Promise<NormalizedSchema> {
-  const { projectName: appProjectName, projectRoot: appProjectRoot } =
+  await ensureRootProjectName(options, 'application');
+  const { projectName, projectRoot: appProjectRoot } =
     await determineProjectNameAndRootOptions(host, {
       name: options.name,
       projectType: 'application',
-      // Use name as the directory if directory is not provided
-      directory: options.directory || options.name,
-      rootProject: options.rootProject,
+      directory: options.directory,
     });
   options.rootProject = appProjectRoot === '.';
 
   return {
     addPlugin: process.env.NX_ADD_PLUGINS !== 'false',
     ...options,
-    name: appProjectName,
+    name: projectName,
     frontendProject: options.frontendProject,
     appProjectRoot,
     unitTestRunner: options.unitTestRunner ?? 'vitest',

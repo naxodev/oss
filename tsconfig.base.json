@@ -8,7 +8,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "es2018",
     "module": "esnext",
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@naxodev/e2e-utils": ["packages/e2e-utils/src/index.ts"],
+      "@naxodev/gonx": ["packages/gonx/src/index.ts"],
       "@naxodev/nx-cloudflare": ["packages/nx-cloudflare/src/index.ts"]
     }
   },

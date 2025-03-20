@@ -1,9 +1,9 @@
 export interface Schema {
-  name: string;
+  directory: string;
+  name?: string;
   template?: 'fetch-handler' | 'scheduled-handler' | 'hono' | 'none';
   js?: boolean;
   unitTestRunner?: 'vitest' | 'none';
-  directory?: string;
   rootProject?: boolean;
   tags?: string;
   frontendProject?: string;

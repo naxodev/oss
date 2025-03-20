@@ -1,0 +1,34 @@
+{
+  "executors": {
+    "build": {
+      "implementation": "./src/executors/build/executor",
+      "schema": "./src/executors/build/schema.json",
+      "description": "Build the executable of a Go program"
+    },
+    "serve": {
+      "implementation": "./src/executors/serve/executor",
+      "schema": "./src/executors/serve/schema.json",
+      "description": "Run a Go application"
+    },
+    "lint": {
+      "implementation": "./src/executors/lint/executor",
+      "schema": "./src/executors/lint/schema.json",
+      "description": "Format and lint a Go project"
+    },
+    "test": {
+      "implementation": "./src/executors/test/executor",
+      "schema": "./src/executors/test/schema.json",
+      "description": "Run tests of a Go project"
+    },
+    "tidy": {
+      "implementation": "./src/executors/tidy/executor",
+      "schema": "./src/executors/tidy/schema.json",
+      "description": "Ensures go.mod file matches a project source code"
+    },
+    "nx-release-publish": {
+      "implementation": "./src/executors/nx-release-publish/nx-release-publish",
+      "schema": "./src/executors/nx-release-publish/schema.json",
+      "description": "List the module in the Golang registry"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@naxodev/gonx",
+  "version": "0.0.1-alpha.8",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "executors": "./executors.json",
+  "generators": "./generators.json",
+  "description": "Nx plugin for Golang",
+  "homepage": "https://github.com/naxodev/oss/tree/main/packages/gonx",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:naxodev/oss.git",
+    "directory": "packages/gonx"
+  },
+  "keywords": [
+    "nx",
+    "golang",
+    "go",
+    "plugin"
+  ],
+  "contributors": [
+    {
+      "name": "Nacho Vazquez",
+      "email": "nacho@naxo.dev",
+      "url": "https://github.com/NachoVazquez"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/naxodev/oss/issues?q=is:issue+is:open+sort:updated-desc"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@nx/devkit": "^21.0.0-rc.3",
+    "nx": "^21.0.0-rc.3",
+    "tslib": "^2.3.0",
+    "npm-run-path": "4.0.1",
+    "chalk": "^4.1.2"
+  }
+}

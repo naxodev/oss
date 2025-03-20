@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "@naxodev/gonx:library",
+  "title": "Go library generator options",
+  "type": "object",
+  "properties": {
+    "directory": {
+      "description": "The directory of the new library.",
+      "type": "string",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Which directory do you want to create the library in?"
+    },
+    "name": {
+      "description": "The name of the library.",
+      "type": "string",
+      "pattern": "^[a-zA-Z][^:]*$",
+      "x-priority": "important"
+    },
+    "tags": {
+      "type": "string",
+      "description": "Add tags to the library (used for linting)."
+    },
+    "skipFormat": {
+      "type": "boolean",
+      "description": "Skip formatting files.",
+      "default": false,
+      "x-priority": "internal"
+    }
+  },
+  "required": ["directory"]
+}

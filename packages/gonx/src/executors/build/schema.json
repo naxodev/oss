@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "outputCapture": "direct-nodejs",
+  "$schema": "https://json-schema.org/schema",
+  "title": "Build executor",
+  "description": "Builds an executable using the `go build` command",
+  "type": "object",
+  "properties": {
+    "main": {
+      "type": "string",
+      "description": "Path to the file containing the main() function",
+      "x-completion-type": "file",
+      "x-completion-glob": "main.go"
+    },
+    "compiler": {
+      "type": "string",
+      "enum": ["go", "tinygo"],
+      "description": "The Go compiler to use",
+      "default": "go"
+    },
+    "outputPath": {
+      "type": "string",
+      "description": "The output path of the resulting executable"
+    },
+    "buildMode": {
+      "type": "string",
+      "description": "The build mode to use"
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Environment variables to set when running the executor"
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Flags to pass to the go compiler"
+    }
+  }
+}

@@ -11,7 +11,6 @@
   "license": "MIT",
   "dependencies": {
     "fs-extra": "^11.2.0",
-    "semver": "^7.6.0",
     "typescript": "^5.4.4",
     "next": "^14.2.4",
     "webpack": "^5.90.1",
@@ -21,12 +20,13 @@
     "url-loader": "^4.1.1",
     "wrangler": "^4.7.1",
     "dotenv": "^16.4.4",
-    "@nx/js": "^20.0.0",
-    "nx": "^20.0.0",
-    "@nx/workspace": "^20.0.0",
-    "@nx/web": "^20.0.0",
-    "@nx/node": "^20.0.0",
-    "@nx/devkit": "^20.0.0"
+    "@nx/js": "^21.0.0-rc.3",
+    "nx": "^21.0.0-rc.3",
+    "@nx/workspace": "^21.0.0-rc.3",
+    "@nx/web": "^21.0.0-rc.3",
+    "@nx/node": "^21.0.0-rc.3",
+    "@nx/devkit": "^21.0.0-rc.3",
+    "semver": "^7.6.0"
   },
   "keywords": [
     "nx",
@@ -38,7 +38,7 @@
   "contributors": [
     {
       "name": "Nacho Vazquez",
-      "email": "nacho.vazquez.dev@gmail.com",
+      "email": "nacho@naxo.dev",
       "url": "https://github.com/NachoVazquez"
     }
   ],
