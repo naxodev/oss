@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@naxodev/e2e-utils": ["packages/e2e-utils/src/index.ts"],
+      "@naxodev/gonx": ["packages/gonx/src/index.ts"],
       "@naxodev/nx-cloudflare": ["packages/nx-cloudflare/src/index.ts"]
     }
   },

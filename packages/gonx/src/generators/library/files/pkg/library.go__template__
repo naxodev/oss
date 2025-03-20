@@ -1,0 +1,6 @@
+package pkg
+
+// <%= className %> is a sample function from the <%= name %> library
+func <%= className %>(param string) string {
+	return param
+}

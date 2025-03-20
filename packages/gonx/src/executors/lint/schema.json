@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Lint executor",
+  "description": "Formats and lints a Go project",
+  "type": "object",
+  "properties": {
+    "linter": {
+      "type": "string",
+      "description": "The command to execute when running the lint executor instead of go fmt.",
+      "default": "go fmt"
+    },
+    "args": {
+      "type": "array",
+      "description": "Extra args when linting the project",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": []
+}

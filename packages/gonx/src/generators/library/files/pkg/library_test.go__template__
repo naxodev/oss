@@ -1,0 +1,9 @@
+package pkg
+
+import "testing"
+
+func Test<%= className %>(t *testing.T) {
+	if <%= className %>("test") != "test" {
+		t.Error("Expected <%= className %>(\"test\") to return \"test\"")
+	}
+}

@@ -1,0 +1,15 @@
+{
+  "generators": {
+    "binary": {
+      "factory": "./src/generators/application/generator",
+      "schema": "./src/generators/application/schema.json",
+      "description": "Generate a Go binary",
+      "aliases": ["app", "bin", "application"]
+    },
+    "library": {
+      "factory": "./src/generators/library/generator",
+      "schema": "./src/generators/library/schema.json",
+      "description": "Generate a Go library"
+    }
+  }
+}

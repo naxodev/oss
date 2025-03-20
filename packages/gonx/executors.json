@@ -1,0 +1,34 @@
+{
+  "executors": {
+    "build": {
+      "implementation": "./src/executors/build/executor",
+      "schema": "./src/executors/build/schema.json",
+      "description": "Build a Go project"
+    },
+    "serve": {
+      "implementation": "./src/executors/serve/executor",
+      "schema": "./src/executors/serve/schema.json",
+      "description": "Run a Go application"
+    },
+    "lint": {
+      "implementation": "./src/executors/lint/executor",
+      "schema": "./src/executors/lint/schema.json",
+      "description": "Format and lint a Go project"
+    },
+    "test": {
+      "implementation": "./src/executors/test/executor",
+      "schema": "./src/executors/test/schema.json",
+      "description": "Run tests of a Go project"
+    },
+    "tidy": {
+      "implementation": "./src/executors/tidy/executor",
+      "schema": "./src/executors/tidy/schema.json",
+      "description": "Ensures go.mod file matches a project source code"
+    },
+    "generate": {
+      "implementation": "./src/executors/generate/executor",
+      "schema": "./src/executors/generate/schema.json",
+      "description": "Generate code using Go"
+    }
+  }
+}

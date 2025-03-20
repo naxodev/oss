@@ -1,0 +1,15 @@
+# <%= name %>
+
+This application was generated with [gonx](https://github.com/naxodev/gonx).
+
+## Building
+
+Run `nx build <%= projectName %>` to build the application.
+
+## Running
+
+Run `nx serve <%= projectName %>` to run the application.
+
+## Testing
+
+Run `nx test <%= projectName %>` to execute the unit tests.
