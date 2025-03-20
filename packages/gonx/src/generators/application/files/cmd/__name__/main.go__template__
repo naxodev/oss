@@ -1,9 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
+
+	"<%= projectName %>/pkg/server"
 )
 
 func main() {
-	fmt.Println("Hello, <%= name %>!")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	if err := server.StartServer(port); err != nil {
+		log.Fatalf("Server error: %v", err)
+	}
 }
