@@ -116,6 +116,8 @@ describe('app', () => {
           ],
           "ignorePatterns": [
             "!**/*",
+            "**/vite.config.*.timestamp*",
+            "**/vitest.config.*.timestamp*",
           ],
           "overrides": [
             {
