@@ -1,9 +1,15 @@
 {
   "$schema": "https://json-schema.org/schema",
   "version": 2,
-  "title": "Generate executor",
-  "description": "",
+  "title": "Tidy executor",
+  "description": "Ensures go.mod file matches a project's source code",
   "type": "object",
-  "properties": {},
+  "properties": {
+    "verbose": {
+      "type": "boolean",
+      "description": "Enable verbose output",
+      "default": false
+    }
+  },
   "required": []
 }

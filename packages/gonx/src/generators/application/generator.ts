@@ -62,7 +62,7 @@ export async function applicationGenerator(tree: Tree, options: ApplicationGener
   // Create go.mod file
   const goModPath = joinPathFragments(normalizedOptions.projectRoot, 'go.mod');
   const appName = normalizedOptions.projectName.replace(/-/g, '');
-  const goModContent = `module ${appName}\n\ngo 1.22\n`;
+  const goModContent = `module ${appName}\n\ngo 1.24\n`;
   
   // Create project files
   addFiles(tree, normalizedOptions);

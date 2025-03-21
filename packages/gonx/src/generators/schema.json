@@ -1,18 +1,30 @@
 {
   "$schema": "https://json-schema.org/schema",
-  "$id": "Library",
-  "title": "",
+  "$id": "GoInit",
+  "title": "Init Go Support",
+  "description": "Initialize Go support in an Nx workspace",
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string",
-      "description": "",
-      "$default": {
-        "$source": "argv",
-        "index": 0
-      },
-      "x-prompt": "What name would you like to use?"
+    "skipPackageJson": {
+      "type": "boolean",
+      "description": "Skip updating the package.json file",
+      "default": false
+    },
+    "skipWorkspaceJson": {
+      "type": "boolean",
+      "description": "Skip updating workspace.json",
+      "default": false
+    },
+    "skipGoDependencyCheck": {
+      "type": "boolean",
+      "description": "Skip checking for Go installation when computing project dependencies",
+      "default": false
+    },
+    "multiModule": {
+      "type": "boolean",
+      "description": "Enable multi-module Go workspace (requires Go 1.18+)",
+      "default": true
     }
   },
-  "required": ["name"]
+  "required": []
 }

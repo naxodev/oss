@@ -62,7 +62,7 @@ export async function libraryGenerator(tree: Tree, options: LibraryGeneratorSche
   // Create go.mod file
   const goModPath = joinPathFragments(normalizedOptions.projectRoot, 'go.mod');
   const libName = normalizedOptions.projectName.replace(/-/g, '');
-  const goModContent = `module ${libName}\n\ngo 1.22\n`;
+  const goModContent = `module ${libName}\n\ngo 1.24\n`;
   
   // Create project files
   addFiles(tree, normalizedOptions);

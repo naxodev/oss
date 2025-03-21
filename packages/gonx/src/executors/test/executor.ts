@@ -20,7 +20,7 @@ const runExecutor: PromiseExecutor<TestExecutorSchema> = async (
     throw new Error('No project name provided');
   }
   
-  const projectRoot = context.workspace.projects[projectName]?.root;
+  const projectRoot = context.projectsConfigurations.projects[projectName]?.root;
   
   if (!projectRoot) {
     throw new Error(`Cannot find project root for ${projectName}`);
@@ -75,10 +75,7 @@ const runExecutor: PromiseExecutor<TestExecutorSchema> = async (
     };
   } catch (error) {
     logger.error(`Error during testing: ${error.message}`);
-    return {
-      success: false,
-      error: error.message
-    };
+    throw new Error(error.message);
   }
 };
 

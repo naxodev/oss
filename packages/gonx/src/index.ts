@@ -1,11 +1,15 @@
 // plugin
-import { createNodeV2 } from '@nx/devkit';
+import { CreateNodes, createNodesV2 } from '@nx/devkit';
+
+interface GoPluginOptions {
+  skipGoDependencyCheck?: boolean;
+}
 
 // Entry point for your plugin
-export function plugin(options: { skipGoDependencyCheck?: boolean } = {}) {
+export function plugin(options: GoPluginOptions = {}): { name: string, createNodes: CreateNodes } {
   return {
     name: 'gonx',
-    createNodeV2: createNodeV2((projectPath) => {
+    createNodes: createNodesV2((projectPath) => {
       // This will be implemented later to analyze Go imports
       return {
         projects: [],

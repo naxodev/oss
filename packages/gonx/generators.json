@@ -1,15 +1,20 @@
 {
   "generators": {
-    "binary": {
+    "application": {
       "factory": "./src/generators/application/generator",
       "schema": "./src/generators/application/schema.json",
-      "description": "Generate a Go binary",
-      "aliases": ["app", "bin", "application"]
+      "description": "Generate a Go application",
+      "aliases": ["app", "bin", "binary"]
     },
     "library": {
       "factory": "./src/generators/library/generator",
       "schema": "./src/generators/library/schema.json",
       "description": "Generate a Go library"
+    },
+    "init": {
+      "factory": "./src/generators/init",
+      "schema": "./src/generators/schema.json",
+      "description": "Initialize Go support in an Nx workspace"
     }
   }
 }

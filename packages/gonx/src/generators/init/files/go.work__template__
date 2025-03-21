@@ -1,0 +1,5 @@
+go <%= goVersion %>
+
+<% if(multiModule) { %>
+# Directories will be added when creating Go projects
+<% } %>

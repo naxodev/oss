@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "vercel-build": "next build",
     "start": "next start"
   },
   "dependencies": {

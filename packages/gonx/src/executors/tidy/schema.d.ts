@@ -1,1 +1,3 @@
-export interface GenerateExecutorSchema {} // eslint-disable-line
+export interface TidyExecutorSchema {
+  verbose?: boolean;
+}
