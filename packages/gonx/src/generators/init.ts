@@ -26,33 +26,32 @@ export async function initGenerator(tree: Tree, options: InitGeneratorSchema) {
   
   // Update nx.json to include the plugin with options
   if (!options.skipWorkspaceJson) {
-    const nxJson = readNxJson(tree);
-    const plugins = nxJson.plugins || [];
-
-    // Check if @naxodev/gonx is already in plugins
-    const gonxPluginIndex = plugins.findIndex(plugin => {
-      if (typeof plugin === 'string') {
-        return plugin === '@naxodev/gonx';
+    const nxJson = readNxJson(tree) || {};
+    const hasPlugin = nxJson.plugins?.some((p) => 
+      typeof p === 'string' ? p === '@naxodev/gonx' : p.plugin === '@naxodev/gonx'
+    );
+    
+    if (!hasPlugin) {
+      if (!nxJson.plugins) {
+        nxJson.plugins = [];
       }
-      return plugin.plugin === '@naxodev/gonx';
-    });
-
-    if (gonxPluginIndex === -1) {
-      // Add the plugin if it doesn't exist
-      plugins.push({
-        plugin: '@naxodev/gonx',
-        options: {
-          skipGoDependencyCheck: options.skipGoDependencyCheck || false
+      
+      nxJson.plugins = [
+        ...nxJson.plugins,
+        {
+          plugin: '@naxodev/gonx',
+          options: {
+            skipGoDependencyCheck: options.skipGoDependencyCheck || false,
+            buildTargetName: 'build',
+            serveTargetName: 'serve',
+            testTargetName: 'test',
+            lintTargetName: 'lint',
+            tidyTargetName: 'tidy'
+          }
         }
-      });
+      ];
       
-      const updatedNxJson = {
-        ...nxJson,
-        plugins
-      };
-      
-      updateNxJson(tree, updatedNxJson);
-      
+      updateNxJson(tree, nxJson);
       logger.info('Updated nx.json to include the @naxodev/gonx plugin');
     }
   }
