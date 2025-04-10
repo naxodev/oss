@@ -1,12 +1,30 @@
 {
   "files": [
-    "README.md"
+    "./packages/nx-cloudflare/README.md"
   ],
   "imageSize": 100,
   "commit": false,
   "commitType": "docs",
   "commitConvention": "angular",
   "contributors": [
+      {
+      "login": "NachoVazquez",
+      "name": "Nacho Vazquez",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/9338604?v=4",
+      "profile": "https://github.com/NachoVazquez",
+      "contributions": [
+        "code",
+        "documentation",
+        "example",
+        "ideas",
+        "mentoring",
+        "maintenance",
+        "projectManagement",
+        "review",
+        "test",
+        "tool"
+      ]
+    },
     {
       "login": "terrxo",
       "name": "Nik",
