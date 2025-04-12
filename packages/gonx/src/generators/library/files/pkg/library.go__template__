@@ -1,4 +1,4 @@
-package pkg
+package <%= className %>
 
 // <%= className %> is a sample function from the <%= name %> library
 func <%= className %>(param string) string {

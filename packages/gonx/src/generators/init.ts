@@ -5,7 +5,7 @@ import {
   updateJson,
   logger,
   readNxJson,
-  updateNxJson
+  updateNxJson,
 } from '@nx/devkit';
 import * as path from 'path';
 import { InitGeneratorSchema } from './schema';
@@ -23,19 +23,21 @@ function getGoVersion(): string {
 
 export async function initGenerator(tree: Tree, options: InitGeneratorSchema) {
   logger.info('Initializing Go support for Nx workspace');
-  
+
   // Update nx.json to include the plugin with options
   if (!options.skipWorkspaceJson) {
     const nxJson = readNxJson(tree) || {};
-    const hasPlugin = nxJson.plugins?.some((p) => 
-      typeof p === 'string' ? p === '@naxodev/gonx' : p.plugin === '@naxodev/gonx'
+    const hasPlugin = nxJson.plugins?.some((p) =>
+      typeof p === 'string'
+        ? p === '@naxodev/gonx'
+        : p.plugin === '@naxodev/gonx'
     );
-    
+
     if (!hasPlugin) {
       if (!nxJson.plugins) {
         nxJson.plugins = [];
       }
-      
+
       nxJson.plugins = [
         ...nxJson.plugins,
         {
@@ -46,50 +48,50 @@ export async function initGenerator(tree: Tree, options: InitGeneratorSchema) {
             serveTargetName: 'serve',
             testTargetName: 'test',
             lintTargetName: 'lint',
-            tidyTargetName: 'tidy'
-          }
-        }
+            tidyTargetName: 'tidy',
+          },
+        },
       ];
-      
+
       updateNxJson(tree, nxJson);
       logger.info('Updated nx.json to include the @naxodev/gonx plugin');
     }
   }
-  
+
   // Update package.json
   if (!options.skipPackageJson) {
     updateJson(tree, 'package.json', (json) => {
       if (!json.dependencies) {
         json.dependencies = {};
       }
-      
+
       if (!json.dependencies['@naxodev/gonx']) {
         json.dependencies['@naxodev/gonx'] = '*';
       }
-      
+
       return json;
     });
-    
+
     logger.info('Updated package.json to include @naxodev/gonx dependency');
   }
-  
+
   // Generate files
   const goVersion = getGoVersion();
-  
+
   generateFiles(tree, path.join(__dirname, 'init/files'), '', {
     goVersion,
     multiModule: options.multiModule !== false,
-    template: ''
+    template: '',
   });
-  
+
   logger.info(`Created Go workspace files (Go ${goVersion})`);
-  
+
   if (options.multiModule !== false) {
     logger.info('Multi-module Go workspace enabled. This requires Go 1.18+');
   }
-  
+
   await formatFiles(tree);
-  
+
   logger.info('Go support successfully initialized!');
 }
 
