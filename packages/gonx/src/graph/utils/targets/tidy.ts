@@ -1,7 +1,9 @@
-export const tidy = (projectRoot: string) => ({
-  executor: 'nx:run-commands',
-  options: {
-    command: 'go mod tidy',
-    cwd: projectRoot,
-  },
+export const tidy = () => ({
+  executor: '@naxodev/gonx:tidy',
+  cache: true,
+  inputs: [
+    '{projectRoot}/go.mod',
+    '{projectRoot}/go.sum',
+    '{projectRoot}/**/*.{go}',
+  ],
 });

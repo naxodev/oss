@@ -10,7 +10,6 @@ import { hasMainPackage } from '../has-main-package';
 
 export function getTargetsByProjectType(
   projectRoot: string,
-  projectName: string,
   options: GoPluginOptions
 ) {
   // Detect if this is an application or a library
@@ -28,22 +27,22 @@ export function getTargetsByProjectType(
   const targets: Record<string, TargetConfiguration> = {};
 
   // Common test target - available for both apps and libraries
-  targets[testTargetName] = test(projectRoot);
+  targets[testTargetName] = test();
 
   // Tidy target - available for both apps and libraries
-  targets[tidyTargetName] = tidy(projectRoot);
+  targets[tidyTargetName] = tidy();
 
   // Lint target - available for both apps and libraries
-  targets[lintTargetName] = lint(projectRoot);
+  targets[lintTargetName] = lint();
 
   // Release-publish target - available for both apps and libraries
   targets[releasePublishTargetName] = releasePublish(projectRoot);
 
   // Build and run targets - only for applications
   if (isApplication) {
-    targets[buildTargetName] = build(projectRoot, projectName);
+    targets[buildTargetName] = build(projectRoot);
 
-    targets[runTargetName] = run(projectRoot);
+    targets[runTargetName] = run();
   }
 
   return targets;

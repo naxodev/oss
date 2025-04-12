@@ -7,7 +7,7 @@ import { TargetConfiguration } from '@nx/devkit';
  */
 export function releasePublish(projectRoot: string): TargetConfiguration {
   return {
-    executor: '@lazyengs/gonx:release-publish',
+    executor: '@naxodev/gonx:release-publish',
     options: {
       moduleRoot: projectRoot,
     },

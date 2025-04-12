@@ -1,16 +1,10 @@
-import { joinPathFragments } from '@nx/devkit';
-
-export const build = (projectRoot: string, projectName: string) => ({
-  executor: 'nx:run-commands',
-  options: {
-    command: 'go build .',
-    cwd: projectRoot,
-  },
+export const build = (projectRoot: string) => ({
+  executor: '@naxodev/gonx:build',
   cache: true,
   inputs: [
     '{projectRoot}/go.mod',
     '{projectRoot}/go.sum',
-    joinPathFragments('{projectRoot}', '**', '*.go'),
+    '{projectRoot}/**/*.{go}',
   ],
-  outputs: ['{projectRoot}/' + projectName],
+  outputs: [`dist/${projectRoot}`],
 });

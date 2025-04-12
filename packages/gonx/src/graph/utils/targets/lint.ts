@@ -1,7 +1,9 @@
-export const lint = (projectRoot: string) => ({
-  executor: 'nx:run-commands',
-  options: {
-    command: 'golangci-lint run',
-    cwd: projectRoot,
-  },
+export const lint = () => ({
+  executor: '@naxodev/gonx:lint',
+  cache: true,
+  inputs: [
+    '{projectRoot}/go.mod',
+    '{projectRoot}/go.sum',
+    '{projectRoot}/**/*.{go}',
+  ],
 });

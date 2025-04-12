@@ -19,7 +19,7 @@ export function createNodesInternal(
   const isApplication = hasMainPackage(projectRoot);
   const projectType = isApplication ? 'application' : 'library';
 
-  const targets = getTargetsByProjectType(projectRoot, projectName, options);
+  const targets = getTargetsByProjectType(projectRoot, options);
 
   // Create the project configuration
   const projectConfig: ProjectConfiguration & { root: string } = {
