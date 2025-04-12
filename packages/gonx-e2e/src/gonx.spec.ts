@@ -54,7 +54,7 @@ function createTestProject() {
   });
 
   execSync(
-    `pnpm dlx create-nx-workspace@latest ${projectName} --preset apps --nxCloud=skip --no-interactive`,
+    `pnpm dlx create-nx-workspace@latest ${projectName} --preset none --nxCloud=skip --no-interactive`,
     {
       cwd: dirname(projectDirectory),
       stdio: 'inherit',

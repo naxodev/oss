@@ -9,7 +9,6 @@ import {
   workspaceRoot,
   writeJsonFile,
 } from '@nx/devkit';
-import { createLockFile, createPackageJson, getLockFileName } from '@nx/js';
 import { join, resolve as pathResolve } from 'path';
 import {
   copySync,
@@ -28,6 +27,11 @@ import { checkPublicDirectory } from './lib/check-project';
 import { NextBuildBuilderOptions } from '../../utils/types';
 import { execSync, ExecSyncOptions } from 'child_process';
 import { createCliOptions } from '../../utils/create-cli-options';
+import { createPackageJson } from 'nx/src/plugins/js/package-json/create-package-json';
+import {
+  createLockFile,
+  getLockFileName,
+} from 'nx/src/plugins/js/lock-file/lock-file';
 
 // This executor is a modified version of the original `@nrwl/next:build` executor.
 // It's main modification is to use the cloudflare next-on-pages package.

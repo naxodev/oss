@@ -12,9 +12,15 @@ class MockProcess extends EventEmitter {
 }
 
 // Mock child_process methods
-vi.mock('child_process', async () => {
+vi.mock('child_process', async (importOriginal) => {
+  const actual = await importOriginal();
   return {
+    ...actual,
     spawn: vi.fn(),
+    default: {
+      ...actual.default,
+      spawn: vi.fn(),
+    }
   };
 });
 
@@ -53,7 +59,7 @@ describe('Serve Executor', () => {
     
     // Set up mock process
     mockProcess = new MockProcess();
-    vi.mocked(childProcess.spawn).mockReturnValue(mockProcess as any);
+    childProcess.spawn = vi.fn().mockReturnValue(mockProcess as any);
   });
 
   it('can run and succeed', async () => {

@@ -13,6 +13,9 @@
         "runInBand": true
       },
       "dependsOn": ["^build"]
+    },
+    "test": {
+      "executor": "nx:noop"
     }
   }
 }

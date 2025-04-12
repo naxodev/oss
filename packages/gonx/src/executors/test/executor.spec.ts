@@ -5,9 +5,15 @@ import { TestExecutorSchema } from './schema';
 import executor from './executor';
 
 // Mock child_process methods
-vi.mock('child_process', async () => {
+vi.mock('child_process', async (importOriginal) => {
+  const actual = await importOriginal();
   return {
+    ...actual,
     execSync: vi.fn(),
+    default: {
+      ...actual.default,
+      execSync: vi.fn(),
+    }
   };
 });
 
@@ -40,7 +46,7 @@ describe('Test Executor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock successful command execution
-    vi.mocked(childProcess.execSync).mockImplementation(() => Buffer.from(''));
+    childProcess.execSync = vi.fn().mockReturnValue(Buffer.from(''));
   });
 
   it('can run', async () => {
@@ -176,7 +182,7 @@ describe('Test Executor', () => {
 
   it('handles command execution error', async () => {
     // Mock command execution failure
-    vi.mocked(childProcess.execSync).mockImplementation(() => {
+    childProcess.execSync = vi.fn().mockImplementation(() => {
       throw new Error('Command failed');
     });
     
