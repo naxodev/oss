@@ -1,15 +1,15 @@
 {
   "name": "gonx-e2e",
-  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "gonx-e2e/src",
+  "sourceRoot": "packages/gonx-e2e/src",
   "implicitDependencies": ["gonx"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "gonx-e2e/jest.config.ts",
+        "jestConfig": "packages/gonx-e2e/jest.config.ts",
         "runInBand": true
       },
       "dependsOn": ["^build"]
