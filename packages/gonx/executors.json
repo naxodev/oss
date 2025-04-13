@@ -24,11 +24,6 @@
       "implementation": "./src/executors/tidy/executor",
       "schema": "./src/executors/tidy/schema.json",
       "description": "Ensures go.mod file matches a project source code"
-    },
-    "generate": {
-      "implementation": "./src/executors/generate/executor",
-      "schema": "./src/executors/generate/schema.json",
-      "description": "Generate code using Go"
     }
   }
 }

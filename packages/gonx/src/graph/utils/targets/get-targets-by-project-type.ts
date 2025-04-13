@@ -3,7 +3,7 @@ import { test } from './test';
 import { tidy } from './tidy';
 import { lint } from './lint';
 import { build } from './build';
-import { run } from './run';
+import { serve } from './serve';
 import { releasePublish } from './release-publish';
 import { GoPluginOptions } from '../../types/go-plugin-options';
 import { hasMainPackage } from '../has-main-package';
@@ -17,7 +17,7 @@ export function getTargetsByProjectType(
   // For better UX, set default target names if not provided
   const buildTargetName = options.buildTargetName || 'build';
   const testTargetName = options.testTargetName || 'test';
-  const runTargetName = options.runTargetName || 'serve';
+  const serveTargetName = options.runTargetName || 'serve';
   const tidyTargetName = options.tidyTargetName || 'tidy';
   const lintTargetName = options.lintTargetName || 'lint';
   const releasePublishTargetName =
@@ -42,7 +42,7 @@ export function getTargetsByProjectType(
   if (isApplication) {
     targets[buildTargetName] = build(projectRoot);
 
-    targets[runTargetName] = run();
+    targets[serveTargetName] = serve();
   }
 
   return targets;

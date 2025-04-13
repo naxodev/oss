@@ -1,10 +1,6 @@
 {
-  "extends": ["../../.eslintrc.base.json"],
-  "ignorePatterns": [
-    "!**/*",
-    "**/vite.config.*.timestamp*",
-    "**/vitest.config.*.timestamp*"
-  ],
+  "extends": ["../../.eslintrc.json", "../../.eslintrc.base.json"],
+  "ignorePatterns": ["!**/*", "**/test-fixtures/*"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -22,19 +18,11 @@
       "files": ["*.json"],
       "parser": "jsonc-eslint-parser",
       "rules": {
-        "@nx/dependency-checks": [
-          "error",
-          {
-            "ignoredFiles": [
-              "{projectRoot}/eslint.config.{js,cjs,mjs}",
-              "{projectRoot}/vite.config.{js,ts,mjs,mts}"
-            ]
-          }
-        ]
+        "@nx/dependency-checks": "error"
       }
     },
     {
-      "files": ["./package.json"],
+      "files": ["./package.json", "./executors.json", "./generators.json"],
       "parser": "jsonc-eslint-parser",
       "rules": {
         "@nx/nx-plugin-checks": "error"
