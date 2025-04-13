@@ -2,14 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExecutorContext } from '@nx/devkit';
 import { BuildExecutorSchema } from './schema';
 import executor from './executor';
-
-// Mock the entire child_process module
-vi.mock('child_process', () => {
-  return {
-    execSync: vi.fn(),
-  };
-});
-
 import { execSync } from 'child_process';
 
 describe('Build Executor', () => {
@@ -42,14 +34,11 @@ describe('Build Executor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock successful command execution
-    (execSync as any).mockReturnValue(Buffer.from(''));
   });
 
-  it('can run', async () => {
+  it('executes go build command successfully', async () => {
     const output = await executor(options, context);
 
-    // Verify execution
     expect(execSync).toHaveBeenCalledWith(
       'go build main.go',
       expect.objectContaining({
@@ -61,7 +50,7 @@ describe('Build Executor', () => {
     expect(output.success).toBe(true);
   });
 
-  it('handles compiler option', async () => {
+  it('uses custom compiler when specified', async () => {
     const result = await executor({ ...options, compiler: 'go1.24' }, context);
 
     expect(execSync).toHaveBeenCalledWith(
@@ -72,7 +61,7 @@ describe('Build Executor', () => {
     expect(result.success).toBe(true);
   });
 
-  it('handles outputPath option', async () => {
+  it('uses output path when specified', async () => {
     const result = await executor(
       { ...options, outputPath: 'bin/app' },
       context
@@ -86,7 +75,7 @@ describe('Build Executor', () => {
     expect(result.success).toBe(true);
   });
 
-  it('handles buildMode option', async () => {
+  it('applies buildMode option correctly', async () => {
     const result = await executor(
       { ...options, buildMode: 'c-shared' },
       context
@@ -100,7 +89,7 @@ describe('Build Executor', () => {
     expect(result.success).toBe(true);
   });
 
-  it('handles flags option', async () => {
+  it('includes custom flags when specified', async () => {
     const result = await executor(
       { ...options, flags: ['-race', '-v'] },
       context
@@ -114,7 +103,32 @@ describe('Build Executor', () => {
     expect(result.success).toBe(true);
   });
 
-  it('throws error when no project name is provided', async () => {
+  it('applies environment variables to the command', async () => {
+    const result = await executor(
+      { 
+        ...options, 
+        env: { 
+          CGO_ENABLED: '1',
+          GOOS: 'linux'
+        } 
+      },
+      context
+    );
+
+    expect(execSync).toHaveBeenCalledWith(
+      'go build main.go',
+      expect.objectContaining({
+        env: expect.objectContaining({
+          CGO_ENABLED: '1',
+          GOOS: 'linux'
+        })
+      })
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it('throws error when project name is missing', async () => {
     const badContext = { ...context, projectName: undefined };
     await expect(executor(options, badContext)).rejects.toThrow(
       'No project name provided'
@@ -136,9 +150,8 @@ describe('Build Executor', () => {
     );
   });
 
-  it('handles command execution error', async () => {
-    // Mock command execution failure
-    (execSync as any).mockImplementation(() => {
+  it('handles command execution error properly', async () => {
+    vi.mocked(execSync).mockImplementationOnce(() => {
       throw new Error('Command failed');
     });
 

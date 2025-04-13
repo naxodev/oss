@@ -13,12 +13,13 @@ export default defineConfig(() => ({
   test: {
     watch: false,
     globals: true,
-    isolate: false,
     environment: 'jsdom',
+    threads: false,
     include: [
-      'src/generators/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+      'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
     ],
     reporters: ['default'],
+    setupFiles: ['./vitest.setup.ts'],
     coverage: {
       reportsDirectory: '../../coverage/packages/gonx',
       provider: 'v8' as const,

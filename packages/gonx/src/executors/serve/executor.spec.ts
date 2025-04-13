@@ -1,28 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExecutorContext } from '@nx/devkit';
-import * as childProcess from 'child_process';
 import { EventEmitter } from 'events';
 import { ServeExecutorSchema } from './schema';
 import executor from './executor';
+import { spawn } from 'child_process';
 
 // Create a mock process with EventEmitter for testing
 class MockProcess extends EventEmitter {
   kill = vi.fn();
   killed = false;
 }
-
-// Mock child_process methods
-vi.mock('child_process', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    spawn: vi.fn(),
-    default: {
-      ...actual.default,
-      spawn: vi.fn(),
-    },
-  };
-});
 
 describe('Serve Executor', () => {
   let mockProcess: MockProcess;
@@ -56,18 +43,18 @@ describe('Serve Executor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
+    
     // Set up mock process
     mockProcess = new MockProcess();
-    childProcess.spawn = vi.fn().mockReturnValue(mockProcess as any);
+    vi.mocked(spawn).mockReturnValue(mockProcess as any);
   });
 
-  it('can run and succeed', async () => {
+  it('spawns go run command with correct parameters', async () => {
     // Create a pending promise that will be resolved by the event
     const executorPromise = executor(options, context);
 
     // Verify spawn was called with the right arguments
-    expect(childProcess.spawn).toHaveBeenCalledWith(
+    expect(spawn).toHaveBeenCalledWith(
       'go',
       ['run', 'main.go'],
       expect.objectContaining({
@@ -83,10 +70,13 @@ describe('Serve Executor', () => {
     expect(result.success).toBe(true);
   });
 
-  it('handles custom cmd option', async () => {
-    const executorPromise = executor({ ...options, cmd: 'go1.24' }, context);
+  it('uses custom Go command when specified', async () => {
+    const executorPromise = executor(
+      { ...options, cmd: 'go1.24' },
+      context
+    );
 
-    expect(childProcess.spawn).toHaveBeenCalledWith(
+    expect(spawn).toHaveBeenCalledWith(
       'go1.24',
       ['run', 'main.go'],
       expect.anything()
@@ -97,13 +87,13 @@ describe('Serve Executor', () => {
     expect(result.success).toBe(true);
   });
 
-  it('handles custom cwd option', async () => {
+  it('uses custom working directory when specified', async () => {
     const executorPromise = executor(
       { ...options, cwd: 'custom/path' },
       context
     );
 
-    expect(childProcess.spawn).toHaveBeenCalledWith(
+    expect(spawn).toHaveBeenCalledWith(
       'go',
       ['run', 'main.go'],
       expect.objectContaining({
@@ -116,13 +106,13 @@ describe('Serve Executor', () => {
     expect(result.success).toBe(true);
   });
 
-  it('handles args option', async () => {
+  it('passes command line arguments when specified', async () => {
     const executorPromise = executor(
       { ...options, args: ['--port=8080', '--debug'] },
       context
     );
 
-    expect(childProcess.spawn).toHaveBeenCalledWith(
+    expect(spawn).toHaveBeenCalledWith(
       'go',
       ['run', 'main.go', '--port=8080', '--debug'],
       expect.anything()
@@ -133,7 +123,7 @@ describe('Serve Executor', () => {
     expect(result.success).toBe(true);
   });
 
-  it('throws error when no project name is provided', async () => {
+  it('throws error when project name is missing', async () => {
     const badContext = { ...context, projectName: undefined };
     await expect(executor(options, badContext)).rejects.toThrow(
       'No project name provided'
@@ -155,7 +145,7 @@ describe('Serve Executor', () => {
     );
   });
 
-  it('handles process error', async () => {
+  it('handles process errors correctly', async () => {
     const executorPromise = executor(options, context);
 
     // Simulate process error
@@ -164,7 +154,7 @@ describe('Serve Executor', () => {
     await expect(executorPromise).rejects.toEqual('Process failed');
   });
 
-  it('handles non-zero exit code', async () => {
+  it('handles non-zero exit codes correctly', async () => {
     const executorPromise = executor(options, context);
 
     // Simulate process exit with non-zero code
