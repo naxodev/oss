@@ -14,10 +14,40 @@ const childProcessMock = {
   // Add any other methods you need
 };
 
-// Apply the mock
+// Apply the mock for child_process
 vi.mock('child_process', () => {
   return {
     ...childProcessMock,
     default: childProcessMock,
+  };
+});
+
+// Apply the mock for node:child_process as well
+vi.mock('node:child_process', () => {
+  return {
+    ...childProcessMock,
+    default: childProcessMock,
+  };
+});
+
+// Mock fs and node:fs with default functionality
+const fsMock = {
+  readFileSync: vi.fn().mockReturnValue(''),
+  existsSync: vi.fn().mockReturnValue(true),
+  mkdirSync: vi.fn(),
+  writeFileSync: vi.fn(),
+};
+
+vi.mock('fs', () => {
+  return {
+    ...fsMock,
+    default: fsMock,
+  };
+});
+
+vi.mock('node:fs', () => {
+  return {
+    ...fsMock,
+    default: fsMock,
   };
 });
