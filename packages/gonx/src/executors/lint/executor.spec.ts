@@ -13,13 +13,13 @@ vi.mock('child_process', async (importOriginal) => {
     default: {
       ...actual.default,
       execSync: vi.fn(),
-    }
+    },
   };
 });
 
 describe('Lint Executor', () => {
   const options: LintExecutorSchema = {};
-  
+
   const context: ExecutorContext = {
     root: '/root',
     cwd: '/root',
@@ -35,8 +35,8 @@ describe('Lint Executor', () => {
           root: 'apps/test-project',
           sourceRoot: 'apps/test-project',
           projectType: 'application',
-          targets: {}
-        }
+          targets: {},
+        },
       },
       version: 2,
     },
@@ -51,7 +51,7 @@ describe('Lint Executor', () => {
 
   it('can run', async () => {
     const output = await executor(options, context);
-    
+
     // Verify execution
     expect(childProcess.execSync).toHaveBeenCalledWith(
       'go fmt ./...',
@@ -60,7 +60,7 @@ describe('Lint Executor', () => {
         stdio: 'inherit',
       })
     );
-    
+
     expect(output.success).toBe(true);
   });
 
@@ -69,12 +69,12 @@ describe('Lint Executor', () => {
       { ...options, linter: 'golangci-lint run' },
       context
     );
-    
+
     expect(childProcess.execSync).toHaveBeenCalledWith(
       'golangci-lint run ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
@@ -83,18 +83,20 @@ describe('Lint Executor', () => {
       { ...options, args: ['-s', '--fix'] },
       context
     );
-    
+
     expect(childProcess.execSync).toHaveBeenCalledWith(
       'go fmt -s --fix ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
   it('throws error when no project name is provided', async () => {
     const badContext = { ...context, projectName: undefined };
-    await expect(executor(options, badContext)).rejects.toThrow('No project name provided');
+    await expect(executor(options, badContext)).rejects.toThrow(
+      'No project name provided'
+    );
   });
 
   it('throws error when project root cannot be found', async () => {
@@ -103,11 +105,13 @@ describe('Lint Executor', () => {
       projectName: 'non-existent',
       projectsConfigurations: {
         ...context.projectsConfigurations,
-        projects: {}
-      }
+        projects: {},
+      },
     };
-    
-    await expect(executor(options, badContext)).rejects.toThrow('Cannot find project root for non-existent');
+
+    await expect(executor(options, badContext)).rejects.toThrow(
+      'Cannot find project root for non-existent'
+    );
   });
 
   it('handles command execution error', async () => {
@@ -115,7 +119,7 @@ describe('Lint Executor', () => {
     childProcess.execSync = vi.fn().mockImplementation(() => {
       throw new Error('Command failed');
     });
-    
+
     await expect(executor(options, context)).rejects.toThrow('Command failed');
   });
 });

@@ -15,36 +15,37 @@ const runExecutor: PromiseExecutor<TidyExecutorSchema> = async (
   context: ExecutorContext
 ) => {
   const projectName = context.projectName;
-  
+
   if (!projectName) {
     throw new Error('No project name provided');
   }
-  
-  const projectRoot = context.projectsConfigurations.projects[projectName]?.root;
-  
+
+  const projectRoot =
+    context.projectsConfigurations.projects[projectName]?.root;
+
   if (!projectRoot) {
     throw new Error(`Cannot find project root for ${projectName}`);
   }
-  
+
   // Construct the tidy command
   let tidyCommand = 'go mod tidy';
-  
+
   // Add verbose flag if specified
   if (options.verbose) {
     tidyCommand += ' -v';
   }
-  
+
   try {
     logger.info(`Executing: ${tidyCommand}`);
-    
+
     // Execute the command
     execSync(tidyCommand, {
       cwd: path.join(context.root, projectRoot),
       stdio: 'inherit',
     });
-    
+
     return {
-      success: true
+      success: true,
     };
   } catch (error) {
     logger.error(`Error during go mod tidy: ${error.message}`);

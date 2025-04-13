@@ -15,7 +15,9 @@ export default defineConfig(() => ({
     globals: true,
     isolate: false,
     environment: 'jsdom',
-    include: ['src/generators/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: [
+      'src/generators/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+    ],
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/packages/gonx',

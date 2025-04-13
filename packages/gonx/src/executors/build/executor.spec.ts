@@ -6,7 +6,7 @@ import executor from './executor';
 // Mock the entire child_process module
 vi.mock('child_process', () => {
   return {
-    execSync: vi.fn()
+    execSync: vi.fn(),
   };
 });
 
@@ -145,4 +145,3 @@ describe('Build Executor', () => {
     await expect(executor(options, context)).rejects.toThrow('Command failed');
   });
 });
-

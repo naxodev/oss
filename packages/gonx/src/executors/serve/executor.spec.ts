@@ -20,17 +20,17 @@ vi.mock('child_process', async (importOriginal) => {
     default: {
       ...actual.default,
       spawn: vi.fn(),
-    }
+    },
   };
 });
 
 describe('Serve Executor', () => {
   let mockProcess: MockProcess;
-  
+
   const options: ServeExecutorSchema = {
-    main: 'main.go'
+    main: 'main.go',
   };
-  
+
   const context: ExecutorContext = {
     root: '/root',
     cwd: '/root',
@@ -46,8 +46,8 @@ describe('Serve Executor', () => {
           root: 'apps/test-project',
           sourceRoot: 'apps/test-project',
           projectType: 'application',
-          targets: {}
-        }
+          targets: {},
+        },
       },
       version: 2,
     },
@@ -56,7 +56,7 @@ describe('Serve Executor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Set up mock process
     mockProcess = new MockProcess();
     childProcess.spawn = vi.fn().mockReturnValue(mockProcess as any);
@@ -65,7 +65,7 @@ describe('Serve Executor', () => {
   it('can run and succeed', async () => {
     // Create a pending promise that will be resolved by the event
     const executorPromise = executor(options, context);
-    
+
     // Verify spawn was called with the right arguments
     expect(childProcess.spawn).toHaveBeenCalledWith(
       'go',
@@ -75,26 +75,23 @@ describe('Serve Executor', () => {
         stdio: 'inherit',
       })
     );
-    
+
     // Simulate process exit with success
     mockProcess.emit('exit', 0);
-    
+
     const result = await executorPromise;
     expect(result.success).toBe(true);
   });
 
   it('handles custom cmd option', async () => {
-    const executorPromise = executor(
-      { ...options, cmd: 'go1.24' },
-      context
-    );
-    
+    const executorPromise = executor({ ...options, cmd: 'go1.24' }, context);
+
     expect(childProcess.spawn).toHaveBeenCalledWith(
       'go1.24',
       ['run', 'main.go'],
       expect.anything()
     );
-    
+
     mockProcess.emit('exit', 0);
     const result = await executorPromise;
     expect(result.success).toBe(true);
@@ -105,7 +102,7 @@ describe('Serve Executor', () => {
       { ...options, cwd: 'custom/path' },
       context
     );
-    
+
     expect(childProcess.spawn).toHaveBeenCalledWith(
       'go',
       ['run', 'main.go'],
@@ -113,7 +110,7 @@ describe('Serve Executor', () => {
         cwd: '/root/custom/path',
       })
     );
-    
+
     mockProcess.emit('exit', 0);
     const result = await executorPromise;
     expect(result.success).toBe(true);
@@ -124,13 +121,13 @@ describe('Serve Executor', () => {
       { ...options, args: ['--port=8080', '--debug'] },
       context
     );
-    
+
     expect(childProcess.spawn).toHaveBeenCalledWith(
       'go',
       ['run', 'main.go', '--port=8080', '--debug'],
       expect.anything()
     );
-    
+
     mockProcess.emit('exit', 0);
     const result = await executorPromise;
     expect(result.success).toBe(true);
@@ -138,7 +135,9 @@ describe('Serve Executor', () => {
 
   it('throws error when no project name is provided', async () => {
     const badContext = { ...context, projectName: undefined };
-    await expect(executor(options, badContext)).rejects.toThrow('No project name provided');
+    await expect(executor(options, badContext)).rejects.toThrow(
+      'No project name provided'
+    );
   });
 
   it('throws error when project root cannot be found', async () => {
@@ -147,28 +146,30 @@ describe('Serve Executor', () => {
       projectName: 'non-existent',
       projectsConfigurations: {
         ...context.projectsConfigurations,
-        projects: {}
-      }
+        projects: {},
+      },
     };
-    
-    await expect(executor(options, badContext)).rejects.toThrow('Cannot find project root for non-existent');
+
+    await expect(executor(options, badContext)).rejects.toThrow(
+      'Cannot find project root for non-existent'
+    );
   });
 
   it('handles process error', async () => {
     const executorPromise = executor(options, context);
-    
+
     // Simulate process error
     mockProcess.emit('error', new Error('Process failed'));
-    
+
     await expect(executorPromise).rejects.toEqual('Process failed');
   });
 
   it('handles non-zero exit code', async () => {
     const executorPromise = executor(options, context);
-    
+
     // Simulate process exit with non-zero code
     mockProcess.emit('exit', 1);
-    
+
     await expect(executorPromise).rejects.toEqual('Process exited with code 1');
   });
 });
