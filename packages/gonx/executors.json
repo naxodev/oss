@@ -24,6 +24,11 @@
       "implementation": "./src/executors/tidy/executor",
       "schema": "./src/executors/tidy/schema.json",
       "description": "Ensures go.mod file matches a project source code"
+    },
+    "nx-release-publish": {
+      "implementation": "./src/executors/nx-release-publish",
+      "schema": "./src/executors/nx-release-publish/schema.json",
+      "description": "List the module in the Golang registry"
     }
   }
 }

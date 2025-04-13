@@ -31,8 +31,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "nx": "^20.0.0",
     "@nx/devkit": "^20.0.0",
+    "nx": "^20.0.0",
     "@nx/vite": "^20.0.0",
     "vite": "6.2.2",
     "tslib": "^2.3.0"

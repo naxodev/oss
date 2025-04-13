@@ -5,6 +5,7 @@
   "scripts": {},
   "private": true,
   "devDependencies": {
+    "npm-run-path": "4.0.1",
     "@angular-devkit/core": "~17.3.7",
     "@cloudflare/next-on-pages": "^1.13.7",
     "@cloudflare/vitest-pool-workers": "^0.6.16",
