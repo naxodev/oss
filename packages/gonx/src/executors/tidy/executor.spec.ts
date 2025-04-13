@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 
 describe('Tidy Executor', () => {
   const options: TidyExecutorSchema = {};
-  
+
   const context: ExecutorContext = {
     root: '/root',
     cwd: '/root',
@@ -22,8 +22,8 @@ describe('Tidy Executor', () => {
           root: 'apps/test-project',
           sourceRoot: 'apps/test-project',
           projectType: 'application',
-          targets: {}
-        }
+          targets: {},
+        },
       },
       version: 2,
     },
@@ -36,7 +36,7 @@ describe('Tidy Executor', () => {
 
   it('executes go mod tidy command successfully', async () => {
     const output = await executor(options, context);
-    
+
     expect(execSync).toHaveBeenCalledWith(
       'go mod tidy',
       expect.objectContaining({
@@ -44,27 +44,23 @@ describe('Tidy Executor', () => {
         stdio: 'inherit',
       })
     );
-    
+
     expect(output.success).toBe(true);
   });
 
   it('adds verbose flag when verbose option is true', async () => {
-    const result = await executor(
-      { ...options, verbose: true },
-      context
-    );
-    
-    expect(execSync).toHaveBeenCalledWith(
-      'go mod tidy -v',
-      expect.anything()
-    );
-    
+    const result = await executor({ ...options, verbose: true }, context);
+
+    expect(execSync).toHaveBeenCalledWith('go mod tidy -v', expect.anything());
+
     expect(result.success).toBe(true);
   });
 
   it('throws error when project name is missing', async () => {
     const badContext = { ...context, projectName: undefined };
-    await expect(executor(options, badContext)).rejects.toThrow('No project name provided');
+    await expect(executor(options, badContext)).rejects.toThrow(
+      'No project name provided'
+    );
   });
 
   it('throws error when project root cannot be found', async () => {
@@ -73,18 +69,20 @@ describe('Tidy Executor', () => {
       projectName: 'non-existent',
       projectsConfigurations: {
         ...context.projectsConfigurations,
-        projects: {}
-      }
+        projects: {},
+      },
     };
-    
-    await expect(executor(options, badContext)).rejects.toThrow('Cannot find project root for non-existent');
+
+    await expect(executor(options, badContext)).rejects.toThrow(
+      'Cannot find project root for non-existent'
+    );
   });
 
   it('handles command execution error properly', async () => {
     vi.mocked(execSync).mockImplementationOnce(() => {
       throw new Error('Command failed');
     });
-    
+
     await expect(executor(options, context)).rejects.toThrow('Command failed');
   });
 });

@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 
 describe('Test Executor', () => {
   const options: TestExecutorSchema = {};
-  
+
   const context: ExecutorContext = {
     root: '/root',
     cwd: '/root',
@@ -22,8 +22,8 @@ describe('Test Executor', () => {
           root: 'apps/test-project',
           sourceRoot: 'apps/test-project',
           projectType: 'application',
-          targets: {}
-        }
+          targets: {},
+        },
       },
       version: 2,
     },
@@ -36,7 +36,7 @@ describe('Test Executor', () => {
 
   it('executes go test command successfully', async () => {
     const output = await executor(options, context);
-    
+
     expect(execSync).toHaveBeenCalledWith(
       'go test ./...',
       expect.objectContaining({
@@ -44,21 +44,18 @@ describe('Test Executor', () => {
         stdio: 'inherit',
       })
     );
-    
+
     expect(output.success).toBe(true);
   });
 
   it('enables code coverage when cover option is true', async () => {
-    const result = await executor(
-      { ...options, cover: true },
-      context
-    );
-    
+    const result = await executor({ ...options, cover: true }, context);
+
     expect(execSync).toHaveBeenCalledWith(
       'go test -cover ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
@@ -67,97 +64,82 @@ describe('Test Executor', () => {
       { ...options, coverProfile: 'coverage.out' },
       context
     );
-    
+
     expect(execSync).toHaveBeenCalledWith(
       'go test -coverprofile=coverage.out ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
   it('enables race detection when race option is true', async () => {
-    const result = await executor(
-      { ...options, race: true },
-      context
-    );
-    
+    const result = await executor({ ...options, race: true }, context);
+
     expect(execSync).toHaveBeenCalledWith(
       'go test -race ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
   it('filters tests by pattern when run option is set', async () => {
-    const result = await executor(
-      { ...options, run: 'TestFunction' },
-      context
-    );
-    
+    const result = await executor({ ...options, run: 'TestFunction' }, context);
+
     expect(execSync).toHaveBeenCalledWith(
       'go test -run=TestFunction ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
   it('enables verbose output when verbose option is true', async () => {
-    const result = await executor(
-      { ...options, verbose: true },
-      context
-    );
-    
+    const result = await executor({ ...options, verbose: true }, context);
+
     expect(execSync).toHaveBeenCalledWith(
       'go test -v ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
   it('sets test count when count option is specified', async () => {
-    const result = await executor(
-      { ...options, count: 3 },
-      context
-    );
-    
+    const result = await executor({ ...options, count: 3 }, context);
+
     expect(execSync).toHaveBeenCalledWith(
       'go test -count=3 ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
   it('sets test timeout when timeout option is specified', async () => {
-    const result = await executor(
-      { ...options, timeout: '30s' },
-      context
-    );
-    
+    const result = await executor({ ...options, timeout: '30s' }, context);
+
     expect(execSync).toHaveBeenCalledWith(
       'go test -timeout=30s ./...',
       expect.anything()
     );
-    
+
     expect(result.success).toBe(true);
   });
 
   it('combines multiple options correctly', async () => {
     const result = await executor(
-      { 
-        ...options, 
+      {
+        ...options,
         verbose: true,
         cover: true,
         race: true,
-        timeout: '60s'
+        timeout: '60s',
       },
       context
     );
-    
+
     // Instead of checking exact order, check that the command contains all the expected flags
     expect(execSync).toHaveBeenCalled();
     const callArg = vi.mocked(execSync).mock.calls[0][0] as string;
@@ -167,13 +149,15 @@ describe('Test Executor', () => {
     expect(callArg).toContain('-race');
     expect(callArg).toContain('-timeout=60s');
     expect(callArg).toContain('./...');
-    
+
     expect(result.success).toBe(true);
   });
 
   it('throws error when project name is missing', async () => {
     const badContext = { ...context, projectName: undefined };
-    await expect(executor(options, badContext)).rejects.toThrow('No project name provided');
+    await expect(executor(options, badContext)).rejects.toThrow(
+      'No project name provided'
+    );
   });
 
   it('throws error when project root cannot be found', async () => {
@@ -182,18 +166,20 @@ describe('Test Executor', () => {
       projectName: 'non-existent',
       projectsConfigurations: {
         ...context.projectsConfigurations,
-        projects: {}
-      }
+        projects: {},
+      },
     };
-    
-    await expect(executor(options, badContext)).rejects.toThrow('Cannot find project root for non-existent');
+
+    await expect(executor(options, badContext)).rejects.toThrow(
+      'Cannot find project root for non-existent'
+    );
   });
 
   it('handles command execution error properly', async () => {
     vi.mocked(execSync).mockImplementationOnce(() => {
       throw new Error('Command failed');
     });
-    
+
     await expect(executor(options, context)).rejects.toThrow('Command failed');
   });
 });

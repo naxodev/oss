@@ -43,7 +43,7 @@ describe('Serve Executor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Set up mock process
     mockProcess = new MockProcess();
     vi.mocked(spawn).mockReturnValue(mockProcess as any);
@@ -71,10 +71,7 @@ describe('Serve Executor', () => {
   });
 
   it('uses custom Go command when specified', async () => {
-    const executorPromise = executor(
-      { ...options, cmd: 'go1.24' },
-      context
-    );
+    const executorPromise = executor({ ...options, cmd: 'go1.24' }, context);
 
     expect(spawn).toHaveBeenCalledWith(
       'go1.24',

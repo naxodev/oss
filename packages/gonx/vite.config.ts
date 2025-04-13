@@ -15,9 +15,7 @@ export default defineConfig(() => ({
     globals: true,
     environment: 'jsdom',
     threads: false,
-    include: [
-      'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-    ],
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     setupFiles: ['./vitest.setup.ts'],
     coverage: {

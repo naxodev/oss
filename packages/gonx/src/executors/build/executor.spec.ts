@@ -105,12 +105,12 @@ describe('Build Executor', () => {
 
   it('applies environment variables to the command', async () => {
     const result = await executor(
-      { 
-        ...options, 
-        env: { 
+      {
+        ...options,
+        env: {
           CGO_ENABLED: '1',
-          GOOS: 'linux'
-        } 
+          GOOS: 'linux',
+        },
       },
       context
     );
@@ -120,8 +120,8 @@ describe('Build Executor', () => {
       expect.objectContaining({
         env: expect.objectContaining({
           CGO_ENABLED: '1',
-          GOOS: 'linux'
-        })
+          GOOS: 'linux',
+        }),
       })
     );
 
