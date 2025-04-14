@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import { join, dirname } from 'path';
-import { mkdirSync, rmSync } from 'fs';
+import { mkdirSync, rmSync, existsSync } from 'fs';
 
 describe('gonx', () => {
   let projectDirectory: string;
@@ -34,6 +34,59 @@ describe('gonx', () => {
       stdio: 'inherit',
     });
   });
+
+  it('should generate a Go application', () => {
+    execSync('npx nx g @naxodev/gonx:init', {
+      cwd: projectDirectory,
+      stdio: 'inherit',
+      env: process.env,
+    });
+
+    // Generate a Go application
+    execSync('npx nx g @naxodev/gonx:application --name my-go-app', {
+      cwd: projectDirectory,
+      stdio: 'inherit',
+      env: process.env,
+    });
+
+    // Verify the application files were created
+    expect(existsSync(join(projectDirectory, 'apps/my-go-app/main.go'))).toBeTruthy();
+    expect(existsSync(join(projectDirectory, 'apps/my-go-app/go.mod'))).toBeTruthy();
+  });
+
+  it('should generate a Go library', () => {
+    // Generate a Go library
+    execSync('npx nx g @naxodev/gonx:library --name my-go-lib', {
+      cwd: projectDirectory,
+      stdio: 'inherit',
+      env: process.env,
+    });
+
+    // Verify the library files were created
+    expect(existsSync(join(projectDirectory, 'libs/my-go-lib/mygolib.go'))).toBeTruthy();
+    expect(existsSync(join(projectDirectory, 'libs/my-go-lib/go.mod'))).toBeTruthy();
+  });
+
+  it('should run the build executor', () => {
+    // Run the build executor
+    execSync('npx nx build my-go-app', {
+      cwd: projectDirectory,
+      stdio: 'inherit',
+      env: process.env,
+    });
+
+    // Skip verification as the output path might vary by OS
+    // The test will fail if the build executor fails
+  });
+
+  it('should run the tidy executor', () => {
+    // Run the tidy executor
+    execSync('npx nx tidy my-go-app', {
+      cwd: projectDirectory,
+      stdio: 'inherit',
+      env: process.env,
+    });
+  });
 });
 
 /**
@@ -54,7 +107,7 @@ function createTestProject() {
   });
 
   execSync(
-    `pnpm dlx create-nx-workspace@latest ${projectName} --preset none --nxCloud=skip --no-interactive`,
+    `pnpm dlx create-nx-workspace@latest ${projectName} --preset apps --nxCloud=skip --no-interactive`,
     {
       cwd: dirname(projectDirectory),
       stdio: 'inherit',
