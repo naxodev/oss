@@ -96,6 +96,104 @@ Available options:
 | tags       | string  | null       | Add tags to the library (used for linting) |
 | skipFormat | boolean | false      | Skip formatting files                      |
 
+## Executors
+
+gonx provides several executors to manage your Go projects within Nx:
+
+### Build Executor
+
+Builds a Go project using the Go compiler.
+
+```bash
+nx build my-go-app
+```
+
+Configuration options:
+
+| Option      | Type     | Default | Description                                                |
+| ----------- | -------- | ------- | ---------------------------------------------------------- |
+| main        | string   | -       | Path to the file containing the main() function (required) |
+| compiler    | string   | "go"    | The Go compiler to use (possible values: 'go', 'tinygo')   |
+| outputPath  | string   | -       | The output path of the resulting executable                |
+| buildMode   | string   | -       | Build mode to use                                          |
+| env         | object   | -       | Environment variables to set when running the executor     |
+| flags       | string[] | -       | Flags to pass to the go compiler                           |
+
+### Serve Executor
+
+Runs a Go application.
+
+```bash
+nx serve my-go-app
+```
+
+Configuration options:
+
+| Option | Type     | Default | Description                                                |
+| ------ | -------- | ------- | ---------------------------------------------------------- |
+| main   | string   | -       | Path to the file containing the main() function (required) |
+| cmd    | string   | "go"    | Name of the go binary to use                               |
+| cwd    | string   | -       | Working directory from which to run the application        |
+| args   | string[] | -       | Extra args when starting the app                           |
+| env    | object   | -       | Environment variables to set when running the application  |
+
+### Lint Executor
+
+Formats and lints a Go project.
+
+```bash
+nx lint my-go-app
+```
+
+Configuration options:
+
+| Option | Type     | Default  | Description                                  |
+| ------ | -------- | -------- | -------------------------------------------- |
+| linter | string   | "go fmt" | The command to execute instead of go fmt     |
+| args   | string[] | -        | Extra args when linting the project          |
+
+### Test Executor
+
+Runs tests for a Go project.
+
+```bash
+nx test my-go-app
+```
+
+Configuration options:
+
+| Option       | Type    | Default | Description                                                    |
+| ------------ | ------- | ------- | -------------------------------------------------------------- |
+| cover        | boolean | false   | Enable coverage analysis                                       |
+| coverProfile | string  | -       | Write a coverage profile to the file after all tests have passed |
+| race         | boolean | false   | Enable race detector                                           |
+| run          | string  | -       | Run only tests matching this regular expression                 |
+| verbose      | boolean | false   | Enable verbose test output                                     |
+| count        | number  | -       | Run test N times                                               |
+| timeout      | string  | "10m"   | Test timeout duration (0 to disable)                           |
+
+### Tidy Executor
+
+Ensures go.mod file matches the project's source code.
+
+```bash
+nx tidy my-go-app
+```
+
+Configuration options:
+
+| Option  | Type    | Default | Description           |
+| ------- | ------- | ------- | --------------------- |
+| verbose | boolean | false   | Enable verbose output |
+
+### Nx-Release-Publish Executor
+
+Lists the module in the Golang registry.
+
+```bash
+nx nx-release-publish my-go-lib
+```
+
 ## Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
