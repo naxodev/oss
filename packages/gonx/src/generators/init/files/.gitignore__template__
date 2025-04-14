@@ -1,0 +1,3 @@
+# Go workspace file is managed by Nx
+go.work
+go.work.sum

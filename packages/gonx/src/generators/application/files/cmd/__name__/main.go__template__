@@ -1,0 +1,19 @@
+package main
+
+import (
+	"log"
+	"os"
+
+	"<%= projectName %>/pkg/server"
+)
+
+func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	if err := server.StartServer(port); err != nil {
+		log.Fatalf("Server error: %v", err)
+	}
+}

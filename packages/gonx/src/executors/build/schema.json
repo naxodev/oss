@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Build executor",
+  "description": "Builds a project with go build cli command",
+  "type": "object",
+  "properties": {
+    "main": {
+      "type": "string",
+      "description": "Path to the file containing the main() function"
+    },
+    "compiler": {
+      "type": "string",
+      "description": "The Go compiler to use (possible values: 'go', 'tinygo')",
+      "default": "go"
+    },
+    "outputPath": {
+      "type": "string",
+      "description": "The output path of the resulting executable"
+    },
+    "buildMode": {
+      "type": "string",
+      "description": "Build mode to use"
+    },
+    "env": {
+      "type": "object",
+      "description": "Environment variables to set when running the executor"
+    },
+    "flags": {
+      "type": "array",
+      "description": "Flags to pass to the go compiler",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["main"]
+}

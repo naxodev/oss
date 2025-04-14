@@ -1,0 +1,7 @@
+# <%= name %>
+
+This library was generated with [gonx](https://github.com/naxodev/gonx).
+
+## Testing
+
+Run `nx test <%= projectName %>` to execute the unit tests.

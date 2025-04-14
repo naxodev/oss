@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Serve executor",
+  "description": "Run a Go application",
+  "type": "object",
+  "properties": {
+    "main": {
+      "type": "string",
+      "description": "Path to the file containing the main() function"
+    },
+    "cmd": {
+      "type": "string",
+      "description": "Name of the go binary to use",
+      "default": "go"
+    },
+    "cwd": {
+      "type": "string",
+      "description": "Working directory from which to run the application"
+    },
+    "args": {
+      "type": "array",
+      "description": "Extra args when starting the app",
+      "items": {
+        "type": "string"
+      }
+    },
+    "env": {
+      "type": "object",
+      "description": "Environment variables to set when running the application"
+    }
+  },
+  "required": ["main"]
+}

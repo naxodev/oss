@@ -1,5 +1,5 @@
 import type { ExecutorContext } from '@nx/devkit';
-import type { PackageJson } from 'nx/src/utils/package-json';
+import { PackageJson } from 'nx/src/utils/package-json';
 
 export function updatePackageJson(
   packageJson: PackageJson,

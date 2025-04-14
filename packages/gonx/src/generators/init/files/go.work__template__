@@ -1,0 +1,4 @@
+go <%= goVersion %>
+
+<% if(multiModule) { %>
+<% } %>

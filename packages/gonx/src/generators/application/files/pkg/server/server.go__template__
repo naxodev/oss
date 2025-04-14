@@ -1,0 +1,20 @@
+package server
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"<%= projectName %>/pkg/handlers"
+)
+
+// StartServer initializes and starts the HTTP server
+func StartServer(port string) error {
+	http.HandleFunc("/", handlers.HomeHandler)
+	http.HandleFunc("/health", handlers.HealthHandler)
+	
+	addr := fmt.Sprintf(":%s", port)
+	fmt.Printf("Starting <%= name %> server at http://localhost%s\n", addr)
+	
+	return http.ListenAndServe(addr, nil)
+}
