@@ -79,39 +79,6 @@ export async function applicationGenerator(
   // Create go.mod file
   tree.write(goModPath, goModContent);
 
-  // Add project configuration
-  const projectConfig: ProjectConfiguration = {
-    root: normalizedOptions.projectRoot,
-    projectType: 'application',
-    sourceRoot: `${normalizedOptions.projectRoot}/cmd/${normalizedOptions.name}`,
-    targets: {
-      build: {
-        executor: '@naxodev/gonx:build',
-        options: {
-          main: `./cmd/${normalizedOptions.name}/main.go`,
-        },
-      },
-      serve: {
-        executor: '@naxodev/gonx:serve',
-        options: {
-          main: `./cmd/${normalizedOptions.name}/main.go`,
-        },
-      },
-      test: {
-        executor: '@naxodev/gonx:test',
-      },
-      lint: {
-        executor: '@naxodev/gonx:lint',
-      },
-      tidy: {
-        executor: '@naxodev/gonx:tidy',
-      },
-    },
-    tags: normalizedOptions.parsedTags,
-  };
-
-  addProjectConfiguration(tree, normalizedOptions.projectName, projectConfig);
-
   if (!options.skipFormat) {
     await formatFiles(tree);
   }

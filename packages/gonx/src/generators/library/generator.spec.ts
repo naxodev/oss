@@ -1,12 +1,12 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
-import { Tree, readProjectConfiguration } from '@nx/devkit';
+import { Tree } from '@nx/devkit';
 
 import { libraryGenerator } from './generator';
 import { LibraryGeneratorSchema } from './schema';
 
 describe('library generator', () => {
   let tree: Tree;
-  const options: LibraryGeneratorSchema = { name: 'test' };
+  const options: LibraryGeneratorSchema = { name: 'go-pkg' };
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
@@ -14,7 +14,6 @@ describe('library generator', () => {
 
   it('should run successfully', async () => {
     await libraryGenerator(tree, options);
-    const config = readProjectConfiguration(tree, 'test');
-    expect(config).toBeDefined();
+    expect(tree.exists('go-pkg/pkg/library.go')).toBeTruthy();
   });
 });

@@ -59,6 +59,11 @@ describe('gonx', () => {
       existsSync(join(projectDirectory, 'my-go-app/cmd/my-go-app/main.go'))
     ).toBeTruthy();
     expect(existsSync(join(projectDirectory, 'my-go-app/go.mod'))).toBeTruthy();
+    
+    // Verify project.json is not created (using GraphV2 and inferred tasks instead)
+    expect(
+      existsSync(join(projectDirectory, 'my-go-app/project.json'))
+    ).toBeFalsy();
   });
 
   it('should generate a Go library', () => {
@@ -74,9 +79,11 @@ describe('gonx', () => {
       existsSync(join(projectDirectory, 'my-go-lib/pkg/library.go'))
     ).toBeTruthy();
     expect(existsSync(join(projectDirectory, 'my-go-lib/go.mod'))).toBeTruthy();
-    // expect(
-    //   existsSync(join(projectDirectory, 'my-go-lib/project.json'))
-    // ).toBeFalsy();
+    
+    // Verify project.json is not created (using GraphV2 and inferred tasks instead)
+    expect(
+      existsSync(join(projectDirectory, 'my-go-lib/project.json'))
+    ).toBeFalsy();
   });
 
   it('should run the build executor', () => {

@@ -79,27 +79,6 @@ export async function libraryGenerator(
   // Create go.mod file
   tree.write(goModPath, goModContent);
 
-  // Add project configuration
-  const projectConfig: ProjectConfiguration = {
-    root: normalizedOptions.projectRoot,
-    projectType: 'library',
-    sourceRoot: `${normalizedOptions.projectRoot}/pkg`,
-    targets: {
-      test: {
-        executor: '@naxodev/gonx:test',
-      },
-      lint: {
-        executor: '@naxodev/gonx:lint',
-      },
-      tidy: {
-        executor: '@naxodev/gonx:tidy',
-      },
-    },
-    tags: normalizedOptions.parsedTags,
-  };
-
-  addProjectConfiguration(tree, normalizedOptions.projectName, projectConfig);
-
   if (!options.skipFormat) {
     await formatFiles(tree);
   }

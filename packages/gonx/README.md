@@ -16,7 +16,9 @@
 
 <hr>
 
-Nx plugin for Go/Golang. This project is a fork of [nx-go](https://github.com/nx-go/nx-go) with modernized code and updated dependencies. Most credit goes to the original project maintainers - we're building on their excellent work.
+Very opinionated Nx plugin for Go/Golang. This project is a fork of [nx-go](https://github.com/nx-go/nx-go) with modernized code and updated dependencies. Most credit goes to the original project maintainers - we're building on their excellent work.
+
+The philosophy of gonx is to generate a non-invasive tooling to work with go and nx, that means that we heavily rely on inferred tasks and that this project will not be compatible with older version of Nx.
 
 ## Features
 
@@ -110,14 +112,14 @@ nx build my-go-app
 
 Configuration options:
 
-| Option      | Type     | Default | Description                                                |
-| ----------- | -------- | ------- | ---------------------------------------------------------- |
-| main        | string   | -       | Path to the file containing the main() function (required) |
-| compiler    | string   | "go"    | The Go compiler to use (possible values: 'go', 'tinygo')   |
-| outputPath  | string   | -       | The output path of the resulting executable                |
-| buildMode   | string   | -       | Build mode to use                                          |
-| env         | object   | -       | Environment variables to set when running the executor     |
-| flags       | string[] | -       | Flags to pass to the go compiler                           |
+| Option     | Type     | Default | Description                                                |
+| ---------- | -------- | ------- | ---------------------------------------------------------- |
+| main       | string   | -       | Path to the file containing the main() function (required) |
+| compiler   | string   | "go"    | The Go compiler to use (possible values: 'go', 'tinygo')   |
+| outputPath | string   | -       | The output path of the resulting executable                |
+| buildMode  | string   | -       | Build mode to use                                          |
+| env        | object   | -       | Environment variables to set when running the executor     |
+| flags      | string[] | -       | Flags to pass to the go compiler                           |
 
 ### Serve Executor
 
@@ -147,10 +149,10 @@ nx lint my-go-app
 
 Configuration options:
 
-| Option | Type     | Default  | Description                                  |
-| ------ | -------- | -------- | -------------------------------------------- |
-| linter | string   | "go fmt" | The command to execute instead of go fmt     |
-| args   | string[] | -        | Extra args when linting the project          |
+| Option | Type     | Default  | Description                              |
+| ------ | -------- | -------- | ---------------------------------------- |
+| linter | string   | "go fmt" | The command to execute instead of go fmt |
+| args   | string[] | -        | Extra args when linting the project      |
 
 ### Test Executor
 
@@ -162,15 +164,15 @@ nx test my-go-app
 
 Configuration options:
 
-| Option       | Type    | Default | Description                                                    |
-| ------------ | ------- | ------- | -------------------------------------------------------------- |
-| cover        | boolean | false   | Enable coverage analysis                                       |
+| Option       | Type    | Default | Description                                                      |
+| ------------ | ------- | ------- | ---------------------------------------------------------------- |
+| cover        | boolean | false   | Enable coverage analysis                                         |
 | coverProfile | string  | -       | Write a coverage profile to the file after all tests have passed |
-| race         | boolean | false   | Enable race detector                                           |
-| run          | string  | -       | Run only tests matching this regular expression                 |
-| verbose      | boolean | false   | Enable verbose test output                                     |
-| count        | number  | -       | Run test N times                                               |
-| timeout      | string  | "10m"   | Test timeout duration (0 to disable)                           |
+| race         | boolean | false   | Enable race detector                                             |
+| run          | string  | -       | Run only tests matching this regular expression                  |
+| verbose      | boolean | false   | Enable verbose test output                                       |
+| count        | number  | -       | Run test N times                                                 |
+| timeout      | string  | "10m"   | Test timeout duration (0 to disable)                             |
 
 ### Tidy Executor
 

@@ -1,12 +1,14 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
-import { Tree, readProjectConfiguration } from '@nx/devkit';
+import { Tree } from '@nx/devkit';
 
 import { applicationGenerator } from './generator';
 import { ApplicationGeneratorSchema } from './schema';
 
 describe('application generator', () => {
   let tree: Tree;
-  const options: ApplicationGeneratorSchema = { name: 'test' };
+  const options: ApplicationGeneratorSchema = {
+    name: 'go-app',
+  };
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
@@ -14,7 +16,6 @@ describe('application generator', () => {
 
   it('should run successfully', async () => {
     await applicationGenerator(tree, options);
-    const config = readProjectConfiguration(tree, 'test');
-    expect(config).toBeDefined();
+    expect(tree.exists('go-app/cmd/go-app/main.go')).toBeTruthy();
   });
 });
