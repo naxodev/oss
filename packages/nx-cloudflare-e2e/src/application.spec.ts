@@ -110,4 +110,23 @@ describe('Cloudflare Worker Applications', () => {
       await promisifiedTreeKill(p.pid, 'SIGKILL');
     }
   }, 120_000);
+
+  it('should be able to generate an application without specifying a directory', async () => {
+    const workerapp = uniq('workerapp');
+
+    runNxCommand(
+      `generate @naxodev/nx-cloudflare:app --name=${workerapp} --template="fetch-handler"`,
+      { env: { NX_ADD_PLUGINS: 'true' } }
+    );
+
+    const lintResults = runNxCommand(`lint ${workerapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${workerapp}`
+    );
+
+    // Default directory should be the app name
+    expect(
+      fileExists(join(tmpProjPath(), `${workerapp}/src/index.ts`))
+    ).toBeTruthy();
+  }, 120_000);
 });

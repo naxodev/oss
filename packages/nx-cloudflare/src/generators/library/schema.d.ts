@@ -3,7 +3,7 @@ import type { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/projec
 export type Bundler = 'swc' | 'tsc' | 'rollup' | 'vite' | 'esbuild' | 'none';
 
 export interface NxCloudflareLibraryGeneratorSchema {
-  directory: string;
+  directory?: string;
   name?: string;
   skipFormat?: boolean;
   linter?: Linter;

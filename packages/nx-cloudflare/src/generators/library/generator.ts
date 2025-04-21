@@ -30,7 +30,7 @@ export async function nxCloudflareWorkerLibraryGenerator(
     skipFormat: true,
   });
 
-  const libraryTask = await libraryGenerator(tree, options);
+  const libraryTask = await libraryGenerator(tree, { ...options, directory: options.directory || '' });
   updateTsLibConfig(tree, options);
 
   if (!options.skipFormat) {
@@ -47,7 +47,7 @@ async function normalizeOptions(
   tree: Tree,
   options: NxCloudflareLibraryGeneratorSchema
 ): Promise<NormalizedSchema> {
-  await ensureRootProjectName(options, 'library');
+  await ensureRootProjectName({ directory: options.directory || '', name: options.name }, 'library');
 
   options.linter = await normalizeLinterOption(tree, options.linter);
 
@@ -133,7 +133,7 @@ async function normalizeOptions(
   } = await determineProjectNameAndRootOptions(tree, {
     name: options.name,
     projectType: 'library',
-    directory: options.directory,
+    directory: options.directory || '',
     importPath: options.importPath,
     rootProject: options.rootProject,
   });

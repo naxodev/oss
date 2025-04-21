@@ -42,6 +42,7 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
         options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
       e2eTestRunner: 'none',
       name: schema.name,
+      directory: options.directory || '', // Ensure directory is not undefined
     })
   );
 
@@ -206,7 +207,7 @@ async function normalizeOptions(
     await determineProjectNameAndRootOptions(host, {
       name: options.name,
       projectType: 'application',
-      directory: options.directory,
+      directory: options.directory || '',
       rootProject: options.rootProject,
     });
   options.rootProject = appProjectRoot === '.';

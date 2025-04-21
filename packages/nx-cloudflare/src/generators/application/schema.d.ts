@@ -3,7 +3,7 @@ export interface Schema {
   template?: 'fetch-handler' | 'scheduled-handler' | 'hono' | 'none';
   js?: boolean;
   unitTestRunner?: 'vitest' | 'none';
-  directory: string;
+  directory?: string;
   rootProject?: boolean;
   tags?: string;
   frontendProject?: string;
