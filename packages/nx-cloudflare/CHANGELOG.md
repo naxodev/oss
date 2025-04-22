@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [4.0.2](https://github.com/naxodev/oss/compare/v4.0.1...v4.0.2) (2025-04-22)
+
+
+### Bug Fixes
+
+* **nx-cloudflare:** directory is not longer required for generators ([#67](https://github.com/naxodev/oss/issues/67)) ([e40177f](https://github.com/naxodev/oss/commit/e40177f13794b512c5b6355478626e57a251f79d))
+
 ## [4.0.1](https://github.com/naxodev/oss/compare/v4.0.0...v4.0.1) (2025-04-10)
 
 ## [4.0.0](https://github.com/naxodev/oss/compare/v3.1.1...v4.0.0) (2025-02-15)
