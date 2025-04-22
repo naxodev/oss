@@ -26,7 +26,7 @@ describe('Cloudflare Worker Library', () => {
       fileExists(join(tmpProjPath(), `libs/${workerlib}/project.json`))
     ).toBeTruthy();
   }, 30_000);
-  
+
   it('should be able to generate a library without specifying a directory', async () => {
     const workerlib = uniq('workerlib');
 

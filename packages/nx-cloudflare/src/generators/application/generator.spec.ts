@@ -147,7 +147,7 @@ describe('app', () => {
         }
       `);
     });
-    
+
     it('should generate files without directory parameter', async () => {
       // Test without specifying directory
       await applicationGenerator(tree, {
@@ -156,7 +156,7 @@ describe('app', () => {
       expect(tree.exists('myApp/src/index.ts')).toBeTruthy();
       expect(tree.exists('myApp/src/index.test.ts')).toBeTruthy();
       expect(tree.exists('myApp/src/index.integration.test.ts')).toBeTruthy();
-      
+
       const project = readProjectConfiguration(tree, 'myApp');
       expect(project.root).toEqual('myApp');
     });

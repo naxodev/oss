@@ -96,23 +96,25 @@ describe('lib', () => {
           },
         });
       });
-      
+
       it('should work without directory parameter', async () => {
         // Test without specifying directory
         await libraryGenerator(tree, {
           ...defaultOptions,
           name: 'my-lib-without-dir',
         });
-        
+
         const project = readProjectConfiguration(tree, 'my-lib-without-dir');
         expect(project.root).toEqual('my-lib-without-dir');
         expect(tree.exists('my-lib-without-dir/src/index.ts')).toBeTruthy();
-        expect(tree.exists('my-lib-without-dir/src/lib/my-lib-without-dir.ts')).toBeTruthy();
-        
+        expect(
+          tree.exists('my-lib-without-dir/src/lib/my-lib-without-dir.ts')
+        ).toBeTruthy();
+
         const tsconfigJson = readJson(tree, '/tsconfig.base.json');
-        expect(tsconfigJson.compilerOptions.paths['@proj/my-lib-without-dir']).toEqual([
-          'my-lib-without-dir/src/index.ts',
-        ]);
+        expect(
+          tsconfigJson.compilerOptions.paths['@proj/my-lib-without-dir']
+        ).toEqual(['my-lib-without-dir/src/index.ts']);
       });
 
       it('should update root tsconfig.base.json', async () => {
