@@ -26,4 +26,17 @@ describe('Cloudflare Worker Library', () => {
       fileExists(join(tmpProjPath(), `libs/${workerlib}/project.json`))
     ).toBeTruthy();
   }, 30_000);
+
+  it('should be able to generate a library without specifying a directory', async () => {
+    const workerlib = uniq('workerlib');
+
+    runNxCommand(
+      `generate @naxodev/nx-cloudflare:lib --name=${workerlib} --unitTestRunner="none"`
+    );
+
+    // Default directory should be the library name
+    expect(
+      fileExists(join(tmpProjPath(), `${workerlib}/project.json`))
+    ).toBeTruthy();
+  }, 30_000);
 });

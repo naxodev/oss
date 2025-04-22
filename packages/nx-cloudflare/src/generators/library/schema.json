@@ -18,7 +18,11 @@
     "directory": {
       "type": "string",
       "description": "A directory where the lib is placed.",
-      "x-priority": "important"
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Which directory do you want to create the library in?"
     },
     "linter": {
       "description": "The tool to use for running lint checks.",
