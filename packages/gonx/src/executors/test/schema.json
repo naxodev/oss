@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Test executor",
+  "description": "Run tests of a Go project",
+  "type": "object",
+  "properties": {
+    "cover": {
+      "type": "boolean",
+      "description": "Enable coverage analysis",
+      "default": false
+    },
+    "coverProfile": {
+      "type": "string",
+      "description": "Write a coverage profile to the file after all tests have passed"
+    },
+    "race": {
+      "type": "boolean",
+      "description": "Enable race detector",
+      "default": false
+    },
+    "run": {
+      "type": "string",
+      "description": "Run only tests matching this regular expression"
+    },
+    "verbose": {
+      "type": "boolean",
+      "description": "Enable verbose test output",
+      "default": false
+    },
+    "count": {
+      "type": "number",
+      "description": "Run test N times"
+    },
+    "timeout": {
+      "type": "string",
+      "description": "If a test binary runs longer than duration d, panic. If d is 0, the timeout is disabled. The default is 10 minutes (10m).",
+      "default": "10m"
+    }
+  },
+  "required": []
+}

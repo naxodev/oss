@@ -7,7 +7,6 @@ import {
 } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 
-import { Schema } from './schema';
 import { applicationGenerator } from './generator';
 
 describe('app', () => {
@@ -151,7 +150,7 @@ describe('app', () => {
     it('should generate files without directory parameter', async () => {
       // Test without specifying directory
       await applicationGenerator(tree, {
-        name: 'myApp',
+        directory: 'myApp',
       });
       expect(tree.exists('myApp/src/index.ts')).toBeTruthy();
       expect(tree.exists('myApp/src/index.test.ts')).toBeTruthy();

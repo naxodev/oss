@@ -1,0 +1,72 @@
+{
+  "name": "gonx",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/gonx/src",
+  "projectType": "library",
+  "tags": ["scope:public", "type:plugin"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/gonx",
+        "main": "packages/gonx/src/index.ts",
+        "tsConfig": "packages/gonx/tsconfig.lib.json",
+        "assets": [
+          "packages/gonx/*.md",
+          {
+            "input": "./packages/gonx/src",
+            "glob": "**/!(*.ts)",
+            "output": "./src"
+          },
+          {
+            "input": "./packages/gonx/src",
+            "glob": "**/*.d.ts",
+            "output": "./src"
+          },
+          {
+            "input": "./packages/gonx",
+            "glob": "generators.json",
+            "output": "./"
+          },
+          {
+            "input": "./packages/gonx",
+            "glob": "executors.json",
+            "output": "./"
+          }
+        ]
+      }
+    },
+    "version": {
+      "dependsOn": ["build"],
+      "executor": "@jscutlery/semver:version",
+      "options": {
+        "preset": "conventional",
+        "tagPrefix": "v",
+        "noVerify": true,
+        "push": true,
+        "preid": "beta",
+        "syncVersions": false,
+        "commitMessageFormat": "release(${projectName}): 🎸 cut release to ${version}",
+        "postTargets": ["gonx:github"]
+      }
+    },
+    "github": {
+      "executor": "@jscutlery/semver:github",
+      "options": {
+        "tag": "${tag}",
+        "notes": "${notes}"
+      }
+    },
+    "npm-publish": {
+      "executor": "ngx-deploy-npm:deploy",
+      "options": {
+        "access": "public"
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs gonx {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    }
+  }
+}

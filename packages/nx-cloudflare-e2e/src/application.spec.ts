@@ -115,7 +115,7 @@ describe('Cloudflare Worker Applications', () => {
     const workerapp = uniq('workerapp');
 
     runNxCommand(
-      `generate @naxodev/nx-cloudflare:app --name=${workerapp} --template="fetch-handler"`,
+      `generate @naxodev/nx-cloudflare:app ${workerapp} --template="fetch-handler"`,
       { env: { NX_ADD_PLUGINS: 'true' } }
     );
 

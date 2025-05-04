@@ -51,14 +51,7 @@ async function normalizeOptions(
   tree: Tree,
   options: NxCloudflareLibraryGeneratorSchema
 ): Promise<NormalizedSchema> {
-  await ensureRootProjectName(
-    {
-      name: options.name,
-      // Use name as the directory if directory is not provided
-      directory: options.directory || options.name,
-    },
-    'library'
-  );
+  await ensureRootProjectName(options, 'library');
 
   options.linter = await normalizeLinterOption(tree, options.linter);
 

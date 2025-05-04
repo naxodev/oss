@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "NxReleasePublish executor",
+  "description": "Publish a Go module to a registry as part of the release process",
+  "type": "object",
+  "properties": {
+    "moduleRoot": {
+      "type": "string",
+      "description": "Path to the directory containing the go.mod file. Defaults to the project root."
+    },
+    "dryRun": {
+      "type": "boolean",
+      "description": "Whether to perform a dry run (no actual publishing)",
+      "default": false
+    }
+  },
+  "required": []
+}

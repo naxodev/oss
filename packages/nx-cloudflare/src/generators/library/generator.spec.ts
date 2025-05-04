@@ -101,7 +101,7 @@ describe('lib', () => {
         // Test without specifying directory
         await libraryGenerator(tree, {
           ...defaultOptions,
-          name: 'my-lib-without-dir',
+          directory: 'my-lib-without-dir',
         });
 
         const project = readProjectConfiguration(tree, 'my-lib-without-dir');
