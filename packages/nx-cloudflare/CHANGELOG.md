@@ -6,7 +6,7 @@
 
 ### ❤️ Thank You
 
-- Nacho Vazquez @ngworker
+- Nacho Vazquez @NachoVazquez
 
 ## [4.0.2](https://github.com/naxodev/oss/compare/v4.0.1...v4.0.2) (2025-04-22)
 

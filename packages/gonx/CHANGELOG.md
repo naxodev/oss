@@ -6,4 +6,4 @@
 
 ### ❤️ Thank You
 
-- Nacho Vazquez @ngworker
+- Nacho Vazquez @NachoVazquez
