@@ -37,20 +37,6 @@
         ]
       }
     },
-    "version": {
-      "dependsOn": ["build"],
-      "executor": "@jscutlery/semver:version",
-      "options": {
-        "preset": "conventional",
-        "tagPrefix": "v",
-        "noVerify": true,
-        "push": true,
-        "preid": "beta",
-        "syncVersions": false,
-        "commitMessageFormat": "release(${projectName}): 🎸 cut release to ${version}",
-        "postTargets": ["gonx:github"]
-      }
-    },
     "github": {
       "executor": "@jscutlery/semver:github",
       "options": {
