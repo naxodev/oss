@@ -6,7 +6,7 @@
   "types": "./src/index.d.ts",
   "executors": "./executors.json",
   "generators": "./generators.json",
-  "description": "Nx plugin for Golang",
+  "description": "Modern Nx plugin to use Go in a Nx workspace",
   "homepage": "https://github.com/naxodev/oss/tree/main/packages/gonx",
   "repository": {
     "type": "git",
