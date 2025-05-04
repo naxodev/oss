@@ -5,6 +5,7 @@ import {
   ensureNxProject,
   cleanup,
 } from '@nx/plugin/testing';
+import { readFileSync } from 'fs';
 import { join } from 'path';
 
 describe('gonx:init', () => {
@@ -26,7 +27,7 @@ describe('gonx:init', () => {
 
     // Verify nx.json was updated with the plugin
     const nxJson = JSON.parse(
-      require('fs').readFileSync(join(tmpProjPath(), 'nx.json'), 'utf-8')
+      readFileSync(join(tmpProjPath(), 'nx.json'), 'utf-8')
     );
     const hasGonxPlugin = nxJson.plugins?.some(
       (plugin) =>
