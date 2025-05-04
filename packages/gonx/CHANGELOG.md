@@ -1,3 +1,13 @@
+## 1.0.0-rc.1 (2025-05-04)
+
+### 🩹 Fixes
+
+- update gonx description ([a9f126e](https://github.com/naxodev/oss/commit/a9f126e))
+
+### ❤️ Thank You
+
+- Nacho Vazquez
+
 ## 1.0.0-rc.0 (2025-05-04)
 
 ### 🩹 Fixes
