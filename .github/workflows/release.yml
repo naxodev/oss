@@ -1,13 +1,14 @@
 name: Release
 
 on:
-  - workflow_dispatch
+  release:
+      types: [published]
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       id-token: write # needed for provenance data generation
 
     if: github.ref == 'refs/heads/main'
@@ -19,13 +20,15 @@ jobs:
         with:
           git_bot_token: ${{ secrets.GIT_BOT_TOKEN }}
 
+      - name: Print Environment Info
+        run: npx nx report
+        shell: bash
+
       - name: Release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
         shell: bash
-        run: pnpm exec nx release --yes
+        run: pnpm exec nx release publish
 
 
