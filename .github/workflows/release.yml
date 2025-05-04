@@ -33,6 +33,18 @@ jobs:
           echo "Project name: $PROJECT_NAME extracted from tag: $RELEASE_TAG"
         shell: bash
 
+      - name: Determine if Prerelease
+        id: check-prerelease
+        run: |
+          IS_PRERELEASE=${{ github.event.release.prerelease }}
+          NPM_TAG="latest"
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            NPM_TAG="next"
+          fi
+          echo "NPM_TAG=$NPM_TAG" >> $GITHUB_ENV
+          echo "Publishing with NPM tag: $NPM_TAG"
+        shell: bash
+
       - name: Release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -40,6 +52,6 @@ jobs:
           # This is needed for actions/setup-node authentication to work
           npm_config_registry: https://registry.npmjs.org
         shell: bash
-        run: pnpm exec nx release publish --projects=${{ env.PROJECT_NAME }}
+        run: pnpm exec nx release publish --projects=${{ env.PROJECT_NAME }} --tag=${{ env.NPM_TAG }}
 
 
