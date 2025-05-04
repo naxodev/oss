@@ -25,7 +25,7 @@ runs:
 
     - name: Setup git user to "🤖 naxodev bot"
       shell: bash
-      run: git config user.email "-" && git config user.name "🤖 naxodev bot"
+      run: git config user.email "nacho@naxo.dev" && git config user.name "🤖 naxodev bot"
 
 
     - name: Determine Node.js version
