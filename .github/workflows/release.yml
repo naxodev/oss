@@ -26,6 +26,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
         shell: bash
-        run: nx release
+        run: pnpm exec nx release --yes
 
 
