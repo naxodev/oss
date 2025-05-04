@@ -1,3 +1,9 @@
 ## 0.1.0-0 (2025-05-04)
 
-This was a version bump only for gonx to align it with other projects, there were no code changes.
+### ⚠️  Breaking Changes
+
+- ⚠️  First release of gonx, a new plugin for Nx + Golang.
+
+### ❤️ Thank You
+
+- Nacho Vazquez @ngworker

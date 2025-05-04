@@ -1,23 +1,8 @@
 ## 4.1.0-0 (2025-05-04)
 
-### 🚀 Features
-
-- improve generated tests by using Vitest and workerd ([#53](https://github.com/naxodev/oss/pull/53), [#23435](https://github.com/naxodev/oss/issues/23435))
-- ⚠️  upgrade to nx 19 ([#46](https://github.com/naxodev/oss/pull/46))
-- update packages ([#44](https://github.com/naxodev/oss/pull/44))
-- install vitest using crystal ([#41](https://github.com/naxodev/oss/pull/41))
-
-### 🩹 Fixes
-
-- **nx-cloudflare:** directory is not longer required for generators ([#67](https://github.com/naxodev/oss/pull/67))
-- vitest workerd configuration ([#55](https://github.com/naxodev/oss/pull/55))
-- compatibility warning on deploy ([#43](https://github.com/naxodev/oss/pull/43))
-- nx-cloudflare Readme ([72f8e27](https://github.com/naxodev/oss/commit/72f8e27))
-- release pipeline ([#34](https://github.com/naxodev/oss/pull/34))
-
 ### ⚠️  Breaking Changes
 
-- ⚠️  upgrade to nx 19 ([#46](https://github.com/naxodev/oss/pull/46))
+- ⚠️  upgrade to nx 21.0.0.rc.3
 
 ### ❤️ Thank You
 
