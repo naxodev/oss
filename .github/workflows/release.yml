@@ -11,23 +11,35 @@ jobs:
       contents: read
       id-token: write # needed for provenance data generation
 
-
     steps:
       - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup
         with:
           git_bot_token: ${{ secrets.GIT_BOT_TOKEN }}
+          npm_token: ${{ secrets.NPM_TOKEN }}
 
       - name: Print Environment Info
         run: npx nx report
+        shell: bash
+        
+      - name: Extract Project from GitHub Release Tag
+        id: extract-project
+        run: |
+          RELEASE_TAG=${{ github.event.release.tag_name }}
+          PROJECT_NAME=$(echo $RELEASE_TAG | sed -E 's/(.+)@v.*/\1/')
+          echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          echo "Project name: $PROJECT_NAME extracted from tag: $RELEASE_TAG"
         shell: bash
 
       - name: Release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+          # This is needed for actions/setup-node authentication to work
+          npm_config_registry: https://registry.npmjs.org
         shell: bash
-        run: pnpm exec nx release publish
+        run: pnpm exec nx release publish --projects=${{ env.PROJECT_NAME }}
 
 
