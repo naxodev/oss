@@ -1,3 +1,13 @@
+## 1.0.0-rc.5 (2025-05-05)
+
+### 🩹 Fixes
+
+- **gonx:** rename publish executor ([aab4a08](https://github.com/naxodev/oss/commit/aab4a08))
+
+### ❤️ Thank You
+
+- Nacho Vazquez
+
 ## 1.0.0-rc.4 (2025-05-05)
 
 ### 🩹 Fixes
