@@ -1,3 +1,13 @@
+## 1.0.0-rc.4 (2025-05-05)
+
+### 🩹 Fixes
+
+- **gonx:** use the right version for the version action ([8e2106f](https://github.com/naxodev/oss/commit/8e2106f))
+
+### ❤️ Thank You
+
+- Nacho Vazquez
+
 ## 1.0.0-rc.3 (2025-05-05)
 
 ### 🩹 Fixes
