@@ -56,10 +56,6 @@ jobs:
           echo "Publishing with NPM tag: $NPM_TAG"
         shell: bash
 
-      - name: Build
-        run: pnpm exec nx build ${{ env.PROJECT_NAME }}
-        shell: bash
-
       - name: Publish Package
         shell: bash
         run: pnpm exec nx release publish --projects=${{ env.PROJECT_NAME }} --tag=${{ env.NPM_TAG }}
