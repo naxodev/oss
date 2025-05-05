@@ -34,7 +34,7 @@ export function createNodesInternal(
     // Add release configuration for nx release
     release: {
       version: {
-        versionActions: '@nx/js/src/release/version-actions',
+        versionActions: '@naxodev/gonx/src/release/go-version-actions',
       },
     },
   };
