@@ -1,3 +1,7 @@
+## 1.0.0-rc.2 (2025-05-05)
+
+This was a version bump only for gonx to align it with other projects, there were no code changes.
+
 ## 1.0.0-rc.1 (2025-05-04)
 
 ### 🩹 Fixes
