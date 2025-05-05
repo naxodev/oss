@@ -1,3 +1,13 @@
+## 1.0.0-rc.9 (2025-05-05)
+
+### 🩹 Fixes
+
+- tests ([90fa6e3](https://github.com/naxodev/oss/commit/90fa6e3))
+
+### ❤️ Thank You
+
+- Nacho Vazquez
+
 ## 1.0.0-rc.8 (2025-05-05)
 
 This was a version bump only for gonx to align it with other projects, there were no code changes.
