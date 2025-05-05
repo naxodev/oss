@@ -52,9 +52,8 @@
       "inputs": ["default", "^production"]
     },
     "nx-release-publish": {
-      "dependsOn": ["build"],
       "options": {
-        "packageRoot": "dist/{projectRoot}"
+        "packageRoot": "dist/{projectName}"
       }
     }
   },
