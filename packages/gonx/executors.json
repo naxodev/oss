@@ -25,7 +25,7 @@
       "schema": "./src/executors/tidy/schema.json",
       "description": "Ensures go.mod file matches a project source code"
     },
-    "nx-release-publish": {
+    "release-publish": {
       "implementation": "./src/executors/nx-release-publish/nx-release-publish",
       "schema": "./src/executors/nx-release-publish/schema.json",
       "description": "List the module in the Golang registry"
