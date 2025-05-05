@@ -1,11 +1,8 @@
 name: Release
 
 on:
-  workflow_dispatch:
-
-# on:
-#   release:
-#       types: [published]
+  release:
+      types: [published]
 
 jobs:
   release:
@@ -57,10 +54,6 @@ jobs:
           fi
           echo "NPM_TAG=$NPM_TAG" >> $GITHUB_ENV
           echo "Publishing with NPM tag: $NPM_TAG"
-        shell: bash
-
-      - name: Build
-        run: pnpm exec nx build ${{ env.PROJECT_NAME }}
         shell: bash
 
       - name: Publish Package
