@@ -158,20 +158,44 @@ export default async function runExecutor(
 
     output.logSingleLine(`Found latest version tag: ${currentTag}`);
 
-    // Prepare GOPROXY command
-    const goPublishCommand = `GOPROXY=proxy.golang.org go list -m ${moduleName}@${currentTag}`;
+    // Extract the version from the tag using regex based on the tag pattern
+    let version = currentTag;
+
+    // Create a regex pattern from the tag pattern, replacing {version} with a capturing group
+    if (tagPattern.includes('{version}')) {
+      // Escape special regex characters in the tag pattern
+      const escapeRegex = (str: string) =>
+        str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Create pattern by replacing {projectName} with its value and {version} with a capturing group
+      const regexPattern = escapeRegex(tagPattern)
+        .replace(escapeRegex('{projectName}'), escapeRegex(projectName))
+        .replace(escapeRegex('{version}'), '(.+)');
+
+      // Create regex and try to match
+      const regex = new RegExp(`^${regexPattern}$`);
+      const match = currentTag.match(regex);
+
+      if (match && match[1]) {
+        version = match[1];
+      }
+    }
+
+    // Prepare GOPROXY command - ensure version has proper format
+    const versionForCommand = version.startsWith('v') ? version : `v${version}`;
+    const goPublishCommand = `GOPROXY=proxy.golang.org go list -m ${moduleName}@${versionForCommand}`;
 
     output.logSingleLine(
       `Publishing ${chalk.bold(moduleName)} at version ${chalk.bold(
-        currentTag
-      )}...`
+        versionForCommand
+      )} (from tag ${chalk.bold(currentTag)})...`
     );
 
     if (isDryRun) {
       console.log(`Would run: ${goPublishCommand}`);
       console.log(
         `Would publish module ${chalk.cyan(moduleName)} at version ${chalk.cyan(
-          currentTag
+          versionForCommand
         )} to the Go proxy, but ${chalk.keyword('orange')('[dry-run]')} was set`
       );
     } else {
@@ -187,7 +211,7 @@ export default async function runExecutor(
       console.log('');
       console.log(
         `Published ${chalk.cyan(moduleName)}@${chalk.cyan(
-          currentTag
+          versionForCommand
         )} to Go proxy`
       );
     }
