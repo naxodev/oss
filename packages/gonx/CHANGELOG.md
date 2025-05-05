@@ -1,3 +1,13 @@
+## 1.0.0-rc.3 (2025-05-05)
+
+### 🩹 Fixes
+
+- **gonx:** attempt to fix versions actions ([c85265b](https://github.com/naxodev/oss/commit/c85265b))
+
+### ❤️ Thank You
+
+- Nacho Vazquez
+
 ## 1.0.0-rc.2 (2025-05-05)
 
 This was a version bump only for gonx to align it with other projects, there were no code changes.
