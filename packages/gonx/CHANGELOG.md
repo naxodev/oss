@@ -1,3 +1,13 @@
+## 1.0.0-rc.6 (2025-05-05)
+
+### 🩹 Fixes
+
+- **gonx:** properly extract the version of the package ([b7467bf](https://github.com/naxodev/oss/commit/b7467bf))
+
+### ❤️ Thank You
+
+- Nacho Vazquez
+
 ## 1.0.0-rc.5 (2025-05-05)
 
 ### 🩹 Fixes
