@@ -1,3 +1,13 @@
+# 1.0.0 (2025-05-06)
+
+### 🚀 Features
+
+- prepare gonx for v1 ([#69](https://github.com/naxodev/oss/pull/69))
+
+### ❤️ Thank You
+
+- Nacho Vazquez
+
 ## 1.0.0-rc.15 (2025-05-06)
 
 This was a version bump only for gonx to align it with other projects, there were no code changes.

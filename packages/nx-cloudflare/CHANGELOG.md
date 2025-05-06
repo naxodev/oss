@@ -1,3 +1,7 @@
+# 5.0.0 (2025-05-06)
+
+This was a version bump only for nx-cloudflare to align it with other projects, there were no code changes.
+
 ## 5.0.0-rc.1 (2025-05-05)
 
 This was a version bump only for nx-cloudflare to align it with other projects, there were no code changes.
