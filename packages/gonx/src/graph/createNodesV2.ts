@@ -2,8 +2,9 @@ import { CreateNodesV2, createNodesFromFiles } from '@nx/devkit';
 import { GoPluginOptions } from './types/go-plugin-options';
 import { createNodesInternal } from './utils/create-nodes-internal';
 
-// NOTE: LIMITATION: This assumes the name of the package from the last part of the path.
-// So having two package with the same name in different directories will cause issues.
+// NOTE: We use the full project path as the project name to ensure uniqueness
+// and compatibility with Go's release tagging convention (projectRoot/vx.x.x).
+// This removes potential name conflicts between packages at different locations.
 
 // File glob to find all Go projects
 const goModGlob = '**/go.mod';
