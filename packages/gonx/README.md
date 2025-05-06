@@ -100,6 +100,7 @@ Need more customization? See our [plugin configuration options](./docs/options.m
 - Removed the generation of the project.json for applications and libraries
   - We follow the philosophy of keeping non-js monorepos as pure as possible
 - Implemented the new `VersionActions` to enable version generation when using `nx release` with Go applications and libraries
+  - Project names now use the full path to ensure compatibility with Go's release tagging convention (`projectRoot/vx.x.x`)
 - Implemented the `publish` executor to use with `nx release` for publishing applications and libraries to the Go registry
 - Modified the build and serve executors to work with nested `main.go` packages (previously required manual `main.go` location)
 - Removed the generate executor (we plan to support generation options that better fit the Nx model)
@@ -199,6 +200,34 @@ Or as part of the Nx release process:
 ```bash
 nx release --publish
 ```
+
+#### Release Configuration
+
+gonx supports Nx's release process with Go's versioning conventions. We automatically set up project names to match their directory paths, which ensures compatibility with Go's release tagging convention (`projectRoot/vx.x.x`).
+
+To configure your workspace for releasing Go modules, add a configuration like this to your `nx.json`:
+
+```json
+{
+  "release": {
+    "projectsRelationship": "independent",
+    "projects": ["your-go-project"],
+    "releaseTagPattern": "{projectName}/v{version}", // important! this is the Go release tag pattern
+    "changelog": {
+      ...
+    },
+    "version": {
+      "useLegacyVersioning": false, // important! this means that we are using the plugin version actions
+      ...
+    },
+  }
+}
+```
+
+Key points about this configuration:
+
+- `releaseTagPattern`: Set to `{projectName}/v{version}` to create Go-compatible tags (e.g., `apps/myapp/v1.2.3`)
+- `projectName`: With gonx, this is the full path to your project, not just the directory name
 
 See the [nx-release-publish executor docs](./docs/executors/nx-release-publish.md) for more information.
 
