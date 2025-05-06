@@ -17,7 +17,7 @@ type ProxyGolangOrgVersionResponse = {
 
 const MANIFEST_FILENAME = 'go.mod';
 
-// NOTE: We use the full project path as the project name, which ensures compatibility 
+// NOTE: We use the full project path as the project name, which ensures compatibility
 // with Go's release tagging convention (projectRoot/vx.x.x) and prevents name conflicts.
 
 /**
