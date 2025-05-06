@@ -1,5 +1,5 @@
 import { CreateNodesContextV2, ProjectConfiguration } from '@nx/devkit';
-import { dirname, basename } from 'path';
+import { dirname } from 'path';
 import { GoPluginOptions } from '../types/go-plugin-options';
 import { hasMainPackage } from './has-main-package';
 import { getTargetsByProjectType } from './targets/get-targets-by-project-type';
@@ -14,8 +14,9 @@ export function createNodesInternal(
   // Get the full project root directory
   const projectRoot = dirname(configFilePath);
 
-  // Get a more readable name from the directory
-  const projectName = basename(projectRoot);
+  // Use the projectRoot as the name to ensure uniqueness
+  // This also supports Go's release tagging convention (projectRoot/vx.x.x)
+  const projectName = projectRoot;
 
   // Detect if this is an application or a library
   const isApplication = hasMainPackage(projectRoot);
