@@ -100,7 +100,8 @@
     "releaseTagPattern": "{projectName}@v{version}",
     "version": {
       "useLegacyVersioning": false,
-      "preVersionCommand": "pnpm exec nx run-many -t build"
+      "preVersionCommand": "pnpm exec nx run-many -t build",
+      "conventionalCommits": true
     },
     "git": {
       "commit": true,
@@ -108,7 +109,8 @@
     },
     "changelog": {
       "projectChangelogs": {
-        "createRelease": "github"
+        "createRelease": "github",
+        "file": false
       },
       "workspaceChangelog": false,
       "commitMessageFormat": "conventional"
