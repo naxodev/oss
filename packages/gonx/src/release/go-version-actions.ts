@@ -87,13 +87,6 @@ export default class GoVersionActions extends VersionActions {
     throw new Error('Method not implemented.');
   }
 
-  // We don't really have a way to determine if a dependency is local or not.
-  // In some cases (when using a Go workspace), we will not even declare local dependencies explicitly.
-  async isLocalDependencyProtocol(versionSpecifier: string): Promise<boolean> {
-    // we cannot determine the real value, so we default to true
-    return true;
-  }
-
   // Since go.mod does not contain the version, we cannot update it.
   async updateProjectVersion(
     tree: Tree,
