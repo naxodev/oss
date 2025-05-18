@@ -2,6 +2,8 @@
 
 This is my OSS workspace. I plan to add a misc of packages to this workspace. Check the list of current projects below.
 
+If you want to chat, you are invited to my [Discord Server](https://discord.gg/zjDCGpKP2S)
+
 ## Nx Cloudflare
 
 This is a Nx plugin for Cloudflare. In particular Cloudflare workers.
