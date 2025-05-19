@@ -258,8 +258,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       </td>
       <td align="center" valign="top" width="14.28%">
         <a href="https://github.com/creadicted">
-          <img src="https://avatars.githubusercontent.com/u/1899013?v=4?s=100" width="100px;" alt="Nik"/><br />
-          <sub><b>creadicted</b></sub>
+          <img src="https://avatars.githubusercontent.com/u/1899013?v=4?s=100" width="100px;" alt="Wenzel"/><br />
+          <sub><b>Wenzel</b></sub>
         </a><br />
         <a href="https://github.com/naxodev/oss/commits?author=creadicted" title="Code">💻</a>
       </td>
