@@ -16,7 +16,7 @@ import { getProjectNameForGoImport } from './utils/get-project-name-for-go-impor
 // So having two package with the same name in different directories will cause issues.
 
 export const createDependencies: CreateDependencies<GoPluginOptions> = async (
-  _,
+  options,
   context
 ) => {
   const dependencies: RawProjectGraphDependency[] = [];
@@ -30,7 +30,7 @@ export const createDependencies: CreateDependencies<GoPluginOptions> = async (
     );
 
     if (files.length > 0 && goModules == null) {
-      goModules = computeGoModules();
+      goModules = computeGoModules(options?.skipGoDependencyCheck);
       projectRootMap = extractProjectRootMap(context);
     }
 
