@@ -6,7 +6,7 @@ import { getTargetsByProjectType } from './targets/get-targets-by-project-type';
 
 export function createNodesInternal(
   configFilePath: string,
-  options: GoPluginOptions,
+  options: GoPluginOptions = {},
   // context is not used, but TypeScript needs the parameter
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   context: CreateNodesContextV2
