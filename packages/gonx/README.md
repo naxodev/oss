@@ -263,6 +263,13 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
         </a><br />
         <a href="https://github.com/naxodev/oss/commits?author=creadicted" title="Code">💻</a>
       </td>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/mpsanchis">
+          <img src="https://avatars.githubusercontent.com/u/33475618?v=4?s=100" width="100px;" alt="Miguel"/><br />
+          <sub><b>Miguel</b></sub>
+        </a><br />
+        <a href="https://github.com/naxodev/oss/commits?author=mpsanchis" title="Code">💻</a>
+      </td>
     </tr>
   </tbody>
 </table>
