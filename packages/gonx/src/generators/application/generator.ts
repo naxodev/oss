@@ -17,6 +17,7 @@ export default async function applicationGenerator(
 
   await initGenerator(tree, {
     skipFormat: true,
+    addGoDotWork: options.addGoDotWork,
   });
 
   generateFiles(tree, join(__dirname, 'files'), options.projectRoot, options);

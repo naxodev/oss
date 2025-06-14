@@ -9,6 +9,11 @@
       "description": "Skip formatting files.",
       "default": false,
       "x-priority": "internal"
+    },
+    "addGoDotWork": {
+      "type": "boolean",
+      "description": "Add a go.work file to the project.",
+      "default": false
     }
   }
 }

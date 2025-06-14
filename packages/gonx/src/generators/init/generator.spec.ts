@@ -11,7 +11,6 @@ jest.mock('@nx/devkit', () => ({
 }));
 jest.mock('../../utils', () => ({
   addNxPlugin: jest.fn(),
-  createGoMod: jest.fn(),
   createGoWork: jest.fn(),
   ensureGoConfigInSharedGlobals: jest.fn(),
   getProjectScope: jest.fn().mockReturnValue('proj'),
@@ -30,21 +29,39 @@ describe('init generator', () => {
     expect(shared.addNxPlugin).toHaveBeenCalledWith(tree);
   });
 
-  it('should create go workspace if supported', async () => {
+  it('should create go workspace if supported and flag is set', async () => {
     jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
-    await initGenerator(tree, options);
+    await initGenerator(tree, { ...options, addGoDotWork: true });
     expect(shared.createGoWork).toHaveBeenCalledWith(tree);
   });
 
-  it('should create go mod if go workspace is not supported', async () => {
-    jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(false);
+  it('should not create go workspace if flag is not set', async () => {
+    jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
     await initGenerator(tree, options);
-    expect(shared.createGoMod).toHaveBeenCalledWith(tree, 'proj');
-    expect(nxDevkit.logger.warn).toHaveBeenCalledTimes(1);
+    expect(shared.createGoWork).not.toHaveBeenCalled();
   });
 
-  it('should ensure go configuration in shared globals', async () => {
+  it('should ensure go configuration in shared globals when go.work is enabled', async () => {
+    await initGenerator(tree, { ...options, addGoDotWork: true });
+    expect(shared.ensureGoConfigInSharedGlobals).toHaveBeenCalledWith(tree);
+  });
+
+  it('should not ensure go configuration in shared globals when go.work is disabled', async () => {
     await initGenerator(tree, options);
+    expect(shared.ensureGoConfigInSharedGlobals).not.toHaveBeenCalled();
+  });
+
+  it('should not create go workspace when flag is not set even if workspace supports it', async () => {
+    jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
+    await initGenerator(tree, { ...options, addGoDotWork: false });
+    expect(shared.createGoWork).not.toHaveBeenCalled();
+    expect(shared.ensureGoConfigInSharedGlobals).not.toHaveBeenCalled();
+  });
+
+  it('should not create go workspace when workspace does not support it even if flag is set', async () => {
+    jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(false);
+    await initGenerator(tree, { ...options, addGoDotWork: true });
+    expect(shared.createGoWork).not.toHaveBeenCalled();
     expect(shared.ensureGoConfigInSharedGlobals).toHaveBeenCalledWith(tree);
   });
 
