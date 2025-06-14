@@ -53,14 +53,14 @@ describe('Nx bridge', () => {
     });
   });
 
-  describe('Method: ensureGoModInSharedGlobals', () => {
+  describe('Method: ensureGoConfigInSharedGlobals', () => {
     it.each`
-      sharedGlobals                          | isGoWorkspace | updated  | expectedSharedGlobals                  | description
-      ${[]}                                  | ${false}      | ${true}  | ${[`{workspaceRoot}/${GO_MOD_FILE}`]}  | ${'there is no go mod yet'}
-      ${[`{workspaceRoot}/${GO_WORK_FILE}`]} | ${false}      | ${true}  | ${[`{workspaceRoot}/${GO_MOD_FILE}`]}  | ${'there is already a go work but need a go mod'}
-      ${[]}                                  | ${true}       | ${true}  | ${[`{workspaceRoot}/${GO_WORK_FILE}`]} | ${'there is no go work yet'}
-      ${[`{workspaceRoot}/${GO_WORK_FILE}`]} | ${true}       | ${false} | ${[`{workspaceRoot}/${GO_WORK_FILE}`]} | ${'there is already a go work'}
-      ${[`{workspaceRoot}/${GO_MOD_FILE}`]}  | ${true}       | ${true}  | ${[`{workspaceRoot}/${GO_WORK_FILE}`]} | ${'there is already a go mod but need a go work'}
+      sharedGlobals                          | isGoWorkspace | updated  | expectedSharedGlobals                                                    | description
+      ${[]}                                  | ${false}      | ${false} | ${[]}                                                                    | ${'workspace is not using go.work'}
+      ${[`{workspaceRoot}/${GO_MOD_FILE}`]}  | ${false}      | ${false} | ${[`{workspaceRoot}/${GO_MOD_FILE}`]}                                    | ${'workspace is not using go.work but has go.mod'}
+      ${[]}                                  | ${true}       | ${true}  | ${[`{workspaceRoot}/${GO_WORK_FILE}`]}                                   | ${'workspace is using go.work and no shared globals exist'}
+      ${[`{workspaceRoot}/${GO_WORK_FILE}`]} | ${true}       | ${false} | ${[`{workspaceRoot}/${GO_WORK_FILE}`]}                                   | ${'workspace is using go.work and go.work already in shared globals'}
+      ${[`{workspaceRoot}/${GO_MOD_FILE}`]}  | ${true}       | ${true}  | ${[`{workspaceRoot}/${GO_MOD_FILE}`, `{workspaceRoot}/${GO_WORK_FILE}`]} | ${'workspace is using go.work but only has go.mod in shared globals'}
     `(
       'should modify sharedGlobals if $description',
       ({ sharedGlobals, isGoWorkspace, updated, expectedSharedGlobals }) => {

@@ -13,8 +13,8 @@ describe('Go Applications', () => {
   beforeEach(() => {
     ensureNxProject('@naxodev/gonx', 'dist/packages/gonx');
 
-    // Initialize Go support first
-    runNxCommand('generate @naxodev/gonx:init');
+    // Initialize Go support first with go.work support
+    runNxCommand('generate @naxodev/gonx:init --addGoDotWork');
   });
 
   afterEach(() => cleanup());
