@@ -10,27 +10,15 @@
     "importHelpers": true,
     "target": "es2018",
     "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@naxodev/e2e-utils": [
-        "packages/e2e-utils/src/index.ts"
-      ],
-      "@naxodev/gonx": [
-        "packages/gonx/src/index.ts"
-      ],
-      "@naxodev/nx-cloudflare": [
-        "packages/nx-cloudflare/src/index.ts"
-      ]
+      "@naxodev/e2e-utils": ["packages/e2e-utils/src/index.ts"],
+      "@naxodev/gonx": ["packages/gonx/src/index.ts"],
+      "@naxodev/nx-cloudflare": ["packages/nx-cloudflare/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }
