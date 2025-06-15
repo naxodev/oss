@@ -4,11 +4,7 @@ gonx provides several configuration options to customize your Go development exp
 
 ## Workspace Configuration
 
-By default, gonx sets up a multi-module Go workspace configuration, which provides better integration with Nx's dependency graph and caching features. However, you can convert to a single-module configuration if preferred:
-
-```bash
-nx g @naxodev/gonx:convert-to-one-mod
-```
+By default, gonx sets up projects without creating a go.work file, keeping the workspace lightweight. You can enable multi-module Go workspace configuration by using the `addGoDotWork` option when setting up your workspace, which provides better integration with Nx's dependency graph and caching features for complex Go projects.
 
 ## Inferred Tasks
 
