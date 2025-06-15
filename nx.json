@@ -93,6 +93,7 @@
       }
     }
   },
+  "nxCloudAccessToken": "OWEyN2E2OTktMWM2Ni00MmQwLWE1YmEtNjI2MDMwNDg1MWVjfHJlYWQtd3JpdGU=",
   "release": {
     "projectsRelationship": "independent",
     "projects": ["gonx", "nx-cloudflare"],
