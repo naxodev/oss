@@ -56,5 +56,5 @@ my-go-lib/
 
 - Unlike the original nx-go, gonx does not generate a project.json file
 - Uses inferred tasks, so you can immediately use `nx build`, `nx test`, etc.
-- Works with the multi-module Go workspace configuration by default
+- Works with both single and multi-module Go workspace configurations
 - Integrated with Nx release system for version management

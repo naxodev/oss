@@ -1,10 +1,15 @@
 import type { Tree } from '@nx/devkit';
-import initGenerator from '../init/generator';
 import type { PresetGeneratorSchema } from './schema';
+import libraryGenerator from '../library/generator';
+import applicationGenerator from '../application/generator';
 
 export default async function presetGenerator(
   tree: Tree,
   options: PresetGeneratorSchema
 ) {
-  return initGenerator(tree, options);
+  if (options.type === 'library') {
+    return libraryGenerator(tree, options);
+  }
+
+  return applicationGenerator(tree, options);
 }

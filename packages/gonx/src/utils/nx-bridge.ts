@@ -5,7 +5,7 @@ import {
   type Tree,
   updateNxJson,
 } from '@nx/devkit';
-import { GO_MOD_FILE, GO_WORK_FILE, NX_PLUGIN_NAME } from '../constants';
+import { GO_WORK_FILE, NX_PLUGIN_NAME } from '../constants';
 import { isGoWorkspace } from './go-bridge';
 
 /**
@@ -45,17 +45,14 @@ export const addNxPlugin = (tree: Tree): void => {
  */
 export const ensureGoConfigInSharedGlobals = (tree: Tree): void => {
   const useWorkspace = isGoWorkspace(tree);
-  const toAdd = `{workspaceRoot}/${useWorkspace ? GO_WORK_FILE : GO_MOD_FILE}`;
-  const toRem = `{workspaceRoot}/${useWorkspace ? GO_MOD_FILE : GO_WORK_FILE}`;
+  const toAdd = `{workspaceRoot}/${GO_WORK_FILE}`;
 
   const nxJson = readNxJson(tree);
   const namedInputs = nxJson.namedInputs ?? {};
   const sharedGlobals = namedInputs['sharedGlobals'] ?? [];
 
-  if (!sharedGlobals.includes(toAdd) || sharedGlobals.includes(toRem)) {
-    namedInputs.sharedGlobals = Array.from(
-      new Set([...sharedGlobals.filter((item) => item !== toRem), toAdd])
-    );
+  if (!sharedGlobals.includes(toAdd) && useWorkspace) {
+    namedInputs.sharedGlobals = Array.from(new Set([...sharedGlobals, toAdd]));
     updateNxJson(tree, { ...nxJson, namedInputs });
   }
 };

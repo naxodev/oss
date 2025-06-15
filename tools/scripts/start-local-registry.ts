@@ -3,7 +3,7 @@
  * It is meant to be called in jest's globalSetup.
  */
 import { startLocalRegistry } from '@nx/js/plugins/jest/local-registry';
-import { execFileSync } from 'child_process';
+import { releasePublish, releaseVersion } from 'nx/release';
 
 export default async () => {
   // local registry target to run
@@ -14,12 +14,22 @@ export default async () => {
   global.stopLocalRegistry = await startLocalRegistry({
     localRegistryTarget,
     storage,
+    listenAddress: '0.0.0.0',
     verbose: false,
   });
-  const nx = require.resolve('nx');
-  execFileSync(
-    nx,
-    ['run-many', '--targets', 'publish', '--ver', '0.0.0-e2e', '--tag', 'e2e'],
-    { env: process.env, stdio: 'inherit' }
-  );
+
+  await releaseVersion({
+    specifier: '0.0.0-e2e',
+    stageChanges: false,
+    gitCommit: false,
+    gitTag: false,
+    firstRelease: true,
+    versionActionsOptionsOverrides: {
+      skipLockFileUpdate: true,
+    },
+  });
+  await releasePublish({
+    tag: 'e2e',
+    firstRelease: true,
+  });
 };
