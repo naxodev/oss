@@ -54,25 +54,16 @@ npx create-nx-workspace go-workspace --preset=@naxodev/gonx
 nx add @naxodev/gonx
 ```
 
-### Don't want to use a multi-module Go workspace?
-
-The plugin configures a [multi-module Go workspace](https://go.dev/doc/tutorial/workspaces) by default, to simplify project management and improve the quality of the Nx graph. If you don't want to take advantage of this feature, you can use generator `convert-to-one-mod` after the plugin installation. Generators will automatically adapt to your configuration.
-
-```shell
-nx g @naxodev/gonx:convert-to-one-mod
-```
-
 ## 📖 Generators & executors
 
 ### Generators
 
-| Generator                                                       | Description                                         |
-| --------------------------------------------------------------- | --------------------------------------------------- |
-| [`application`](./docs/generators/application.md)               | Generate a Go application                           |
-| [`library`](./docs/generators/library.md)                       | Generate a Go library                               |
-| [`convert-to-one-mod`](./docs/generators/convert-to-one-mod.md) | Convert a multi-module workspace to a single module |
-| [`init`](./docs/generators/init.md)                             | Initialize gonx in an existing workspace            |
-| [`preset`](./docs/generators/preset.md)                         | Preset generator for creating a new workspace       |
+| Generator                                         | Description                                   |
+| ------------------------------------------------- | --------------------------------------------- |
+| [`application`](./docs/generators/application.md) | Generate a Go application                     |
+| [`library`](./docs/generators/library.md)         | Generate a Go library                         |
+| [`init`](./docs/generators/init.md)               | Initialize gonx in an existing workspace      |
+| [`preset`](./docs/generators/preset.md)           | Preset generator for creating a new workspace |
 
 ### Executors
 
@@ -90,7 +81,7 @@ nx g @naxodev/gonx:convert-to-one-mod
 
 Need more customization? See our [plugin configuration options](./docs/options.md).
 
-## Changes from the original nx-go
+## Changes from the Original nx-go
 
 - Modern Nx-only, we break compatibility with older versions of Nx.
 - We brought cacheable tasks to the table.
@@ -104,6 +95,9 @@ Need more customization? See our [plugin configuration options](./docs/options.m
 - Implemented the `publish` executor to use with `nx release` for publishing applications and libraries to the Go registry
 - Modified the build and serve executors to work with nested `main.go` packages (previously required manual `main.go` location)
 - Removed the generate executor (we plan to support generation options that better fit the Nx model)
+- Removed the creation of go.work by default. Now this is opt-in using the `addGoDotWork` flag.
+- Removed the `convert-to-one-module` generator.
+- The preset now asks you to choose between generating a library or application.
 
 ## Installation
 
@@ -117,13 +111,13 @@ gonx is published as the `@naxodev/gonx` package.
 
 ## Compatibility
 
-gonx is compatible with the following versions of Nx:
+gonx is compatible with the following Nx versions:
 
-| Nx Version | gonx Version |
-| ---------- | ------------ |
-| 21.x       | 1.0.0        |
+| Nx Version | gonx Version      |
+| ---------- | ----------------- |
+| 21.x       | >=^1.0.0 <=^2.0.0 |
 
-This plugin is only tested on [stable versions of Go](https://go.dev/dl/), older versions do not receive support. However, you can expect a fair degree of compatibility. Please note that multi-module Go workspaces require Go 1.18 or later.
+This plugin is only tested on [stable versions of Go](https://go.dev/dl/); older versions do not receive support. However, you can expect a fair degree of compatibility. Please note that multi-module Go workspaces require Go 1.18 or later.
 
 ## Usage
 
@@ -224,7 +218,7 @@ To configure your workspace for releasing Go modules, add a configuration like t
 }
 ```
 
-Key points about this configuration:
+Key configuration points:
 
 - `releaseTagPattern`: Set to `{projectName}/v{version}` to create Go-compatible tags (e.g., `apps/myapp/v1.2.3`)
 - `projectName`: With gonx, this is the full path to your project, not just the directory name
