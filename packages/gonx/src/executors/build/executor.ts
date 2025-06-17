@@ -18,7 +18,7 @@ export default async function runExecutor(
   context: ExecutorContext
 ) {
   return executeCommand(buildParams(options, context), {
-    cwd: context.cwd,
+    cwd: extractProjectRoot(context),
     env: options.env,
     executable: buildExecutable(options.compiler),
   });
@@ -55,6 +55,11 @@ const buildParams = (
 
     mainFile = mainGoFiles[0];
     logger.debug(`Found main.go file at: ${mainFile}`);
+  }
+
+  // Since we're running from the project root, adjust the main file path to be relative to project root
+  if (mainFile.startsWith(`${projectRoot}/`)) {
+    mainFile = mainFile.replace(`${projectRoot}/`, './');
   }
 
   return [

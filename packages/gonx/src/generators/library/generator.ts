@@ -25,8 +25,11 @@ export default async function libraryGenerator(
     ...names(options.projectName),
   });
 
+  // Always create go.mod for the project
+  createGoMod(tree, options.projectRoot, options.projectRoot);
+
+  // Only add to go.work if it exists
   if (isGoWorkspace(tree)) {
-    createGoMod(tree, options.projectRoot, options.projectRoot);
     addGoWorkDependency(tree, options.projectRoot);
   }
 

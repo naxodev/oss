@@ -25,6 +25,7 @@ describe('Serve Executor', () => {
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', 'hello_world.go'], {
       cwd: 'apps/project',
+      executable: undefined,
     });
   });
 
@@ -37,7 +38,7 @@ describe('Serve Executor', () => {
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(
       ['run', 'hello_world.go', '--help'],
-      { cwd: '/tmp/custom/path' }
+      { cwd: '/tmp/custom/path', executable: undefined }
     );
   });
 
@@ -60,6 +61,7 @@ describe('Serve Executor', () => {
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', 'hello_world.go'], {
       cwd: 'apps/project',
+      executable: undefined,
     });
   });
 });
