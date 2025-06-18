@@ -1,8 +1,7 @@
 import { promisify } from 'util';
+import * as treeKill from 'tree-kill';
 import { logError, logInfo, logSuccess } from './log-utils';
 import { check as portCheck } from 'tcp-port-used';
-
-import * as treeKill from 'tree-kill';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 export const kill = require('kill-port');
@@ -15,14 +14,15 @@ export const promisifiedTreeKill: (
 
 export async function killPort(port: number): Promise<boolean> {
   if (await portCheck(port)) {
+    let killPortResult;
     try {
       logInfo(`Attempting to close port ${port}`);
-      await kill(port);
+      killPortResult = await kill(port);
       await new Promise<void>((resolve) =>
         setTimeout(() => resolve(), KILL_PORT_DELAY)
       );
       if (await portCheck(port)) {
-        logError(`Port ${port} still open`);
+        logError(`Port ${port} still open`, JSON.stringify(killPortResult));
       } else {
         logSuccess(`Port ${port} successfully closed`);
         return true;

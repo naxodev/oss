@@ -7,16 +7,15 @@
   "properties": {
     "main": {
       "type": "string",
-      "description": "Path to the file containing the main() function"
+      "description": "Path to the file containing the main() function",
+      "x-completion-type": "file",
+      "x-completion-glob": "main.go"
     },
     "cmd": {
       "type": "string",
-      "description": "Name of the go binary to use",
+      "enum": ["go", "tinygo", "gow"],
+      "description": "The name of the binary to use",
       "default": "go"
-    },
-    "cwd": {
-      "type": "string",
-      "description": "Working directory from which to run the application"
     },
     "args": {
       "type": "array",
@@ -29,6 +28,5 @@
       "type": "object",
       "description": "Environment variables to set when running the application"
     }
-  },
-  "required": ["main"]
+  }
 }

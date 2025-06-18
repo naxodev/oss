@@ -14,7 +14,7 @@
     },
     "compiler": {
       "type": "string",
-      "enum": ["go", "tinygo"],
+      "enum": ["go", "tinygo", "gow"],
       "description": "The Go compiler to use",
       "default": "go"
     },
