@@ -1,7 +1,6 @@
 export interface ServeExecutorSchema {
   main?: string;
-  cmd?: string;
-  cwd?: string;
+  cmd?: 'go' | 'tinygo' | 'gow';
   args?: string[];
   env?: Record<string, string>;
 }

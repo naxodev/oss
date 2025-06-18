@@ -22,8 +22,11 @@ export default async function applicationGenerator(
 
   generateFiles(tree, join(__dirname, 'files'), options.projectRoot, options);
 
+  // Always create go.mod for the project
+  createGoMod(tree, options.projectRoot, options.projectRoot);
+
+  // Only add to go.work if it exists
   if (isGoWorkspace(tree)) {
-    createGoMod(tree, options.projectRoot, options.projectRoot);
     addGoWorkDependency(tree, options.projectRoot);
   }
 
