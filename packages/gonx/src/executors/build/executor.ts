@@ -1,4 +1,5 @@
 import { ExecutorContext, logger } from '@nx/devkit';
+import { relative } from 'path';
 import {
   buildStringFlagIfValid,
   executeCommand,
@@ -20,7 +21,7 @@ export default async function runExecutor(
   return executeCommand(buildParams(options, context), {
     cwd: extractProjectRoot(context),
     env: options.env,
-    executable: buildExecutable(options.compiler),
+    executable: options.compiler ?? 'go',
   });
 }
 
@@ -58,9 +59,7 @@ const buildParams = (
   }
 
   // Since we're running from the project root, adjust the main file path to be relative to project root
-  if (mainFile.startsWith(`${projectRoot}/`)) {
-    mainFile = mainFile.replace(`${projectRoot}/`, './');
-  }
+  mainFile = relative(projectRoot, mainFile);
 
   return [
     'build',
@@ -82,13 +81,3 @@ const buildOutputPath = (projectRoot: string, customPath?: string): string => {
   const extension = process.platform === 'win32' ? '.exe' : '';
   return (customPath ?? `dist/${projectRoot}`) + extension;
 };
-
-/**
- * Determines the executable command based on the provided compiler.
- *
- * @param compiler - The compiler to use, which can be either 'tinygo' or 'go'.
- * @returns The executable command as a string, either 'tinygo' or 'go'.
- */
-const buildExecutable = (
-  compiler: BuildExecutorSchema['compiler']
-): string | undefined => (compiler === 'tinygo' ? 'tinygo' : undefined);

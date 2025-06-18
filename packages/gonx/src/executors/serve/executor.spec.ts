@@ -9,14 +9,23 @@ jest.mock('../../utils', () => ({
 }));
 
 const options: ServeExecutorSchema = {
-  main: 'hello_world.go',
+  main: 'apps/project/hello_world.go',
 };
 
 const context: ExecutorContext = {
   cwd: 'current-dir',
   root: '',
   isVerbose: false,
-} as ExecutorContext;
+  projectName: 'project',
+  projectsConfigurations: {
+    projects: {
+      project: {
+        root: 'apps/project',
+        sourceRoot: 'apps/project',
+      },
+    },
+  },
+} as unknown as ExecutorContext;
 
 describe('Serve Executor', () => {
   it('should run Go program with default parameters', async () => {
@@ -25,20 +34,17 @@ describe('Serve Executor', () => {
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', 'hello_world.go'], {
       cwd: 'apps/project',
-      executable: undefined,
+      executable: 'go',
     });
   });
 
-  it('should run Go program with custom directory', async () => {
+  it('should run Go program with custom args', async () => {
     const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
-    const output = await executor(
-      { ...options, args: ['--help'], cwd: '/tmp/custom/path' },
-      context
-    );
+    const output = await executor({ ...options, args: ['--help'] }, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(
       ['run', 'hello_world.go', '--help'],
-      { cwd: '/tmp/custom/path', executable: undefined }
+      { cwd: 'apps/project', executable: 'go' }
     );
   });
 
@@ -61,7 +67,7 @@ describe('Serve Executor', () => {
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', 'hello_world.go'], {
       cwd: 'apps/project',
-      executable: undefined,
+      executable: 'go',
     });
   });
 });
