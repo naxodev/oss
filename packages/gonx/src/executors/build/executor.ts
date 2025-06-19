@@ -1,12 +1,10 @@
-import { ExecutorContext, logger } from '@nx/devkit';
-import { relative } from 'path';
+import { ExecutorContext } from '@nx/devkit';
 import {
   buildStringFlagIfValid,
   executeCommand,
   extractProjectRoot,
 } from '../../utils';
 import { BuildExecutorSchema } from './schema';
-import { findMainGoFiles } from '../../utils/find-main-go-files';
 
 /**
  * This executor builds an executable using the `go build` command.
@@ -29,9 +27,6 @@ const buildParams = (
   options: BuildExecutorSchema,
   context: ExecutorContext
 ): string[] => {
-  // Use main from options if provided, otherwise try to find main.go file
-  let mainFile = options.main;
-
   const projectName = context.projectName;
 
   if (!projectName) {
@@ -45,29 +40,13 @@ const buildParams = (
     throw new Error(`Cannot find project root for ${context.projectName}`);
   }
 
-  if (!mainFile) {
-    const mainGoFiles = findMainGoFiles(projectRoot, context.root);
-
-    if (!mainGoFiles?.length) {
-      throw new Error(
-        `Cannot find main.go file or main package in ${projectRoot} or its subdirectories`
-      );
-    }
-
-    mainFile = mainGoFiles[0];
-    logger.debug(`Found main.go file at: ${mainFile}`);
-  }
-
-  // Since we're running from the project root, adjust the main file path to be relative to project root
-  mainFile = relative(projectRoot, mainFile);
-
   return [
     'build',
     '-o',
     buildOutputPath(extractProjectRoot(context), options.outputPath),
     ...buildStringFlagIfValid('-buildmode', options.buildMode),
     ...(options.flags ?? []),
-    mainFile,
+    '.',
   ];
 };
 

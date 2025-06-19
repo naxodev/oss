@@ -9,12 +9,10 @@ jest.mock('../../utils', () => {
     buildStringFlagIfValid,
     executeCommand: jest.fn().mockResolvedValue({ success: true }),
     extractProjectRoot: jest.fn(() => 'apps/project'),
-    findMainGoFiles: jest.fn(() => ['apps/project/main.go']),
   };
 });
 
 const options: BuildExecutorSchema = {
-  main: 'apps/project/main.go',
   env: { hello: 'world' },
 };
 
@@ -45,7 +43,7 @@ describe('Build Executor', () => {
       const output = await executor(options, context);
       expect(output.success).toBeTruthy();
       expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-        ['build', '-o', outputPath, 'main.go'],
+        ['build', '-o', outputPath, '.'],
         { cwd: 'apps/project', env: { hello: 'world' }, executable: 'go' }
       );
     }
@@ -54,7 +52,7 @@ describe('Build Executor', () => {
   it('should execute build command using TinyGo compiler', async () => {
     await executor({ ...options, compiler: 'tinygo' }, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project', 'main.go'],
+      ['build', '-o', 'dist/apps/project', '.'],
       expect.objectContaining({ executable: 'tinygo' })
     );
   });
@@ -65,7 +63,7 @@ describe('Build Executor', () => {
       context
     );
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'custom-path', '--flag1', 'main.go'],
+      ['build', '-o', 'custom-path', '--flag1', '.'],
       expect.anything()
     );
   });
