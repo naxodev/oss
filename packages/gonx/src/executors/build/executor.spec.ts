@@ -43,7 +43,7 @@ describe('Build Executor', () => {
       const output = await executor(options, context);
       expect(output.success).toBeTruthy();
       expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-        ['build', '-o', outputPath, '.'],
+        ['build', '-o', outputPath, './...'],
         { cwd: 'apps/project', env: { hello: 'world' }, executable: 'go' }
       );
     }
@@ -52,7 +52,7 @@ describe('Build Executor', () => {
   it('should execute build command using TinyGo compiler', async () => {
     await executor({ ...options, compiler: 'tinygo' }, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project', '.'],
+      ['build', '-o', 'dist/apps/project', './...'],
       expect.objectContaining({ executable: 'tinygo' })
     );
   });
@@ -63,7 +63,7 @@ describe('Build Executor', () => {
       context
     );
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'custom-path', '--flag1', '.'],
+      ['build', '-o', 'custom-path', '--flag1', './...'],
       expect.anything()
     );
   });

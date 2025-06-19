@@ -36,5 +36,5 @@ const buildParams = (
     throw new Error(`Cannot find project root for ${context.projectName}`);
   }
 
-  return ['run', '.', ...(options.args ?? [])];
+  return ['run', './...', ...(options.args ?? [])];
 };
