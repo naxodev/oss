@@ -5,6 +5,12 @@
   "description": "Run a Go application",
   "type": "object",
   "properties": {
+    "main": {
+      "type": "string",
+      "description": "Relative path from the project root to the main.go file defining the binary.",
+      "x-completion-type": "file",
+      "x-completion-glob": "main.go"
+    },
     "cmd": {
       "type": "string",
       "enum": ["go", "tinygo", "gow"],

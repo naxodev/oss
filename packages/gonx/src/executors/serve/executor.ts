@@ -1,5 +1,5 @@
 import { ExecutorContext } from '@nx/devkit';
-import { executeCommand, extractProjectRoot } from '../../utils';
+import { executeCommand, extractCWD } from '../../utils';
 import { ServeExecutorSchema } from './schema';
 
 /**
@@ -13,7 +13,7 @@ export default async function runExecutor(
   context: ExecutorContext
 ) {
   return executeCommand(buildParams(options, context), {
-    cwd: extractProjectRoot(context),
+    cwd: extractCWD(options, context),
     env: options.env,
     executable: options.cmd ?? 'go',
   });
@@ -36,5 +36,7 @@ const buildParams = (
     throw new Error(`Cannot find project root for ${context.projectName}`);
   }
 
-  return ['run', './...', ...(options.args ?? [])];
+  const runPath = options.main ? '.' : './...';
+
+  return ['run', runPath, ...(options.args ?? [])];
 };

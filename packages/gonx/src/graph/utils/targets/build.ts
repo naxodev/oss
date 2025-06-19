@@ -6,6 +6,8 @@ export const build = () => ({
     '{projectRoot}/go.sum',
     '{projectRoot}/**/*.{go}',
   ],
-  options: {},
+  options: {
+    outputPath: 'dist/{projectRoot}/',
+  },
   outputs: ['{options.outputPath}'],
 });

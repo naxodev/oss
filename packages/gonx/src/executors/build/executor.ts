@@ -2,6 +2,7 @@ import { ExecutorContext } from '@nx/devkit';
 import {
   buildStringFlagIfValid,
   executeCommand,
+  extractCWD,
   extractProjectRoot,
 } from '../../utils';
 import { BuildExecutorSchema } from './schema';
@@ -18,7 +19,7 @@ export default async function runExecutor(
   context: ExecutorContext
 ) {
   return executeCommand(buildParams(options, context), {
-    cwd: extractProjectRoot(context),
+    cwd: extractCWD(options, context),
     env: options.env,
     executable: options.compiler ?? 'go',
   });
@@ -41,6 +42,8 @@ const buildParams = (
     throw new Error(`Cannot find project root for ${context.projectName}`);
   }
 
+  const runPath = options.main ? '.' : './...';
+
   return [
     'build',
     '-o',
@@ -51,7 +54,7 @@ const buildParams = (
     ),
     ...buildStringFlagIfValid('-buildmode', options.buildMode),
     ...(options.flags ?? []),
-    './...',
+    runPath,
   ];
 };
 
@@ -61,12 +64,13 @@ const buildParams = (
  * @param projectRoot project root
  * @param customPath custom path to use first
  */
-const buildOutputPath = (
+function buildOutputPath(
   workspaceRoot: string,
   projectRoot: string,
   customPath?: string
-): string => {
+): string {
+  const normalizedCustomPath = customPath && join(workspaceRoot, customPath);
   const defaultPath = join(workspaceRoot, `dist/${projectRoot}/`);
 
-  return customPath || defaultPath;
-};
+  return normalizedCustomPath || defaultPath;
+}
