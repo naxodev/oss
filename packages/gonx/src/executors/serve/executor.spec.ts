@@ -27,7 +27,7 @@ describe('Serve Executor', () => {
     const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
     const output = await executor({}, context);
     expect(output.success).toBeTruthy();
-    expect(spyExecute).toHaveBeenCalledWith(['run', '.'], {
+    expect(spyExecute).toHaveBeenCalledWith(['run', './...'], {
       cwd: 'apps/project',
       executable: 'go',
     });
@@ -37,7 +37,7 @@ describe('Serve Executor', () => {
     const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
     const output = await executor({ args: ['--help'] }, context);
     expect(output.success).toBeTruthy();
-    expect(spyExecute).toHaveBeenCalledWith(['run', '.', '--help'], {
+    expect(spyExecute).toHaveBeenCalledWith(['run', './...', '--help'], {
       cwd: 'apps/project',
       executable: 'go',
     });
@@ -48,7 +48,7 @@ describe('Serve Executor', () => {
     const output = await executor({ cmd: 'tinygo' }, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(
-      ['run', '.'],
+      ['run', './...'],
       expect.objectContaining({ executable: 'tinygo' })
     );
   });
@@ -57,7 +57,7 @@ describe('Serve Executor', () => {
     const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
     const output = await executor({}, context);
     expect(output.success).toBeTruthy();
-    expect(spyExecute).toHaveBeenCalledWith(['run', '.'], {
+    expect(spyExecute).toHaveBeenCalledWith(['run', './...'], {
       cwd: 'apps/project',
       executable: 'go',
     });
