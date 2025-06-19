@@ -1,16 +1,11 @@
 import { ExecutorContext } from '@nx/devkit';
 import * as commonFunctions from '../../utils';
 import executor from './executor';
-import { ServeExecutorSchema } from './schema';
 
 jest.mock('../../utils', () => ({
   executeCommand: jest.fn().mockResolvedValue({ success: true }),
   extractProjectRoot: jest.fn(() => 'apps/project'),
 }));
-
-const options: ServeExecutorSchema = {
-  main: 'apps/project/hello_world.go',
-};
 
 const context: ExecutorContext = {
   cwd: 'current-dir',
@@ -30,9 +25,9 @@ const context: ExecutorContext = {
 describe('Serve Executor', () => {
   it('should run Go program with default parameters', async () => {
     const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
-    const output = await executor(options, context);
+    const output = await executor({}, context);
     expect(output.success).toBeTruthy();
-    expect(spyExecute).toHaveBeenCalledWith(['run', 'hello_world.go'], {
+    expect(spyExecute).toHaveBeenCalledWith(['run', '.'], {
       cwd: 'apps/project',
       executable: 'go',
     });
@@ -40,32 +35,29 @@ describe('Serve Executor', () => {
 
   it('should run Go program with custom args', async () => {
     const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
-    const output = await executor({ ...options, args: ['--help'] }, context);
+    const output = await executor({ args: ['--help'] }, context);
     expect(output.success).toBeTruthy();
-    expect(spyExecute).toHaveBeenCalledWith(
-      ['run', 'hello_world.go', '--help'],
-      { cwd: 'apps/project', executable: 'go' }
-    );
+    expect(spyExecute).toHaveBeenCalledWith(['run', '.', '--help'], {
+      cwd: 'apps/project',
+      executable: 'go',
+    });
   });
 
   it('should run Go program with custom executable', async () => {
     const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
-    const output = await executor({ ...options, cmd: 'tinygo' }, context);
+    const output = await executor({ cmd: 'tinygo' }, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(
-      ['run', 'hello_world.go'],
+      ['run', '.'],
       expect.objectContaining({ executable: 'tinygo' })
     );
   });
 
   it('should remove directory from main file path', async () => {
     const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
-    const output = await executor(
-      { ...options, main: 'apps/project/hello_world.go' },
-      context
-    );
+    const output = await executor({}, context);
     expect(output.success).toBeTruthy();
-    expect(spyExecute).toHaveBeenCalledWith(['run', 'hello_world.go'], {
+    expect(spyExecute).toHaveBeenCalledWith(['run', '.'], {
       cwd: 'apps/project',
       executable: 'go',
     });

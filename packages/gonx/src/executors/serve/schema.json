@@ -5,12 +5,6 @@
   "description": "Run a Go application",
   "type": "object",
   "properties": {
-    "main": {
-      "type": "string",
-      "description": "Path to the file containing the main() function",
-      "x-completion-type": "file",
-      "x-completion-glob": "main.go"
-    },
     "cmd": {
       "type": "string",
       "enum": ["go", "tinygo", "gow"],

@@ -93,7 +93,8 @@ Need more customization? See our [plugin configuration options](./docs/options.m
 - Implemented the new `VersionActions` to enable version generation when using `nx release` with Go applications and libraries
   - Project names now use the full path to ensure compatibility with Go's release tagging convention (`projectRoot/vx.x.x`)
 - Implemented the `publish` executor to use with `nx release` for publishing applications and libraries to the Go registry
-- Modified the build and serve executors to work with nested `main.go` packages (previously required manual `main.go` location)
+- Run the commands from inside the project root instead of from the root of the workspace, closing the gap with the traditional commands.
+- Stop using the `main.go` as the target for the `build` and `serve` executors, instead we use the `go.mod` file to determine the project root.
 - Removed the generate executor (we plan to support generation options that better fit the Nx model)
 - Removed the creation of go.work by default. Now this is opt-in using the `addGoDotWork` flag.
 - Removed the `convert-to-one-module` generator.
