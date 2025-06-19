@@ -5,6 +5,7 @@ import {
   runNxCommand,
   ensureNxProject,
   cleanup,
+  directoryExists,
 } from '@nx/plugin/testing';
 import { promisifiedTreeKill, runCommandUntil } from '@naxodev/e2e-utils';
 import { join } from 'path';
@@ -75,6 +76,8 @@ describe('Go Applications (with go.work)', () => {
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
+
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
 
     // Run test
     const testResults = runNxCommand(`test ${goapp}`);
@@ -177,6 +180,8 @@ describe('Go Applications (without go.work)', () => {
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
+
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
 
     // Run test
     const testResults = runNxCommand(`test ${goapp}`);

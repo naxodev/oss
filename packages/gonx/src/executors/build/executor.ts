@@ -5,6 +5,7 @@ import {
   extractProjectRoot,
 } from '../../utils';
 import { BuildExecutorSchema } from './schema';
+import { join } from 'node:path';
 
 /**
  * This executor builds an executable using the `go build` command.
@@ -43,7 +44,11 @@ const buildParams = (
   return [
     'build',
     '-o',
-    buildOutputPath(extractProjectRoot(context), options.outputPath),
+    buildOutputPath(
+      context.root,
+      extractProjectRoot(context),
+      options.outputPath
+    ),
     ...buildStringFlagIfValid('-buildmode', options.buildMode),
     ...(options.flags ?? []),
     './...',
@@ -56,7 +61,12 @@ const buildParams = (
  * @param projectRoot project root
  * @param customPath custom path to use first
  */
-const buildOutputPath = (projectRoot: string, customPath?: string): string => {
-  const extension = process.platform === 'win32' ? '.exe' : '';
-  return (customPath ?? `dist/${projectRoot}`) + extension;
+const buildOutputPath = (
+  workspaceRoot: string,
+  projectRoot: string,
+  customPath?: string
+): string => {
+  const defaultPath = join(workspaceRoot, `dist/${projectRoot}/`);
+
+  return customPath || defaultPath;
 };
