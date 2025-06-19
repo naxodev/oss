@@ -1,5 +1,9 @@
 import { ExecutorContext, logger } from '@nx/devkit';
 import { execSync } from 'child_process';
+import { join, dirname } from 'path';
+import { fileExists } from 'nx/src/utils/fileutils';
+import { BuildExecutorSchema } from '../executors/build/schema';
+import { ServeExecutorSchema } from '../executors/serve/schema';
 
 export type RunGoOptions = {
   executable?: string;
@@ -63,3 +67,33 @@ export const buildStringFlagIfValid = (
   flag: string,
   value?: string
 ): string[] => (value ? [`${flag}=${value}`] : []);
+
+/**
+ * Extracts the current working directory (CWD) for the build process.
+ * If the 'main' option is provided, returns the directory containing the main.go file.
+ * Otherwise, returns the project root directory.
+ *
+ * @param options - The build executor schema options.
+ * @param context - The executor context.
+ * @returns The resolved CWD path.
+ */
+export function extractCWD(
+  options: BuildExecutorSchema | ServeExecutorSchema,
+  context: ExecutorContext
+) {
+  const projectRoot = extractProjectRoot(context);
+  const projectName = context.projectName;
+
+  if (options.main) {
+    const mainFilePath = join(projectRoot, options.main);
+    if (!fileExists(mainFilePath)) {
+      throw new Error(
+        `Main file ${options.main} does not exist in project ${projectName}`
+      );
+    }
+    // Return the directory containing the main.go file
+    return dirname(mainFilePath);
+  }
+
+  return projectRoot;
+}

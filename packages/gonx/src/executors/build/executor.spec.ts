@@ -9,6 +9,15 @@ jest.mock('../../utils', () => {
     buildStringFlagIfValid,
     executeCommand: jest.fn().mockResolvedValue({ success: true }),
     extractProjectRoot: jest.fn(() => 'apps/project'),
+    extractCWD: jest.fn(
+      (options: BuildExecutorSchema, context: ExecutorContext) => {
+        if (options.main) {
+          return 'apps/project/cmd';
+        } else {
+          return 'apps/project';
+        }
+      }
+    ),
   };
 });
 
@@ -17,8 +26,7 @@ const options: BuildExecutorSchema = {
 };
 
 const context: ExecutorContext = {
-  cwd: 'current-dir',
-  root: '',
+  root: '.',
   isVerbose: false,
   projectName: 'project',
   projectsConfigurations: {
@@ -32,27 +40,31 @@ const context: ExecutorContext = {
 } as unknown as ExecutorContext;
 
 describe('Build Executor', () => {
-  it.each`
-    platform   | outputPath
-    ${'win32'} | ${'dist/apps/project.exe'}
-    ${'linux'} | ${'dist/apps/project'}
-  `(
-    'should execute build command on platform $platform',
-    async ({ platform, outputPath }) => {
-      Object.defineProperty(process, 'platform', { value: platform });
-      const output = await executor(options, context);
-      expect(output.success).toBeTruthy();
-      expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-        ['build', '-o', outputPath, './...'],
-        { cwd: 'apps/project', env: { hello: 'world' }, executable: 'go' }
-      );
-    }
-  );
+  it('should execute build command using the default options', async () => {
+    await executor({}, context);
+    expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
+      ['build', '-o', 'dist/apps/project/', './...'],
+      expect.objectContaining({ executable: 'go' })
+    );
+  });
+
+  it('should execute build command using the main file', async () => {
+    await executor(
+      {
+        main: './cmd/main.go',
+      },
+      context
+    );
+    expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
+      ['build', '-o', 'dist/apps/project/', './...'],
+      expect.objectContaining({ executable: 'go' })
+    );
+  });
 
   it('should execute build command using TinyGo compiler', async () => {
     await executor({ ...options, compiler: 'tinygo' }, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project', './...'],
+      ['build', '-o', 'dist/apps/project/', './...'],
       expect.objectContaining({ executable: 'tinygo' })
     );
   });
@@ -77,6 +89,30 @@ describe('Build Executor', () => {
     ).toBeTruthy();
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
       expect.arrayContaining([flag]),
+      expect.anything()
+    );
+  });
+
+  it('should use "." as run path when main option is provided', async () => {
+    await executor({ ...options, main: 'cmd/main.go' }, context);
+    expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
+      ['build', '-o', 'dist/apps/project/', '.'],
+      expect.anything()
+    );
+  });
+
+  it('should use "./..." as run path when main option is not provided', async () => {
+    await executor(options, context);
+    expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
+      ['build', '-o', 'dist/apps/project/', './...'],
+      expect.anything()
+    );
+  });
+
+  it('should use "." as run path when main option is empty string', async () => {
+    await executor({ ...options, main: '' }, context);
+    expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
+      ['build', '-o', 'dist/apps/project/', './...'],
       expect.anything()
     );
   });

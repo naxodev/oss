@@ -2,9 +2,11 @@ import { ExecutorContext } from '@nx/devkit';
 import {
   buildStringFlagIfValid,
   executeCommand,
+  extractCWD,
   extractProjectRoot,
 } from '../../utils';
 import { BuildExecutorSchema } from './schema';
+import { join } from 'node:path';
 
 /**
  * This executor builds an executable using the `go build` command.
@@ -17,7 +19,7 @@ export default async function runExecutor(
   context: ExecutorContext
 ) {
   return executeCommand(buildParams(options, context), {
-    cwd: extractProjectRoot(context),
+    cwd: extractCWD(options, context),
     env: options.env,
     executable: options.compiler ?? 'go',
   });
@@ -40,13 +42,19 @@ const buildParams = (
     throw new Error(`Cannot find project root for ${context.projectName}`);
   }
 
+  const runPath = options.main ? '.' : './...';
+
   return [
     'build',
     '-o',
-    buildOutputPath(extractProjectRoot(context), options.outputPath),
+    buildOutputPath(
+      context.root,
+      extractProjectRoot(context),
+      options.outputPath
+    ),
     ...buildStringFlagIfValid('-buildmode', options.buildMode),
     ...(options.flags ?? []),
-    './...',
+    runPath,
   ];
 };
 
@@ -56,7 +64,13 @@ const buildParams = (
  * @param projectRoot project root
  * @param customPath custom path to use first
  */
-const buildOutputPath = (projectRoot: string, customPath?: string): string => {
-  const extension = process.platform === 'win32' ? '.exe' : '';
-  return (customPath ?? `dist/${projectRoot}`) + extension;
-};
+function buildOutputPath(
+  workspaceRoot: string,
+  projectRoot: string,
+  customPath?: string
+): string {
+  const normalizedCustomPath = customPath && join(workspaceRoot, customPath);
+  const defaultPath = join(workspaceRoot, `dist/${projectRoot}/`);
+
+  return normalizedCustomPath || defaultPath;
+}

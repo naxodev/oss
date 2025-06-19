@@ -1,16 +1,23 @@
-import { logger } from '@nx/devkit';
+import { logger, ExecutorContext } from '@nx/devkit';
 import * as child_process from 'child_process';
 import {
   buildFlagIfEnabled,
   buildStringFlagIfValid,
   executeCommand,
+  extractCWD,
   extractProjectRoot,
 } from './execute-command';
+import * as fileUtils from 'nx/src/utils/fileutils';
+
+const mockFileUtils = jest.mocked(fileUtils);
 
 jest.mock('@nx/devkit', () => ({
   logger: { info: jest.fn(), error: jest.fn() },
 }));
 jest.mock('child_process');
+jest.mock('nx/src/utils/fileutils', () => ({
+  fileExists: jest.fn(),
+}));
 
 describe('Execute command', () => {
   describe('Method: extractProjectRoot', () => {
@@ -95,6 +102,59 @@ describe('Execute command', () => {
 
     it('should not add a flag because not valid', () => {
       expect(buildStringFlagIfValid('--flag1')).toEqual([]);
+    });
+  });
+
+  describe('Method: extractCWD', () => {
+    const context: ExecutorContext = {
+      root: '/workspace',
+      isVerbose: false,
+      projectName: 'my-project',
+      projectsConfigurations: {
+        projects: {
+          'my-project': {
+            root: 'apps/my-project',
+            sourceRoot: 'apps/my-project',
+          },
+        },
+      },
+    } as unknown as ExecutorContext;
+
+    beforeEach(() => {
+      mockFileUtils.fileExists.mockClear();
+    });
+
+    it('should return project root when no main option is provided', () => {
+      const result = extractCWD({}, context);
+      expect(result).toBe('apps/my-project');
+    });
+
+    it('should return directory containing main.go when main option is provided', () => {
+      mockFileUtils.fileExists.mockReturnValue(true);
+
+      const result = extractCWD({ main: 'cmd/server/main.go' }, context);
+      expect(result).toBe('apps/my-project/cmd/server');
+      expect(mockFileUtils.fileExists).toHaveBeenCalledWith(
+        'apps/my-project/cmd/server/main.go'
+      );
+    });
+
+    it('should throw error when main file does not exist', () => {
+      mockFileUtils.fileExists.mockReturnValue(false);
+
+      expect(() => extractCWD({ main: 'cmd/server/main.go' }, context)).toThrow(
+        'Main file cmd/server/main.go does not exist in project my-project'
+      );
+    });
+
+    it('should handle main file in project root', () => {
+      mockFileUtils.fileExists.mockReturnValue(true);
+
+      const result = extractCWD({ main: 'main.go' }, context);
+      expect(result).toBe('apps/my-project');
+      expect(mockFileUtils.fileExists).toHaveBeenCalledWith(
+        'apps/my-project/main.go'
+      );
     });
   });
 });

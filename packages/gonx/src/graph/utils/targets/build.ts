@@ -7,7 +7,7 @@ export const build = () => ({
     '{projectRoot}/**/*.{go}',
   ],
   options: {
-    outputPath: 'dist/{projectRoot}',
+    outputPath: 'dist/{projectRoot}/',
   },
   outputs: ['{options.outputPath}'],
 });

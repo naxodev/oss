@@ -94,7 +94,7 @@ Need more customization? See our [plugin configuration options](./docs/options.m
   - Project names now use the full path to ensure compatibility with Go's release tagging convention (`projectRoot/vx.x.x`)
 - Implemented the `publish` executor to use with `nx release` for publishing applications and libraries to the Go registry
 - Run the commands from inside the project root instead of from the root of the workspace, closing the gap with the traditional commands.
-- Stop using the `main.go` as the target for the `build` and `serve` executors, instead we use the `go.mod` file to determine the project root.
+- Stop using the `main.go` as the target for the `build` and `serve` executors directly when provided, instead use the `main.go` directory to capture the context.
 - Removed the generate executor (we plan to support generation options that better fit the Nx model)
 - Removed the creation of go.work by default. Now this is opt-in using the `addGoDotWork` flag.
 - Removed the `convert-to-one-module` generator.
@@ -140,12 +140,24 @@ See the [application generator docs](./docs/generators/application.md) for all o
 nx build my-go-app
 ```
 
+You can also specify a custom main.go file:
+
+```bash
+nx build my-go-app --main=cmd/server/main.go
+```
+
 See the [build executor docs](./docs/executors/build.md) for all options.
 
 #### Running a Go application
 
 ```bash
 nx serve my-go-app
+```
+
+You can also specify a custom main.go file:
+
+```bash
+nx serve my-go-app --main=cmd/server/main.go
 ```
 
 See the [serve executor docs](./docs/executors/serve.md) for all options.

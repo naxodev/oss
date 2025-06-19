@@ -5,9 +5,11 @@ import {
   runNxCommand,
   ensureNxProject,
   cleanup,
+  directoryExists,
 } from '@nx/plugin/testing';
 import { promisifiedTreeKill, runCommandUntil } from '@naxodev/e2e-utils';
 import { join } from 'path';
+import { writeFileSync, mkdirSync } from 'fs';
 
 describe('Go Applications (with go.work)', () => {
   beforeEach(() => {
@@ -76,6 +78,8 @@ describe('Go Applications (with go.work)', () => {
       `NX   Successfully ran target build for project ${goapp}`
     );
 
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
+
     // Run test
     const testResults = runNxCommand(`test ${goapp}`);
     expect(testResults).toContain(
@@ -96,6 +100,82 @@ describe('Go Applications (with go.work)', () => {
     // Run serve and wait until the server starts
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
       output.includes(`Hello ${goapp}`)
+    );
+
+    // Kill the process after verification
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+    }
+  }, 120_000);
+
+  it('should be able to build a Go application with custom main option', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Create a custom main.go file in a subdirectory
+    const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
+    mkdirSync(customMainDir, { recursive: true });
+
+    writeFileSync(
+      join(customMainDir, 'main.go'),
+      `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello from custom main!")
+}
+`
+    );
+
+    // Build with custom main option
+    const buildResults = runNxCommand(
+      `build ${goapp} --main=cmd/server/main.go`
+    );
+    expect(buildResults).toContain(
+      `NX   Successfully ran target build for project ${goapp}`
+    );
+
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
+  }, 120_000);
+
+  it('should be able to serve a Go application with custom main option', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Create a custom main.go file in a subdirectory
+    const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
+    mkdirSync(customMainDir, { recursive: true });
+
+    writeFileSync(
+      join(customMainDir, 'main.go'),
+      `package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Hello from custom ${goapp} server!")
+    })
+    fmt.Println("Custom ${goapp} server starting...")
+    http.ListenAndServe(":8080", nil)
+}
+`
+    );
+
+    // Run serve with custom main option
+    const p = await runCommandUntil(
+      `serve ${goapp} --main=cmd/server/main.go`,
+      (output: string) => output.includes(`Custom ${goapp} server starting...`)
     );
 
     // Kill the process after verification
@@ -178,6 +258,8 @@ describe('Go Applications (without go.work)', () => {
       `NX   Successfully ran target build for project ${goapp}`
     );
 
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
+
     // Run test
     const testResults = runNxCommand(`test ${goapp}`);
     expect(testResults).toContain(
@@ -198,6 +280,82 @@ describe('Go Applications (without go.work)', () => {
     // Run serve and wait until the server starts
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
       output.includes(`Hello ${goapp}`)
+    );
+
+    // Kill the process after verification
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+    }
+  }, 120_000);
+
+  it('should be able to build a Go application with custom main option without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Create a custom main.go file in a subdirectory
+    const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
+    mkdirSync(customMainDir, { recursive: true });
+
+    writeFileSync(
+      join(customMainDir, 'main.go'),
+      `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello from custom main!")
+}
+`
+    );
+
+    // Build with custom main option
+    const buildResults = runNxCommand(
+      `build ${goapp} --main=cmd/server/main.go`
+    );
+    expect(buildResults).toContain(
+      `NX   Successfully ran target build for project ${goapp}`
+    );
+
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
+  }, 120_000);
+
+  it('should be able to serve a Go application with custom main option without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Create a custom main.go file in a subdirectory
+    const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
+    mkdirSync(customMainDir, { recursive: true });
+
+    writeFileSync(
+      join(customMainDir, 'main.go'),
+      `package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Hello from custom ${goapp} server!")
+    })
+    fmt.Println("Custom ${goapp} server starting...")
+    http.ListenAndServe(":8080", nil)
+}
+`
+    );
+
+    // Run serve with custom main option
+    const p = await runCommandUntil(
+      `serve ${goapp} --main=cmd/server/main.go`,
+      (output: string) => output.includes(`Custom ${goapp} server starting...`)
     );
 
     // Kill the process after verification
