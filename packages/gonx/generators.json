@@ -25,6 +25,11 @@
       "schema": "./src/generators/preset/schema.json",
       "description": "Preset when creating Nx workspace with Go support",
       "x-use-standalone-layout": true
+    },
+    "go-blueprint": {
+      "factory": "./src/generators/go-blueprint/go-blueprint",
+      "schema": "./src/generators/go-blueprint/schema.json",
+      "description": "go-blueprint generator"
     }
   }
 }
