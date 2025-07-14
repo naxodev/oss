@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "outputCapture": "direct-nodejs",
+  "$schema": "https://json-schema.org/schema",
+  "title": "Generate executor",
+  "description": "Runs code generation using the `go generate` command",
+  "type": "object",
+  "properties": {
+    "compiler": {
+      "type": "string",
+      "enum": ["go", "tinygo", "gow"],
+      "description": "The Go compiler to use",
+      "default": "go"
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Environment variables to set when running the executor"
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Flags to pass to the go generate command"
+    }
+  }
+}

@@ -50,7 +50,7 @@ describe('Go Applications (with go.work)', () => {
     ).toBeTruthy();
   }, 30_000);
 
-  it('should be able to run build, lint, test and tidy commands on a Go application', async () => {
+  it('should be able to run build, lint, test, generate and tidy commands on a Go application', async () => {
     const goapp = uniq('goapp');
 
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
@@ -70,6 +70,12 @@ describe('Go Applications (with go.work)', () => {
     const lintResults = runNxCommand(`lint ${goapp}`);
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${goapp}`
+    );
+
+    // Run generate
+    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    expect(generateResults).toContain(
+      `NX   Successfully ran target generate for project ${goapp}`
     );
 
     // Run build
@@ -183,6 +189,31 @@ func main() {
       await promisifiedTreeKill(p.pid, 'SIGKILL');
     }
   }, 120_000);
+
+  it('should be able to run the generate command with custom flags', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Create a Go file with go:generate directive
+    writeFileSync(
+      join(tmpProjPath(), `${goapp}/generated.go`),
+      `package main
+
+//go:generate echo "Generated code would go here"
+
+var GeneratedVar = "placeholder"
+`
+    );
+
+    // Run generate with verbose flag
+    const generateResults = runNxCommand(`run ${goapp}:generate --flags=-v`);
+    expect(generateResults).toContain(
+      `NX   Successfully ran target generate for project ${goapp}`
+    );
+  }, 120_000);
 });
 
 describe('Go Applications (without go.work)', () => {
@@ -230,7 +261,7 @@ describe('Go Applications (without go.work)', () => {
     expect(fileExists(join(tmpProjPath(), 'go.work'))).toBeFalsy();
   }, 30_000);
 
-  it('should be able to run build, lint, test and tidy commands on a Go application without go.work', async () => {
+  it('should be able to run build, lint, test, generate and tidy commands on a Go application without go.work', async () => {
     const goapp = uniq('goapp');
 
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
@@ -250,6 +281,12 @@ describe('Go Applications (without go.work)', () => {
     const lintResults = runNxCommand(`lint ${goapp}`);
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${goapp}`
+    );
+
+    // Run generate
+    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    expect(generateResults).toContain(
+      `NX   Successfully ran target generate for project ${goapp}`
     );
 
     // Run build
@@ -362,5 +399,30 @@ func main() {
     if (p.pid) {
       await promisifiedTreeKill(p.pid, 'SIGKILL');
     }
+  }, 120_000);
+
+  it('should be able to run the generate command with custom flags without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Create a Go file with go:generate directive
+    writeFileSync(
+      join(tmpProjPath(), `${goapp}/generated.go`),
+      `package main
+
+//go:generate echo "Generated code would go here"
+
+var GeneratedVar = "placeholder"
+`
+    );
+
+    // Run generate with verbose flag
+    const generateResults = runNxCommand(`run ${goapp}:generate --flags=-v`);
+    expect(generateResults).toContain(
+      `NX   Successfully ran target generate for project ${goapp}`
+    );
   }, 120_000);
 });
