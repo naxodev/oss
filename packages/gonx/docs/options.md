@@ -10,14 +10,15 @@ By default, gonx sets up projects without creating a go.work file, keeping the w
 
 gonx leverages Nx's inferred tasks feature, which means you don't need to have project.json files for your Go projects. The following tasks are automatically available:
 
-| Task    | Command           | Description                               |
-| ------- | ----------------- | ----------------------------------------- |
-| build   | `nx build <app>`  | Builds the Go application                 |
-| serve   | `nx serve <app>`  | Runs the Go application                   |
-| test    | `nx test <app>`   | Runs tests for the Go project             |
-| lint    | `nx lint <app>`   | Formats and lints the Go project          |
-| tidy    | `nx tidy <app>`   | Ensures go.mod matches the project source |
-| publish | (with nx release) | Publishes the Go module to the registry   |
+| Task     | Command                 | Description                               |
+| -------- | ----------------------- | ----------------------------------------- |
+| build    | `nx build <app>`        | Builds the Go application                 |
+| generate | `nx run <app>:generate` | Runs code generation using go generate    |
+| serve    | `nx serve <app>`        | Runs the Go application                   |
+| test     | `nx test <app>`         | Runs tests for the Go project             |
+| lint     | `nx lint <app>`         | Formats and lints the Go project          |
+| tidy     | `nx tidy <app>`         | Ensures go.mod matches the project source |
+| publish  | (with nx release)       | Publishes the Go module to the registry   |
 
 ## Nx Release Integration
 
@@ -125,6 +126,25 @@ You can configure custom linting tools instead of the default `go fmt`:
     "options": {
       "linter": "golangci-lint",
       "args": ["run"]
+    }
+  }
+}
+```
+
+## Code Generation
+
+You can configure the generate executor with custom flags and environment variables:
+
+```json
+{
+  "generate": {
+    "executor": "@naxodev/gonx:generate",
+    "options": {
+      "flags": ["-v"],
+      "env": {
+        "GOOS": "linux",
+        "GOARCH": "amd64"
+      }
     }
   }
 }

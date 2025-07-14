@@ -15,7 +15,7 @@ export default async function runExecutor(
   return executeCommand(buildParams(options), {
     cwd: extractCWD(options, context),
     env: options.env,
-    executable: options.compiler ?? 'go',
+    executable: 'go',
   });
 }
 

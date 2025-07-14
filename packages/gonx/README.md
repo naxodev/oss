@@ -30,8 +30,8 @@ The philosophy of gonx is to generate a non-invasive tooling to work with Go and
   - ✅ Well-structured Go code scaffolding
 - ✅ Generate Go Libraries
 - ✅ Full Nx integration
-  - ✅ Inferred Tasks: Build, Tidy, Test, Run, and Lint
-  - ✅ Cacheable Tasks: Build, Tidy, Test, and Lint
+  - ✅ Inferred Tasks: Build, Generate, Tidy, Test, Run, and Lint
+  - ✅ Cacheable Tasks: Build, Generate, Tidy, Test, and Lint
   - ✅ GraphV2 Support
   - ✅ Version Actions for Go release
   - ✅ Nx Release Publish executor to release to list the module on the registry
@@ -70,6 +70,7 @@ nx add @naxodev/gonx
 | Executor                                                       | Description                                       |
 | -------------------------------------------------------------- | ------------------------------------------------- |
 | [`build`](./docs/executors/build.md)                           | Build a Go project                                |
+| [`generate`](./docs/executors/generate.md)                     | Run code generation using go generate             |
 | [`lint`](./docs/executors/lint.md)                             | Format and lint a Go project                      |
 | [`serve`](./docs/executors/serve.md)                           | Run a Go application                              |
 | [`test`](./docs/executors/test.md)                             | Run tests of a Go project                         |
@@ -95,7 +96,6 @@ Need more customization? See our [plugin configuration options](./docs/options.m
 - Implemented the `publish` executor to use with `nx release` for publishing applications and libraries to the Go registry
 - Run the commands from inside the project root instead of from the root of the workspace, closing the gap with the traditional commands.
 - Stop using the `main.go` as the target for the `build` and `serve` executors directly when provided, instead use the `main.go` directory to capture the context.
-- Removed the generate executor (we plan to support generation options that better fit the Nx model)
 - Removed the creation of go.work by default. Now this is opt-in using the `addGoDotWork` flag.
 - Removed the `convert-to-one-module` generator.
 - The preset now asks you to choose between generating a library or application.
@@ -195,6 +195,20 @@ nx tidy my-go-lib
 ```
 
 See the [tidy executor docs](./docs/executors/tidy.md) for all options.
+
+#### Running code generation
+
+```bash
+nx run my-go-lib:generate
+```
+
+You can also pass custom flags to the go generate command:
+
+```bash
+nx run my-go-lib:generate --flags=-v
+```
+
+See the [generate executor docs](./docs/executors/generate.md) for all options.
 
 ### Publishing Go Modules
 

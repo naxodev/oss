@@ -37,22 +37,6 @@ describe('Generate Executor', () => {
     );
   });
 
-  it('should execute generate command using TinyGo compiler', async () => {
-    await executor({ ...options, compiler: 'tinygo' }, context);
-    expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['generate', './...'],
-      expect.objectContaining({ executable: 'tinygo' })
-    );
-  });
-
-  it('should execute generate command using gow compiler', async () => {
-    await executor({ ...options, compiler: 'gow' }, context);
-    expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['generate', './...'],
-      expect.objectContaining({ executable: 'gow' })
-    );
-  });
-
   it('should execute generate command with custom flags', async () => {
     await executor({ ...options, flags: ['-v', '-x'] }, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
@@ -75,7 +59,6 @@ describe('Generate Executor', () => {
 
   it('should execute generate command with both flags and environment variables', async () => {
     const combinedOptions = {
-      compiler: 'tinygo' as const,
       flags: ['-v'],
       env: { GOARCH: 'arm64' },
     };
@@ -84,7 +67,7 @@ describe('Generate Executor', () => {
       ['generate', '-v', './...'],
       expect.objectContaining({
         env: { GOARCH: 'arm64' },
-        executable: 'tinygo',
+        executable: 'go',
       })
     );
   });

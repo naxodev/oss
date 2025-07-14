@@ -6,12 +6,6 @@
   "description": "Runs code generation using the `go generate` command",
   "type": "object",
   "properties": {
-    "compiler": {
-      "type": "string",
-      "enum": ["go", "tinygo", "gow"],
-      "description": "The Go compiler to use",
-      "default": "go"
-    },
     "env": {
       "type": "object",
       "additionalProperties": {
