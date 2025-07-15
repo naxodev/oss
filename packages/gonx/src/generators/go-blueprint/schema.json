@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/schema",
   "$id": "@naxodev/gonx:go-blueprint",
-  "title": "Uses Go Blueprint to generates multiple templates",
+  "title": "Uses Go Blueprint to generate multiple templates",
   "type": "object",
   "properties": {
     "directory": {
@@ -18,7 +18,181 @@
       "type": "string",
       "pattern": "^[a-zA-Z][^:]*$",
       "x-priority": "important"
+    },
+    "tags": {
+      "description": "Add tags to the project (used for linting)",
+      "type": "string",
+      "x-priority": "important"
+    },
+    "skipFormat": {
+      "description": "Skip formatting files",
+      "type": "boolean",
+      "default": false
+    },
+    "addGoDotWork": {
+      "description": "Add this project to go.work file",
+      "type": "boolean",
+      "default": false
+    },
+    "driver": {
+      "description": "Database drivers to use",
+      "type": "string",
+      "enum": [
+        "mysql",
+        "postgres",
+        "sqlite",
+        "mongo",
+        "redis",
+        "scylla",
+        "none"
+      ],
+      "x-prompt": {
+        "message": "Which database driver would you like to use?",
+        "type": "list",
+        "items": [
+          {
+            "value": "mysql",
+            "label": "Mysql"
+          },
+          {
+            "value": "postgres",
+            "label": "Postgres"
+          },
+          {
+            "value": "sqlite",
+            "label": "Sqlite"
+          },
+          {
+            "value": "mongo",
+            "label": "Mongo"
+          },
+          {
+            "value": "redis",
+            "label": "Redis"
+          },
+          {
+            "value": "scylla",
+            "label": "Scylla"
+          },
+          {
+            "value": "none",
+            "label": "None"
+          }
+        ]
+      }
+    },
+    "feature": {
+      "description": "Advanced feature to use",
+      "type": "array",
+      "enum": [
+        "react",
+        "htmx",
+        "githubaction",
+        "websocket",
+        "tailwind",
+        "docker"
+      ],
+      "x-prompt": {
+        "message": "Which advanced features would you like to include?",
+        "type": "multiselect",
+        "items": [
+          {
+            "value": "react",
+            "label": "React"
+          },
+          {
+            "value": "htmx",
+            "label": "Htmx"
+          },
+          {
+            "value": "githubaction",
+            "label": "Githubaction"
+          },
+          {
+            "value": "websocket",
+            "label": "Websocket"
+          },
+          {
+            "value": "tailwind",
+            "label": "Tailwind"
+          },
+          {
+            "value": "docker",
+            "label": "Docker"
+          }
+        ]
+      }
+    },
+    "framework": {
+      "description": "Framework to use",
+      "type": "string",
+      "enum": [
+        "chi",
+        "gin",
+        "fiber",
+        "gorilla/mux",
+        "httprouter",
+        "standard-library",
+        "echo"
+      ],
+      "x-prompt": {
+        "message": "Which web framework would you like to use?",
+        "type": "list",
+        "items": [
+          {
+            "value": "chi",
+            "label": "Chi"
+          },
+          {
+            "value": "gin",
+            "label": "Gin"
+          },
+          {
+            "value": "fiber",
+            "label": "Fiber"
+          },
+          {
+            "value": "gorilla/mux",
+            "label": "Gorilla/mux"
+          },
+          {
+            "value": "httprouter",
+            "label": "Httprouter"
+          },
+          {
+            "value": "standard-library",
+            "label": "Standard-library"
+          },
+          {
+            "value": "echo",
+            "label": "Echo"
+          }
+        ]
+      }
+    },
+    "git": {
+      "description": "Git to use",
+      "type": "string",
+      "enum": ["commit", "stage", "skip"],
+      "x-prompt": {
+        "message": "How would you like to handle git?",
+        "type": "list",
+        "items": [
+          {
+            "value": "commit",
+            "label": "Commit"
+          },
+          {
+            "value": "stage",
+            "label": "Stage"
+          },
+          {
+            "value": "skip",
+            "label": "Skip"
+          }
+        ]
+      }
     }
   },
-  "required": ["directory"]
+  "required": ["directory", "driver", "framework", "git"]
 }

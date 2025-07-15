@@ -11,9 +11,9 @@ function validateGoBlueprintInstallation(): void {
   } catch (error) {
     logger.error(
       'go-blueprint is not installed or not available in PATH.\n' +
-      'Please install go-blueprint first:\n' +
-      '  go install github.com/melkeydev/go-blueprint@latest\n' +
-      'Or visit https://docs.go-blueprint.dev/ for installation instructions.'
+        'Please install go-blueprint first:\n' +
+        '  go install github.com/melkeydev/go-blueprint@latest\n' +
+        'Or visit https://docs.go-blueprint.dev/ for installation instructions.'
     );
     throw new Error('go-blueprint binary not found');
   }
