@@ -29,6 +29,11 @@
       "implementation": "./src/executors/nx-release-publish/nx-release-publish",
       "schema": "./src/executors/nx-release-publish/schema.json",
       "description": "List the module in the Golang registry"
+    },
+    "generate": {
+      "implementation": "./src/executors/generate/executor",
+      "schema": "./src/executors/generate/schema.json",
+      "description": "Run code generation using the go generate command"
     }
   }
 }

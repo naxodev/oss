@@ -5,6 +5,7 @@ export interface GoPluginOptions {
   runTargetName?: string;
   tidyTargetName?: string;
   lintTargetName?: string;
+  generateTargetName?: string;
   releasePublishTargetName?: string;
   tagName?: string;
   /**

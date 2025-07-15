@@ -1,6 +1,7 @@
 export const build = () => ({
   executor: '@naxodev/gonx:build',
   cache: true,
+  dependsOn: ['generate'],
   inputs: [
     '{projectRoot}/go.mod',
     '{projectRoot}/go.sum',

@@ -1,7 +1,7 @@
-export const test = () => ({
-  executor: '@naxodev/gonx:test',
+export const generate = () => ({
+  executor: '@naxodev/gonx:generate',
   cache: true,
-  dependsOn: ['generate', '^build'],
+  dependsOn: ['^generate'],
   inputs: [
     '{projectRoot}/go.mod',
     '{projectRoot}/go.sum',
