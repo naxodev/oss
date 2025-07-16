@@ -72,8 +72,10 @@ npx create-nx-workspace go-app --preset=@naxodev/gonx \
   --framework=fiber \
   --driver=mysql \
   --git=stage \
-  --feature=docker,react,tailwind
+  --feature=docker,githubaction
 ```
+
+⚠️ **Note**: Avoid using `react` or other frontend features with Go Blueprint. Use separate Nx generators for frontend projects instead.
 
 ### With Go Workspace
 
@@ -103,8 +105,9 @@ npx create-nx-workspace go-workspace --preset=@naxodev/gonx \
 
 - Uses [Go Blueprint](https://github.com/Melkeydev/go-blueprint) for advanced scaffolding
 - Provides multiple web frameworks and database integrations
-- Includes optional features like Docker, React, WebSockets, etc.
-- Requires Go Blueprint to be installed (`go install github.com/melkeydev/go-blueprint@latest`)
+- Includes optional features like Docker, GitHub Actions, WebSockets, etc.
+- Go Blueprint binary is included with the package
+- ⚠️ **Note**: Use separate Nx generators for frontend projects instead of Go Blueprint's built-in frontend features
 
 ## Project Structure
 
@@ -140,7 +143,7 @@ my-go-project/
 - Creates a new Nx workspace with gonx pre-configured
 - Sets up the workspace with Go support and inferred tasks
 - Ready to use immediately for Go development
-- Go Blueprint option requires Go Blueprint to be installed
+- Go Blueprint binary is bundled with the package
 - Creates go.work file only when explicitly requested via the `addGoDotWork` option
 - All template types support the full gonx toolchain (build, test, lint, etc.)
 

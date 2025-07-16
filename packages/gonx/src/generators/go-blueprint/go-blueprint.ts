@@ -1,5 +1,5 @@
 import { Tree, logger, formatFiles, generateFiles } from '@nx/devkit';
-import { execSync } from 'child_process';
+import { fork } from 'child_process';
 import { join } from 'path';
 import { mkdirSync, rmSync, existsSync } from 'fs';
 import { GoBlueprintGeneratorSchema } from './schema';
@@ -7,96 +7,108 @@ import { normalizeOptions } from '../../utils/normalize-options';
 import { initGenerator } from '../init/generator';
 
 /**
- * Validates that the go-blueprint binary is installed and available
+ * Gets the path to the go-blueprint binary from the npm package
  */
-function validateGoBlueprintInstallation(): void {
+function getGoBlueprintBinary(): string {
   try {
-    execSync('go-blueprint version', { stdio: 'ignore' });
+    return require.resolve('@melkeydev/go-blueprint/bin/go-blueprint');
   } catch (error) {
     logger.error(
-      'go-blueprint is not installed or not available in PATH.\n' +
-        'Please install go-blueprint first:\n' +
-        '  go install github.com/melkeydev/go-blueprint@latest\n' +
-        'Or visit https://docs.go-blueprint.dev/ for installation instructions.'
+      'go-blueprint npm package is not installed.\n' +
+        'This should not happen as it is a dependency of this package.'
     );
-    throw new Error('go-blueprint binary not found');
+    throw new Error('go-blueprint binary not found in npm package');
   }
 }
 
 /**
- * Builds the go-blueprint command with the provided options
+ * Builds the go-blueprint command arguments with the provided options
  */
-function buildGoBlueprintCommand(
+function buildGoBlueprintArgs(
   projectName: string,
   blueprintOptions: GoBlueprintGeneratorSchema
 ): string[] {
-  const command = ['go-blueprint', 'create'];
+  const args = ['create'];
 
   // Add required flags
-  command.push('--name', projectName);
-  command.push('--framework', blueprintOptions.framework);
-  command.push('--driver', blueprintOptions.driver);
-  command.push('--git', blueprintOptions.git);
+  args.push('--name', projectName);
+  args.push('--framework', blueprintOptions.framework);
+  args.push('--driver', blueprintOptions.driver);
+  args.push('--git', blueprintOptions.git);
 
   // Add advanced features if specified
   if (blueprintOptions.feature && blueprintOptions.feature.length > 0) {
-    command.push('--advanced');
+    args.push('--advanced');
     blueprintOptions.feature.forEach((feature) => {
-      command.push('--feature', feature);
+      args.push('--feature', feature);
     });
   }
 
-  return command;
+  return args;
 }
 
 /**
- * Executes go-blueprint command in the specified directory
+ * Executes go-blueprint command in the specified directory using the npm package binary
  */
 function executeGoBlueprintCommand(
-  command: string[],
+  args: string[],
   executionDir: string
-): void {
-  const fullCommand = command.join(' ');
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      const goBlueprintBin = getGoBlueprintBinary();
 
-  try {
-    execSync(fullCommand, {
-      cwd: executionDir,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        TERM: 'dumb',
-        CI: 'true',
-        NO_COLOR: '1',
-        FORCE_COLOR: '0',
-      },
-    });
-  } catch (error) {
-    throw new Error(`go-blueprint execution failed: ${error.message}`);
-  }
+      const childProcess = fork(goBlueprintBin, args, {
+        cwd: executionDir,
+        stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
+        env: {
+          ...process.env,
+        },
+      });
+
+      // Forward output to the console
+      childProcess.stdout?.on('data', (data) => {
+        process.stdout.write(data);
+      });
+
+      childProcess.stderr?.on('data', (data) => {
+        process.stderr.write(data);
+      });
+
+      childProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(
+            new Error(`go-blueprint execution failed with exit code ${code}`)
+          );
+        }
+      });
+
+      childProcess.on('error', (error) => {
+        reject(new Error(`go-blueprint execution failed: ${error.message}`));
+      });
+    } catch (error) {
+      reject(new Error(`Failed to start go-blueprint: ${error.message}`));
+    }
+  });
 }
 
 export async function goBlueprintGenerator(
   tree: Tree,
-  options: GoBlueprintGeneratorSchema
+  schema: GoBlueprintGeneratorSchema
 ) {
-  // Validate go-blueprint installation first
-  validateGoBlueprintInstallation();
-
   // Normalize options using the standard utility
-  const normalizedOptions = await normalizeOptions(
-    tree,
-    options,
-    'application'
-  );
+  const options = await normalizeOptions(tree, schema, 'application');
 
   // Initialize the workspace (adds necessary dependencies, etc.)
   await initGenerator(tree, {
     skipFormat: true,
-    addGoDotWork: options.addGoDotWork,
+    addGoDotWork: schema.addGoDotWork,
   });
 
   // Extract project name from normalized options
-  const pathSegments = normalizedOptions.projectRoot
+  const pathSegments = options.projectRoot
     .split('/')
     .filter((segment) => segment.length > 0);
   const projectName = pathSegments[pathSegments.length - 1];
@@ -112,12 +124,12 @@ export async function goBlueprintGenerator(
     }
 
     // Build and execute go-blueprint command in the files directory
-    const command = buildGoBlueprintCommand(projectName, options);
-    executeGoBlueprintCommand(command, filesDir);
+    const args = buildGoBlueprintArgs(projectName, schema);
+    await executeGoBlueprintCommand(args, filesDir);
 
     // Use generateFiles to copy from the temporary files directory to the project root
-    generateFiles(tree, tempProjectDir, normalizedOptions.projectRoot, {
-      ...options,
+    generateFiles(tree, tempProjectDir, options.projectRoot, {
+      ...schema,
       projectName,
       tmpl: '',
     });
@@ -129,7 +141,7 @@ export async function goBlueprintGenerator(
   }
 
   // Format files if not skipped
-  if (!options.skipFormat) {
+  if (!schema.skipFormat) {
     await formatFiles(tree);
   }
 }

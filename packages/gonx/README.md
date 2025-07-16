@@ -143,6 +143,23 @@ nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=c
 
 See the [go-blueprint generator docs](./docs/generators/go-blueprint.md) for all options.
 
+#### Full-Stack Development with Frontend
+
+For full-stack applications, generate the Go API first, then add a separate frontend:
+
+```bash
+# Generate Go API
+nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=skip
+
+# Generate React frontend in separate project
+nx g @nx/react:app my-frontend --directory=apps/my-frontend
+
+# Or Angular
+nx g @nx/angular:app my-frontend --directory=apps/my-frontend
+```
+
+This approach ensures proper Nx project graph detection and provides better separation of concerns.
+
 #### Building a Go application
 
 ```bash

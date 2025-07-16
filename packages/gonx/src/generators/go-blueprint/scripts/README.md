@@ -41,8 +41,3 @@ Plus Nx-specific options:
 - `tags` - Project tags
 - `skipFormat` - Skip formatting
 - `addGoDotWork` - Add to go.work file
-
-## Requirements
-
-- go-blueprint must be installed and available in PATH
-- Node.js to run the script

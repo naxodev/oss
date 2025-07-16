@@ -1,6 +1,7 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
-import { Tree, generateFiles } from '@nx/devkit';
-import { execSync } from 'child_process';
+import { Tree } from '@nx/devkit';
+import { fork } from 'child_process';
+import { EventEmitter } from 'events';
 
 import { goBlueprintGenerator } from './go-blueprint';
 import { GoBlueprintGeneratorSchema } from './schema';
@@ -11,6 +12,9 @@ jest.mock('../init/generator', () => ({
   initGenerator: jest.fn().mockResolvedValue(() => Promise.resolve()),
 }));
 
+// Mock require.resolve to return a fake binary path
+const mockRequireResolve = jest.fn();
+
 // Mock generateFiles specifically to avoid filesystem dependencies in tests
 const mockedGenerateFiles = jest.fn();
 jest.mock('@nx/devkit', () => ({
@@ -18,7 +22,7 @@ jest.mock('@nx/devkit', () => ({
   generateFiles: (...args: any[]) => mockedGenerateFiles(...args),
 }));
 
-const mockedExecSync = execSync as jest.MockedFunction<typeof execSync>;
+const mockedFork = fork as jest.MockedFunction<typeof fork>;
 
 describe('go-blueprint generator', () => {
   let tree: Tree;
@@ -29,53 +33,58 @@ describe('go-blueprint generator', () => {
     git: 'skip',
   };
 
+  function createMockChildProcess() {
+    const mockProcess = new EventEmitter() as any;
+    mockProcess.stdout = new EventEmitter();
+    mockProcess.stderr = new EventEmitter();
+    return mockProcess;
+  }
+
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
     jest.clearAllMocks();
 
-    // Mock successful execSync by default
-    mockedExecSync.mockReturnValue(Buffer.from('success'));
+    // Mock require.resolve to return a fake binary path
+    mockRequireResolve.mockReturnValue('/fake/path/to/go-blueprint');
+    (global as any).require = {
+      ...require,
+      resolve: mockRequireResolve,
+    };
+
+    // Mock successful fork by default
+    const mockProcess = createMockChildProcess();
+    mockedFork.mockReturnValue(mockProcess);
+
+    // Simulate successful process completion
+    setTimeout(() => {
+      mockProcess.emit('close', 0);
+    }, 0);
   });
 
-  it('should throw error when go-blueprint binary is not installed', async () => {
-    mockedExecSync.mockImplementation(() => {
-      throw new Error('command not found');
-    });
-
-    await expect(goBlueprintGenerator(tree, options)).rejects.toThrow(
-      'go-blueprint binary not found'
-    );
-    expect(mockedExecSync).toHaveBeenCalledWith('go-blueprint version', {
-      stdio: 'ignore',
-    });
-  });
-
-  it('should validate go-blueprint binary and complete successfully', async () => {
+  it('should complete successfully with default options', async () => {
     await goBlueprintGenerator(tree, options);
 
-    expect(mockedExecSync).toHaveBeenCalledWith('go-blueprint version', {
-      stdio: 'ignore',
-    });
-    // Verify execSync was called at least twice (validation + generation)
-    expect(mockedExecSync).toHaveBeenCalledTimes(2);
+    expect(mockedFork).toHaveBeenCalledWith(
+      expect.stringContaining('go-blueprint'),
+      [
+        'create',
+        '--name',
+        'test-app',
+        '--framework',
+        'gin',
+        '--driver',
+        'postgres',
+        '--git',
+        'skip',
+      ],
+      expect.objectContaining({
+        cwd: expect.any(String),
+        stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
+      })
+    );
   });
 
   describe('command building', () => {
-    it('should successfully generate with required options', async () => {
-      await goBlueprintGenerator(tree, options);
-
-      expect(mockedExecSync).toHaveBeenCalledWith('go-blueprint version', {
-        stdio: 'ignore',
-      });
-      // Verify the go-blueprint create command was called
-      expect(mockedExecSync).toHaveBeenCalledWith(
-        expect.stringContaining('go-blueprint create'),
-        expect.objectContaining({
-          cwd: expect.any(String),
-        })
-      );
-    });
-
     it('should successfully generate with advanced features', async () => {
       const optionsWithFeatures = {
         ...options,
@@ -84,13 +93,28 @@ describe('go-blueprint generator', () => {
 
       await goBlueprintGenerator(tree, optionsWithFeatures);
 
-      expect(mockedExecSync).toHaveBeenCalledWith('go-blueprint version', {
-        stdio: 'ignore',
-      });
-      // Verify advanced flag was used
-      expect(mockedExecSync).toHaveBeenCalledWith(
-        expect.stringContaining('--advanced'),
-        expect.any(Object)
+      expect(mockedFork).toHaveBeenCalledWith(
+        expect.stringContaining('go-blueprint'),
+        [
+          'create',
+          '--name',
+          'test-app',
+          '--framework',
+          'gin',
+          '--driver',
+          'postgres',
+          '--git',
+          'skip',
+          '--advanced',
+          '--feature',
+          'htmx',
+          '--feature',
+          'docker',
+        ],
+        expect.objectContaining({
+          cwd: expect.any(String),
+          stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
+        })
       );
     });
 
@@ -102,7 +126,37 @@ describe('go-blueprint generator', () => {
 
       await goBlueprintGenerator(tree, optionsWithNestedPath);
 
-      expect(mockedExecSync).toHaveBeenCalledTimes(2);
+      expect(mockedFork).toHaveBeenCalledWith(
+        expect.stringContaining('go-blueprint'),
+        [
+          'create',
+          '--name',
+          'test-app',
+          '--framework',
+          'gin',
+          '--driver',
+          'postgres',
+          '--git',
+          'skip',
+        ],
+        expect.objectContaining({
+          cwd: expect.any(String),
+        })
+      );
+    });
+
+    it('should handle process failure correctly', async () => {
+      const mockProcess = createMockChildProcess();
+      mockedFork.mockReturnValue(mockProcess);
+
+      // Simulate process failure
+      setTimeout(() => {
+        mockProcess.emit('close', 1);
+      }, 0);
+
+      await expect(goBlueprintGenerator(tree, options)).rejects.toThrow(
+        'go-blueprint execution failed with exit code 1'
+      );
     });
   });
 });

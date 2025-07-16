@@ -81,7 +81,8 @@
     "vite": "6.2.2",
     "vitest": "^3.0.0",
     "webpack": "^5.90.1",
-    "wrangler": "^4.7.1"
+    "wrangler": "^4.7.1",
+    "@melkeydev/go-blueprint": "0.10.11"
   },
   "dependencies": {
     "@types/fs-extra": "^11.0.4",

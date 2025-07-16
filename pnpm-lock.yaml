@@ -51,6 +51,9 @@ importers:
       '@eslint/js':
         specifier: ^8.52.0
         version: 8.57.1
+      '@melkeydev/go-blueprint':
+        specifier: 0.10.11
+        version: 0.10.11
       '@nx/angular':
         specifier: 21.2.0
         version: 21.2.0(a1cddf49c695394e3fcc12d585d330a8)
@@ -2370,6 +2373,47 @@ packages:
   '@mapbox/node-pre-gyp@2.0.0':
     resolution: {integrity: sha512-llMXd39jtP0HpQLVI37Bf1m2ADlEb35GYSh1SDSLsBhR+5iCxiNGlT31yqbNtVHygHAtMy6dWFERpU2JgufhPg==}
     engines: {node: '>=18'}
+    hasBin: true
+
+  '@melkeydev/go-blueprint-darwin-arm64@0.10.11':
+    resolution: {integrity: sha512-5flr8v70HxBXruDojsCy9VRh8aWDtGhLTu4pPmuTPs/a4BPrSEq4a3TufcN0N5o9z0DX4cVtfnTsB8mlxssGMA==}
+    cpu: [arm64]
+    os: [darwin]
+    hasBin: true
+
+  '@melkeydev/go-blueprint-darwin-x64@0.10.11':
+    resolution: {integrity: sha512-eDAUUTF/6dAgBLShXUG8QrdOp6vO8z6XeWe9Ydi1TrmBPvIGHO6c86bwTCYCGZD+tM58IzRRX0h0FXgCdmQImg==}
+    cpu: [x64]
+    os: [darwin]
+    hasBin: true
+
+  '@melkeydev/go-blueprint-linux-arm64@0.10.11':
+    resolution: {integrity: sha512-LTsX5FDYnnfbck27Hj28Tez0R/43+xGxaD0OWZUNrY2BphSQP8SzD7JeBtBuSlzs3ddUwmMIaXxm4Rx5368bvA==}
+    cpu: [arm64]
+    os: [linux]
+    hasBin: true
+
+  '@melkeydev/go-blueprint-linux-x64@0.10.11':
+    resolution: {integrity: sha512-ruDGU+KxokxlWe+DmRGCqhsxy3GByXKGMBZIRkB2JI+DbA679nFCBPRhPFfTA093tyH4Ohgm/Guil/XSFJByNQ==}
+    cpu: [x64]
+    os: [linux]
+    hasBin: true
+
+  '@melkeydev/go-blueprint-win32-arm64@0.10.11':
+    resolution: {integrity: sha512-65vTWl3+rOCbq0Ig39/I8VF7GdrCesjgXwWMgEDBsTJu2BZYWvAwZFkt++5Mrk8zmMczpDzL4cZ7DuEaJjDRHA==}
+    cpu: [arm64]
+    os: [win32]
+    hasBin: true
+
+  '@melkeydev/go-blueprint-win32-x64@0.10.11':
+    resolution: {integrity: sha512-d+8R4hqOTRodmvrfUV2s7E68R3I2/swVkX4XVWRaEyG+q9cDAERKSGMBuhSHygc9f6MkCMIfa6iM2aA5zm7C1A==}
+    cpu: [x64]
+    os: [win32]
+    hasBin: true
+
+  '@melkeydev/go-blueprint@0.10.11':
+    resolution: {integrity: sha512-N8OuTmgcF+4udNWsUIVOhOKOqobUttVbdDctq6uDLgKWpdbCPXvx54dFFshxFwabj2vj2R9dTBZLWhftmrtfqA==}
+    engines: {node: '>=14.0.0'}
     hasBin: true
 
   '@modern-js/node-bundle-require@2.65.1':
@@ -12832,6 +12876,33 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@melkeydev/go-blueprint-darwin-arm64@0.10.11':
+    optional: true
+
+  '@melkeydev/go-blueprint-darwin-x64@0.10.11':
+    optional: true
+
+  '@melkeydev/go-blueprint-linux-arm64@0.10.11':
+    optional: true
+
+  '@melkeydev/go-blueprint-linux-x64@0.10.11':
+    optional: true
+
+  '@melkeydev/go-blueprint-win32-arm64@0.10.11':
+    optional: true
+
+  '@melkeydev/go-blueprint-win32-x64@0.10.11':
+    optional: true
+
+  '@melkeydev/go-blueprint@0.10.11':
+    optionalDependencies:
+      '@melkeydev/go-blueprint-darwin-arm64': 0.10.11
+      '@melkeydev/go-blueprint-darwin-x64': 0.10.11
+      '@melkeydev/go-blueprint-linux-arm64': 0.10.11
+      '@melkeydev/go-blueprint-linux-x64': 0.10.11
+      '@melkeydev/go-blueprint-win32-arm64': 0.10.11
+      '@melkeydev/go-blueprint-win32-x64': 0.10.11
 
   '@modern-js/node-bundle-require@2.65.1':
     dependencies:

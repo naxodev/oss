@@ -2,15 +2,7 @@
 
 Uses [Go Blueprint](https://github.com/Melkeydev/go-blueprint) to generate Go applications with various frameworks and features. This generator integrates Go Blueprint's powerful scaffolding capabilities with Nx's workflow.
 
-## Prerequisites
-
-Go Blueprint must be installed on your system:
-
-```bash
-go install github.com/melkeydev/go-blueprint@latest
-```
-
-For detailed installation instructions, visit [Go Blueprint documentation](https://docs.go-blueprint.dev/).
+The Go Blueprint binary is included with this package, so no additional installation is required.
 
 ## Usage
 
@@ -67,7 +59,7 @@ The generator will prompt you to select:
 
 ### Advanced Features
 
-- `react` - React frontend integration
+- `react` - React frontend integration (⚠️ **Not recommended** - see Frontend Integration below)
 - `htmx` - HTMX integration
 - `githubaction` - GitHub Actions workflow
 - `websocket` - WebSocket support
@@ -150,23 +142,56 @@ nx lint my-go-app
 nx tidy my-go-app
 ```
 
+## Frontend Integration
+
+⚠️ **Important**: Avoid using Go Blueprint's built-in frontend features (like `react`) as they will not be properly detected by Nx's project graph. Since Nx already detects a Go project in the directory, adding frontend code directly will create conflicts.
+
+### Recommended Approach
+
+Instead of using Go Blueprint's frontend features, create separate frontend projects using Nx's native generators:
+
+```bash
+# Generate your Go API first
+nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=skip
+
+# Then generate a separate frontend project
+nx g @nx/react:app frontend --directory=apps/frontend
+
+# Or use other Nx frontend generators
+nx g @nx/angular:app frontend --directory=apps/frontend
+nx g @nx/vue:app frontend --directory=apps/frontend
+```
+
+### Benefits of Separate Projects
+
+- ✅ Proper Nx project graph detection and dependency tracking
+- ✅ Independent build, test, and deployment pipelines
+- ✅ Better separation of concerns
+- ✅ Full access to Nx's frontend tooling and optimizations
+- ✅ Easier to scale and maintain
+
+### Example Workspace Structure
+
+```
+my-workspace/
+├── apps/
+│   ├── my-api/           # Go API (generated with go-blueprint)
+│   │   ├── main.go
+│   │   └── go.mod
+│   └── frontend/         # React/Angular/Vue app (generated with Nx)
+│       ├── src/
+│       └── package.json
+└── nx.json
+```
+
 ## Notes
 
-- The generator validates that Go Blueprint is installed before proceeding
+- Go Blueprint binary is bundled with this package
 - Uses Nx's inferred tasks, so no project.json file is generated
 - Follows gonx's philosophy of keeping non-JS monorepos pure
 - All Go Blueprint options are mapped to provide a seamless integration experience
 
 ## Troubleshooting
-
-### Go Blueprint Not Found
-
-If you see an error about go-blueprint not being found:
-
-1. Ensure Go is installed and configured
-2. Install Go Blueprint: `go install github.com/melkeydev/go-blueprint@latest`
-3. Verify installation: `go-blueprint version`
-4. Make sure `$GOPATH/bin` is in your `$PATH`
 
 ### Generation Fails
 
@@ -175,4 +200,4 @@ If generation fails:
 1. Check that the target directory doesn't already exist
 2. Ensure you have write permissions to the target location
 3. Verify all required options are provided
-4. Check Go Blueprint documentation for framework-specific requirements
+4. Check [Go Blueprint documentation](https://docs.go-blueprint.dev/) for framework-specific requirements
