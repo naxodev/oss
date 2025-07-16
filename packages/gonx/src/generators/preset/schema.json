@@ -13,14 +13,15 @@
     "type": {
       "type": "string",
       "description": "Define the type of preset to generate.",
-      "enum": ["binary", "library"],
+      "enum": ["binary", "library", "go-blueprint"],
       "x-prompt": {
         "message": "Which template type do you want to use?",
         "type": "list",
         "default": "binary",
         "items": [
           { "value": "binary", "label": "Binary" },
-          { "value": "library", "label": "library" }
+          { "value": "library", "label": "Library" },
+          { "value": "go-blueprint", "label": "Go Blueprint" }
         ]
       }
     },
@@ -33,11 +34,192 @@
       },
       "x-prompt": "Which directory do you want to create the project in?"
     },
+    "name": {
+      "description": "The name of the application.",
+      "type": "string",
+      "pattern": "^[a-zA-Z][^:]*$",
+      "x-priority": "important"
+    },
+    "tags": {
+      "description": "Add tags to the project (used for linting)",
+      "type": "string",
+      "x-priority": "important"
+    },
     "addGoDotWork": {
       "type": "boolean",
       "description": "Add a go.work file to the project.",
       "default": false
+    },
+    "framework": {
+      "description": "Framework to use",
+      "type": "string",
+      "enum": [
+        "chi",
+        "gin",
+        "fiber",
+        "gorilla/mux",
+        "httprouter",
+        "standard-library",
+        "echo"
+      ],
+      "x-prompt": {
+        "message": "Which web framework would you like to use?",
+        "type": "list",
+        "items": [
+          {
+            "value": "chi",
+            "label": "Chi"
+          },
+          {
+            "value": "gin",
+            "label": "Gin"
+          },
+          {
+            "value": "fiber",
+            "label": "Fiber"
+          },
+          {
+            "value": "gorilla/mux",
+            "label": "Gorilla/mux"
+          },
+          {
+            "value": "httprouter",
+            "label": "Httprouter"
+          },
+          {
+            "value": "standard-library",
+            "label": "Standard-library"
+          },
+          {
+            "value": "echo",
+            "label": "Echo"
+          }
+        ]
+      }
+    },
+    "driver": {
+      "description": "Database drivers to use",
+      "type": "string",
+      "enum": [
+        "mysql",
+        "postgres",
+        "sqlite",
+        "mongo",
+        "redis",
+        "scylla",
+        "none"
+      ],
+      "x-prompt": {
+        "message": "Which database driver would you like to use?",
+        "type": "list",
+        "items": [
+          {
+            "value": "mysql",
+            "label": "Mysql"
+          },
+          {
+            "value": "postgres",
+            "label": "Postgres"
+          },
+          {
+            "value": "sqlite",
+            "label": "Sqlite"
+          },
+          {
+            "value": "mongo",
+            "label": "Mongo"
+          },
+          {
+            "value": "redis",
+            "label": "Redis"
+          },
+          {
+            "value": "scylla",
+            "label": "Scylla"
+          },
+          {
+            "value": "none",
+            "label": "None"
+          }
+        ]
+      }
+    },
+    "feature": {
+      "description": "Advanced feature to use",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "react",
+          "htmx",
+          "githubaction",
+          "websocket",
+          "tailwind",
+          "docker"
+        ]
+      },
+      "x-prompt": {
+        "message": "Which advanced features would you like to include?",
+        "type": "multiselect",
+        "items": [
+          {
+            "value": "react",
+            "label": "React"
+          },
+          {
+            "value": "htmx",
+            "label": "Htmx"
+          },
+          {
+            "value": "githubaction",
+            "label": "Githubaction"
+          },
+          {
+            "value": "websocket",
+            "label": "Websocket"
+          },
+          {
+            "value": "tailwind",
+            "label": "Tailwind"
+          },
+          {
+            "value": "docker",
+            "label": "Docker"
+          }
+        ]
+      }
+    },
+    "git": {
+      "description": "Git to use",
+      "type": "string",
+      "enum": ["commit", "stage", "skip"],
+      "x-prompt": {
+        "message": "How would you like to handle git?",
+        "type": "list",
+        "items": [
+          {
+            "value": "commit",
+            "label": "Commit"
+          },
+          {
+            "value": "stage",
+            "label": "Stage"
+          },
+          {
+            "value": "skip",
+            "label": "Skip"
+          }
+        ]
+      }
     }
   },
-  "required": ["type", "directory"]
+  "required": ["type", "directory"],
+  "if": {
+    "properties": {
+      "type": { "const": "go-blueprint" }
+    }
+  },
+  "then": {
+    "required": ["type", "directory", "driver", "framework", "git"]
+  }
 }
