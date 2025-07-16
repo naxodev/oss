@@ -34,6 +34,53 @@
       "type": "boolean",
       "default": false
     },
+    "framework": {
+      "description": "Framework to use",
+      "type": "string",
+      "enum": [
+        "chi",
+        "gin",
+        "fiber",
+        "gorilla/mux",
+        "httprouter",
+        "standard-library",
+        "echo"
+      ],
+      "x-prompt": {
+        "message": "Which web framework would you like to use?",
+        "type": "list",
+        "items": [
+          {
+            "value": "chi",
+            "label": "Chi"
+          },
+          {
+            "value": "gin",
+            "label": "Gin"
+          },
+          {
+            "value": "fiber",
+            "label": "Fiber"
+          },
+          {
+            "value": "gorilla/mux",
+            "label": "Gorilla/mux"
+          },
+          {
+            "value": "httprouter",
+            "label": "Httprouter"
+          },
+          {
+            "value": "standard-library",
+            "label": "Standard-library"
+          },
+          {
+            "value": "echo",
+            "label": "Echo"
+          }
+        ]
+      }
+    },
     "driver": {
       "description": "Database drivers to use",
       "type": "string",
@@ -119,53 +166,6 @@
           {
             "value": "docker",
             "label": "Docker"
-          }
-        ]
-      }
-    },
-    "framework": {
-      "description": "Framework to use",
-      "type": "string",
-      "enum": [
-        "chi",
-        "gin",
-        "fiber",
-        "gorilla/mux",
-        "httprouter",
-        "standard-library",
-        "echo"
-      ],
-      "x-prompt": {
-        "message": "Which web framework would you like to use?",
-        "type": "list",
-        "items": [
-          {
-            "value": "chi",
-            "label": "Chi"
-          },
-          {
-            "value": "gin",
-            "label": "Gin"
-          },
-          {
-            "value": "fiber",
-            "label": "Fiber"
-          },
-          {
-            "value": "gorilla/mux",
-            "label": "Gorilla/mux"
-          },
-          {
-            "value": "httprouter",
-            "label": "Httprouter"
-          },
-          {
-            "value": "standard-library",
-            "label": "Standard-library"
-          },
-          {
-            "value": "echo",
-            "label": "Echo"
           }
         ]
       }
