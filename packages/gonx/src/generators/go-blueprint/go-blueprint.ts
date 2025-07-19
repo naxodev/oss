@@ -63,10 +63,6 @@ function executeGoBlueprintCommand(
         stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
         env: {
           ...process.env,
-          TERM: 'dumb',
-          CI: 'true',
-          NO_COLOR: '1',
-          FORCE_COLOR: '0',
         },
       });
 
