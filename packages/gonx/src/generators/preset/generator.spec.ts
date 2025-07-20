@@ -2,11 +2,13 @@ import type { Tree } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import applicationGenerator from '../application/generator';
 import libraryGenerator from '../library/generator';
+import goBlueprintGenerator from '../go-blueprint/go-blueprint';
 import presetGenerator from './generator';
 import type { PresetGeneratorSchema } from './schema';
 
 jest.mock('../application/generator');
 jest.mock('../library/generator');
+jest.mock('../go-blueprint/go-blueprint');
 
 describe('preset generator', () => {
   let tree: Tree;
@@ -56,5 +58,90 @@ describe('preset generator', () => {
     await presetGenerator(tree, options);
     expect(applicationGenerator).toHaveBeenCalledWith(tree, options);
     expect(libraryGenerator).not.toHaveBeenCalled();
+  });
+
+  describe('go-blueprint type', () => {
+    beforeEach(() => {
+      (goBlueprintGenerator as jest.Mock).mockResolvedValue(undefined);
+    });
+
+    it('should run go-blueprint generator when type is go-blueprint', async () => {
+      const options = {
+        ...baseOptions,
+        type: 'go-blueprint' as const,
+        framework: 'gin' as const,
+        driver: 'postgres' as const,
+        git: 'commit' as const,
+      };
+      await presetGenerator(tree, options);
+      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, {
+        ...options,
+        feature: [],
+      });
+      expect(applicationGenerator).not.toHaveBeenCalled();
+      expect(libraryGenerator).not.toHaveBeenCalled();
+    });
+
+    it('should provide default values for go-blueprint required options', async () => {
+      const options = {
+        ...baseOptions,
+        type: 'go-blueprint' as const,
+      };
+      await presetGenerator(tree, options);
+      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, {
+        ...options,
+        driver: 'none',
+        framework: 'gin',
+        git: 'skip',
+        feature: [],
+      });
+    });
+
+    it('should preserve provided go-blueprint options', async () => {
+      const options = {
+        ...baseOptions,
+        type: 'go-blueprint' as const,
+        framework: 'fiber' as const,
+        driver: 'mysql' as const,
+        git: 'stage' as const,
+        feature: ['docker', 'react'],
+      };
+      await presetGenerator(tree, options);
+      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, options);
+    });
+
+    it('should handle partial go-blueprint options with defaults', async () => {
+      const options = {
+        ...baseOptions,
+        type: 'go-blueprint' as const,
+        framework: 'echo' as const,
+        // driver and git not provided
+      };
+      await presetGenerator(tree, options);
+      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, {
+        ...options,
+        driver: 'none',
+        git: 'skip',
+        feature: [],
+      });
+    });
+
+    it('should pass through additional preset options to go-blueprint generator', async () => {
+      const options = {
+        ...baseOptions,
+        type: 'go-blueprint' as const,
+        framework: 'chi' as const,
+        driver: 'sqlite' as const,
+        git: 'commit' as const,
+        skipFormat: true,
+        addGoDotWork: true,
+        tags: 'api,service',
+      };
+      await presetGenerator(tree, options);
+      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, {
+        ...options,
+        feature: [],
+      });
+    });
   });
 });

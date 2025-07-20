@@ -1,30 +1,9 @@
 {
   "$schema": "https://json-schema.org/schema",
-  "$id": "@naxodev/gonx:preset",
-  "title": "Go preset generator options",
+  "$id": "@naxodev/gonx:go-blueprint",
+  "title": "Uses Go Blueprint to generate multiple templates",
   "type": "object",
   "properties": {
-    "skipFormat": {
-      "type": "boolean",
-      "description": "Skip formatting files.",
-      "default": false,
-      "x-priority": "internal"
-    },
-    "type": {
-      "type": "string",
-      "description": "Define the type of preset to generate.",
-      "enum": ["binary", "library", "go-blueprint"],
-      "x-prompt": {
-        "message": "Which template type do you want to use?",
-        "type": "list",
-        "default": "binary",
-        "items": [
-          { "value": "binary", "label": "Binary" },
-          { "value": "library", "label": "Library" },
-          { "value": "go-blueprint", "label": "Go Blueprint" }
-        ]
-      }
-    },
     "directory": {
       "description": "The directory of the new application.",
       "type": "string",
@@ -32,7 +11,7 @@
         "$source": "argv",
         "index": 0
       },
-      "x-prompt": "Which directory do you want to create the project in?"
+      "x-prompt": "Which directory do you want to create the application in?"
     },
     "name": {
       "description": "The name of the application.",
@@ -45,9 +24,14 @@
       "type": "string",
       "x-priority": "important"
     },
-    "addGoDotWork": {
+    "skipFormat": {
+      "description": "Skip formatting files",
       "type": "boolean",
-      "description": "Add a go.work file to the project.",
+      "default": false
+    },
+    "addGoDotWork": {
+      "description": "Add this project to go.work file",
+      "type": "boolean",
       "default": false
     },
     "framework": {
@@ -147,17 +131,14 @@
     "feature": {
       "description": "Advanced feature to use",
       "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "react",
-          "htmx",
-          "githubaction",
-          "websocket",
-          "tailwind",
-          "docker"
-        ]
-      },
+      "enum": [
+        "react",
+        "htmx",
+        "githubaction",
+        "websocket",
+        "tailwind",
+        "docker"
+      ],
       "x-prompt": {
         "message": "Which advanced features would you like to include?",
         "type": "multiselect",
@@ -213,13 +194,5 @@
       }
     }
   },
-  "required": ["type", "directory"],
-  "if": {
-    "properties": {
-      "type": { "const": "go-blueprint" }
-    }
-  },
-  "then": {
-    "required": ["type", "directory", "driver", "framework", "git"]
-  }
+  "required": ["directory", "driver", "framework", "git"]
 }

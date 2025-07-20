@@ -58,12 +58,13 @@ nx add @naxodev/gonx
 
 ### Generators
 
-| Generator                                         | Description                                   |
-| ------------------------------------------------- | --------------------------------------------- |
-| [`application`](./docs/generators/application.md) | Generate a Go application                     |
-| [`library`](./docs/generators/library.md)         | Generate a Go library                         |
-| [`init`](./docs/generators/init.md)               | Initialize gonx in an existing workspace      |
-| [`preset`](./docs/generators/preset.md)           | Preset generator for creating a new workspace |
+| Generator                                           | Description                                   |
+| --------------------------------------------------- | --------------------------------------------- |
+| [`application`](./docs/generators/application.md)   | Generate a Go application                     |
+| [`go-blueprint`](./docs/generators/go-blueprint.md) | Generate Go applications using Go Blueprint   |
+| [`library`](./docs/generators/library.md)           | Generate a Go library                         |
+| [`init`](./docs/generators/init.md)                 | Initialize gonx in an existing workspace      |
+| [`preset`](./docs/generators/preset.md)             | Preset generator for creating a new workspace |
 
 ### Executors
 
@@ -133,6 +134,31 @@ nx g @naxodev/gonx:application my-go-app
 ```
 
 See the [application generator docs](./docs/generators/application.md) for all options.
+
+#### Creating a Go application with Go Blueprint
+
+```bash
+nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=commit
+```
+
+See the [go-blueprint generator docs](./docs/generators/go-blueprint.md) for all options.
+
+#### Full-Stack Development with Frontend
+
+For full-stack applications, generate the Go API first, then add a separate frontend:
+
+```bash
+# Generate Go API
+nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=skip
+
+# Generate React frontend in separate project
+nx g @nx/react:app my-frontend --directory=apps/my-frontend
+
+# Or Angular
+nx g @nx/angular:app my-frontend --directory=apps/my-frontend
+```
+
+This approach ensures proper Nx project graph detection and provides better separation of concerns.
 
 #### Building a Go application
 
