@@ -9,8 +9,24 @@ Welcome to the OSS workspace documentation! This workspace contains a collection
 
 The OSS workspace is a monorepo that houses multiple interconnected projects, each solving specific development challenges:
 
-- **GoNx** - A modern Nx plugin for Go/Golang development
-- **Nx Cloudflare** - Comprehensive Cloudflare integration for Nx workspaces
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+  <div style="text-align: center;">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/gonx.svg" />
+      <img alt="gonx - Nx plugin for Go/Golang" src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/gonx.svg" width="100%" />
+    </picture>
+    <h3>GoNx</h3>
+    <p>A modern Nx plugin for Go/Golang development</p>
+  </div>
+  <div style="text-align: center;">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" />
+      <img alt="nx-cloudflare - Nx plugin for Cloudflare workers" src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" width="100%" />
+    </picture>
+    <h3>Nx Cloudflare</h3>
+    <p>Comprehensive Cloudflare integration for Nx workspaces</p>
+  </div>
+</div>
 
 ## Philosophy
 

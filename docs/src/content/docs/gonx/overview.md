@@ -3,7 +3,13 @@ title: GoNx Overview
 description: Modern Nx plugin for Go/Golang development
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<p style="text-align: center;">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/gonx.svg" />
+    <img alt="gonx - Nx plugin for Go/Golang" src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/gonx.svg" width="100%" />
+  </picture>
+</p>
 
 GoNx is a very opinionated Nx plugin for Go/Golang development that brings modern Nx features to Go projects.
 

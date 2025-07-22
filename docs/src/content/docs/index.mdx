@@ -4,14 +4,12 @@ description: Collection of Nx plugins and tools for modern development
 template: splash
 hero:
   tagline: A comprehensive collection of Nx plugins for Go and Cloudflare development
-  image:
-    file: ../../assets/houston.webp
   actions:
     - text: Get Started
-      link: /getting-started/quick-start/
+      link: /introduction/
       icon: right-arrow
     - text: View on GitHub
-      link: https://github.com/abelpenton/oss
+      link: https://github.com/naxodev/oss
       icon: external
       variant: minimal
 ---
@@ -22,9 +20,21 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 <CardGrid stagger>
 	<Card title="GoNx" icon="rocket">
+		<div style="text-align: center; margin-bottom: 1rem;">
+			<picture>
+				<source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/gonx.svg" />
+				<img alt="gonx - Nx plugin for Go/Golang" src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/gonx.svg" width="80%" />
+			</picture>
+		</div>
 		A modern Nx plugin for Go/Golang development with full Nx integration, inferred tasks, and official Go command support.
 	</Card>
 	<Card title="Nx Cloudflare" icon="setting">
+		<div style="text-align: center; margin-bottom: 1rem;">
+			<picture>
+				<source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" />
+				<img alt="nx-cloudflare - Nx plugin for Cloudflare workers" src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" width="80%" />
+			</picture>
+		</div>
 		Nx plugin for Cloudflare development, featuring Workers, Pages, and Next.js integration.
 	</Card>
 	<Card title="Community" icon="open-book">

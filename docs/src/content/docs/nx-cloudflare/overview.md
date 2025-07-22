@@ -3,7 +3,13 @@ title: Nx Cloudflare Overview
 description: Nx plugin for Cloudflare development, featuring Workers, Pages, and Next.js integration
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<p style="text-align: center;">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" />
+    <img alt="nx-cloudflare - Nx plugin for Cloudflare, in particular Cloudflare workers." src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" width="100%" />
+  </picture>
+</p>
 
 Nx Cloudflare is a comprehensive Nx plugin designed for Cloudflare development, particularly focused on Cloudflare Workers with additional support for Pages and Next.js integration.
 
@@ -136,7 +142,7 @@ Ready to start building with Cloudflare Workers? Check out:
 ## Community & Support
 
 - **Discord**: Join our [Discord server](https://discord.gg/zjDCGpKP2S) for community support
-- **GitHub**: Contribute to the [open source project](https://github.com/abelpenton/oss)
+- **GitHub**: Contribute to the [open source project](https://github.com/naxodev/oss)
 - **Documentation**: Comprehensive guides and API reference
 - **Examples**: Real-world examples in the workspace
 

@@ -1,15 +1,13 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
-// https://astro.build/config
 export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'OSS Workspace',
 			description: 'Nx plugins and tools for modern development',
 			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/abelpenton/oss' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/naxodev/oss' },
 				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/zjDCGpKP2S' }
 			],
 			sidebar: [

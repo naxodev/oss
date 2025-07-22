@@ -367,7 +367,7 @@ npm list @naxodev/nx-cloudflare
 ### Community Resources
 
 - **Discord**: [Join our server](https://discord.gg/zjDCGpKP2S)
-- **GitHub**: [Report issues](https://github.com/abelpenton/oss)
+- **GitHub**: [Report issues](https://github.com/naxodev/oss)
 - **Documentation**: This comprehensive guide
 - **Examples**: Check the workspace examples directory
 
