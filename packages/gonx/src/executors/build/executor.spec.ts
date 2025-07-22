@@ -1,4 +1,5 @@
 import { ExecutorContext } from '@nx/devkit';
+import * as path from 'path';
 import * as sharedFunctions from '../../utils';
 import executor from './executor';
 import { BuildExecutorSchema } from './schema';
@@ -25,6 +26,10 @@ const options: BuildExecutorSchema = {
   env: { hello: 'world' },
 };
 
+const getExpectedOutputPath = () => {
+  return path.join('dist', 'apps', 'project') + path.sep;
+};
+
 const context: ExecutorContext = {
   root: '.',
   isVerbose: false,
@@ -43,7 +48,7 @@ describe('Build Executor', () => {
   it('should execute build command using the default options', async () => {
     await executor({}, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project/', './...'],
+      ['build', '-o', getExpectedOutputPath(), './...'],
       expect.objectContaining({ executable: 'go' })
     );
   });
@@ -56,7 +61,7 @@ describe('Build Executor', () => {
       context
     );
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project/', './...'],
+      ['build', '-o', getExpectedOutputPath(), './...'],
       expect.objectContaining({ executable: 'go' })
     );
   });
@@ -64,7 +69,7 @@ describe('Build Executor', () => {
   it('should execute build command using TinyGo compiler', async () => {
     await executor({ ...options, compiler: 'tinygo' }, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project/', './...'],
+      ['build', '-o', getExpectedOutputPath(), './...'],
       expect.objectContaining({ executable: 'tinygo' })
     );
   });
@@ -96,7 +101,7 @@ describe('Build Executor', () => {
   it('should use "." as run path when main option is provided', async () => {
     await executor({ ...options, main: 'cmd/main.go' }, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project/', '.'],
+      ['build', '-o', getExpectedOutputPath(), '.'],
       expect.anything()
     );
   });
@@ -104,7 +109,7 @@ describe('Build Executor', () => {
   it('should use "./..." as run path when main option is not provided', async () => {
     await executor(options, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project/', './...'],
+      ['build', '-o', getExpectedOutputPath(), './...'],
       expect.anything()
     );
   });
@@ -112,7 +117,7 @@ describe('Build Executor', () => {
   it('should use "." as run path when main option is empty string', async () => {
     await executor({ ...options, main: '' }, context);
     expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      ['build', '-o', 'dist/apps/project/', './...'],
+      ['build', '-o', getExpectedOutputPath(), './...'],
       expect.anything()
     );
   });
