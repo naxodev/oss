@@ -5,7 +5,9 @@ import { EventEmitter } from 'events';
 
 import { goBlueprintGenerator } from './go-blueprint';
 import { GoBlueprintGeneratorSchema } from './schema';
+import { platform } from 'os';
 
+const isWindows = platform() === 'win32';
 // Mock what we need
 jest.mock('child_process');
 jest.mock('../init/generator', () => ({
@@ -79,7 +81,7 @@ describe('go-blueprint generator', () => {
       ],
       expect.objectContaining({
         cwd: expect.any(String),
-        stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
+        stdio: isWindows ? 'inherit' : ['pipe', 'ignore', 'pipe', 'ipc'],
       })
     );
   });
@@ -113,7 +115,7 @@ describe('go-blueprint generator', () => {
         ],
         expect.objectContaining({
           cwd: expect.any(String),
-          stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
+          stdio: isWindows ? 'inherit' : ['pipe', 'ignore', 'pipe', 'ipc'],
         })
       );
     });
