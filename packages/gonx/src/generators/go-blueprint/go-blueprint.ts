@@ -5,9 +5,6 @@ import { mkdirSync, rmSync, existsSync } from 'fs';
 import { GoBlueprintGeneratorSchema } from './schema';
 import { normalizeOptions } from '../../utils/normalize-options';
 import { initGenerator } from '../init/generator';
-import { platform } from 'os';
-
-const isWindows = platform() === 'win32';
 
 /**
  * Gets the path to the go-blueprint binary from the npm package
@@ -63,22 +60,15 @@ function executeGoBlueprintCommand(
 
       const childProcess = fork(goBlueprintBin, args, {
         cwd: executionDir,
-        stdio: isWindows ? 'inherit' : ['pipe', 'ignore', 'pipe', 'ipc'],
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
         env: {
           ...process.env,
         },
       });
 
-      if (!isWindows) {
-        // Forward output to the console
-        childProcess.stdout?.on('data', (data) => {
-          process.stdout.write(data);
-        });
-
-        childProcess.stderr?.on('data', (data) => {
-          process.stderr.write(data);
-        });
-      }
+      childProcess.stderr?.on('data', (data) => {
+        process.stderr.write(data);
+      });
 
       childProcess.on('close', (code) => {
         if (code === 0) {
