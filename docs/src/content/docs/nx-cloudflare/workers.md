@@ -3,7 +3,6 @@ title: Cloudflare Workers
 description: Creating and managing Cloudflare Workers with Nx
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 This guide covers creating, developing, and deploying Cloudflare Workers using Nx Cloudflare.
 
@@ -38,26 +37,14 @@ nx g @naxodev/nx-cloudflare:application my-worker-app
 
 The standard HTTP request/response worker:
 
-<Tabs>
-<TabItem label="TypeScript">
 ```typescript
+// TypeScript Worker
 export default {
   async fetch(request: Request): Promise<Response> {
     return new Response('Hello World!');
   },
 };
 ```
-</TabItem>
-<TabItem label="JavaScript">
-```javascript
-export default {
-  async fetch(request) {
-    return new Response('Hello World!');
-  },
-};
-```
-</TabItem>
-</Tabs>
 
 ### Scheduled Handler
 

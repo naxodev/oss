@@ -3,7 +3,6 @@ title: GoNx Usage
 description: How to use GoNx for Go development in Nx workspaces
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 This guide covers the most common usage patterns for GoNx, from generating projects to building and deploying Go applications.
 
@@ -39,12 +38,10 @@ nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=c
 
 This generator leverages Go Blueprint to create more sophisticated application templates with different frameworks and database drivers.
 
-#### Full-Stack Development
+### Full-Stack Development
 
 For full-stack applications, generate the Go API first, then add a separate frontend:
 
-<Tabs>
-<TabItem label="With React">
 ```bash
 # Generate Go API
 nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=skip
@@ -52,8 +49,6 @@ nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=s
 # Generate React frontend
 nx g @nx/react:app my-frontend --directory=apps/my-frontend
 ```
-</TabItem>
-<TabItem label="With Angular">
 ```bash
 # Generate Go API  
 nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=skip
@@ -61,8 +56,6 @@ nx g @naxodev/gonx:go-blueprint my-api --framework=gin --driver=postgres --git=s
 # Generate Angular frontend
 nx g @nx/angular:app my-frontend --directory=apps/my-frontend
 ```
-</TabItem>
-</Tabs>
 
 This approach ensures proper Nx project graph detection and provides better separation of concerns.
 

@@ -1,40 +1,74 @@
-# Starlight Starter Kit: Basics
+# OSS Workspace Documentation
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
-```
-pnpm create astro@latest -- --template starlight
-```
+All commands are run from the `docs/` directory:
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/starlight/tree/main/examples/basics)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/withastro/starlight&create_from_path=examples/basics)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwithastro%2Fstarlight%2Ftree%2Fmain%2Fexamples%2Fbasics&project-name=my-starlight-docs&repository-name=my-starlight-docs)
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `pnpm install`            | Installs dependencies                            |
+| `pnpm dev`                | Starts local dev server at `localhost:4321`     |
+| `pnpm build`              | Build production site to `./dist/`              |
+| `pnpm preview`            | Preview your build locally, before deploying    |
+| `pnpm astro ...`          | Run CLI commands like `astro add`, `astro check`|
+| `pnpm astro -- --help`    | Get help using the Astro CLI                    |
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 📝 Contributing to Documentation
+
+We welcome contributions to improve the documentation! Here's how you can help:
+
+1. **Fix typos or improve clarity** in existing documentation
+2. **Add examples** for common use cases
+3. **Update outdated information** as the plugins evolve
+4. **Add new guides** for advanced topics
+
+See the [Contributing Guide](../CONTRIBUTING.md) for more details.
+
+## 🎯 What's Next?
+
+- Browse the [Getting Started](./src/content/docs/getting-started/) guides
+- Explore [GoNx documentation](./src/content/docs/gonx/) for Go development
+- Check out [Nx Cloudflare documentation](./src/content/docs/nx-cloudflare/) for edge computing://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+
+This is the documentation site for the OSS workspace - a collection of Nx plugins and tools for modern development.
+
+## 📦 What's Documented
+
+This documentation covers:
+
+- **GoNx** - Very opinionated Nx plugin for Go/Golang development
+- **Nx Cloudflare** - Nx plugin for Cloudflare Workers and edge computing
+- **Getting Started** guides and tutorials
+- **API Reference** and configuration options
 
 ## 🚀 Project Structure
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+Inside of the OSS workspace documentation, you'll see the following folders and files:
 
 ```
 .
-├── public/
+├── public/                     # Static assets (favicons, images)
 ├── src/
-│   ├── assets/
+│   ├── assets/                # Project assets (logos, diagrams)
 │   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
+│   │   └── docs/              # Documentation content
+│   │       ├── getting-started/
+│   │       ├── gonx/          # GoNx plugin documentation
+│   │       ├── nx-cloudflare/ # Nx Cloudflare plugin documentation
+│   │       └── reference/     # API reference and configuration
+│   └── content.config.ts      # Content configuration
+├── astro.config.mjs           # Astro + Starlight configuration
 ├── package.json
 └── tsconfig.json
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+Documentation is written in `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+## 🔗 Related Links
 
-Static assets, like favicons, can be placed in the `public/` directory.
+- **Main Repository**: [naxodev/oss](https://github.com/naxodev/oss)
+- **GoNx Package**: [packages/gonx](../packages/gonx/)
+- **Nx Cloudflare Package**: [packages/nx-cloudflare](../packages/nx-cloudflare/)
+- **Discord Community**: [Join our Discord](https://discord.gg/zjDCGpKP2S)
 
 ## 🧞 Commands
 
