@@ -6,6 +6,7 @@ export default defineConfig({
 		starlight({
 			title: 'OSS Workspace',
 			description: 'Nx plugins and tools for modern development',
+			favicon: '/favicon.svg',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/naxodev/oss' },
 				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/zjDCGpKP2S' }
