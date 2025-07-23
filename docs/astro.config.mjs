@@ -9,6 +9,7 @@ export default defineConfig({
 			favicon: '/favicon.svg',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/naxodev/oss' },
+				{ icon: 'npm', label: 'npm', href: 'https://www.npmjs.com/package/@naxodev/gonx' },
 				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/zjDCGpKP2S' }
 			],
 			sidebar: [
@@ -46,6 +47,9 @@ export default defineConfig({
 						{ label: 'Compatibility', slug: 'reference/compatibility' },
 					],
 				},
+			],
+			customCss: [
+				'./src/styles/custom.css',
 			],
 		}),
 	],
