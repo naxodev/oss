@@ -30,7 +30,9 @@ describe('Execute command', () => {
           isVerbose: false,
           root: path.sep + 'root',
           projectsConfigurations: {
-            projects: { proj: { root: path.join(path.sep + 'root', 'project') } },
+            projects: {
+              proj: { root: path.join(path.sep + 'root', 'project') },
+            },
             version: 1,
           },
           nxJsonConfiguration: {},
@@ -133,7 +135,10 @@ describe('Execute command', () => {
     it('should return directory containing main.go when main option is provided', () => {
       mockFileUtils.fileExists.mockReturnValue(true);
 
-      const result = extractCWD({ main: path.join('cmd', 'server', 'main.go') }, context);
+      const result = extractCWD(
+        { main: path.join('cmd', 'server', 'main.go') },
+        context
+      );
       expect(result).toBe(path.join('apps', 'my-project', 'cmd', 'server'));
       expect(mockFileUtils.fileExists).toHaveBeenCalledWith(
         path.join('apps', 'my-project', 'cmd', 'server', 'main.go')
@@ -143,8 +148,12 @@ describe('Execute command', () => {
     it('should throw error when main file does not exist', () => {
       mockFileUtils.fileExists.mockReturnValue(false);
 
-      expect(() => extractCWD({ main: path.join('cmd', 'server', 'main.go') }, context)).toThrow(
-        'Main file ' + path.join('cmd', 'server', 'main.go') + ' does not exist in project my-project'
+      expect(() =>
+        extractCWD({ main: path.join('cmd', 'server', 'main.go') }, context)
+      ).toThrow(
+        'Main file ' +
+          path.join('cmd', 'server', 'main.go') +
+          ' does not exist in project my-project'
       );
     });
 
