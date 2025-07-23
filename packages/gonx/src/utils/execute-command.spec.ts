@@ -1,5 +1,6 @@
 import { logger, ExecutorContext } from '@nx/devkit';
 import * as child_process from 'child_process';
+import * as path from 'path';
 import {
   buildFlagIfEnabled,
   buildStringFlagIfValid,
@@ -27,9 +28,11 @@ describe('Execute command', () => {
           projectName: 'proj',
           cwd: '',
           isVerbose: false,
-          root: '/root',
+          root: path.sep + 'root',
           projectsConfigurations: {
-            projects: { proj: { root: '/root/project' } },
+            projects: {
+              proj: { root: path.join(path.sep + 'root', 'project') },
+            },
             version: 1,
           },
           nxJsonConfiguration: {},
@@ -38,7 +41,7 @@ describe('Execute command', () => {
             dependencies: {},
           },
         })
-      ).toBe('/root/project');
+      ).toBe(path.join(path.sep + 'root', 'project'));
     });
   });
 
@@ -56,14 +59,14 @@ describe('Execute command', () => {
     it('should execute a successfully command withh custom options', async () => {
       const result = await executeCommand(['build', '--flag1'], {
         executable: 'gow',
-        cwd: '/root',
+        cwd: path.sep + 'root',
         env: { hello: 'world' },
       });
       expect(result.success).toBeTruthy();
       expect(child_process.execSync).toHaveBeenCalledWith(
         'gow build --flag1',
         expect.objectContaining({
-          cwd: '/root',
+          cwd: path.sep + 'root',
           env: Object.assign(process.env, { hello: 'world' }),
         })
       );
@@ -107,14 +110,14 @@ describe('Execute command', () => {
 
   describe('Method: extractCWD', () => {
     const context: ExecutorContext = {
-      root: '/workspace',
+      root: path.sep + 'workspace',
       isVerbose: false,
       projectName: 'my-project',
       projectsConfigurations: {
         projects: {
           'my-project': {
-            root: 'apps/my-project',
-            sourceRoot: 'apps/my-project',
+            root: path.join('apps', 'my-project'),
+            sourceRoot: path.join('apps', 'my-project'),
           },
         },
       },
@@ -126,24 +129,31 @@ describe('Execute command', () => {
 
     it('should return project root when no main option is provided', () => {
       const result = extractCWD({}, context);
-      expect(result).toBe('apps/my-project');
+      expect(result).toBe(path.join('apps', 'my-project'));
     });
 
     it('should return directory containing main.go when main option is provided', () => {
       mockFileUtils.fileExists.mockReturnValue(true);
 
-      const result = extractCWD({ main: 'cmd/server/main.go' }, context);
-      expect(result).toBe('apps/my-project/cmd/server');
+      const result = extractCWD(
+        { main: path.join('cmd', 'server', 'main.go') },
+        context
+      );
+      expect(result).toBe(path.join('apps', 'my-project', 'cmd', 'server'));
       expect(mockFileUtils.fileExists).toHaveBeenCalledWith(
-        'apps/my-project/cmd/server/main.go'
+        path.join('apps', 'my-project', 'cmd', 'server', 'main.go')
       );
     });
 
     it('should throw error when main file does not exist', () => {
       mockFileUtils.fileExists.mockReturnValue(false);
 
-      expect(() => extractCWD({ main: 'cmd/server/main.go' }, context)).toThrow(
-        'Main file cmd/server/main.go does not exist in project my-project'
+      expect(() =>
+        extractCWD({ main: path.join('cmd', 'server', 'main.go') }, context)
+      ).toThrow(
+        'Main file ' +
+          path.join('cmd', 'server', 'main.go') +
+          ' does not exist in project my-project'
       );
     });
 
@@ -151,9 +161,9 @@ describe('Execute command', () => {
       mockFileUtils.fileExists.mockReturnValue(true);
 
       const result = extractCWD({ main: 'main.go' }, context);
-      expect(result).toBe('apps/my-project');
+      expect(result).toBe(path.join('apps', 'my-project'));
       expect(mockFileUtils.fileExists).toHaveBeenCalledWith(
-        'apps/my-project/main.go'
+        path.join('apps', 'my-project', 'main.go')
       );
     });
   });

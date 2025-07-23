@@ -16,6 +16,7 @@ export default async () => {
     storage,
     verbose: false,
   });
+
   const nx = require.resolve('nx');
   execFileSync(
     nx,

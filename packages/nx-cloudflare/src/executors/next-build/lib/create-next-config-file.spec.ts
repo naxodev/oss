@@ -15,8 +15,8 @@ describe('Next.js config: getWithNxContent', () => {
     );
 
     expect(modulePaths).toEqual([
-      'nested/a.cjs',
-      'nested/b.cjs',
+      join('nested', 'a.cjs'),
+      join('nested', 'b.cjs'),
       'nested.c.cjs',
     ]);
   });
@@ -60,7 +60,7 @@ describe('Next.js config: getWithNxContent', () => {
 
   it('should return files with their extensions when calling ensureFileExtensions', () => {
     const result = ensureFileExtensions(
-      ['bar', 'baz', 'foo', 'faz', 'nested/baz.cjs'],
+      ['bar', 'baz', 'foo', 'faz', join('nested', 'baz.cjs')],
       join(__dirname, 'test-fixtures/ensure-exts')
     );
 
@@ -69,7 +69,7 @@ describe('Next.js config: getWithNxContent', () => {
       'baz.json',
       'foo.cjs',
       'faz.cjs',
-      'nested/baz.cjs',
+      join('nested', 'baz.cjs'),
     ]);
   });
 

@@ -60,15 +60,10 @@ function executeGoBlueprintCommand(
 
       const childProcess = fork(goBlueprintBin, args, {
         cwd: executionDir,
-        stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
         env: {
           ...process.env,
         },
-      });
-
-      // Forward output to the console
-      childProcess.stdout?.on('data', (data) => {
-        process.stdout.write(data);
       });
 
       childProcess.stderr?.on('data', (data) => {

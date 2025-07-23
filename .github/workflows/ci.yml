@@ -31,6 +31,9 @@ env:
 jobs:
   main:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,4 +57,7 @@ jobs:
       - uses: nrwl/nx-set-shas@v4
 
       - run: pnpm exec nx-cloud record -- nx format:check
-      - run: pnpm exec nx affected -t lint test build e2e
+      - run: pnpm exec nx affected -t lint test
+
+      - if: ${{ matrix.os != 'windows-latest'}}
+        run: pnpm exec nx affected -t build e2e        

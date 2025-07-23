@@ -79,7 +79,7 @@ describe('go-blueprint generator', () => {
       ],
       expect.objectContaining({
         cwd: expect.any(String),
-        stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       })
     );
   });
@@ -113,7 +113,7 @@ describe('go-blueprint generator', () => {
         ],
         expect.objectContaining({
           cwd: expect.any(String),
-          stdio: ['pipe', 'ignore', 'pipe', 'ipc'],
+          stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
         })
       );
     });
