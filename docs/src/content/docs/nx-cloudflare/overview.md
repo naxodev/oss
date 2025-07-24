@@ -12,7 +12,7 @@ description: Nx plugin for Cloudflare development, featuring Workers, Pages, and
 
 Nx Cloudflare is a comprehensive Nx plugin designed for Cloudflare development, particularly focused on Cloudflare Workers with additional support for Pages and Next.js integration.
 
-## Key Features
+## Features
 
 ### 🚀 Application Generation
 

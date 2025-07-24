@@ -7,6 +7,7 @@ export default defineConfig({
       title: 'OSS Workspace Docs',
       description: 'Nx plugins and tools for modern development',
       favicon: '/favicon.svg',
+      disable404Route: true,
       social: [
         {
           icon: 'github',
@@ -37,6 +38,17 @@ export default defineConfig({
           items: [
             { label: 'Overview', slug: 'gonx/overview' },
             {
+              label: 'Go Generators',
+              items: [
+                { label: 'Initializer', slug: 'gonx/generators/init' },
+                { label: 'Application', slug: 'gonx/generators/application' },
+                { label: 'Library', slug: 'gonx/generators/library' },
+                { label: 'Go Blueprint', slug: 'gonx/generators/go-blueprint' },
+                { label: 'Preset', slug: 'gonx/generators/preset' },
+                { label: 'Options', slug: 'gonx/generators/options' },
+              ],
+            },
+            {
               label: 'Go Executors',
               items: [
                 { label: 'Generate', slug: 'gonx/executors/generate' },
@@ -46,17 +58,6 @@ export default defineConfig({
                 { label: 'Tidy', slug: 'gonx/executors/tidy' },
                 { label: 'Serve', slug: 'gonx/executors/serve' },
                 { label: 'Release', slug: 'gonx/executors/nx-release-publish' },
-              ],
-            },
-            {
-              label: 'Go Generators',
-              items: [
-                { label: 'Initializer', slug: 'gonx/generators/init' },
-                { label: 'Application', slug: 'gonx/generators/application' },
-                { label: 'Library', slug: 'gonx/generators/library' },
-                { label: 'Go Blueprint', slug: 'gonx/generators/go-blueprint' },
-                { label: 'Preset', slug: 'gonx/generators/preset' },
-                { label: 'Options', slug: 'gonx/generators/options' },
               ],
             },
             { label: 'Migration from nx-go', slug: 'gonx/migration' },
