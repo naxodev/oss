@@ -1,6 +1,7 @@
-# Library Generator
-
-Generates a Go library with a well-structured foundation.
+---
+title: Library Generator
+description: Generates a Go library with a well-structured foundation
+---
 
 ## Usage
 

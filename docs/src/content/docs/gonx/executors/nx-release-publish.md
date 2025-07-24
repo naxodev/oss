@@ -1,6 +1,7 @@
-# Nx-Release-Publish Executor
-
-Lists the module in the Golang registry.
+---
+title: Nx-Release-Publish Executor
+description: Lists the module in the Golang registry
+---
 
 ## Usage
 

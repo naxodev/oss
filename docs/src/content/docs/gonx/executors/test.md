@@ -1,6 +1,7 @@
-# Test Executor
-
-Runs tests for a Go project.
+---
+title: Test Executor
+description: Runs tests for a Go project
+---
 
 ## Usage
 

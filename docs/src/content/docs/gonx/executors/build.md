@@ -1,6 +1,7 @@
-# Build Executor
-
-Builds a Go project using the Go compiler.
+---
+title: Build Executor
+description: Builds a Go project using the Go compiler
+---
 
 ## Usage
 

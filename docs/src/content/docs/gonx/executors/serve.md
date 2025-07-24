@@ -1,6 +1,7 @@
-# Serve Executor
-
-Runs a Go application.
+---
+title: Serve Executor
+description: Runs a Go application
+---
 
 ## Usage
 
