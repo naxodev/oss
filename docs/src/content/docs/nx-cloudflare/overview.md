@@ -14,20 +14,23 @@ Nx Cloudflare is a comprehensive Nx plugin designed for Cloudflare development, 
 
 ## Key Features
 
-<CardGrid>
-	<Card title="Cloudflare Workers" icon="rocket">
-		Generate Worker applications with Fetch Handler, Scheduled Handler, or Hono templates.
-	</Card>
-	<Card title="Worker Libraries" icon="puzzle">
-		Create reusable libraries for Cloudflare Worker development.
-	</Card>
-	<Card title="Development Tools" icon="laptop">
-		Serve and deploy executors with full Wrangler CLI integration.
-	</Card>
-	<Card title="Next.js Support" icon="star">
-		Experimental Cloudflare Pages builder for Next.js projects.
-	</Card>
-</CardGrid>
+### 🚀 Application Generation
+
+- **Cloudflare Workers** - Generate Worker applications with Fetch Handler, Scheduled Handler, or Hono templates
+- **Worker Libraries** - Create reusable libraries for Cloudflare Worker development
+- **Template Variety** - Choose from multiple templates including Vitest integration and custom setups
+
+### 🛠️ Development Tools
+
+- **Local Development** - Serve workers locally with full Wrangler CLI integration
+- **Hot Reload** - Fast development iteration with automatic rebuilds
+- **Environment Simulation** - Complete Cloudflare runtime environment locally
+
+### ⭐ Advanced Features
+
+- **Next.js Support** - Experimental Cloudflare Pages builder for Next.js projects
+- **Wrangler Integration** - Full compatibility with official Cloudflare tooling
+- **Nx Optimization** - Task caching, project graphs, and parallel execution
 
 ## Supported Templates
 

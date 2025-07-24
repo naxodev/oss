@@ -18,20 +18,26 @@ GoNx - Very opinionated Nx plugin for Go/Golang
 
 The philosophy of gonx is to generate a non-invasive tooling to work with Go and Nx, heavily relying on inferred tasks and modern Nx features.
 
-## ✨ Features
+## Features
 
-- ✅ Generate Go Applications
-  - ✅ Customizable Go module setup
-  - ✅ Well-structured Go code scaffolding
-- ✅ Generate Go Libraries
-- ✅ Full Nx integration
-  - ✅ Inferred Tasks: Build, Generate, Tidy, Test, Run, and Lint
-  - ✅ Cacheable Tasks: Build, Generate, Tidy, Test, and Lint
-  - ✅ GraphV2 Support
-  - ✅ Version Actions for Go release
-  - ✅ Nx Release Publish executor to release to list the module on the registry
-- ✅ Use official Go commands in the background
-- ✅ Efficient caching and dependency graph tools for Go projects
+### 🏗️ Code Generation
+
+- **Go Applications** - Generate complete Go applications with customizable module setup and well-structured scaffolding
+- **Go Libraries** - Create reusable Go libraries with proper project structure
+- **Go Blueprint Integration** - Generate applications using the popular Go Blueprint framework
+
+### ⚡ Nx Integration
+
+- **Inferred Tasks** - Automatic task detection for Build, Generate, Tidy, Test, Run, and Lint
+- **Intelligent Caching** - Built-in caching for Build, Generate, Tidy, Test, and Lint operations
+- **Dependency Graph** - Full GraphV2 support for visualizing project relationships
+- **Release Management** - Version actions and publish executor for Go module releases
+
+### 🔧 Developer Experience
+
+- **Native Go Commands** - Uses official Go toolchain under the hood
+- **Efficient Workflows** - Streamlined caching and dependency management
+- **Modern Nx Features** - Built for the latest Nx capabilities and best practices
 
 ## 🚀 Getting started
 
