@@ -48,7 +48,7 @@ Remove the original nx-go plugin:
 npm uninstall @nx-go/nx-go
 # or
 pnpm remove @nx-go/nx-go
-# or  
+# or
 yarn remove @nx-go/nx-go
 ```
 
@@ -102,6 +102,7 @@ Keep `project.json` files for non-Go projects or if you need custom task configu
 If you had custom build configurations in `project.json`, you may need to adjust them:
 
 #### Before (nx-go)
+
 ```json
 {
   "targets": {
@@ -117,6 +118,7 @@ If you had custom build configurations in `project.json`, you may need to adjust
 ```
 
 #### After (GoNx)
+
 GoNx infers build tasks automatically. If you need custom configuration, you can override specific options using task configuration in `nx.json` or create a minimal `project.json`.
 
 ### Step 7: Update Scripts and CI
@@ -124,6 +126,7 @@ GoNx infers build tasks automatically. If you need custom configuration, you can
 Update any scripts or CI configurations that reference nx-go:
 
 #### Package.json Scripts
+
 ```json
 {
   "scripts": {
@@ -134,6 +137,7 @@ Update any scripts or CI configurations that reference nx-go:
 ```
 
 #### CI Configuration
+
 Update your CI to use the new executors and ensure Go is available in the environment.
 
 ### Step 8: Handle go.work Files
@@ -141,6 +145,7 @@ Update your CI to use the new executors and ensure Go is available in the enviro
 GoNx doesn't create `go.work` files by default. If you need them:
 
 1. **Enable in configuration**:
+
 ```json
 {
   "plugins": [
@@ -162,7 +167,8 @@ GoNx doesn't create `go.work` files by default. If you need them:
 
 **Problem**: Nx doesn't recognize Go project tasks.
 
-**Solution**: 
+**Solution**:
+
 1. Ensure `go.mod` files exist in your Go projects
 2. Clear Nx cache: `nx reset`
 3. Verify plugin configuration in `nx.json`
@@ -171,7 +177,8 @@ GoNx doesn't create `go.work` files by default. If you need them:
 
 **Problem**: Builds fail due to path changes.
 
-**Solution**: 
+**Solution**:
+
 1. Update any hardcoded paths in your Go code
 2. Ensure imports use proper module paths
 3. Check that `go.mod` files have correct module names
@@ -181,6 +188,7 @@ GoNx doesn't create `go.work` files by default. If you need them:
 **Problem**: Custom nx-go executors are no longer available.
 
 **Solution**:
+
 1. Use GoNx's built-in executors
 2. Create custom executors if needed
 3. Use shell commands as a fallback
@@ -190,6 +198,7 @@ GoNx doesn't create `go.work` files by default. If you need them:
 **Problem**: Project dependencies aren't detected correctly.
 
 **Solution**:
+
 1. Ensure Go imports are correctly structured
 2. Use proper module paths
 3. Clear cache and regenerate: `nx reset && nx graph`
@@ -198,25 +207,27 @@ GoNx doesn't create `go.work` files by default. If you need them:
 
 Here's how nx-go features map to GoNx:
 
-| nx-go Feature | GoNx Equivalent | Notes |
-|---------------|-----------------|-------|
-| `@nx-go/nx-go:build` | Inferred `build` task | Automatic detection |
-| `@nx-go/nx-go:test` | Inferred `test` task | Improved caching |
-| `@nx-go/nx-go:lint` | Inferred `lint` task | Uses `go fmt` |
-| `@nx-go/nx-go:serve` | Inferred `serve` task | Runs from project root |
-| Manual project.json | Inferred tasks | Cleaner project structure |
-| Custom executors | Built-in + extensible | Modern Nx patterns |
+| nx-go Feature        | GoNx Equivalent       | Notes                     |
+| -------------------- | --------------------- | ------------------------- |
+| `@nx-go/nx-go:build` | Inferred `build` task | Automatic detection       |
+| `@nx-go/nx-go:test`  | Inferred `test` task  | Improved caching          |
+| `@nx-go/nx-go:lint`  | Inferred `lint` task  | Uses `go fmt`             |
+| `@nx-go/nx-go:serve` | Inferred `serve` task | Runs from project root    |
+| Manual project.json  | Inferred tasks        | Cleaner project structure |
+| Custom executors     | Built-in + extensible | Modern Nx patterns        |
 
 ## Post-Migration Testing
 
 After migration, verify everything works:
 
 ### 1. Project Detection
+
 ```bash
 nx show projects
 ```
 
 ### 2. Task Execution
+
 ```bash
 nx build my-go-app
 nx test my-go-lib
@@ -224,11 +235,13 @@ nx lint my-go-app
 ```
 
 ### 3. Project Graph
+
 ```bash
 nx graph
 ```
 
 ### 4. Caching
+
 ```bash
 nx build my-go-app
 nx build my-go-app  # Should use cache

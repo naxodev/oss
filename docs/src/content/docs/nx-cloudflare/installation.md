@@ -18,16 +18,19 @@ Before installing Nx Cloudflare, ensure you have:
 Nx Cloudflare can be installed using any package manager:
 
 ### Using npm
+
 ```bash
 npm install @naxodev/nx-cloudflare
 ```
 
 ### Using pnpm
+
 ```bash
 pnpm add @naxodev/nx-cloudflare
 ```
 
 ### Using yarn
+
 ```bash
 yarn add @naxodev/nx-cloudflare
 ```
@@ -150,7 +153,7 @@ name = "my-worker-prod"
 vars = { ENVIRONMENT = "production" }
 
 [env.staging]
-name = "my-worker-staging"  
+name = "my-worker-staging"
 vars = { ENVIRONMENT = "staging" }
 ```
 

@@ -15,22 +15,22 @@ nx g @naxodev/nx-cloudflare:library my-worker-lib
 
 ### Available Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `name` | string | *required* | Library name |
-| `directory` | string | - | Library directory |
-| `projectNameAndRootFormat` | `as-provided` \| `derived` | `as-provided` | Project naming format |
-| `linter` | `eslint` \| `none` | `eslint` | Linting tool |
-| `unitTestRunner` | `vitest` \| `none` | `vitest` | Test runner |
-| `tags` | string | - | Project tags |
-| `skipFormat` | boolean | `false` | Skip formatting |
-| `js` | boolean | `false` | Use JavaScript |
-| `strict` | boolean | `true` | TypeScript strict mode |
-| `publishable` | boolean | `false` | Make library publishable |
-| `importPath` | string | - | Import path for publishable library |
-| `bundler` | `swc` \| `tsc` \| `vite` \| `esbuild` \| `none` | `tsc` | Build bundler |
-| `minimal` | boolean | `false` | Minimal setup |
-| `simpleName` | boolean | `false` | Simple file naming |
+| Option                     | Type                                            | Default       | Description                         |
+| -------------------------- | ----------------------------------------------- | ------------- | ----------------------------------- |
+| `name`                     | string                                          | _required_    | Library name                        |
+| `directory`                | string                                          | -             | Library directory                   |
+| `projectNameAndRootFormat` | `as-provided` \| `derived`                      | `as-provided` | Project naming format               |
+| `linter`                   | `eslint` \| `none`                              | `eslint`      | Linting tool                        |
+| `unitTestRunner`           | `vitest` \| `none`                              | `vitest`      | Test runner                         |
+| `tags`                     | string                                          | -             | Project tags                        |
+| `skipFormat`               | boolean                                         | `false`       | Skip formatting                     |
+| `js`                       | boolean                                         | `false`       | Use JavaScript                      |
+| `strict`                   | boolean                                         | `true`        | TypeScript strict mode              |
+| `publishable`              | boolean                                         | `false`       | Make library publishable            |
+| `importPath`               | string                                          | -             | Import path for publishable library |
+| `bundler`                  | `swc` \| `tsc` \| `vite` \| `esbuild` \| `none` | `tsc`         | Build bundler                       |
+| `minimal`                  | boolean                                         | `false`       | Minimal setup                       |
+| `simpleName`               | boolean                                         | `false`       | Simple file naming                  |
 
 ## Library Structure
 
@@ -156,10 +156,7 @@ KV and R2 abstractions:
 // libs/storage/src/index.ts
 
 export class KVRepository<T> {
-  constructor(
-    private kv: KVNamespace,
-    private prefix: string = ''
-  ) {}
+  constructor(private kv: KVNamespace, private prefix: string = '') {}
 
   async get(key: string): Promise<T | null> {
     const value = await this.kv.get(`${this.prefix}${key}`);
@@ -178,7 +175,7 @@ export class KVRepository<T> {
   async list(prefix?: string): Promise<string[]> {
     const listKey = `${this.prefix}${prefix || ''}`;
     const result = await this.kv.list({ prefix: listKey });
-    return result.keys.map(k => k.name.slice(this.prefix.length));
+    return result.keys.map((k) => k.name.slice(this.prefix.length));
   }
 }
 
@@ -212,12 +209,7 @@ Request/response middleware patterns:
 ```typescript
 // libs/middleware/src/index.ts
 
-export type MiddlewareHandler = (
-  request: Request,
-  env: any,
-  ctx: ExecutionContext,
-  next: () => Promise<Response>
-) => Promise<Response>;
+export type MiddlewareHandler = (request: Request, env: any, ctx: ExecutionContext, next: () => Promise<Response>) => Promise<Response>;
 
 export class MiddlewareChain {
   private middlewares: MiddlewareHandler[] = [];
@@ -227,19 +219,14 @@ export class MiddlewareChain {
     return this;
   }
 
-  async handle(
-    request: Request,
-    env: any,
-    ctx: ExecutionContext,
-    handler: () => Promise<Response>
-  ): Promise<Response> {
+  async handle(request: Request, env: any, ctx: ExecutionContext, handler: () => Promise<Response>): Promise<Response> {
     let index = 0;
 
     const next = async (): Promise<Response> => {
       if (index >= this.middlewares.length) {
         return handler();
       }
-      
+
       const middleware = this.middlewares[index++];
       return middleware(request, env, ctx, next);
     };
@@ -258,7 +245,7 @@ export const corsMiddleware: MiddlewareHandler = async (request, env, ctx, next)
 
   const response = await next();
   const corsHeaders = createCorsHeaders();
-  
+
   corsHeaders.forEach((value, key) => {
     response.headers.set(key, value);
   });
@@ -266,14 +253,11 @@ export const corsMiddleware: MiddlewareHandler = async (request, env, ctx, next)
   return response;
 };
 
-export const rateLimitMiddleware = (
-  limit: number,
-  windowMs: number
-): MiddlewareHandler => {
+export const rateLimitMiddleware = (limit: number, windowMs: number): MiddlewareHandler => {
   return async (request, env, ctx, next) => {
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     const key = `rate-limit:${ip}`;
-    
+
     // Rate limiting logic using KV
     const current = await env.RATE_LIMIT_KV.get(key);
     if (current && parseInt(current) >= limit) {
@@ -282,7 +266,7 @@ export const rateLimitMiddleware = (
 
     // Continue with request
     const response = await next();
-    
+
     // Update rate limit counter
     const count = current ? parseInt(current) + 1 : 1;
     await env.RATE_LIMIT_KV.put(key, count.toString(), {
@@ -311,33 +295,26 @@ interface Env {
   RATE_LIMIT_KV: KVNamespace;
 }
 
-const middleware = new MiddlewareChain()
-  .use(corsMiddleware)
-  .use(rateLimitMiddleware(100, 60000)); // 100 requests per minute
+const middleware = new MiddlewareChain().use(corsMiddleware).use(rateLimitMiddleware(100, 60000)); // 100 requests per minute
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     return middleware.handle(request, env, ctx, async () => {
       const auth = new JwtAuth(env.JWT_SECRET);
       const userRepo = new KVRepository(env.USER_KV, 'users:');
-      
+
       const token = extractBearerToken(request);
       if (!token) {
-        return new ResponseBuilder()
-          .setStatus(401)
-          .json({ error: 'Missing authorization token' });
+        return new ResponseBuilder().setStatus(401).json({ error: 'Missing authorization token' });
       }
 
       const user = await auth.verifyToken(token);
       if (!user) {
-        return new ResponseBuilder()
-          .setStatus(401)
-          .json({ error: 'Invalid token' });
+        return new ResponseBuilder().setStatus(401).json({ error: 'Invalid token' });
       }
 
       // Handle authenticated request
-      return new ResponseBuilder()
-        .json({ message: `Hello, ${user.email}!` });
+      return new ResponseBuilder().json({ message: `Hello, ${user.email}!` });
     });
   },
 };
@@ -365,18 +342,15 @@ describe('ResponseBuilder', () => {
   it('should create JSON response', () => {
     const builder = new ResponseBuilder();
     const response = builder.json({ message: 'Hello' });
-    
+
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe('application/json');
   });
 
   it('should set custom status and headers', () => {
     const builder = new ResponseBuilder();
-    const response = builder
-      .setStatus(201)
-      .setHeader('X-Custom', 'value')
-      .text('Created');
-    
+    const response = builder.setStatus(201).setHeader('X-Custom', 'value').text('Created');
+
     expect(response.status).toBe(201);
     expect(response.headers.get('X-Custom')).toBe('value');
   });
@@ -402,14 +376,14 @@ describe('JwtAuth Integration', () => {
   it('should verify valid tokens', async () => {
     // Create a test token
     const token = await auth.createToken({ id: '1', email: 'test@example.com' });
-    
+
     // Verify the token
     const user = await auth.verifyToken(token);
-    
+
     expect(user).toEqual({
       id: '1',
       email: 'test@example.com',
-      roles: []
+      roles: [],
     });
   });
 });
@@ -426,6 +400,7 @@ nx build my-worker-lib
 ### Automatic Building
 
 Libraries are automatically built when:
+
 - A dependent worker is built
 - Running `nx build` on the entire workspace
 - CI/CD pipelines run affected builds
@@ -494,24 +469,28 @@ Configure `package.json` for publishable libraries:
 ## Best Practices
 
 ### Library Design
+
 - Keep libraries focused on single responsibilities
 - Provide clear, typed interfaces
 - Include comprehensive documentation
 - Write thorough tests
 
 ### Performance
+
 - Keep bundle sizes small
 - Use tree-shaking friendly exports
 - Avoid heavy dependencies
 - Consider Worker runtime limitations
 
 ### Compatibility
+
 - Target appropriate browser/Worker APIs
 - Test with different Cloudflare compatibility dates
 - Document compatibility requirements
 - Use feature detection when necessary
 
 ### Maintenance
+
 - Version libraries semantically
 - Maintain backwards compatibility
 - Provide migration guides for breaking changes
@@ -522,16 +501,19 @@ Configure `package.json` for publishable libraries:
 ### Common Issues
 
 **Library not found during build**
+
 - Check import paths in `tsconfig.base.json`
 - Verify library is built before worker
 - Clear Nx cache: `nx reset`
 
 **Type errors with library imports**
+
 - Ensure proper TypeScript configuration
 - Check `tsconfig.lib.json` in library
 - Verify export/import syntax
 
 **Runtime errors in Worker**
+
 - Test library functions in isolation
 - Check for Node.js-specific APIs
 - Validate with Wrangler's dev environment
@@ -539,7 +521,7 @@ Configure `package.json` for publishable libraries:
 ## Next Steps
 
 - **Create shared types**: Define common interfaces across workers
-- **Build API clients**: Create libraries for external service integration  
+- **Build API clients**: Create libraries for external service integration
 - **Develop testing utilities**: Share test helpers across projects
 - **Set up monitoring**: Create shared observability libraries
 

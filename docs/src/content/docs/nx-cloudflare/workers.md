@@ -3,7 +3,6 @@ title: Cloudflare Workers
 description: Creating and managing Cloudflare Workers with Nx
 ---
 
-
 This guide covers creating, developing, and deploying Cloudflare Workers using Nx Cloudflare.
 
 ## Creating Workers
@@ -16,20 +15,20 @@ nx g @naxodev/nx-cloudflare:application my-worker-app
 
 ### Available Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `name` | string | *required* | Worker name |
-| `template` | `fetch-handler` \| `scheduled-handler` \| `hono` \| `none` | `fetch-handler` | Worker template |
-| `projectNameAndRootFormat` | `as-provided` \| `derived` | `as-provided` | Project naming format |
-| `port` | number | `8787` | Development server port |
-| `accountId` | string | - | Cloudflare account ID |
-| `js` | boolean | `false` | Use JavaScript instead of TypeScript |
-| `tags` | string | - | Project tags for linting |
-| `frontendProject` | string | - | Frontend project for proxy setup |
-| `unitTestRunner` | `vitest` \| `none` | `vitest` | Test runner |
-| `directory` | string | - | Project directory |
-| `rootProject` | boolean | `false` | Create at workspace root |
-| `skipFormat` | boolean | `false` | Skip formatting files |
+| Option                     | Type                                                       | Default         | Description                          |
+| -------------------------- | ---------------------------------------------------------- | --------------- | ------------------------------------ |
+| `name`                     | string                                                     | _required_      | Worker name                          |
+| `template`                 | `fetch-handler` \| `scheduled-handler` \| `hono` \| `none` | `fetch-handler` | Worker template                      |
+| `projectNameAndRootFormat` | `as-provided` \| `derived`                                 | `as-provided`   | Project naming format                |
+| `port`                     | number                                                     | `8787`          | Development server port              |
+| `accountId`                | string                                                     | -               | Cloudflare account ID                |
+| `js`                       | boolean                                                    | `false`         | Use JavaScript instead of TypeScript |
+| `tags`                     | string                                                     | -               | Project tags for linting             |
+| `frontendProject`          | string                                                     | -               | Frontend project for proxy setup     |
+| `unitTestRunner`           | `vitest` \| `none`                                         | `vitest`        | Test runner                          |
+| `directory`                | string                                                     | -               | Project directory                    |
+| `rootProject`              | boolean                                                    | `false`         | Create at workspace root             |
+| `skipFormat`               | boolean                                                    | `false`         | Skip formatting files                |
 
 ## Worker Templates
 
@@ -85,6 +84,7 @@ nx serve my-worker-app
 ```
 
 This starts Wrangler's development server with:
+
 - Hot reload on file changes
 - Local environment simulation
 - Request/response debugging
@@ -92,36 +92,36 @@ This starts Wrangler's development server with:
 
 ### Development Server Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `script` | string | - | Entry point path |
-| `name` | string | - | Worker name |
-| `noBundle` | boolean | `false` | Skip bundling |
-| `env` | string | - | Environment name |
-| `compatibilityDate` | string | - | Runtime compatibility date |
-| `compatibilityFlags` | string[] | - | Compatibility flags |
-| `latest` | boolean | `true` | Use latest runtime |
-| `ip` | string | - | Listen IP address |
-| `port` | number | - | Listen port |
-| `inspectorPort` | number | - | Devtools port |
-| `routes` | string[] | - | Route patterns |
-| `host` | string | - | Forward host |
-| `localProtocol` | `http` \| `https` | `http` | Local protocol |
-| `localUpstream` | string | - | Upstream host |
-| `assets` | string | - | Static assets folder |
-| `site` | string | - | Workers Sites folder |
-| `siteInclude` | string[] | - | Include patterns |
-| `siteExclude` | string[] | - | Exclude patterns |
-| `upstreamProtocol` | `http` \| `https` | `https` | Upstream protocol |
-| `var` | string[] | - | Environment variables |
-| `define` | string[] | - | Global definitions |
-| `tsconfig` | string | - | TypeScript config path |
-| `minify` | boolean | - | Minify code |
-| `nodeCompat` | boolean | - | Node.js compatibility |
-| `persistTo` | string | - | Persistence directory |
-| `remote` | boolean | `false` | Use remote resources |
-| `testScheduled` | boolean | `false` | Enable scheduled testing |
-| `logLevel` | `debug` \| `info` \| `log` \| `warn` \| `error` \| `none` | `log` | Log level |
+| Option               | Type                                                      | Default | Description                |
+| -------------------- | --------------------------------------------------------- | ------- | -------------------------- |
+| `script`             | string                                                    | -       | Entry point path           |
+| `name`               | string                                                    | -       | Worker name                |
+| `noBundle`           | boolean                                                   | `false` | Skip bundling              |
+| `env`                | string                                                    | -       | Environment name           |
+| `compatibilityDate`  | string                                                    | -       | Runtime compatibility date |
+| `compatibilityFlags` | string[]                                                  | -       | Compatibility flags        |
+| `latest`             | boolean                                                   | `true`  | Use latest runtime         |
+| `ip`                 | string                                                    | -       | Listen IP address          |
+| `port`               | number                                                    | -       | Listen port                |
+| `inspectorPort`      | number                                                    | -       | Devtools port              |
+| `routes`             | string[]                                                  | -       | Route patterns             |
+| `host`               | string                                                    | -       | Forward host               |
+| `localProtocol`      | `http` \| `https`                                         | `http`  | Local protocol             |
+| `localUpstream`      | string                                                    | -       | Upstream host              |
+| `assets`             | string                                                    | -       | Static assets folder       |
+| `site`               | string                                                    | -       | Workers Sites folder       |
+| `siteInclude`        | string[]                                                  | -       | Include patterns           |
+| `siteExclude`        | string[]                                                  | -       | Exclude patterns           |
+| `upstreamProtocol`   | `http` \| `https`                                         | `https` | Upstream protocol          |
+| `var`                | string[]                                                  | -       | Environment variables      |
+| `define`             | string[]                                                  | -       | Global definitions         |
+| `tsconfig`           | string                                                    | -       | TypeScript config path     |
+| `minify`             | boolean                                                   | -       | Minify code                |
+| `nodeCompat`         | boolean                                                   | -       | Node.js compatibility      |
+| `persistTo`          | string                                                    | -       | Persistence directory      |
+| `remote`             | boolean                                                   | `false` | Use remote resources       |
+| `testScheduled`      | boolean                                                   | `false` | Enable scheduled testing   |
+| `logLevel`           | `debug` \| `info` \| `log` \| `warn` \| `error` \| `none` | `log`   | Log level                  |
 
 ### Example Development Command
 
@@ -138,6 +138,7 @@ nx build my-worker-app
 ```
 
 The build process:
+
 1. Bundles TypeScript/JavaScript code
 2. Applies transformations and optimizations
 3. Generates deployment-ready artifacts
@@ -153,28 +154,28 @@ nx deploy my-worker-app
 
 ### Deployment Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `name` | string | - | Worker name override |
-| `noBundle` | boolean | `false` | Skip bundling |
-| `env` | string | - | Target environment |
-| `outdir` | string | - | Output directory |
-| `compatibilityDate` | string | - | Runtime compatibility |
-| `compatibilityFlags` | string[] | - | Compatibility flags |
-| `latest` | boolean | `true` | Use latest runtime |
-| `assets` | string | - | Static assets |
-| `site` | string | - | Workers Sites |
-| `siteInclude` | string[] | - | Include patterns |
-| `siteExclude` | string[] | - | Exclude patterns |
-| `var` | string[] | - | Environment variables |
-| `define` | string[] | - | Global definitions |
-| `triggers` | string[] | - | Cron schedules |
-| `routes` | string[] | - | Route patterns |
-| `tsconfig` | string | - | TypeScript config |
-| `minify` | boolean | - | Minify output |
-| `nodeCompat` | boolean | - | Node.js compatibility |
-| `dryRun` | boolean | `false` | Compile without deploying |
-| `keepVars` | boolean | `false` | Preserve existing variables |
+| Option               | Type     | Default | Description                 |
+| -------------------- | -------- | ------- | --------------------------- |
+| `name`               | string   | -       | Worker name override        |
+| `noBundle`           | boolean  | `false` | Skip bundling               |
+| `env`                | string   | -       | Target environment          |
+| `outdir`             | string   | -       | Output directory            |
+| `compatibilityDate`  | string   | -       | Runtime compatibility       |
+| `compatibilityFlags` | string[] | -       | Compatibility flags         |
+| `latest`             | boolean  | `true`  | Use latest runtime          |
+| `assets`             | string   | -       | Static assets               |
+| `site`               | string   | -       | Workers Sites               |
+| `siteInclude`        | string[] | -       | Include patterns            |
+| `siteExclude`        | string[] | -       | Exclude patterns            |
+| `var`                | string[] | -       | Environment variables       |
+| `define`             | string[] | -       | Global definitions          |
+| `triggers`           | string[] | -       | Cron schedules              |
+| `routes`             | string[] | -       | Route patterns              |
+| `tsconfig`           | string   | -       | TypeScript config           |
+| `minify`             | boolean  | -       | Minify output               |
+| `nodeCompat`         | boolean  | -       | Node.js compatibility       |
+| `dryRun`             | boolean  | `false` | Compile without deploying   |
+| `keepVars`           | boolean  | `false` | Preserve existing variables |
 
 ### Environment-Specific Deployment
 
@@ -217,7 +218,7 @@ id = "your-kv-namespace-id"
 
 # R2 Bindings
 [[r2_buckets]]
-binding = "MY_BUCKET" 
+binding = "MY_BUCKET"
 bucket_name = "my-bucket"
 
 # Durable Objects
@@ -268,7 +269,7 @@ describe('Worker', () => {
     const request = new Request('http://localhost/');
     const response = await worker.fetch(request);
     const text = await response.text();
-    
+
     expect(text).toBe('Hello World!');
   });
 });
@@ -305,12 +306,12 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const apiUrl = env.API_URL;
     const debug = env.DEBUG === 'true';
-    
+
     // Use environment variables
     if (debug) {
       console.log('Debug mode enabled');
     }
-    
+
     return new Response('OK');
   },
 };
@@ -325,10 +326,10 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     // Read from KV
     const value = await env.MY_KV.get('key');
-    
+
     // Write to KV
     await env.MY_KV.put('key', 'value');
-    
+
     return new Response(value);
   },
 };
@@ -341,10 +342,10 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     // Upload to R2
     await env.MY_BUCKET.put('file.txt', 'content');
-    
+
     // Download from R2
     const object = await env.MY_BUCKET.get('file.txt');
-    
+
     return new Response(await object?.text());
   },
 };
@@ -359,7 +360,7 @@ export default {
   async scheduled(event: ScheduledEvent, env: Env): Promise<void> {
     // Perform scheduled task
     console.log('Running scheduled task');
-    
+
     // Access environment variables and bindings
     await env.MY_KV.put('last-run', new Date().toISOString());
   },
@@ -369,21 +370,25 @@ export default {
 ## Best Practices
 
 ### Performance
+
 - Keep worker code minimal and fast
 - Use appropriate caching strategies
 - Leverage Cloudflare's edge locations
 
 ### Security
+
 - Validate all input data
 - Use environment variables for secrets
 - Implement proper CORS headers
 
 ### Monitoring
+
 - Use console.log for debugging
 - Monitor performance metrics
 - Set up error tracking
 
 ### Development Workflow
+
 1. Start with local development
 2. Write comprehensive tests
 3. Use staging environment for integration testing
@@ -394,16 +399,19 @@ export default {
 ### Common Issues
 
 **Worker deployment fails**
+
 - Check Account ID in `wrangler.toml`
 - Verify authentication: `npx wrangler auth whoami`
 - Ensure proper permissions
 
 **Local development server won't start**
+
 - Check if port is available
 - Verify Wrangler installation
 - Clear any cached configurations
 
 **TypeScript errors**
+
 - Install `@cloudflare/workers-types`
 - Update `tsconfig.json` configuration
 - Check compatibility date settings

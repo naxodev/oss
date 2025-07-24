@@ -14,6 +14,7 @@ Before getting started, ensure you have:
 - **Nx CLI** (`npm install -g nx` or `npm install -g @nx/cli`)
 
 For GoNx specifically:
+
 - **Go** ([stable version](https://go.dev/dl/)) installed on your machine
 
 ## Choose Your Path
@@ -123,6 +124,7 @@ nx deploy my-worker
 Now that you have a basic setup:
 
 1. **Explore the specific documentation** for your chosen plugin:
+
    - [GoNx Documentation](/gonx/overview/)
    - [Nx Cloudflare Documentation](/nx-cloudflare/overview/)
 

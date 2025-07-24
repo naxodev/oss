@@ -3,7 +3,6 @@ title: Test Executor
 description: Runs tests for a Go project
 ---
 
-
 ## Usage
 
 ```bash

@@ -63,8 +63,8 @@ nx add @naxodev/gonx
 
 ### Generators
 
-| Generator                                           | Description                                   |
-| --------------------------------------------------- | --------------------------------------------- |
+| Generator                                    | Description                                   |
+| -------------------------------------------- | --------------------------------------------- |
 | [`application`](../generators/application)   | Generate a Go application                     |
 | [`go-blueprint`](../generators/go-blueprint) | Generate Go applications using Go Blueprint   |
 | [`library`](../generators/library)           | Generate a Go library                         |
@@ -73,8 +73,8 @@ nx add @naxodev/gonx
 
 ### Executors
 
-| Executor                                                       | Description                                       |
-| -------------------------------------------------------------- | ------------------------------------------------- |
+| Executor                                                | Description                                       |
+| ------------------------------------------------------- | ------------------------------------------------- |
 | [`build`](../executors/build)                           | Build a Go project                                |
 | [`generate`](../executors/generate)                     | Run code generation using go generate             |
 | [`lint`](../executors/lint)                             | Format and lint a Go project                      |
@@ -83,10 +83,10 @@ nx add @naxodev/gonx
 | [`tidy`](../executors/tidy)                             | Ensures go.mod file matches a project source code |
 | [`nx-release-publish`](../executors/nx-release-publish) | Lists the module in the Go registry               |
 
-
 :::tip
+
 > You can use `nx list @naxodev/gonx` to see list capabilities.
-:::
+> :::
 
 Need more customization? See our [plugin configuration options](./docs/options.md).
 

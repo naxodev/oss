@@ -51,16 +51,16 @@ Replace the default Next.js builder in your application's `project.json`:
 
 The Cloudflare Next.js builder supports the same options as `@nx/next:build`:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `outputPath` | string | - | Output directory for build artifacts |
-| `buildLibsFromSource` | boolean | `true` | Build libraries from source |
-| `fileReplacements` | object[] | - | File replacement patterns |
-| `generateLockfile` | boolean | `false` | Generate lockfile |
-| `includeDevDependenciesInPackageJson` | boolean | `false` | Include dev dependencies |
-| `nextConfig` | string | - | Path to Next.js config file |
-| `profile` | boolean | `false` | Enable profiling |
-| `debug` | boolean | `false` | Enable debug mode |
+| Option                                | Type     | Default | Description                          |
+| ------------------------------------- | -------- | ------- | ------------------------------------ |
+| `outputPath`                          | string   | -       | Output directory for build artifacts |
+| `buildLibsFromSource`                 | boolean  | `true`  | Build libraries from source          |
+| `fileReplacements`                    | object[] | -       | File replacement patterns            |
+| `generateLockfile`                    | boolean  | `false` | Generate lockfile                    |
+| `includeDevDependenciesInPackageJson` | boolean  | `false` | Include dev dependencies             |
+| `nextConfig`                          | string   | -       | Path to Next.js config file          |
+| `profile`                             | boolean  | `false` | Enable profiling                     |
+| `debug`                               | boolean  | `false` | Enable debug mode                    |
 
 ## Next.js Configuration
 
@@ -73,17 +73,17 @@ Create or update `next.config.js` for Cloudflare compatibility:
 const nextConfig = {
   // Enable static exports for some pages
   trailingSlash: true,
-  
+
   // Configure images for Cloudflare
   images: {
     unoptimized: true,
   },
-  
+
   // Optimize for edge runtime
   experimental: {
     runtime: 'edge',
   },
-  
+
   // Configure for Cloudflare Pages
   async rewrites() {
     return [
@@ -129,7 +129,7 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  
+
   // For build-time variables
   publicRuntimeConfig: {
     apiUrl: process.env.API_URL,
@@ -178,6 +178,7 @@ dist/apps/my-next-app/
 Deploy the built application to Cloudflare Pages:
 
 1. **Build the application**:
+
    ```bash
    nx build my-next-app
    ```
@@ -204,18 +205,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Build application
         run: nx build my-next-app
-        
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
@@ -271,7 +272,7 @@ Ensure your code is compatible with the edge runtime:
 export default function handler(req: NextRequest) {
   const url = new URL(req.url);
   const userAgent = req.headers.get('user-agent');
-  
+
   return NextResponse.json({
     path: url.pathname,
     userAgent,
@@ -297,7 +298,7 @@ Configure caching headers for optimal performance:
 // app/api/data/route.ts
 export async function GET() {
   const data = await fetchData();
-  
+
   return NextResponse.json(data, {
     headers: {
       'Cache-Control': 'public, max-age=3600, s-maxage=86400',
@@ -316,13 +317,13 @@ Optimize static assets:
 const nextConfig = {
   // Compress assets
   compress: true,
-  
+
   // Optimize images
   images: {
     unoptimized: false,
     domains: ['example.com'],
   },
-  
+
   // Enable experimental features
   experimental: {
     optimizeCss: true,
@@ -354,16 +355,19 @@ export default DynamicComponent;
 ### Common Issues
 
 **Build fails with "Module not found"**
+
 - Check that all dependencies are edge-compatible
 - Verify import paths and module resolution
 - Use dynamic imports for problematic modules
 
 **Runtime errors in production**
+
 - Test with edge runtime locally
 - Check for Node.js-specific APIs
 - Verify environment variable configuration
 
 **Performance issues**
+
 - Review caching strategies
 - Optimize asset loading
 - Check for blocking operations
@@ -440,18 +444,21 @@ export default function handler(req: NextRequest) {
 ## Best Practices
 
 ### Development
+
 - Test with edge runtime early and often
 - Use TypeScript for better error catching
 - Implement proper error handling
 - Monitor build sizes and performance
 
 ### Production
+
 - Set up proper monitoring and alerting
 - Use environment-specific configurations
 - Implement graceful error handling
 - Monitor edge function performance
 
 ### Security
+
 - Validate all inputs
 - Use environment variables for secrets
 - Implement proper CORS headers

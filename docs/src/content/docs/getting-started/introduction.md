@@ -33,16 +33,20 @@ The OSS workspace is a monorepo that houses multiple interconnected projects, ea
 Our projects are built around these core principles:
 
 ### Modern Nx First
+
 We embrace the latest Nx features and capabilities, including:
+
 - Inferred tasks for seamless project detection
 - Advanced caching strategies
 - GraphV2 support
 - Modern project graph integration
 
 ### Non-Invasive Tooling
+
 We believe in generating minimal, focused tooling that enhances rather than replaces existing workflows. Our plugins work alongside your existing tools and practices.
 
 ### Official Command Integration
+
 Rather than reinventing the wheel, we leverage official commands and tools from their respective ecosystems (Go's official toolchain, Cloudflare's Wrangler CLI, etc.).
 
 ## Community

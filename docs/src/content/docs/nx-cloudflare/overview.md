@@ -3,7 +3,6 @@ title: Nx Cloudflare Overview
 description: Nx plugin for Cloudflare development, featuring Workers, Pages, and Next.js integration
 ---
 
-
 <p style="text-align: center;">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" />
@@ -48,6 +47,7 @@ Nx Cloudflare is a comprehensive Nx plugin designed for Cloudflare development, 
 ## Core Capabilities
 
 ### Generate Applications
+
 Create Cloudflare Worker applications with various templates and configurations:
 
 ```bash
@@ -55,6 +55,7 @@ nx g @naxodev/nx-cloudflare:application my-worker-app
 ```
 
 ### Generate Libraries
+
 Build reusable Worker libraries for shared functionality:
 
 ```bash
@@ -62,6 +63,7 @@ nx g @naxodev/nx-cloudflare:library my-worker-lib
 ```
 
 ### Local Development
+
 Serve workers locally with full Cloudflare environment simulation:
 
 ```bash
@@ -69,6 +71,7 @@ nx serve my-worker-app
 ```
 
 ### Deployment
+
 Deploy workers directly to Cloudflare from your Nx workspace:
 
 ```bash
@@ -111,6 +114,7 @@ Nx Cloudflare includes experimental support for deploying Next.js applications t
 ```
 
 This feature enables:
+
 - Server-side rendering on Cloudflare Pages
 - Edge runtime optimization
 - Automatic asset optimization
@@ -119,12 +123,14 @@ This feature enables:
 ## Architecture Benefits
 
 ### Monorepo Advantages
+
 - **Shared libraries** across multiple workers
 - **Consistent tooling** and configuration
 - **Dependency management** with proper caching
 - **Code sharing** between frontend and worker code
 
 ### Nx Integration
+
 - **Task caching** for faster builds and tests
 - **Project graph** visualization of worker dependencies
 - **Parallel execution** of worker operations
