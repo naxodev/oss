@@ -1,0 +1,275 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { Icon } from '@astrojs/starlight/components';
+---
+
+<StarlightPage
+	frontmatter={{
+		title: '404 - Page Not Found',
+		description: 'The page you are looking for does not exist.',
+		template: 'splash',
+	}}
+>
+	<div class="not-found-container">
+		<div class="not-found-content">
+			<div class="error-animation">
+				<div class="error-code">404</div>
+				<div class="floating-elements">
+					<span class="floating-element">📦</span>
+					<span class="floating-element">🔧</span>
+					<span class="floating-element">⚡</span>
+				</div>
+			</div>
+			
+			<h1 class="error-title">Oops! Page Not Found</h1>
+			
+			<div class="suggestions">
+				<h2>Here's what you can do:</h2>
+				<div class="suggestion-grid">
+					<div class="suggestion-item">
+						<Icon name="home" size="1.5rem" />
+						<h3>Go Home</h3>
+						<p>Start fresh from our homepage</p>
+						<a href="/" class="suggestion-link">Take me home</a>
+					</div>
+					
+					<div class="suggestion-item">
+						<Icon name="document" size="1.5rem" />
+						<h3>Browse Docs</h3>
+						<p>Explore our documentation</p>
+						<a href="/getting-started/introduction/" class="suggestion-link">View docs</a>
+					</div>
+					
+					<div class="suggestion-item">
+						<Icon name="github" size="1.5rem" />
+						<h3>Report Issue</h3>
+						<p>Found a broken link? Let us know!</p>
+						<a href="https://github.com/naxodev/oss/issues" class="suggestion-link" target="_blank" rel="noopener">Report bug</a>
+					</div>
+				</div>
+			</div>
+			
+			<div class="popular-pages">
+				<h2>Popular Pages</h2>
+				<div class="popular-links">
+					<a href="/getting-started/quick-start/" class="popular-link">
+						<Icon name="rocket" size="1rem" />
+						Quick Start Guide
+					</a>
+					<a href="/gonx/overview/" class="popular-link">
+						<Icon name="puzzle" size="1rem" />
+						GoNx Overview
+					</a>
+					<a href="/nx-cloudflare/overview/" class="popular-link">
+						<Icon name="cloudflare" size="1rem" />
+						Nx Cloudflare
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<style>
+		.not-found-container {
+			min-height: 80vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 2rem;
+		}
+
+		.not-found-content {
+			max-width: 800px;
+			text-align: center;
+			width: 100%;
+		}
+
+		.error-animation {
+			position: relative;
+			margin-bottom: 2rem;
+			padding: 2rem;
+		}
+
+		.error-code {
+			font-size: clamp(4rem, 12vw, 8rem);
+			font-weight: 900;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 1rem;
+			text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+			animation: pulse 2s ease-in-out infinite alternate;
+		}
+
+		@keyframes pulse {
+			from { transform: scale(1); }
+			to { transform: scale(1.05); }
+		}
+
+		.floating-elements {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none;
+		}
+
+		.floating-element {
+			position: absolute;
+			font-size: 2rem;
+			animation: float 3s ease-in-out infinite;
+		}
+
+		.floating-element:nth-child(1) {
+			top: 20%;
+			left: 10%;
+			animation-delay: 0s;
+		}
+
+		.floating-element:nth-child(2) {
+			top: 60%;
+			right: 15%;
+			animation-delay: 1s;
+		}
+
+		.floating-element:nth-child(3) {
+			bottom: 20%;
+			left: 20%;
+			animation-delay: 2s;
+		}
+
+		@keyframes float {
+			0%, 100% { transform: translateY(0px) rotate(0deg); }
+			50% { transform: translateY(-20px) rotate(10deg); }
+		}
+
+		.error-title {
+			font-size: clamp(2rem, 5vw, 3rem);
+			margin-bottom: 1rem;
+			color: var(--sl-color-text);
+			font-weight: 700;
+		}
+
+		.error-description {
+			font-size: 1.2rem;
+			color: var(--sl-color-text-accent);
+			margin-bottom: 3rem;
+			line-height: 1.6;
+			max-width: 600px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.suggestions {
+			margin-bottom: 3rem;
+		}
+
+		.suggestions h2 {
+			font-size: 1.5rem;
+			margin-bottom: 2rem;
+			color: var(--sl-color-text);
+		}
+
+		.suggestion-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 1.5rem;
+			margin-bottom: 2rem;
+		}
+
+		.suggestion-item {
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 12px;
+			padding: 1.5rem;
+			transition: all 0.3s ease;
+		}
+
+		.suggestion-item:hover {
+			background: rgba(255, 255, 255, 0.08);
+			transform: translateY(-4px);
+			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+		}
+
+		.suggestion-item h3 {
+			margin: 1rem 0 0.5rem 0;
+			color: var(--sl-color-text);
+			font-size: 1.1rem;
+		}
+
+		.suggestion-item p {
+			color: var(--sl-color-text-accent);
+			margin-bottom: 1rem;
+			font-size: 0.9rem;
+		}
+
+		.suggestion-link {
+			display: inline-block;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			padding: 0.5rem 1rem;
+			border-radius: 6px;
+			text-decoration: none;
+			font-weight: 500;
+			transition: all 0.3s ease;
+			font-size: 0.9rem;
+		}
+
+		.suggestion-link:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+			text-decoration: none;
+		}
+
+		.popular-pages h2 {
+			font-size: 1.3rem;
+			margin-bottom: 1.5rem;
+			color: var(--sl-color-text);
+		}
+
+		.popular-links {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1rem;
+			justify-content: center;
+		}
+
+		.popular-link {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			padding: 0.75rem 1rem;
+			border-radius: 8px;
+			text-decoration: none;
+			color: var(--sl-color-text-accent);
+			transition: all 0.3s ease;
+			font-size: 0.9rem;
+		}
+
+		.popular-link:hover {
+			background: rgba(255, 255, 255, 0.08);
+			color: var(--sl-color-text);
+			text-decoration: none;
+			transform: translateY(-2px);
+		}
+
+		@media (max-width: 600px) {
+			.suggestion-grid {
+				grid-template-columns: 1fr;
+			}
+			
+			.popular-links {
+				flex-direction: column;
+				align-items: center;
+			}
+			
+			.floating-element {
+				font-size: 1.5rem;
+			}
+		}
+	</style>
+</StarlightPage>
