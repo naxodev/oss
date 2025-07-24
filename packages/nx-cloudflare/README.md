@@ -236,6 +236,14 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
         <a href="https://github.com/naxodev/oss/pulls?q=is%3Apr+reviewed-by%3ANachoVazquez" title="Reviewed Pull Requests">👀</a>
       </td>
       <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/abelpenton">
+          <img src="https://avatars.githubusercontent.com/u/32851047?v=4?s=100" width="100px;" alt="Abel Penton"/><br />
+          <sub><b>Abel Penton</b></sub>
+        </a><br />
+        <a href="https://github.com/naxodev/oss/commits?author=abelpenton" title="Code">💻</a>
+        <a href="https://github.com/naxodev/oss/commits?author=abelpenton" title="Documentation">📖</a>
+      </td>
+      <td align="center" valign="top" width="14.28%">
         <a href="https://github.com/terrxo">
           <img src="https://avatars.githubusercontent.com/u/99985144?v=4?s=100" width="100px;" alt="Nik"/><br />
           <sub><b>Nik</b></sub>
