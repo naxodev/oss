@@ -1,6 +1,7 @@
-# Lint Executor
-
-Formats and lints a Go project.
+---
+title: Lint Executor
+description: Formats and lints a Go project
+---
 
 ## Usage
 

@@ -1,6 +1,7 @@
-# Preset Generator
-
-Preset generator for creating a new workspace with gonx pre-configured. Choose between different project types to bootstrap your Go development.
+---
+title: Preset Generator
+description: Preset generator for creating a new workspace with gonx pre-configured. Choose between different project types to bootstrap your Go development
+---
 
 ## Usage
 

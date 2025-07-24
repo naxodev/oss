@@ -24,8 +24,29 @@ export default defineConfig({
 					label: 'GoNx',
 					items: [
 						{ label: 'Overview', slug: 'gonx/overview' },
-						{ label: 'Installation', slug: 'gonx/installation' },
-						{ label: 'Usage', slug: 'gonx/usage' },
+						{
+							label: 'Go Executors',
+							items: [
+								{ label: 'Generate', slug: 'gonx/executors/generate' },						
+								{ label: 'Build', slug: 'gonx/executors/build' },
+								{ label: 'Lint', slug: 'gonx/executors/lint' },
+								{ label: 'Test', slug: 'gonx/executors/test' },
+								{ label: 'Tidy', slug: 'gonx/executors/tidy' },
+								{ label: 'Serve', slug: 'gonx/executors/serve' },
+								{ label: 'Release', slug: 'gonx/executors/nx-release-publish' },
+							]
+						},
+						{
+							label: 'Go Generators',
+							items: [
+								{ label: 'Initializer', slug: 'gonx/generators/init' },
+								{ label: 'Application', slug: 'gonx/generators/application' },
+								{ label: 'Library', slug: 'gonx/generators/library' },
+								{ label: 'Go Blueprint', slug: 'gonx/generators/go-blueprint' },
+								{ label: 'Preset', slug: 'gonx/generators/preset' },
+								{ label: 'Options', slug: 'gonx/generators/options' }
+							]
+						},				
 						{ label: 'Migration from nx-go', slug: 'gonx/migration' },
 					],
 				},
@@ -38,15 +59,7 @@ export default defineConfig({
 						{ label: 'Libraries', slug: 'nx-cloudflare/libraries' },
 						{ label: 'Next.js on Cloudflare', slug: 'nx-cloudflare/nextjs' },
 					],
-				},
-				{
-					label: 'Reference',
-					items: [
-						{ label: 'GoNx Reference', slug: 'reference/gonx' },
-						{ label: 'Nx Cloudflare Reference', slug: 'reference/nx-cloudflare' },
-						{ label: 'Compatibility', slug: 'reference/compatibility' },
-					],
-				},
+				}				
 			],
 			customCss: [
 				'./src/styles/custom.css',

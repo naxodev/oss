@@ -1,6 +1,7 @@
-# Init Generator
-
-Initializes gonx in an existing Nx workspace.
+---
+title: Init Generator
+description: Initializes gonx in an existing Nx workspace
+---
 
 ## Usage
 

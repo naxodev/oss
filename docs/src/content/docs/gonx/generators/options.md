@@ -1,6 +1,7 @@
-# Configuration Options
-
-gonx provides several configuration options to customize your Go development experience within Nx.
+---
+title: Configuration Options
+description: gonx provides several configuration options to customize your Go development experience within Nx
+---
 
 ## Workspace Configuration
 

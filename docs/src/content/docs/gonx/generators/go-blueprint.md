@@ -1,6 +1,7 @@
-# Go Blueprint Generator
-
-Uses [Go Blueprint](https://github.com/Melkeydev/go-blueprint) to generate Go applications with various frameworks and features. This generator integrates Go Blueprint's powerful scaffolding capabilities with Nx's workflow.
+---
+title: Go Blueprint Generator
+description: Uses [Go Blueprint](https://github.com/Melkeydev/go-blueprint) to generate Go applications with various frameworks and features. This generator integrates Go Blueprint's powerful scaffolding capabilities with Nx's workflow
+---
 
 The Go Blueprint binary is included with this package, so no additional installation is required.
 
