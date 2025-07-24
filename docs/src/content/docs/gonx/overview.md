@@ -84,9 +84,8 @@ nx add @naxodev/gonx
 | [`nx-release-publish`](../executors/nx-release-publish) | Lists the module in the Go registry               |
 
 :::tip
-
-> You can use `nx list @naxodev/gonx` to see list capabilities.
-> :::
+You can use `nx list @naxodev/gonx` to see list capabilities.
+:::
 
 Need more customization? See our [plugin configuration options](./docs/options.md).
 
