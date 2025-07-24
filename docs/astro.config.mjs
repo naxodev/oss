@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
   integrations: [
     starlight({
-      title: 'OSS Workspace',
+      title: 'OSS Workspace Docs',
       description: 'Nx plugins and tools for modern development',
       favicon: '/favicon.svg',
       social: [
