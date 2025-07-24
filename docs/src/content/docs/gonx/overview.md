@@ -10,19 +10,9 @@ description: Modern Nx plugin for Go/Golang development
   </picture>
 </p>
 
-<div style="text-align: center;">
-
-[![MIT](https://img.shields.io/packagist/l/doctrine/orm.svg?style=flat-square)]()
-[![commitizen](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat-square)]()
-[![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)]()
-[![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-
-</div>
-
 <hr>
 
-# gonx - Very opinionated Nx plugin for Go/Golang
+GoNx - Very opinionated Nx plugin for Go/Golang
 
 **IMPORTANT:** This project is a fork of [@nx-go/nx-go](https://github.com/nx-go/nx-go). We give most of the credit to the original maintainers. We've built upon their excellent foundation to modernize the plugin for the latest Nx features.
 
