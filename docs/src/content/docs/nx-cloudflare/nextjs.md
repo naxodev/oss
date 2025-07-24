@@ -248,19 +248,29 @@ vars = { NODE_ENV = "staging" }
 ### Supported Features
 
 ✅ **Static Site Generation (SSG)**
+
 ✅ **Server-Side Rendering (SSR)** with edge runtime
+
 ✅ **API Routes** as Cloudflare Functions
+
 ✅ **Dynamic imports** and code splitting
+
 ✅ **Image optimization** (with configuration)
+
 ✅ **Environment variables**
+
 ✅ **Custom domains** and SSL
+
 ✅ **Global CDN** distribution
 
 ### Current Limitations
 
 ⚠️ **Node.js APIs** - Limited to edge-compatible APIs only
+
 ⚠️ **File system access** - Not available in edge runtime
+
 ⚠️ **Some Next.js features** - Check compatibility with edge runtime
+
 ⚠️ **Third-party packages** - Must be edge-compatible
 
 ### Edge Runtime Compatibility
