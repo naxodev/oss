@@ -76,8 +76,6 @@ npx create-nx-workspace go-app --preset=@naxodev/gonx \
   --feature=docker,githubaction
 ```
 
-⚠️ **Note**: Avoid using `react` or other frontend features with Go Blueprint. Use separate Nx generators for frontend projects instead.
-
 ### With Go Workspace
 
 ```bash
@@ -108,7 +106,6 @@ npx create-nx-workspace go-workspace --preset=@naxodev/gonx \
 - Provides multiple web frameworks and database integrations
 - Includes optional features like Docker, GitHub Actions, WebSockets, etc.
 - Go Blueprint binary is included with the package
-- ⚠️ **Note**: Use separate Nx generators for frontend projects instead of Go Blueprint's built-in frontend features
 
 ## Project Structure
 

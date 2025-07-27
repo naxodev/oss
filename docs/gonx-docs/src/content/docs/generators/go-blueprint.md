@@ -145,7 +145,9 @@ nx tidy my-go-app
 
 ## Frontend Integration
 
-⚠️ **Important**: Avoid using Go Blueprint's built-in frontend features (like `react`) as they will not be properly detected by Nx's project graph. Since Nx already detects a Go project in the directory, adding frontend code directly will create conflicts.
+:::caution
+Avoid using Go Blueprint's built-in frontend features (like `react`) as they will not be properly detected by Nx's project graph. Since Nx already detects a Go project in the directory, adding frontend code directly will create conflicts.
+:::
 
 ### Recommended Approach
 

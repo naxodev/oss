@@ -30,16 +30,6 @@ For GoNx specifically:
 
 - **Go** ([stable version](https://go.dev/dl/)) installed on your machine
 
-## Installation
-
-gonx is published as the `@naxodev/gonx` package.
-
-| Toolchain | Command                     |
-| --------- | --------------------------- |
-| NPM CLI   | `npm install @naxodev/gonx` |
-| PNPM CLI  | `pnpm add @naxodev/gonx`    |
-| Yarn CLI  | `yarn add @naxodev/gonx`    |
-
 ## Compatibility
 
 gonx is compatible with the following Nx versions:
@@ -48,7 +38,9 @@ gonx is compatible with the following Nx versions:
 | ---------- | ----------------- |
 | 21.x       | >=^1.0.0 <=^2.0.0 |
 
+:::caution
 This plugin is only tested on [stable versions of Go](https://go.dev/dl/); older versions do not receive support. However, you can expect a fair degree of compatibility. Please note that multi-module Go workspaces require Go 1.18 or later.
+:::
 
 ## Choose Your Path
 
@@ -111,7 +103,7 @@ nx serve my-go-app
 nx test my-go-app
 ```
 
-## 📖 Generators & executors
+## Generators & executors
 
 ### Generators
 

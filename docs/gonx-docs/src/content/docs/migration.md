@@ -148,26 +148,6 @@ Although this can make commands longer, it has two main benefits:
 2. Clear Nx cache: `nx reset`
 3. Verify plugin configuration in `nx.json`
 
-### Issue: Build Failures
-
-**Problem**: Builds fail due to path changes.
-
-**Solution**:
-
-1. Update any hardcoded paths in your Go code
-2. Ensure imports use proper module paths
-3. Check that `go.mod` files have correct module names
-
-### Issue: Custom Executors Missing
-
-**Problem**: Custom nx-go executors are no longer available.
-
-**Solution**:
-
-1. Use GoNx's built-in executors
-2. Create custom executors if needed
-3. Use shell commands as a fallback
-
 ### Issue: Project Graph Issues
 
 **Problem**: Project dependencies aren't detected correctly.
