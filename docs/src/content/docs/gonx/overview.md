@@ -80,12 +80,12 @@ nx add @naxodev/gonx
 | [`nx-release-publish`](../executors/nx-release-publish) | Lists the module in the Go registry               |
 
 :::tip
-You can use `nx list @naxodev/gonx` to see list capabilities.
+You can run `nx list @naxodev/gonx` to view the list of plugin capabilities.
 :::
 
 Need more customization? See our [plugin configuration options](./docs/options.md).
 
-## Changes from the Original nx-go
+## Changes from nx-go
 
 - Modern Nx-only, we break compatibility with older versions of Nx.
 - We brought cacheable tasks to the table.
@@ -101,7 +101,7 @@ Need more customization? See our [plugin configuration options](./docs/options.m
 - Stop using the `main.go` as the target for the `build` and `serve` executors directly when provided, instead use the `main.go` directory to capture the context.
 - Removed the creation of go.work by default. Now this is opt-in using the `addGoDotWork` flag.
 - Removed the `convert-to-one-module` generator.
-- The preset now asks you to choose between generating a library or application.
+- The preset now asks you to choose between generating a library, application, or go-blueprint option
 
 ## Installation
 
@@ -318,6 +318,14 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
           <sub><b>Miguel</b></sub>
         </a><br />
         <a href="https://github.com/naxodev/oss/commits?author=mpsanchis" title="Code">💻</a>
+      </td>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/abelpenton">
+          <img src="https://avatars.githubusercontent.com/u/32851047?v=4?s=100" width="100px;" alt="Miguel"/><br />
+          <sub><b>Abel</b></sub>
+        </a><br />
+        <a href="https://github.com/naxodev/oss/commits?author=abelpenton" title="Code">💻</a>
+        <a href="https://github.com/naxodev/oss/commits?author=abelpenton" title="Documentation">📖</a>
       </td>
     </tr>
   </tbody>

@@ -3,14 +3,9 @@ title: Introduction
 description: Learn about the OSS workspace and its projects
 ---
 
-Welcome to the OSS workspace documentation! This workspace contains a collection of Nx plugins and tools designed to enhance modern development workflows, particularly for Go and Cloudflare ecosystems.
+Welcome to the OSS workspace documentation! This workspace contains a collection of Nx plugins and tools designed to enhance modern development workflows, particularly for Go.
 
-## About This Workspace
-
-The OSS workspace is a monorepo that houses multiple interconnected projects, each solving specific development challenges:
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
-  <div style="text-align: center;">
+<div style="text-align: center;">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/gonx.svg" />
       <img alt="gonx - Nx plugin for Go/Golang" src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/gonx.svg" width="100%" />
@@ -18,15 +13,10 @@ The OSS workspace is a monorepo that houses multiple interconnected projects, ea
     <h3>GoNx</h3>
     <p>A modern Nx plugin for Go/Golang development</p>
   </div>
-  <div style="text-align: center;">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" />
-      <img alt="nx-cloudflare - Nx plugin for Cloudflare workers" src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg" width="100%" />
-    </picture>
-    <h3>Nx Cloudflare</h3>
-    <p>Comprehensive Cloudflare integration for Nx workspaces</p>
-  </div>
-</div>
+
+## About This Workspace
+
+The OSS workspace is a monorepo that houses multiple interconnected projects, each solving specific development challenges:
 
 ## Philosophy
 
@@ -47,7 +37,7 @@ We believe in generating minimal, focused tooling that enhances rather than repl
 
 ### Official Command Integration
 
-Rather than reinventing the wheel, we leverage official commands and tools from their respective ecosystems (Go's official toolchain, Cloudflare's Wrangler CLI, etc.).
+Rather than reinventing the wheel, we leverage official commands and tools from the Go's official toolchain ecosystems.
 
 ## Community
 
@@ -55,7 +45,7 @@ We value community contributions and feedback. Here's how you can get involved:
 
 - **Discord**: Join our [Discord Server](https://discord.gg/zjDCGpKP2S) for real-time discussions
 - **GitHub**: Contribute to our [open source repository](https://github.com/naxodev/oss)
-- **Issues**: Report bugs and request features through GitHub Issues
+- **Issues**: Report bugs and request features through [GitHub Issues](https://github.com/naxodev/oss/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen)
 
 ## Getting Support
 

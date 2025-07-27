@@ -11,6 +11,10 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 ## Our Projects
 
 <CardGrid stagger>
+  <Card title="Community" icon="open-book">
+    Join our [Discord Server](https://discord.gg/zjDCGpKP2S) to chat with the
+    community and get support.
+  </Card>
   <Card title="GoNx" icon="rocket">
     <div style="text-align: center; margin-bottom: 1rem;">
       <picture>
@@ -28,51 +32,11 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
     A modern Nx plugin for [Go/Golang](/gonx/overview) development with full Nx integration,
     inferred tasks, and official Go command support.
   </Card>
-  <Card title="Nx Cloudflare" icon="setting">
-    <div style="text-align: center; margin-bottom: 1rem;">
-      <picture>
-        <source
-          media="(prefers-color-scheme: dark)"
-          srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg"
-        />
-        <img
-          alt="nx-cloudflare - Nx plugin for Cloudflare workers"
-          src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg"
-          width="80%"
-        />
-      </picture>
-    </div>
-    Nx plugin for [Cloudflare](/nx-cloudflare/overview) development, featuring Workers,
-    Pages, and Next.js integration.
-  </Card>
-  <Card title="Community" icon="open-book">
-    Join our [Discord Server](https://discord.gg/zjDCGpKP2S) to chat with the
-    community and get support.
-  </Card>
   <Card title="Open Source" icon="github">
     All projects are open source and welcome contributions. Check out our
     [GitHub repository](https://github.com/naxodev/oss).
   </Card>
 </CardGrid>
-
----
-
-<div class="stats-container">
-  <div class="stats-grid">
-    <div class="stat-item">
-      <span class="stat-number">30K+</span>
-      <span class="stat-label">Downloads</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-number">100%</span>
-      <span class="stat-label">Open Source</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-number">24/7</span>
-      <span class="stat-label">Community Support</span>
-    </div>
-  </div>
-</div>
 
 ---
 
@@ -100,40 +64,12 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 {' '}
 
 <div class="feature-item">
-  <span class="feature-icon">☁️</span>
-  <h3 class="feature-title">Cloudflare Support</h3>
-  <p class="feature-description">
-    Workers, Pages, and Next.js deployment to Cloudflare.
-  </p>
-</div>
-
-{' '}
-
-<div class="feature-item">
   <span class="feature-icon">📦</span>
   <h3 class="feature-title">Monorepo Ready</h3>
   <p class="feature-description">
     Designed for large-scale monorepo development.
   </p>
 </div>
-
-{' '}
-
-<div class="feature-item">
-  <span class="feature-icon">🔧</span>
-  <h3 class="feature-title">Developer Experience</h3>
-  <p class="feature-description">
-    Streamlined workflows and excellent tooling.
-  </p>
-</div>
-
-  <div class="feature-item">
-    <span class="feature-icon">⚡</span>
-    <h3 class="feature-title">Performance Optimized</h3>
-    <p class="feature-description">
-      Efficient caching and dependency graph tools.
-    </p>
-  </div>
 </div>
 
 ---
@@ -147,7 +83,10 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
     <a href="/getting-started/quick-start" class="action-button primary">
       🎯 Quick Start
     </a>
-    <a href="/gonx/overview" class="action-button secondary">
+    <a
+      href="https://github.com/naxodev/oss/tree/main/examples"
+      class="action-button secondary"
+    >
       📁 View Examples
     </a>
   </div>

@@ -39,19 +39,6 @@ If you have an existing Nx workspace and want to add our plugins:
 nx add @naxodev/gonx
 ```
 
-#### Add Nx Cloudflare
-
-```bash
-# Using npm
-npm install @naxodev/nx-cloudflare
-
-# Using pnpm
-pnpm add @naxodev/nx-cloudflare
-
-# Using yarn
-yarn add @naxodev/nx-cloudflare
-```
-
 ## Your First Project
 
 ### Create a Go Application
@@ -66,18 +53,6 @@ nx g @naxodev/gonx:application my-go-app
 nx g @naxodev/gonx:library my-go-lib
 ```
 
-### Create a Cloudflare Worker
-
-```bash
-nx g @naxodev/nx-cloudflare:application my-worker
-```
-
-### Create a Cloudflare Worker Library
-
-```bash
-nx g @naxodev/nx-cloudflare:library my-worker-lib
-```
-
 ## Common Commands
 
 Once you have projects set up, here are the most common commands you'll use:
@@ -87,9 +62,6 @@ Once you have projects set up, here are the most common commands you'll use:
 ```bash
 # Build a Go application
 nx build my-go-app
-
-# Build a Cloudflare Worker
-nx build my-worker
 ```
 
 ### Running Projects
@@ -97,9 +69,6 @@ nx build my-worker
 ```bash
 # Run a Go application
 nx serve my-go-app
-
-# Serve a Cloudflare Worker locally
-nx serve my-worker
 ```
 
 ### Testing Projects
@@ -107,16 +76,6 @@ nx serve my-worker
 ```bash
 # Test a Go project
 nx test my-go-app
-
-# Test a Cloudflare Worker
-nx test my-worker
-```
-
-### Deploying to Cloudflare
-
-```bash
-# Deploy a Cloudflare Worker
-nx deploy my-worker
 ```
 
 ## Next Steps
@@ -126,12 +85,9 @@ Now that you have a basic setup:
 1. **Explore the specific documentation** for your chosen plugin:
 
    - [GoNx Documentation](/gonx/overview/)
-   - [Nx Cloudflare Documentation](/nx-cloudflare/overview/)
 
-2. **Check out examples** in the workspace's `examples/` directory
+2. **Check out examples** in the [workspace](https://github.com/naxodev/oss/tree/main/examples)
 
 3. **Join the community** on [Discord](https://discord.gg/zjDCGpKP2S) for tips and support
-
-4. **Read about compatibility** in our [compatibility guide](/reference/compatibility/)
 
 Happy coding! 🎉

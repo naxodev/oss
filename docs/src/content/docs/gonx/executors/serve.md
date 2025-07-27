@@ -23,6 +23,7 @@ nx serve my-go-app
 ```json
 {
   "executor": "@naxodev/gonx:serve",
+  "continuous": true,
   "options": {}
 }
 ```

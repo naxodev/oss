@@ -6,7 +6,7 @@ description: Guide for migrating from the original nx-go plugin to GoNx
 This guide helps you migrate from the original [@nx-go/nx-go](https://github.com/nx-go/nx-go) plugin to GoNx.
 
 :::caution
-GoNx introduces breaking changes and is not a drop-in replacement for nx-go. This migration requires careful planning and testing.
+Although GoNx works well as a drop-in replacement for nx-go in most cases, our philosophy and core implementation have changed since the first fork, which may cause some workflows designed for nx-go not to work with GoNx.
 :::
 
 ## Overview of Changes
@@ -83,9 +83,13 @@ Update your `nx.json` to use GoNx:
 
 Remove any nx-go specific configuration.
 
-### Step 5: Handle Project.json Files
+### Step 5: Handle project.json Files
 
 GoNx uses inferred tasks, so you can remove `project.json` files from your Go projects:
+
+:::caution
+Keep `project.json` files for non-Go projects or if you need custom task configuration.
+:::
 
 ```bash
 # Remove project.json files from Go projects
@@ -94,34 +98,10 @@ rm libs/my-go-lib/project.json
 ```
 
 :::tip
-Keep `project.json` files for non-Go projects or if you need custom task configuration.
+The inferred target configurations are available in the [executor's](/gonx/executors/generate) documentation in case modifications are needed.
 :::
 
-### Step 6: Update Build Targets
-
-If you had custom build configurations in `project.json`, you may need to adjust them:
-
-#### Before (nx-go)
-
-```json
-{
-  "targets": {
-    "build": {
-      "executor": "@nx-go/nx-go:build",
-      "options": {
-        "main": "main.go",
-        "outputPath": "dist/apps/my-app"
-      }
-    }
-  }
-}
-```
-
-#### After (GoNx)
-
-GoNx infers build tasks automatically. If you need custom configuration, you can override specific options using task configuration in `nx.json` or create a minimal `project.json`.
-
-### Step 7: Update Scripts and CI
+### Step 6: Update Scripts and CI
 
 Update any scripts or CI configurations that reference nx-go:
 
@@ -139,27 +119,6 @@ Update any scripts or CI configurations that reference nx-go:
 #### CI Configuration
 
 Update your CI to use the new executors and ensure Go is available in the environment.
-
-### Step 8: Handle go.work Files
-
-GoNx doesn't create `go.work` files by default. If you need them:
-
-1. **Enable in configuration**:
-
-```json
-{
-  "plugins": [
-    {
-      "plugin": "@naxodev/gonx",
-      "options": {
-        "addGoDotWork": true
-      }
-    }
-  ]
-}
-```
-
-2. **Or create manually** if you prefer full control.
 
 ## Common Migration Issues
 
@@ -247,15 +206,6 @@ nx build my-go-app
 nx build my-go-app  # Should use cache
 ```
 
-## Rollback Plan
-
-If you need to rollback:
-
-1. **Restore backup**: Use your workspace backup
-2. **Reinstall nx-go**: `npm install @nx-go/nx-go`
-3. **Restore configurations**: Restore `nx.json` and `project.json` files
-4. **Clear cache**: `nx reset`
-
 ## Getting Help
 
 If you encounter issues during migration:
@@ -264,15 +214,3 @@ If you encounter issues during migration:
 2. **Search issues**: Look for similar issues on GitHub
 3. **Join Discord**: Get real-time help on our [Discord server](https://discord.gg/zjDCGpKP2S)
 4. **Create issue**: Report bugs or request help on GitHub
-
-## Benefits After Migration
-
-Once migrated, you'll enjoy:
-
-- **Better performance**: Improved caching and task execution
-- **Cleaner projects**: No more project.json clutter
-- **Modern features**: Latest Nx capabilities
-- **Better reliability**: Official Go command integration
-- **Active maintenance**: Regular updates and improvements
-
-The migration effort pays off with a more maintainable and performant setup! 🚀
