@@ -12,7 +12,7 @@
     "targets": {
       "build": {
         "outputs": [
-          "{workspaceRoot}/dist/oss"
+          "{workspaceRoot}/dist/docs/gonx-docs"
         ]
       }
     }

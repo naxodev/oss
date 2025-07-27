@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
-  outDir: './dist/oss',
+  outDir: '../../dist/docs/gonx-docs',
   integrations: [
     starlight({
       title: 'GoNx Docs',
