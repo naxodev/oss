@@ -1,6 +1,7 @@
-# Tidy Executor
-
-Ensures go.mod file matches the project's source code.
+---
+title: Tidy Executor
+description: Ensures go.mod file matches the project's source code
+---
 
 ## Usage
 

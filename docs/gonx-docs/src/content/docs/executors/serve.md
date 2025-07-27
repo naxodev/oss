@@ -1,6 +1,7 @@
-# Serve Executor
-
-Runs a Go application.
+---
+title: Serve Executor
+description: Runs a Go application
+---
 
 ## Usage
 
@@ -22,6 +23,7 @@ nx serve my-go-app
 ```json
 {
   "executor": "@naxodev/gonx:serve",
+  "continuous": true,
   "options": {}
 }
 ```

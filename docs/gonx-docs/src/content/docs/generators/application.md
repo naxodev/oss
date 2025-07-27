@@ -1,6 +1,7 @@
-# Application Generator
-
-Generates a Go application with a well-structured foundation.
+---
+title: Application Generator
+description: Generates a Go application with a well-structured foundation
+---
 
 ## Usage
 

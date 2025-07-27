@@ -1,6 +1,7 @@
-# Generate Executor
-
-Runs code generation using the `go generate` command.
+---
+title: Generate Executor
+description: Runs code generation using the `go generate` command
+---
 
 ## Usage
 
