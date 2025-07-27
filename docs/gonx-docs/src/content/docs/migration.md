@@ -122,6 +122,22 @@ Update your CI to use the new executors and ensure Go is available in the enviro
 
 ## Common Migration Issues
 
+---
+
+### Issue: Projects Named Changed
+
+**Problem**: GoNx changed how project names are inferred
+
+**Solution**:
+While nx-go uses the given name for the projects or the final segment of the path as the name, GoNx uses the entire path as the project name.
+
+Although this can make commands longer, it has two main benefits:
+
+- Removes the disambiguation name problem.
+- Aligns perfectly with the Go standard for multi-module repository tag creation.
+
+[Reference](https://go.dev/doc/modules/managing-source)
+
 ### Issue: Tasks Not Found
 
 **Problem**: Nx doesn't recognize Go project tasks.
@@ -161,19 +177,6 @@ Update your CI to use the new executors and ensure Go is available in the enviro
 1. Ensure Go imports are correctly structured
 2. Use proper module paths
 3. Clear cache and regenerate: `nx reset && nx graph`
-
-## Feature Mapping
-
-Here's how nx-go features map to GoNx:
-
-| nx-go Feature        | GoNx Equivalent       | Notes                     |
-| -------------------- | --------------------- | ------------------------- |
-| `@nx-go/nx-go:build` | Inferred `build` task | Automatic detection       |
-| `@nx-go/nx-go:test`  | Inferred `test` task  | Improved caching          |
-| `@nx-go/nx-go:lint`  | Inferred `lint` task  | Uses `go fmt`             |
-| `@nx-go/nx-go:serve` | Inferred `serve` task | Runs from project root    |
-| Manual project.json  | Inferred tasks        | Cleaner project structure |
-| Custom executors     | Built-in + extensible | Modern Nx patterns        |
 
 ## Post-Migration Testing
 

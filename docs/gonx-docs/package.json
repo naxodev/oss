@@ -1,5 +1,5 @@
 {
-  "name": "docs",
+  "name": "gonx-docs",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
@@ -8,9 +8,13 @@
     "preview": "astro preview",
     "astro": "astro"
   },
-  "dependencies": {
-    "@astrojs/starlight": "^0.35.1",
-    "astro": "^5.6.1",
-    "sharp": "^0.34.2"
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{workspaceRoot}/dist/docs/gonx-doc"
+        ]
+      }
+    }
   }
 }
