@@ -12,11 +12,13 @@ description: Get up and running with OSS workspace plugins
     <p>A modern Nx plugin for Go/Golang development</p>
   </div>
 
-GoNx - Very opinionated Nx plugin for Go/Golang
-
-**IMPORTANT:** This project is a fork of [@nx-go/nx-go](https://github.com/nx-go/nx-go). We give most of the credit to the original maintainers. We've built upon their excellent foundation to modernize the plugin for the latest Nx features.
+GoNx - A very opinionated Nx plugin for Go/Golang
 
 The philosophy of gonx is to generate a non-invasive tooling to work with Go and Nx, heavily relying on inferred tasks and modern Nx features.
+
+:::note
+This project is a fork of [@nx-go/nx-go](https://github.com/nx-go/nx-go). Kudos to the original maintainers. We've built upon their excellent foundation.
+:::
 
 ## Prerequisites
 
@@ -42,7 +44,7 @@ gonx is compatible with the following Nx versions:
 This plugin is only tested on [stable versions of Go](https://go.dev/dl/); older versions do not receive support. However, you can expect a fair degree of compatibility. Please note that multi-module Go workspaces require Go 1.18 or later.
 :::
 
-## Choose Your Path
+## Getting started
 
 ### Option 1: Create a New Workspace with GoNx
 

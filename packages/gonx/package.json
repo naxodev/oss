@@ -7,7 +7,7 @@
   "executors": "./executors.json",
   "generators": "./generators.json",
   "description": "Modern Nx plugin to use Go in a Nx workspace",
-  "homepage": "https://github.com/naxodev/oss/tree/main/packages/gonx",
+  "homepage": "https://gonx.naxo.dev/",
   "repository": {
     "type": "git",
     "url": "git@github.com:naxodev/oss.git",
@@ -24,6 +24,10 @@
       "name": "Nacho Vazquez",
       "email": "nacho@naxo.dev",
       "url": "https://github.com/NachoVazquez"
+    },
+    {
+      "name": "Abel Penton",
+      "url": "https://github.com/abelpenton"
     }
   ],
   "bugs": {

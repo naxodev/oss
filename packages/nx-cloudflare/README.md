@@ -49,6 +49,7 @@ Nx Cloudflare is compatible with the following versions of Nx:
 | 18.x       | 2.x                   |
 | 19.x       | 3.x                   |
 | 20.x       | 4.x                   |
+| 21.x       | 5.x                   |
 
 ## Usage
 
