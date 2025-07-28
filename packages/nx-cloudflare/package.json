@@ -18,7 +18,7 @@
     "tslib": "^2.3.0",
     "@svgr/webpack": "^8.1.0",
     "url-loader": "^4.1.1",
-    "wrangler": "^4.7.1",
+    "wrangler": "^4.26.0",
     "dotenv": "^16.4.4",
     "@nx/js": "^21.0.0-rc.3",
     "nx": "^21.0.0-rc.3",
