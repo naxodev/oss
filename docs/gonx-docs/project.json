@@ -36,6 +36,28 @@
       "options": {
         "cwd": "docs/gonx-docs"
       }
+    },
+    "wrangler-dev": {
+      "dependsOn": ["build"],
+      "command": "wrangler dev",
+      "continuous": true,
+      "options": {
+        "cwd": "docs/gonx-docs"
+      }
+    },
+    "deploy": {
+      "dependsOn": ["build"],
+      "command": "wrangler deploy",
+      "options": {
+        "cwd": "docs/gonx-docs"
+      }
+    },
+    "versions-upload": {
+      "dependsOn": ["build"],
+      "command": "wrangler versions upload",
+      "options": {
+        "cwd": "docs/gonx-docs"
+      }
     }
   },
   "tags": ["scope:public", "type:docs"]
