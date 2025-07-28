@@ -4,6 +4,7 @@
   "sourceRoot": "packages/gonx/src",
   "projectType": "library",
   "tags": ["scope:public", "type:plugin"],
+  "implicitDependencies": ["gonx-docs"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
