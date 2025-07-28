@@ -1,0 +1,42 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "docs/gonx-docs",
+  "sourceRoot": "docs/gonx-docs/src",
+  "projectType": "application",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "production": ["!{projectRoot}/**/*.spec.tsx"]
+  },
+  "targets": {
+    "build": {
+      "inputs": ["production", "^production"],
+      "outputs": ["{workspaceRoot}/dist/docs/gonx-docs"],
+      "command": "astro build",
+      "cache": true,
+      "options": {
+        "cwd": "docs/gonx-docs"
+      }
+    },
+    "dev": {
+      "command": "astro dev",
+      "continuous": true,
+      "options": {
+        "cwd": "docs/gonx-docs"
+      }
+    },
+    "preview": {
+      "command": "astro preview",
+      "continuous": true,
+      "options": {
+        "cwd": "docs/gonx-docs"
+      }
+    },
+    "astro": {
+      "command": "astro",
+      "options": {
+        "cwd": "docs/gonx-docs"
+      }
+    }
+  },
+  "tags": ["scope:public", "type:docs"]
+}

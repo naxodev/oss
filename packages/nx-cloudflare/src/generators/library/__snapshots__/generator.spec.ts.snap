@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`lib --bundler=esbuild should add build with esbuild 1`] = `
 "{
@@ -54,6 +54,7 @@ export default defineConfig(() => ({
     dts({
       entryRoot: 'src',
       tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
+      pathsToAliases: false,
     }),
   ],
   // Uncomment this if you are using workers.
