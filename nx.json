@@ -114,6 +114,11 @@
       },
       "workspaceChangelog": false,
       "commitMessageFormat": "conventional"
+    },
+    "conventionalCommits": {
+      "docs": {
+        "semverBump": "patch"
+      }
     }
   }
 }
