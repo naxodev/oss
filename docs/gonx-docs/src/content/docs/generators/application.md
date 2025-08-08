@@ -65,6 +65,7 @@ nx g @naxodev/gonx:application my-go-app --tags="json yaml"
 The generator creates different structures based on the application type:
 
 ### Basic Application (default)
+
 ```
 my-go-app/
 ├── main.go
@@ -73,6 +74,7 @@ my-go-app/
 ```
 
 ### CLI Application (--type=cli)
+
 ```
 my-cli-app/
 ├── main.go
@@ -85,6 +87,7 @@ my-cli-app/
 ```
 
 ### TUI Application (--type=tui)
+
 ```
 my-tui-app/
 ├── main.go
