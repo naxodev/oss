@@ -1,0 +1,102 @@
+package ui
+
+import (
+	"testing"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+func TestNewModel(t *testing.T) {
+	m := NewModel()
+	
+	if len(m.choices) != 4 {
+		t.Errorf("Expected 4 choices, got %d", len(m.choices))
+	}
+	
+	if m.cursor != 0 {
+		t.Errorf("Expected cursor to start at 0, got %d", m.cursor)
+	}
+	
+	if len(m.selected) != 0 {
+		t.Errorf("Expected no selected items initially, got %d", len(m.selected))
+	}
+	
+	if m.quitting {
+		t.Error("Expected quitting to be false initially")
+	}
+}
+
+func TestModelInit(t *testing.T) {
+	m := NewModel()
+	cmd := m.Init()
+	
+	if cmd != nil {
+		t.Error("Expected Init to return nil command")
+	}
+}
+
+func TestModelUpdate(t *testing.T) {
+	m := NewModel()
+	
+	// Test moving cursor down
+	updatedModel, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("j")})
+	if model, ok := updatedModel.(Model); ok {
+		if model.cursor != 1 {
+			t.Errorf("Expected cursor to be at 1 after down movement, got %d", model.cursor)
+		}
+	} else {
+		t.Error("Failed to cast updated model")
+	}
+	
+	// Test moving cursor up
+	m.cursor = 1
+	updatedModel, _ = m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("k")})
+	if model, ok := updatedModel.(Model); ok {
+		if model.cursor != 0 {
+			t.Errorf("Expected cursor to be at 0 after up movement, got %d", model.cursor)
+		}
+	} else {
+		t.Error("Failed to cast updated model")
+	}
+}
+
+func TestModelSelection(t *testing.T) {
+	m := NewModel()
+	
+	// Test selecting an item
+	updatedModel, _ := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if model, ok := updatedModel.(Model); ok {
+		if len(model.selected) != 1 {
+			t.Errorf("Expected 1 selected item, got %d", len(model.selected))
+		}
+		if _, exists := model.selected[0]; !exists {
+			t.Error("Expected item 0 to be selected")
+		}
+	} else {
+		t.Error("Failed to cast updated model")
+	}
+}
+
+func TestRenderHeader(t *testing.T) {
+	header := RenderHeader()
+	if len(header) == 0 {
+		t.Error("Expected non-empty header")
+	}
+}
+
+func TestRenderMenuItem(t *testing.T) {
+	selected := make(map[int]struct{})
+	selected[0] = struct{}{}
+	
+	// Test normal item
+	item := RenderMenuItem("Test Item", 0, 1, make(map[int]struct{}))
+	if len(item) == 0 {
+		t.Error("Expected non-empty menu item")
+	}
+	
+	// Test selected item
+	item = RenderMenuItem("Test Item", 0, 0, selected)
+	if len(item) == 0 {
+		t.Error("Expected non-empty selected menu item")
+	}
+}

@@ -4,6 +4,7 @@ import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/pr
 export interface GeneratorSchema {
   directory: string;
   name?: string;
+  type?: 'basic' | 'cli' | 'tui';
   tags?: string;
   skipFormat?: boolean;
   addGoDotWork?: boolean;

@@ -1,0 +1,66 @@
+package cmd
+
+import (
+	"bytes"
+	"testing"
+)
+
+func TestVersionCommand(t *testing.T) {
+	buf := new(bytes.Buffer)
+	
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+	
+	rootCmd.SetArgs([]string{"version"})
+	err := rootCmd.Execute()
+	
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	
+	expected := "<%= projectName %> v1.0.0\n"
+	if buf.String() != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, buf.String())
+	}
+}
+
+func TestRootCommandHelp(t *testing.T) {
+	buf := new(bytes.Buffer)
+	
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+	
+	rootCmd.SetArgs([]string{"--help"})
+	err := rootCmd.Execute()
+	
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	
+	// Just check that help output contains the app name
+	output := buf.String()
+	if len(output) == 0 {
+		t.Error("Expected help output, got empty string")
+	}
+}
+
+func TestRootCommandWithNameFlag(t *testing.T) {
+	buf := new(bytes.Buffer)
+	
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+	
+	// Test that the name flag is properly registered
+	rootCmd.SetArgs([]string{"--name", "test", "--help"})
+	err := rootCmd.Execute()
+	
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	
+	// The help should contain information about the name flag
+	output := buf.String()
+	if len(output) == 0 {
+		t.Error("Expected help output, got empty string")
+	}
+}

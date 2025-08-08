@@ -20,10 +20,19 @@ export default async function applicationGenerator(
     addGoDotWork: options.addGoDotWork,
   });
 
-  generateFiles(tree, join(__dirname, 'files'), options.projectRoot, options);
+  // Determine the template directory based on the type
+  const appType = options.type || 'basic';
+  const templatePath = join(__dirname, 'files', appType);
 
-  // Always create go.mod for the project
-  createGoMod(tree, options.projectRoot, options.projectRoot);
+  generateFiles(tree, templatePath, options.projectRoot, options);
+
+  // Create go.mod - if there's a custom template, it will be used, otherwise use the default
+  if (tree.exists(join(options.projectRoot, 'go.mod'))) {
+    // go.mod was created from template, no need to create it again
+  } else {
+    // Fallback to creating a basic go.mod
+    createGoMod(tree, options.projectRoot, options.projectRoot);
+  }
 
   // Only add to go.work if it exists
   if (isGoWorkspace(tree)) {
