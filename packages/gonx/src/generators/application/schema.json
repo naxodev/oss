@@ -19,12 +19,11 @@
       "pattern": "^[a-zA-Z][^:]*$",
       "x-priority": "important"
     },
-    "type": {
+    "variant": {
       "type": "string",
-      "description": "The type of application.",
-      "enum": ["basic", "cli", "tui"],
-      "default": "basic",
-      "x-prompt": "What type of application do you want to create?"
+      "description": "The variant of application.",
+      "enum": ["standard", "cli", "tui"],
+      "default": "standard"
     },
     "tags": {
       "type": "string",

@@ -20,9 +20,9 @@ export default async function applicationGenerator(
     addGoDotWork: options.addGoDotWork,
   });
 
-  // Determine the template directory based on the type
-  const appType = options.type || 'basic';
-  const templatePath = join(__dirname, 'files', appType);
+  // Determine the template directory based on the variant
+  const appVariant = options.variant || 'standard';
+  const templatePath = join(__dirname, 'files', appVariant);
 
   generateFiles(tree, templatePath, options.projectRoot, options);
 
