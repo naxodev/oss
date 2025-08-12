@@ -5,7 +5,7 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"<%= moduleName %>/ui"
+	"<%= moduleName %>/internal/ui"
 )
 
 // Execute starts the TUI application
