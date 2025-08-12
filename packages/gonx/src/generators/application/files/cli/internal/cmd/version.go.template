@@ -6,19 +6,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "1.0.0"
-
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number",
-	Long:  `Print the version number of <%= projectName %>.`,
+	Short: "Print the version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("<%= projectName %> v%s\n", version)
+		fmt.Println("<%= projectName %> v1.0.0")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-
-	// Here you will define your flags and configuration settings.
 }

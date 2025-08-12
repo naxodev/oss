@@ -11,10 +11,10 @@ import (
 // Execute starts the TUI application
 func Execute() {
 	m := ui.NewModel()
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	p := tea.NewProgram(m)
 	
 	if _, err := p.Run(); err != nil {
-		fmt.Printf("Error running <%= projectName %>: %v\n", err)
+		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
 }

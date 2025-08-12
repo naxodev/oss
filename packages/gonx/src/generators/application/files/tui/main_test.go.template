@@ -1,21 +1,12 @@
 package main
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestMain(t *testing.T) {
-	// Since main() just calls cmd.Execute(), 
-	// the actual TUI testing should be in the ui package
-	// This is a placeholder for any main-specific tests
-	
-	// For now, just ensure main doesn't panic during setup
+	// Basic test to ensure main doesn't panic
 	defer func() {
 		if r := recover(); r != nil {
-			t.Errorf("main() panicked during setup: %v", r)
+			t.Errorf("main() panicked: %v", r)
 		}
 	}()
-	
-	// We can't easily test the full TUI execution here
-	// Individual components should be tested in their respective packages
 }

@@ -4,69 +4,32 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Style definitions for the TUI
+// Basic styles for the TUI
 var (
-	// HeaderStyle styles the application header
-	HeaderStyle = lipgloss.NewStyle().
+	// TitleStyle styles the application title
+	TitleStyle = lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("86")).
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("86")).
-		Padding(0, 1)
+		Foreground(lipgloss.Color("86"))
 
-	// SelectedItemStyle styles the currently selected menu item
-	SelectedItemStyle = lipgloss.NewStyle().
+	// SelectedStyle styles the currently selected item
+	SelectedStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("170")).
 		Bold(true)
 
-	// NormalItemStyle styles normal menu items
-	NormalItemStyle = lipgloss.NewStyle().
+	// NormalStyle styles normal items
+	NormalStyle = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("252"))
-
-	// CheckedItemStyle styles selected/checked items
-	CheckedItemStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("42"))
-
-	// FooterStyle styles the footer instructions
-	FooterStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("241")).
-		Italic(true).
-		MarginTop(1)
-
-	// GoodbyeStyle styles the goodbye message
-	GoodbyeStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("86")).
-		Bold(true).
-		MarginTop(1).
-		MarginBottom(1)
 )
 
-// ApplyHeaderStyle applies styling to the header
-func ApplyHeaderStyle(text string) string {
-	return HeaderStyle.Render(text)
+// ApplyTitleStyle applies title styling
+func ApplyTitleStyle(text string) string {
+	return TitleStyle.Render(text)
 }
 
-// ApplyItemStyle applies appropriate styling based on item state
-func ApplyItemStyle(text string, isSelected, isCursor bool) string {
-	style := NormalItemStyle
-	
-	if isCursor {
-		style = SelectedItemStyle
-	}
-	
+// ApplyItemStyle applies styling based on selection state
+func ApplyItemStyle(text string, isSelected bool) string {
 	if isSelected {
-		style = style.Copy().Inherit(CheckedItemStyle)
+		return SelectedStyle.Render(text)
 	}
-	
-	return style.Render(text)
-}
-
-// ApplyFooterStyle applies styling to the footer
-func ApplyFooterStyle(text string) string {
-	return FooterStyle.Render(text)
-}
-
-// ApplyGoodbyeStyle applies styling to the goodbye message
-func ApplyGoodbyeStyle(text string) string {
-	return GoodbyeStyle.Render(text)
+	return NormalStyle.Render(text)
 }

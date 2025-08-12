@@ -1,38 +1,23 @@
 package cmd
 
 import (
-    "fmt"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-var (
-	name string
-)
-
 var rootCmd = &cobra.Command{
 	Use:   "<%= projectName %>",
 	Short: "<%= projectName %> is a CLI application",
-	Long: `<%= projectName %> is a CLI application built with Cobra.
-This application provides various commands to interact with the system.`,
-    Run: func(cmd *cobra.Command, args []string) {
-		// This is what happens when you run the CLI without subcommands
-		fmt.Printf("Hello, %s!\n", name)
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Hello from <%= projectName %>!")
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute runs the root command
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
-}
-
-func init() {
-	rootCmd.PersistentFlags().StringVarP(&name, "name", "n", "World", "Name to greet")
-
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

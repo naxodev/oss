@@ -4,39 +4,30 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// Model represents the main application state
 type Model struct {
-	choices  []string
-	cursor   int
-	selected map[int]struct{}
-	quitting bool
+	choices []string
+	cursor  int
 }
 
-// NewModel creates a new model with initial state
 func NewModel() Model {
 	return Model{
 		choices: []string{
-			"Option 1 - Do something cool",
-			"Option 2 - Do something else",
-			"Option 3 - Another action",
+			"Start",
+			"Settings", 
 			"Exit",
 		},
-		selected: make(map[int]struct{}),
 	}
 }
 
-// Init initializes the model
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-// Update handles messages and updates the model
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			m.quitting = true
 			return m, tea.Quit
 		case "up", "k":
 			if m.cursor > 0 {
@@ -46,26 +37,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursor < len(m.choices)-1 {
 				m.cursor++
 			}
-		case "enter", " ":
-			// Handle selection
-			if m.cursor == len(m.choices)-1 { // Exit option
-				m.quitting = true
+		case "enter":
+			if m.choices[m.cursor] == "Exit" {
 				return m, tea.Quit
 			}
-			
-			// Toggle selection for other options
-			_, ok := m.selected[m.cursor]
-			if ok {
-				delete(m.selected, m.cursor)
-			} else {
-				m.selected[m.cursor] = struct{}{}
-			}
+			// Handle other selections here
 		}
 	}
 	return m, nil
 }
 
-// View renders the model
 func (m Model) View() string {
 	return RenderView(m)
 }

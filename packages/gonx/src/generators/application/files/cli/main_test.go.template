@@ -1,11 +1,9 @@
 package main
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestMain(t *testing.T) {
-	// For now, just ensure main doesn't panic
+	// Basic test to ensure main doesn't panic
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("main() panicked: %v", r)

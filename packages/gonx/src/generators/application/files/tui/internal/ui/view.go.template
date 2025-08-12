@@ -7,64 +7,27 @@ import (
 
 // RenderView renders the main view
 func RenderView(m Model) string {
-	if m.quitting {
-		return RenderGoodbye()
-	}
-
 	var b strings.Builder
 	
-	// Header
-	b.WriteString(ApplyHeaderStyle(RenderHeader()))
+	// Header with optional styling
+	title := fmt.Sprintf("=== %s ===", "<%= projectName %>")
+	b.WriteString(ApplyTitleStyle(title))
 	b.WriteString("\n\n")
 	
 	// Menu items
 	for i, choice := range m.choices {
-		b.WriteString(RenderMenuItem(choice, i, m.cursor, m.selected))
+		cursor := "  "
+		if m.cursor == i {
+			cursor = "> "
+		}
+		
+		item := fmt.Sprintf("%s%s", cursor, choice)
+		b.WriteString(ApplyItemStyle(item, m.cursor == i))
 		b.WriteString("\n")
 	}
 	
 	// Footer
-	b.WriteString("\n")
-	b.WriteString(ApplyFooterStyle(RenderFooter()))
+	b.WriteString("\nUse ↑/↓ or j/k to navigate, Enter to select, q to quit\n")
 	
 	return b.String()
-}
-
-// RenderHeader renders the application header
-func RenderHeader() string {
-	return fmt.Sprintf(" Welcome to %s! ", "<%= projectName %>")
-}
-
-// RenderMenuItem renders a single menu item with proper styling
-func RenderMenuItem(choice string, index, cursor int, selected map[int]struct{}) string {
-	cursor_char := " "
-	if cursor == index {
-		cursor_char = ">"
-	}
-
-	checked := " "
-	if _, ok := selected[index]; ok {
-		checked = "✓"
-	}
-
-	text := fmt.Sprintf("%s [%s] %s", cursor_char, checked, choice)
-	
-	// Apply styling based on state
-	isCursor := cursor == index
-	isSelected := false
-	if _, ok := selected[index]; ok {
-		isSelected = true
-	}
-	
-	return ApplyItemStyle(text, isSelected, isCursor)
-}
-
-// RenderFooter renders the application footer with instructions
-func RenderFooter() string {
-	return "Press ↑/↓ (or j/k) to navigate • Enter/Space to select • q to quit"
-}
-
-// RenderGoodbye renders the goodbye message
-func RenderGoodbye() string {
-	return ApplyGoodbyeStyle("Thanks for using <%= projectName %>!")
 }
