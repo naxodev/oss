@@ -214,6 +214,190 @@ var GeneratedVar = "placeholder"
       `NX   Successfully ran target generate for project ${goapp}`
     );
   }, 120_000);
+
+  it('should be able to generate a CLI application', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the CLI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+    expect(fileExists(join(tmpProjPath(), `${goapp}/go.mod`))).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/root.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/version.go`))
+    ).toBeTruthy();
+  }, 30_000);
+
+  it('should be able to generate a CLI application with a specific directory', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(
+      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --variant=cli`,
+      {
+        env: { NX_ADD_PLUGINS: 'true' },
+      }
+    );
+
+    // Verify the CLI application files were created
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/main.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/go.mod`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/root.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/version.go`))
+    ).toBeTruthy();
+  }, 30_000);
+
+  it('should be able to run build, lint, test, generate and tidy commands on a CLI application', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the CLI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Run tidy
+    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    expect(tidyResults).toContain(
+      `NX   Successfully ran target tidy for project ${goapp}`
+    );
+
+    // Run lint
+    const lintResults = runNxCommand(`lint ${goapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${goapp}`
+    );
+
+    // Run generate
+    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    expect(generateResults).toContain(
+      `NX   Successfully ran target generate for project ${goapp}`
+    );
+
+    // Run build
+    const buildResults = runNxCommand(`build ${goapp}`);
+    expect(buildResults).toContain(
+      `NX   Successfully ran target build for project ${goapp}`
+    );
+
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
+
+    // Run test
+    const testResults = runNxCommand(`test ${goapp}`);
+    expect(testResults).toContain(
+      `NX   Successfully ran target test for project ${goapp}`
+    );
+  }, 120_000);
+
+  it('should be able to generate a TUI application', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the TUI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+    expect(fileExists(join(tmpProjPath(), `${goapp}/go.mod`))).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/root.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/model.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/view.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/styles.go`))
+    ).toBeTruthy();
+  }, 30_000);
+
+  it('should be able to generate a TUI application with a specific directory', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(
+      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --variant=tui`,
+      {
+        env: { NX_ADD_PLUGINS: 'true' },
+      }
+    );
+
+    // Verify the TUI application files were created
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/main.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/go.mod`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/root.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/model.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/view.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/styles.go`))
+    ).toBeTruthy();
+  }, 30_000);
+
+  it('should be able to run build, lint, test, generate and tidy commands on a TUI application', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the TUI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Run tidy
+    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    expect(tidyResults).toContain(
+      `NX   Successfully ran target tidy for project ${goapp}`
+    );
+
+    // Run lint
+    const lintResults = runNxCommand(`lint ${goapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${goapp}`
+    );
+
+    // Run generate
+    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    expect(generateResults).toContain(
+      `NX   Successfully ran target generate for project ${goapp}`
+    );
+
+    // Run build
+    const buildResults = runNxCommand(`build ${goapp}`);
+    expect(buildResults).toContain(
+      `NX   Successfully ran target build for project ${goapp}`
+    );
+
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
+
+    // Run test
+    const testResults = runNxCommand(`test ${goapp}`);
+    expect(testResults).toContain(
+      `NX   Successfully ran target test for project ${goapp}`
+    );
+  }, 120_000);
 });
 
 describe('Go Applications (without go.work)', () => {
@@ -423,6 +607,202 @@ var GeneratedVar = "placeholder"
     const generateResults = runNxCommand(`run ${goapp}:generate --flags=-v`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
+    );
+  }, 120_000);
+
+  it('should be able to generate a CLI application without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the CLI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+    expect(fileExists(join(tmpProjPath(), `${goapp}/go.mod`))).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/root.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/version.go`))
+    ).toBeTruthy();
+
+    // Verify go.work was NOT created
+    expect(fileExists(join(tmpProjPath(), 'go.work'))).toBeFalsy();
+  }, 30_000);
+
+  it('should be able to generate a CLI application without go.work in a specific directory', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(
+      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --variant=cli`,
+      {
+        env: { NX_ADD_PLUGINS: 'true' },
+      }
+    );
+
+    // Verify the CLI application files were created
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/main.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/go.mod`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/root.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/version.go`))
+    ).toBeTruthy();
+
+    // Verify go.work was NOT created
+    expect(fileExists(join(tmpProjPath(), 'go.work'))).toBeFalsy();
+  });
+
+  it('should be able to run build, lint, test, generate and tidy commands on a CLI application without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the CLI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Run tidy
+    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    expect(tidyResults).toContain(
+      `NX   Successfully ran target tidy for project ${goapp}`
+    );
+
+    // Run lint
+    const lintResults = runNxCommand(`lint ${goapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${goapp}`
+    );
+
+    // Run generate
+    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    expect(generateResults).toContain(
+      `NX   Successfully ran target generate for project ${goapp}`
+    );
+
+    // Run build
+    const buildResults = runNxCommand(`build ${goapp}`);
+    expect(buildResults).toContain(
+      `NX   Successfully ran target build for project ${goapp}`
+    );
+
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
+
+    // Run test
+    const testResults = runNxCommand(`test ${goapp}`);
+    expect(testResults).toContain(
+      `NX   Successfully ran target test for project ${goapp}`
+    );
+  }, 120_000);
+
+  it('should be able to generate a TUI application without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the TUI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+    expect(fileExists(join(tmpProjPath(), `${goapp}/go.mod`))).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/root.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/model.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/view.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/styles.go`))
+    ).toBeTruthy();
+
+    // Verify go.work was NOT created
+    expect(fileExists(join(tmpProjPath(), 'go.work'))).toBeFalsy();
+  }, 30_000);
+
+  it('should be able to generate a TUI application without go.work in a specific directory', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(
+      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --variant=tui`,
+      {
+        env: { NX_ADD_PLUGINS: 'true' },
+      }
+    );
+
+    // Verify the TUI application files were created
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/main.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/go.mod`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/root.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/model.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/view.go`))
+    ).toBeTruthy();
+    expect(
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/styles.go`))
+    ).toBeTruthy();
+
+    // Verify go.work was NOT created
+    expect(fileExists(join(tmpProjPath(), 'go.work'))).toBeFalsy();
+  });
+
+  it('should be able to run build, lint, test, generate and tidy commands on a TUI application without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the TUI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Run tidy
+    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    expect(tidyResults).toContain(
+      `NX   Successfully ran target tidy for project ${goapp}`
+    );
+
+    // Run lint
+    const lintResults = runNxCommand(`lint ${goapp}`);
+    expect(lintResults).toContain(
+      `NX   Successfully ran target lint for project ${goapp}`
+    );
+
+    // Run generate
+    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    expect(generateResults).toContain(
+      `NX   Successfully ran target generate for project ${goapp}`
+    );
+
+    // Run build
+    const buildResults = runNxCommand(`build ${goapp}`);
+    expect(buildResults).toContain(
+      `NX   Successfully ran target build for project ${goapp}`
+    );
+
+    expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
+
+    // Run test
+    const testResults = runNxCommand(`test ${goapp}`);
+    expect(testResults).toContain(
+      `NX   Successfully ran target test for project ${goapp}`
     );
   }, 120_000);
 });
