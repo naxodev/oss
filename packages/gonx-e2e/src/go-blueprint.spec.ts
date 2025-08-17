@@ -9,6 +9,8 @@ import {
 } from '@nx/plugin/testing';
 import { join } from 'path';
 
+const unnecessaryFiles = ['.air.toml', '.gitignore', 'README.md', 'Makefile'];
+
 describe('Go Blueprint Generator', () => {
   beforeAll(() => {
     if (process.env.CI) {
@@ -53,6 +55,12 @@ describe('Go Blueprint Generator', () => {
       fileExists(join(tmpProjPath(), `${projectName}/cmd/api/main.go`))
     ).toBeTruthy();
 
+    // Should not create extra Go BluePrint files
+    unnecessaryFiles.forEach((file) => {
+      const filePath = join(tmpProjPath(), `${projectName}/${file}`);
+      expect(fileExists(filePath)).toBeFalsy();
+    });
+
     console.log(`✅ go.mod and main.go created correctly in ${projectName}/`);
   }, 60_000);
 
@@ -83,6 +91,12 @@ describe('Go Blueprint Generator', () => {
     expect(
       fileExists(join(tmpProjPath(), `apps/${projectName}/cmd/api/main.go`))
     ).toBeTruthy();
+
+    // Should not create extra Go BluePrint files
+    unnecessaryFiles.forEach((file) => {
+      const filePath = join(tmpProjPath(), `apps/${projectName}/${file}`);
+      expect(fileExists(filePath)).toBeFalsy();
+    });
 
     console.log(`✅ go.mod and main.go created correctly in ${projectName}/`);
   }, 60_000);
