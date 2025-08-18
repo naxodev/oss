@@ -398,6 +398,48 @@ var GeneratedVar = "placeholder"
       `NX   Successfully ran target test for project ${goapp}`
     );
   }, 120_000);
+
+  it('should be able to run the serve command on a CLI application', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the CLI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Run serve and wait until the CLI app runs and prints its message
+    const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
+      output.includes(`Hello from ${goapp}!`)
+    );
+
+    // Kill the process after verification
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+    }
+  }, 120_000);
+
+  it('should be able to run the serve command on a TUI application', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the TUI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Run serve and wait until the TUI app starts and shows the interface
+    const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
+      output.includes(`=== ${goapp} ===`)
+    );
+
+    // Kill the process after verification
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+    }
+  }, 120_000);
 });
 
 describe('Go Applications (without go.work)', () => {
@@ -804,5 +846,47 @@ var GeneratedVar = "placeholder"
     expect(testResults).toContain(
       `NX   Successfully ran target test for project ${goapp}`
     );
+  }, 120_000);
+
+  it('should be able to run the serve command on a CLI application without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the CLI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Run serve and wait until the CLI app runs and prints its message
+    const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
+      output.includes(`Hello from ${goapp}!`)
+    );
+
+    // Kill the process after verification
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+    }
+  }, 120_000);
+
+  it('should be able to run the serve command on a TUI application without go.work', async () => {
+    const goapp = uniq('goapp');
+
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+      env: { NX_ADD_PLUGINS: 'true' },
+    });
+
+    // Verify the TUI application files were created
+    expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Run serve and wait until the TUI app starts and shows the interface
+    const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
+      output.includes(`=== ${goapp} ===`)
+    );
+
+    // Kill the process after verification
+    if (p.pid) {
+      await promisifiedTreeKill(p.pid, 'SIGKILL');
+    }
   }, 120_000);
 });
