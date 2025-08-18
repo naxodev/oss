@@ -409,6 +409,11 @@ var GeneratedVar = "placeholder"
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    expect(tidyResults).toContain(
+      `NX   Successfully ran target tidy for project ${goapp}`
+    );
+
     // Run serve and wait until the CLI app runs and prints its message
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
       output.includes(`Hello from ${goapp}!`)
@@ -429,6 +434,11 @@ var GeneratedVar = "placeholder"
 
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    expect(tidyResults).toContain(
+      `NX   Successfully ran target tidy for project ${goapp}`
+    );
 
     // Run serve and wait until the TUI app starts and shows the interface
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
@@ -858,6 +868,11 @@ var GeneratedVar = "placeholder"
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    expect(tidyResults).toContain(
+      `NX   Successfully ran target tidy for project ${goapp}`
+    );
+
     // Run serve and wait until the CLI app runs and prints its message
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
       output.includes(`Hello from ${goapp}!`)
@@ -878,6 +893,11 @@ var GeneratedVar = "placeholder"
 
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    expect(tidyResults).toContain(
+      `NX   Successfully ran target tidy for project ${goapp}`
+    );
 
     // Run serve and wait until the TUI app starts and shows the interface
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
