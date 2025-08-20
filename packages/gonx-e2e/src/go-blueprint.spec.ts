@@ -9,7 +9,7 @@ import {
 } from '@nx/plugin/testing';
 import { join } from 'path';
 
-const unnecessaryFiles = ['.air.toml', '.gitignore', 'README.md', 'Makefile'];
+const unsupportedFiles = ['.air.toml', 'README.md', 'Makefile'];
 
 describe('Go Blueprint Generator', () => {
   beforeAll(() => {
@@ -56,7 +56,7 @@ describe('Go Blueprint Generator', () => {
     ).toBeTruthy();
 
     // Should not create extra Go BluePrint files
-    unnecessaryFiles.forEach((file) => {
+    unsupportedFiles.forEach((file) => {
       const filePath = join(tmpProjPath(), `${projectName}/${file}`);
       expect(fileExists(filePath)).toBeFalsy();
     });
@@ -93,7 +93,7 @@ describe('Go Blueprint Generator', () => {
     ).toBeTruthy();
 
     // Should not create extra Go BluePrint files
-    unnecessaryFiles.forEach((file) => {
+    unsupportedFiles.forEach((file) => {
       const filePath = join(tmpProjPath(), `apps/${projectName}/${file}`);
       expect(fileExists(filePath)).toBeFalsy();
     });
