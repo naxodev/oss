@@ -19,9 +19,9 @@
       "pattern": "^[a-zA-Z][^:]*$",
       "x-priority": "important"
     },
-    "variant": {
+    "template": {
       "type": "string",
-      "description": "The variant of application.",
+      "description": "The template of application.",
       "enum": ["standard", "cli", "tui"],
       "default": "standard"
     },

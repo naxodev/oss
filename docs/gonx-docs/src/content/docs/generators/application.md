@@ -15,7 +15,7 @@ nx g @naxodev/gonx:application my-go-app
 | ---------- | ---------------------------- | ---------- | ---------------------------------------------- |
 | name       | string                       | null       | Name of the Go application                     |
 | directory  | string                       | \*required | The directory of the new application           |
-| variant    | `standard` \| `cli` \| `tui` | `standard` | The variant of application to generate         |
+| template   | `standard` \| `cli` \| `tui` | `standard` | The template of application to generate        |
 | tags       | string                       | null       | Add tags to the application (used for linting) |
 | skipFormat | boolean                      | false      | Skip formatting files                          |
 
@@ -30,13 +30,13 @@ nx g @naxodev/gonx:application my-go-app
 ### Generate a CLI application
 
 ```bash
-nx g @naxodev/gonx:application my-cli-app --variant=cli
+nx g @naxodev/gonx:application my-cli-app --template=cli
 ```
 
 ### Generate a TUI application
 
 ```bash
-nx g @naxodev/gonx:application my-tui-app --variant=tui
+nx g @naxodev/gonx:application my-tui-app --template=tui
 ```
 
 ### Generate an application in a specific directory
@@ -62,7 +62,7 @@ nx g @naxodev/gonx:application my-go-app --tags="json yaml"
 
 ## Output
 
-The generator creates different structures based on the application variant:
+The generator creates different structures based on the application template:
 
 ### Standard Application (default)
 
@@ -73,7 +73,7 @@ my-go-app/
 └── go.mod
 ```
 
-### CLI Application (--variant=cli)
+### CLI Application (--template=cli)
 
 ```
 my-cli-app/
@@ -87,7 +87,7 @@ my-cli-app/
         └── cmd_test.go
 ```
 
-### TUI Application (--variant=tui)
+### TUI Application (--template=tui)
 
 ```
 my-tui-app/

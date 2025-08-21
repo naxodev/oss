@@ -218,7 +218,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a CLI application', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -237,7 +237,7 @@ var GeneratedVar = "placeholder"
     const goapp = uniq('goapp');
 
     runNxCommand(
-      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --variant=cli`,
+      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --template=cli`,
       {
         env: { NX_ADD_PLUGINS: 'true' },
       }
@@ -265,7 +265,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -308,7 +308,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a TUI application', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -333,7 +333,7 @@ var GeneratedVar = "placeholder"
     const goapp = uniq('goapp');
 
     runNxCommand(
-      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --variant=tui`,
+      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --template=tui`,
       {
         env: { NX_ADD_PLUGINS: 'true' },
       }
@@ -367,7 +367,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -414,7 +414,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -444,7 +444,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -681,7 +681,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a CLI application without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -703,7 +703,7 @@ var GeneratedVar = "placeholder"
     const goapp = uniq('goapp');
 
     runNxCommand(
-      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --variant=cli`,
+      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --template=cli`,
       {
         env: { NX_ADD_PLUGINS: 'true' },
       }
@@ -734,7 +734,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -777,7 +777,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a TUI application without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -805,7 +805,7 @@ var GeneratedVar = "placeholder"
     const goapp = uniq('goapp');
 
     runNxCommand(
-      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --variant=tui`,
+      `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --template=tui`,
       {
         env: { NX_ADD_PLUGINS: 'true' },
       }
@@ -842,7 +842,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -889,7 +889,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=cli`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -919,7 +919,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --variant=tui`, {
+    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
