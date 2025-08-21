@@ -25,7 +25,7 @@ export default async function applicationGenerator(
 
   generateFiles(tree, templatePath, options.projectRoot, options);
 
-  var templateHasModFile = tree.exists(join(options.projectRoot, 'go.mod'));
+  const templateHasModFile = tree.exists(join(options.projectRoot, 'go.mod'));
   if (!templateHasModFile) {
     createGoMod(tree, options.projectRoot, options.projectRoot);
   }
