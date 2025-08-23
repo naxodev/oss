@@ -1,8 +1,7 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { Tree } from '@nx/devkit';
-import { fork } from 'child_process';
+import { fork, spawn } from 'child_process';
 import { EventEmitter } from 'events';
-
 import { goBlueprintGenerator } from './go-blueprint';
 import { GoBlueprintGeneratorSchema } from './schema';
 
@@ -23,6 +22,7 @@ jest.mock('@nx/devkit', () => ({
 }));
 
 const mockedFork = fork as jest.MockedFunction<typeof fork>;
+const mockedSpawn = spawn as jest.MockedFunction<typeof spawn>;
 
 describe('go-blueprint generator', () => {
   let tree: Tree;
@@ -54,6 +54,7 @@ describe('go-blueprint generator', () => {
     // Mock successful fork by default
     const mockProcess = createMockChildProcess();
     mockedFork.mockReturnValue(mockProcess);
+    mockedSpawn.mockReturnValue(mockProcess);
 
     // Simulate successful process completion
     setTimeout(() => {
@@ -64,24 +65,48 @@ describe('go-blueprint generator', () => {
   it('should complete successfully with default options', async () => {
     await goBlueprintGenerator(tree, options);
 
-    expect(mockedFork).toHaveBeenCalledWith(
-      expect.stringContaining('go-blueprint'),
-      [
-        'create',
-        '--name',
-        'test-app',
-        '--framework',
-        'gin',
-        '--driver',
-        'postgres',
-        '--git',
-        'skip',
-      ],
-      expect.objectContaining({
-        cwd: expect.any(String),
-        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      })
-    );
+    if (process.platform === 'linux' || process.platform === 'darwin') {
+      expect(mockedFork).toHaveBeenCalledWith(
+        expect.stringContaining('go-blueprint'),
+        [
+          'create',
+          '--name',
+          'test-app',
+          '--framework',
+          'gin',
+          '--driver',
+          'postgres',
+          '--git',
+          'skip',
+        ],
+        expect.objectContaining({
+          cwd: expect.any(String),
+          stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+        })
+      );
+    } else {
+      expect(mockedSpawn).toHaveBeenCalledWith(
+        'node',
+        [
+          expect.stringContaining('go-blueprint'),
+          'create',
+          '--name',
+          'test-app',
+          '--framework',
+          'gin',
+          '--driver',
+          'postgres',
+          '--git',
+          'skip',
+        ],
+        expect.objectContaining({
+          cwd: expect.any(String),
+          stdio: 'inherit',
+          shell: false,
+          windowsVerbatimArguments: false,
+        })
+      );
+    }
   });
 
   describe('command building', () => {
@@ -92,30 +117,58 @@ describe('go-blueprint generator', () => {
       };
 
       await goBlueprintGenerator(tree, optionsWithFeatures);
-
-      expect(mockedFork).toHaveBeenCalledWith(
-        expect.stringContaining('go-blueprint'),
-        [
-          'create',
-          '--name',
-          'test-app',
-          '--framework',
-          'gin',
-          '--driver',
-          'postgres',
-          '--git',
-          'skip',
-          '--advanced',
-          '--feature',
-          'htmx',
-          '--feature',
-          'docker',
-        ],
-        expect.objectContaining({
-          cwd: expect.any(String),
-          stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-        })
-      );
+      if (process.platform === 'linux' || process.platform === 'darwin') {
+        expect(mockedFork).toHaveBeenCalledWith(
+          expect.stringContaining('go-blueprint'),
+          [
+            'create',
+            '--name',
+            'test-app',
+            '--framework',
+            'gin',
+            '--driver',
+            'postgres',
+            '--git',
+            'skip',
+            '--advanced',
+            '--feature',
+            'htmx',
+            '--feature',
+            'docker',
+          ],
+          expect.objectContaining({
+            cwd: expect.any(String),
+            stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+          })
+        );
+      } else {
+        expect(mockedSpawn).toHaveBeenCalledWith(
+          'node',
+          [
+            expect.stringContaining('go-blueprint'),
+            'create',
+            '--name',
+            'test-app',
+            '--framework',
+            'gin',
+            '--driver',
+            'postgres',
+            '--git',
+            'skip',
+            '--advanced',
+            '--feature',
+            'htmx',
+            '--feature',
+            'docker',
+          ],
+          expect.objectContaining({
+            cwd: expect.any(String),
+            stdio: 'inherit',
+            shell: false,
+            windowsVerbatimArguments: false,
+          })
+        );
+      }
     });
 
     it('should handle directory structure correctly', async () => {
@@ -125,29 +178,53 @@ describe('go-blueprint generator', () => {
       };
 
       await goBlueprintGenerator(tree, optionsWithNestedPath);
-
-      expect(mockedFork).toHaveBeenCalledWith(
-        expect.stringContaining('go-blueprint'),
-        [
-          'create',
-          '--name',
-          'test-app',
-          '--framework',
-          'gin',
-          '--driver',
-          'postgres',
-          '--git',
-          'skip',
-        ],
-        expect.objectContaining({
-          cwd: expect.any(String),
-        })
-      );
+      if (process.platform === 'linux' || process.platform === 'darwin') {
+        expect(mockedFork).toHaveBeenCalledWith(
+          expect.stringContaining('go-blueprint'),
+          [
+            'create',
+            '--name',
+            'test-app',
+            '--framework',
+            'gin',
+            '--driver',
+            'postgres',
+            '--git',
+            'skip',
+          ],
+          expect.objectContaining({
+            cwd: expect.any(String),
+          })
+        );
+      } else {
+        expect(mockedSpawn).toHaveBeenCalledWith(
+          'node',
+          [
+            expect.stringContaining('go-blueprint'),
+            'create',
+            '--name',
+            'test-app',
+            '--framework',
+            'gin',
+            '--driver',
+            'postgres',
+            '--git',
+            'skip',
+          ],
+          expect.objectContaining({
+            cwd: expect.any(String),
+            stdio: 'inherit',
+            shell: false,
+            windowsVerbatimArguments: false,
+          })
+        );
+      }
     });
 
     it('should handle process failure correctly', async () => {
       const mockProcess = createMockChildProcess();
       mockedFork.mockReturnValue(mockProcess);
+      mockedSpawn.mockReturnValue(mockProcess);
 
       // Simulate process failure
       setTimeout(() => {
