@@ -8,7 +8,6 @@ import (
 	"<%= moduleName %>/internal/ui"
 )
 
-// Execute starts the TUI application
 func Execute() {
 	m := ui.NewModel()
 	p := tea.NewProgram(m)

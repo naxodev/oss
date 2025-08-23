@@ -21,7 +21,6 @@ func TestNewModel(t *testing.T) {
 func TestModelUpdate(t *testing.T) {
 	m := NewModel()
 	
-	// Test cursor movement
 	updatedModel, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("j")})
 	if model, ok := updatedModel.(Model); ok {
 		if model.cursor != 1 {

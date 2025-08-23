@@ -4,29 +4,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Basic styles for the TUI
 var (
-	// TitleStyle styles the application title
-	TitleStyle = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("86"))
-
-	// SelectedStyle styles the currently selected item
-	SelectedStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("170")).
-		Bold(true)
-
-	// NormalStyle styles normal items
-	NormalStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("252"))
+	TitleStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86"))
+	SelectedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("170")).Bold(true)	
+	NormalStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
 )
 
-// ApplyTitleStyle applies title styling
 func ApplyTitleStyle(text string) string {
 	return TitleStyle.Render(text)
 }
 
-// ApplyItemStyle applies styling based on selection state
 func ApplyItemStyle(text string, isSelected bool) string {
 	if isSelected {
 		return SelectedStyle.Render(text)
