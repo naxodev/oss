@@ -4,7 +4,6 @@ export interface Schema {
   template?: 'fetch-handler' | 'scheduled-handler' | 'hono' | 'none';
   js?: boolean;
   unitTestRunner?: 'vitest' | 'none';
-  rootProject?: boolean;
   tags?: string;
   frontendProject?: string;
   skipFormat?: boolean;
@@ -14,5 +13,8 @@ export interface Schema {
 }
 
 export interface NormalizedSchema extends Schema {
-  appProjectRoot: string;
+  projectName: string;
+  projectRoot: string;
+  projectType: ProjectType;
+  parsedTags: string[];
 }

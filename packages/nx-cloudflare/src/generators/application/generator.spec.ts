@@ -353,7 +353,11 @@ describe('app', () => {
       expect(tree.exists('myWorkerApp/vite.config.ts')).toBeFalsy();
       const project = readProjectConfiguration(tree, 'myWorkerApp');
       expect(project.targets.test).toBeUndefined();
-      expect(project.targets.lint).toMatchInlineSnapshot(`undefined`);
+      expect(project.targets.lint).toMatchInlineSnapshot(`
+        {
+          "executor": "@nx/eslint:lint",
+        }
+      `);
     });
   });
 

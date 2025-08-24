@@ -3,9 +3,7 @@ import {
   ensurePackage,
   formatFiles,
   generateFiles,
-  GeneratorCallback,
   readProjectConfiguration,
-  runTasksInSerial,
   toJS,
   Tree,
   updateJson,
@@ -26,43 +24,34 @@ import { nxVersion } from '@nx/node/src/utils/versions';
 export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = await normalizeOptions(tree, schema);
 
-  const tasks: GeneratorCallback[] = [];
+  await initGenerator(tree, {
+    ...options,
+    skipFormat: true,
+  });
 
-  // Set up the needed packages.
-  tasks.push(
-    await initGenerator(tree, {
-      ...options,
-      skipFormat: true,
-    })
-  );
-
-  tasks.push(
-    await nodeApplicationGenerator(tree, {
-      ...options,
-      framework: 'none',
-      skipFormat: true,
-      unitTestRunner:
-        options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
-      e2eTestRunner: 'none',
-      name: schema.name,
-      // Use name as the directory if directory is not provided
-      directory: options.directory || options.name,
-    })
-  );
+  await nodeApplicationGenerator(tree, {
+    ...options,
+    framework: 'none',
+    skipFormat: true,
+    unitTestRunner:
+      options.unitTestRunner == 'vitest' ? 'none' : options.unitTestRunner,
+    e2eTestRunner: 'none',
+    name: options.name,
+    directory: options.directory,
+  });
 
   if (options.unitTestRunner === 'vitest') {
     const { vitestGenerator, createOrEditViteConfig } = ensurePackage(
       '@nx/vite',
       nxVersion
     );
-    const vitestTask = await vitestGenerator(tree, {
+    await vitestGenerator(tree, {
       project: options.name,
       uiFramework: 'none',
       coverageProvider: 'v8',
       skipFormat: true,
       testEnvironment: 'node',
     });
-    tasks.push(vitestTask);
     createOrEditViteConfig(
       tree,
       {
@@ -86,73 +75,62 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
   if (!options.skipFormat) {
     await formatFiles(tree);
   }
-
-  return runTasksInSerial(...tasks);
 }
 
 // Modify the default tsconfig.app.json generate by the node application generator to support workers.
 function updateTsAppConfig(tree: Tree, options: NormalizedSchema) {
-  updateJson(
-    tree,
-    join(options.appProjectRoot, 'tsconfig.app.json'),
-    (json) => {
-      json.compilerOptions = {
-        ...json.compilerOptions,
-        esModuleInterop: true,
-        target: 'es2021',
-        lib: ['es2021'],
-        module: 'es2022',
-        moduleResolution: 'node',
-        resolveJsonModule: true,
+  updateJson(tree, join(options.projectRoot, 'tsconfig.app.json'), (json) => {
+    json.compilerOptions = {
+      ...json.compilerOptions,
+      esModuleInterop: true,
+      target: 'es2021',
+      lib: ['es2021'],
+      module: 'es2022',
+      moduleResolution: 'node',
+      resolveJsonModule: true,
 
-        allowJs: true,
-        checkJs: false,
-        noEmit: true,
+      allowJs: true,
+      checkJs: false,
+      noEmit: true,
 
-        isolatedModules: true,
-        allowSyntheticDefaultImports: true,
-        forceConsistentCasingInFileNames: true,
+      isolatedModules: true,
+      allowSyntheticDefaultImports: true,
+      forceConsistentCasingInFileNames: true,
 
-        strict: true,
-        skipLibCheck: true,
-      };
-      json.compilerOptions.types = [
-        ...json.compilerOptions.types,
-        '@cloudflare/workers-types/experimental',
-        '@cloudflare/vitest-pool-workers',
-      ];
-      return json;
-    }
-  );
+      strict: true,
+      skipLibCheck: true,
+    };
+    json.compilerOptions.types = [
+      ...json.compilerOptions.types,
+      '@cloudflare/workers-types/experimental',
+      '@cloudflare/vitest-pool-workers',
+    ];
+    return json;
+  });
 }
 
 // Adds the needed files from the common folder and the selected template folder
 function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
   // Delete main.ts. Workers convention is a file named `index.js` or `index.ts
   tree.delete(
-    join(options.appProjectRoot, `src/main.${options.js ? 'js' : 'ts'}`)
+    join(options.projectRoot, `src/main.${options.js ? 'js' : 'ts'}`)
   );
 
   // General configuration files for workers
-  generateFiles(
-    tree,
-    join(__dirname, './files/common'),
-    options.appProjectRoot,
-    {
-      ...options,
-      tmpl: '',
-      name: options.name,
-      extension: options.js ? 'js' : 'ts',
-      accountId: options.accountId ? getAccountId(options.accountId) : '',
-    }
-  );
+  generateFiles(tree, join(__dirname, './files/common'), options.projectRoot, {
+    ...options,
+    tmpl: '',
+    name: options.name,
+    extension: options.js ? 'js' : 'ts',
+    accountId: options.accountId ? getAccountId(options.accountId) : '',
+  });
 
   // Generate template files with workers code
   if (options.template && options.template !== 'none') {
     generateFiles(
       tree,
       join(__dirname, `./files/${options.template}`),
-      join(options.appProjectRoot, 'src'),
+      join(options.projectRoot, 'src'),
       {
         ...options,
         tmpl: '',
@@ -198,8 +176,8 @@ function addTargets(tree: Tree, options: NormalizedSchema) {
 }
 
 function removeTestFiles(tree: Tree, options: NormalizedSchema) {
-  tree.delete(join(options.appProjectRoot, 'src', 'index.test.ts'));
-  tree.delete(join(options.appProjectRoot, 'src', 'index.integration.test.ts'));
+  tree.delete(join(options.projectRoot, 'src', 'index.test.ts'));
+  tree.delete(join(options.projectRoot, 'src', 'index.integration.test.ts'));
 }
 
 // Transform the options to the normalized schema. Loads defaults options.
@@ -208,24 +186,30 @@ async function normalizeOptions(
   options: Schema
 ): Promise<NormalizedSchema> {
   await ensureRootProjectName(options, 'application');
-  const { projectName, projectRoot: appProjectRoot } =
-    await determineProjectNameAndRootOptions(host, {
+  const { projectName, projectRoot } = await determineProjectNameAndRootOptions(
+    host,
+    {
       name: options.name,
       projectType: 'application',
       directory: options.directory,
-    });
-  options.rootProject = appProjectRoot === '.';
+    }
+  );
+
+  const parsedTags = options.tags
+    ? options.tags.split(',').map((s) => s.trim())
+    : [];
 
   return {
-    addPlugin: process.env.NX_ADD_PLUGINS !== 'false',
     ...options,
     name: projectName,
     frontendProject: options.frontendProject,
-    appProjectRoot,
     unitTestRunner: options.unitTestRunner ?? 'vitest',
-    rootProject: options.rootProject ?? false,
     template: options.template ?? 'fetch-handler',
     port: options.port ?? 3000,
+    projectRoot,
+    projectType: 'application',
+    projectName,
+    parsedTags,
   };
 }
 
