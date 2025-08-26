@@ -1,0 +1,30 @@
+package models
+
+import (
+	"testing"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+func TestNewModel(t *testing.T) {
+	m := NewModel()
+	
+	if len(m.choices) == 0 {
+		t.Error("Expected choices to be initialized")
+	}
+	
+	if m.cursor != 0 {
+		t.Errorf("Expected cursor to start at 0, got %d", m.cursor)
+	}
+}
+
+func TestModelUpdate(t *testing.T) {
+	m := NewModel()
+	
+	updatedModel, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("j")})
+	if model, ok := updatedModel.(Model); ok {
+		if model.cursor != 1 {
+			t.Errorf("Expected cursor to move down, got %d", model.cursor)
+		}
+	}
+}

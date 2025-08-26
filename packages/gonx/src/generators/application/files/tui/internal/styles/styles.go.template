@@ -1,0 +1,22 @@
+package styles
+
+import (
+	"github.com/charmbracelet/lipgloss"
+)
+
+var (
+	TitleStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86"))
+	SelectedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("170")).Bold(true)	
+	NormalStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
+)
+
+func ApplyTitleStyle(text string) string {
+	return TitleStyle.Render(text)
+}
+
+func ApplyItemStyle(text string, isSelected bool) string {
+	if isSelected {
+		return SelectedStyle.Render(text)
+	}
+	return NormalStyle.Render(text)
+}
