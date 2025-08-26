@@ -226,10 +226,10 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
     expect(fileExists(join(tmpProjPath(), `${goapp}/go.mod`))).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/root.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/cmd/root.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/version.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/cmd/version.go`))
     ).toBeTruthy();
   }, 30_000);
 
@@ -251,10 +251,10 @@ var GeneratedVar = "placeholder"
       fileExists(join(tmpProjPath(), `apps/${goapp}/go.mod`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/root.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/cmd/root.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/version.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/cmd/version.go`))
     ).toBeTruthy();
   }, 30_000);
 
@@ -689,10 +689,10 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
     expect(fileExists(join(tmpProjPath(), `${goapp}/go.mod`))).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/root.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/cmd/root.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/version.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/cmd/version.go`))
     ).toBeTruthy();
 
     // Verify go.work was NOT created
@@ -717,10 +717,10 @@ var GeneratedVar = "placeholder"
       fileExists(join(tmpProjPath(), `apps/${goapp}/go.mod`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/root.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/cmd/root.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/version.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/cmd/version.go`))
     ).toBeTruthy();
 
     // Verify go.work was NOT created

@@ -1,6 +1,6 @@
 package main
 
-import "<%= moduleName %>/internal/cmd"
+import "<%= moduleName %>/cmd"
 
 func main() {
 	cmd.Execute()
