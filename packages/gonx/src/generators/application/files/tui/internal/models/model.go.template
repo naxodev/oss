@@ -1,6 +1,10 @@
-package ui
+package models
 
 import (
+	"fmt"
+	"strings"
+	"<%= moduleName %>/internal/styles"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -48,5 +52,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return RenderView(m)
+	var b strings.Builder
+	
+	title := fmt.Sprintf("=== %s ===", "<%= projectName %>")
+	b.WriteString(styles.ApplyTitleStyle(title))
+	b.WriteString("\n\n")
+	
+	for i, choice := range m.choices {
+		cursor := "  "
+		if m.cursor == i {
+			cursor = "> "
+		}
+		
+		item := fmt.Sprintf("%s%s", cursor, choice)
+		b.WriteString(styles.ApplyItemStyle(item, m.cursor == i))
+		b.WriteString("\n")
+	}
+	
+	b.WriteString("\nUse ↑/↓ or j/k to navigate, Enter to select, q to quit\n")
+	
+	return b.String()
 }

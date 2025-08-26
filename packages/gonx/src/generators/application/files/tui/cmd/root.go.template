@@ -3,13 +3,13 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"<%= moduleName %>/internal/models"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"<%= moduleName %>/internal/ui"
 )
 
 func Execute() {
-	m := ui.NewModel()
+	m := models.NewModel()
 	p := tea.NewProgram(m)
 	
 	if _, err := p.Run(); err != nil {

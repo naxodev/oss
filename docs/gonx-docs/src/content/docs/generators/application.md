@@ -80,11 +80,10 @@ my-cli-app/
 ├── main.go
 ├── main_test.go
 ├── go.mod
-└── internal/
-    └── cmd/
-        ├── root.go
-        ├── version.go
-        └── cmd_test.go
+└── cmd/
+    ├── root.go
+    ├── version.go
+    └── cmd_test.go
 ```
 
 ### TUI Application (--template=tui)
@@ -94,14 +93,14 @@ my-tui-app/
 ├── main.go
 ├── main_test.go
 ├── go.mod
+├── cmd/
+   └── root.go
 └── internal/
-    ├── cmd/
-    │   └── root.go
-    └── ui/
+    └── models/
         ├── model.go
-        ├── view.go
+        ├── model_test.go
+    └── styles/
         ├── styles.go
-        └── ui_test.go
 ```
 
 ## Notes

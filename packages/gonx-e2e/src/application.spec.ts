@@ -316,16 +316,13 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
     expect(fileExists(join(tmpProjPath(), `${goapp}/go.mod`))).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/root.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/cmd/root.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/model.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/internal/models/model.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/view.go`))
-    ).toBeTruthy();
-    expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/styles.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/internal/styles/styles.go`))
     ).toBeTruthy();
   }, 30_000);
 
@@ -347,16 +344,13 @@ var GeneratedVar = "placeholder"
       fileExists(join(tmpProjPath(), `apps/${goapp}/go.mod`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/root.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/cmd/root.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/model.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/models/model.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/view.go`))
-    ).toBeTruthy();
-    expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/styles.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/styles/styles.go`))
     ).toBeTruthy();
   }, 30_000);
 
@@ -785,16 +779,13 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
     expect(fileExists(join(tmpProjPath(), `${goapp}/go.mod`))).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/cmd/root.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/cmd/root.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/model.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/internal/models/model.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/view.go`))
-    ).toBeTruthy();
-    expect(
-      fileExists(join(tmpProjPath(), `${goapp}/internal/ui/styles.go`))
+      fileExists(join(tmpProjPath(), `${goapp}/internal/styles/styles.go`))
     ).toBeTruthy();
 
     // Verify go.work was NOT created
@@ -819,16 +810,13 @@ var GeneratedVar = "placeholder"
       fileExists(join(tmpProjPath(), `apps/${goapp}/go.mod`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/cmd/root.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/cmd/root.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/model.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/models/model.go`))
     ).toBeTruthy();
     expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/view.go`))
-    ).toBeTruthy();
-    expect(
-      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/ui/styles.go`))
+      fileExists(join(tmpProjPath(), `apps/${goapp}/internal/styles/styles.go`))
     ).toBeTruthy();
 
     // Verify go.work was NOT created
