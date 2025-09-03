@@ -1,5 +1,6 @@
 import { ExecutorContext } from '@nx/devkit';
-import { ServeSchema } from './schema';
+import { ServeSchema } from './schema
+import { join } from 'path';
 import { fork } from 'child_process';
 import { createAsyncIterable } from '@nx/devkit/src/utils/async-iterable';
 import { waitForPortOpen } from '@nx/web/src/utils/wait-for-port-open';
@@ -18,7 +19,7 @@ export default async function* serveExecutor(
 
   yield* createAsyncIterable<{ success: boolean; baseUrl: string }>(
     async ({ done, next, error }) => {
-      process.env.PWD = projectRoot;
+      process.env.PWD = join(process.cwd(), projectRoot);
       const server = fork(wranglerBin, ['dev', ...wranglerOptions], {
         cwd: projectRoot,
         stdio: 'inherit',
