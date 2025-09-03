@@ -1,5 +1,5 @@
 import { ExecutorContext } from '@nx/devkit';
-import { ServeSchema } from './schema
+import { ServeSchema } from './schema';
 import { join } from 'path';
 import { fork } from 'child_process';
 import { createAsyncIterable } from '@nx/devkit/src/utils/async-iterable';
