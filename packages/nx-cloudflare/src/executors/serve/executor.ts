@@ -10,6 +10,7 @@ export default async function* serveExecutor(
   options: ServeSchema,
   context: ExecutorContext
 ) {
+  const workspaceRoot = context.root;
   const projectRoot =
     context.projectsConfigurations.projects[context.projectName].root;
 
@@ -19,7 +20,7 @@ export default async function* serveExecutor(
 
   yield* createAsyncIterable<{ success: boolean; baseUrl: string }>(
     async ({ done, next, error }) => {
-      process.env.PWD = join(process.cwd(), projectRoot);
+      process.env.PWD = join(workspaceRoot, projectRoot);
       const server = fork(wranglerBin, ['dev', ...wranglerOptions], {
         cwd: projectRoot,
         stdio: 'inherit',
