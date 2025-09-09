@@ -20,10 +20,15 @@ export default async function applicationGenerator(
     addGoDotWork: options.addGoDotWork,
   });
 
-  generateFiles(tree, join(__dirname, 'files'), options.projectRoot, options);
+  const template = options.template || 'standard';
+  const templatePath = join(__dirname, 'files', template);
 
-  // Always create go.mod for the project
-  createGoMod(tree, options.projectRoot, options.projectRoot);
+  generateFiles(tree, templatePath, options.projectRoot, options);
+
+  const templateHasModFile = tree.exists(join(options.projectRoot, 'go.mod'));
+  if (!templateHasModFile) {
+    createGoMod(tree, options.projectRoot, options.projectRoot);
+  }
 
   // Only add to go.work if it exists
   if (isGoWorkspace(tree)) {

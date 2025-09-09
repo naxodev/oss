@@ -1,9 +1,16 @@
 import { names, ProjectType, Tree } from '@nx/devkit';
 import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
+import {
+  bubbleTeaVersion,
+  cobraVersion,
+  goVersion,
+  lipGlossVersion,
+} from './versions';
 
 export interface GeneratorSchema {
   directory: string;
   name?: string;
+  template?: 'standard' | 'cli' | 'tui';
   tags?: string;
   skipFormat?: boolean;
   addGoDotWork?: boolean;
@@ -15,6 +22,10 @@ export interface GeneratorNormalizedSchema extends GeneratorSchema {
   projectRoot: string;
   projectType: ProjectType;
   parsedTags: string[];
+  goVersion: string;
+  cobraVersion?: string;
+  bubbleTeaVersion?: string;
+  lipGlossVersion?: string;
 }
 
 export const normalizeOptions = async (
@@ -35,7 +46,7 @@ export const normalizeOptions = async (
     ? options.tags.split(',').map((s) => s.trim())
     : [];
 
-  return {
+  const defaultOptions = {
     ...options,
     name: projectName,
     moduleName: names(projectName).propertyName.toLowerCase(),
@@ -43,5 +54,23 @@ export const normalizeOptions = async (
     projectRoot,
     projectType,
     parsedTags,
+    goVersion,
   };
+
+  if (options.template === 'cli') {
+    return {
+      ...defaultOptions,
+      cobraVersion,
+    };
+  }
+
+  if (options.template === 'tui') {
+    return {
+      ...defaultOptions,
+      bubbleTeaVersion,
+      lipGlossVersion,
+    };
+  }
+
+  return defaultOptions;
 };

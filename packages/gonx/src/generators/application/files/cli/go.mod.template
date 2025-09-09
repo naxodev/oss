@@ -1,0 +1,5 @@
+module <%= moduleName %>
+
+go <%= goVersion %>
+
+require github.com/spf13/cobra v<%= cobraVersion %>

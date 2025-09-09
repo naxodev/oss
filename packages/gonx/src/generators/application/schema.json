@@ -19,6 +19,12 @@
       "pattern": "^[a-zA-Z][^:]*$",
       "x-priority": "important"
     },
+    "template": {
+      "type": "string",
+      "description": "The template of application.",
+      "enum": ["standard", "cli", "tui"],
+      "default": "standard"
+    },
     "tags": {
       "type": "string",
       "description": "Add tags to the application (used for linting)."

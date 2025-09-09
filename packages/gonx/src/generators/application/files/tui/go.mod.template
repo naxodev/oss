@@ -1,0 +1,8 @@
+module <%= moduleName %>
+
+go <%= goVersion %>
+
+require (
+	github.com/charmbracelet/bubbletea v<%= bubbleTeaVersion %>
+	github.com/charmbracelet/lipgloss v<%= lipGlossVersion %>
+)
