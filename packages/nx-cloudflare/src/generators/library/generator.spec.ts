@@ -600,8 +600,11 @@ describe('lib', () => {
         unitTestRunner: 'vitest',
       });
 
-      expect(tree.exists('my-lib/vite.config.ts')).toBeTruthy();
-      expect(tree.read('my-lib/vite.config.ts', 'utf-8')).toMatchSnapshot();
+      const project = readProjectConfiguration(tree, 'my-lib');
+      expect(project.targets?.build).toMatchObject({
+        executor: '@nx/vite:build',
+      });
+      expect(project.targets?.test).toBeDefined();
       expect(tree.read('my-lib/README.md', 'utf-8')).toMatchSnapshot();
       expect(tree.read('my-lib/tsconfig.lib.json', 'utf-8')).toMatchSnapshot();
       expect(tree.read('my-lib/.eslintrc.json', 'utf-8')).toMatchSnapshot();

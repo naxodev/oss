@@ -2,12 +2,15 @@
  * This script starts a local registry for e2e testing purposes.
  * It is meant to be called in jest's globalSetup.
  */
+
+/// <reference path="registry.d.ts" />
+
 import { startLocalRegistry } from '@nx/js/plugins/jest/local-registry';
-import { execSync } from 'child_process';
+import { releasePublish, releaseVersion } from 'nx/release';
 
 export default async () => {
   // local registry target to run
-  const localRegistryTarget = '@naxodev/oss:local-registry';
+  const localRegistryTarget = '@org/source:local-registry';
   // storage folder for the local registry
   const storage = './tmp/local-registry/storage';
 
@@ -17,9 +20,18 @@ export default async () => {
     verbose: false,
   });
 
-  // Use execSync which handles cross-platform shell execution better
-  execSync('nx run-many --targets publish --ver 0.0.0-e2e --tag e2e', {
-    env: process.env,
-    stdio: 'inherit',
+  await releaseVersion({
+    specifier: '0.0.0-e2e',
+    stageChanges: false,
+    gitCommit: false,
+    gitTag: false,
+    firstRelease: true,
+    versionActionsOptionsOverrides: {
+      skipLockFileUpdate: true,
+    },
+  });
+  await releasePublish({
+    tag: 'e2e',
+    firstRelease: true,
   });
 };

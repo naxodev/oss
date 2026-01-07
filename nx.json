@@ -47,14 +47,14 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },
-    "@nx/vite:test": {
-      "cache": true,
-      "inputs": ["default", "^production"]
-    },
     "nx-release-publish": {
       "options": {
         "packageRoot": "dist/{projectRoot}"
       }
+    },
+    "@nx/vitest:test": {
+      "cache": true,
+      "inputs": ["default", "^production"]
     }
   },
   "plugins": [
@@ -97,7 +97,6 @@
   "release": {
     "projectsRelationship": "independent",
     "projects": ["gonx", "nx-cloudflare"],
-    "releaseTagPattern": "{projectName}@v{version}",
     "version": {
       "useLegacyVersioning": false,
       "preVersionCommand": "pnpm exec nx run-many -t build",
@@ -119,6 +118,9 @@
       "docs": {
         "semverBump": "patch"
       }
+    },
+    "releaseTag": {
+      "pattern": "{projectName}@v{version}"
     }
   }
 }
