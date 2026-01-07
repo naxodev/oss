@@ -10,7 +10,7 @@ import { releasePublish, releaseVersion } from 'nx/release';
 
 export default async () => {
   // local registry target to run
-  const localRegistryTarget = '@org/source:local-registry';
+  const localRegistryTarget = '@naxodev/oss:local-registry';
   // storage folder for the local registry
   const storage = './tmp/local-registry/storage';
 

@@ -56,6 +56,9 @@ describe('Go Libraries', () => {
       fileExists(join(tmpProjPath(), `${golib}/${golib}.go`))
     ).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${golib}`);
     expect(tidyResults).toContain(

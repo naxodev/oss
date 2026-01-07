@@ -60,6 +60,9 @@ describe('Go Applications (with go.work)', () => {
     // Verify the application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -103,6 +106,9 @@ describe('Go Applications (with go.work)', () => {
     // Verify the application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run serve and wait until the server starts
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
       output.includes(`Hello ${goapp}`)
@@ -120,6 +126,9 @@ describe('Go Applications (with go.work)', () => {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -154,6 +163,9 @@ func main() {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -196,6 +208,9 @@ func main() {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a Go file with go:generate directive
     writeFileSync(
@@ -271,6 +286,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
@@ -368,6 +386,9 @@ var GeneratedVar = "placeholder"
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -415,6 +436,9 @@ var GeneratedVar = "placeholder"
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
@@ -444,6 +468,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -517,6 +544,9 @@ describe('Go Applications (without go.work)', () => {
     // Verify the application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -560,6 +590,9 @@ describe('Go Applications (without go.work)', () => {
     // Verify the application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run serve and wait until the server starts
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
       output.includes(`Hello ${goapp}`)
@@ -577,6 +610,9 @@ describe('Go Applications (without go.work)', () => {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -611,6 +647,9 @@ func main() {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -653,6 +692,9 @@ func main() {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a Go file with go:generate directive
     writeFileSync(
@@ -734,6 +776,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
@@ -837,6 +882,9 @@ var GeneratedVar = "placeholder"
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -884,6 +932,9 @@ var GeneratedVar = "placeholder"
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
@@ -913,6 +964,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
