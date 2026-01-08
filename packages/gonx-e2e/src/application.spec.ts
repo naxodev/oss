@@ -11,6 +11,9 @@ import { promisifiedTreeKill, runCommandUntil } from '@naxodev/e2e-utils';
 import { join } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 
+// Skip TUI-related tests in non-interactive environments (CI, Jest without TTY)
+const isNonInteractive = process.env.CI || !process.stdin.isTTY;
+
 describe('Go Applications (with go.work)', () => {
   beforeEach(() => {
     ensureNxProject('@naxodev/gonx', 'dist/packages/gonx');
@@ -274,8 +277,8 @@ var GeneratedVar = "placeholder"
   }, 30_000);
 
   it('should be able to run build, lint, test, generate and tidy commands on a CLI application', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -373,8 +376,8 @@ var GeneratedVar = "placeholder"
   }, 30_000);
 
   it('should be able to run build, lint, test, generate and tidy commands on a TUI application', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -423,8 +426,8 @@ var GeneratedVar = "placeholder"
   }, 120_000);
 
   it('should be able to run the serve command on a CLI application', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -456,8 +459,8 @@ var GeneratedVar = "placeholder"
   }, 120_000);
 
   it('should be able to run the serve command on a TUI application', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -764,8 +767,8 @@ var GeneratedVar = "placeholder"
   });
 
   it('should be able to run build, lint, test, generate and tidy commands on a CLI application without go.work', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -869,8 +872,8 @@ var GeneratedVar = "placeholder"
   });
 
   it('should be able to run build, lint, test, generate and tidy commands on a TUI application without go.work', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -919,8 +922,8 @@ var GeneratedVar = "placeholder"
   }, 120_000);
 
   it('should be able to run the serve command on a CLI application without go.work', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -952,8 +955,8 @@ var GeneratedVar = "placeholder"
   }, 120_000);
 
   it('should be able to run the serve command on a TUI application without go.work', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');

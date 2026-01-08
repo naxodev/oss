@@ -22,6 +22,9 @@ describe('Cloudflare Worker Library', () => {
       `generate @naxodev/nx-cloudflare:lib --name=${workerlib} --directory="libs/${workerlib}" --unitTestRunner="none"`
     );
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     expect(
       fileExists(join(tmpProjPath(), `libs/${workerlib}/project.json`))
     ).toBeTruthy();
@@ -33,6 +36,9 @@ describe('Cloudflare Worker Library', () => {
     runNxCommand(
       `generate @naxodev/nx-cloudflare:lib ${workerlib} --unitTestRunner="none"`
     );
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Default directory should be the library name
     expect(

@@ -11,25 +11,34 @@ import { join } from 'path';
 
 const unsupportedFiles = ['.air.toml', 'README.md', 'Makefile'];
 
+// Skip these tests in non-interactive environments (CI, Jest without TTY)
+const isNonInteractive = process.env.CI || !process.stdin.isTTY;
+
 describe('Go Blueprint Generator', () => {
   beforeAll(() => {
-    if (process.env.CI) {
-      console.log('Skipping Go Blueprint tests in CI due to TTY requirements');
-      return;
+    if (isNonInteractive) {
+      console.log(
+        'Skipping Go Blueprint tests in non-interactive environment (no TTY available)'
+      );
     }
   });
+
   beforeEach(() => {
+    if (isNonInteractive) return;
     ensureNxProject('@naxodev/gonx', 'dist/packages/gonx');
 
     // Initialize Go support
     runNxCommand('generate @naxodev/gonx:init');
   });
 
-  afterEach(() => cleanup());
+  afterEach(() => {
+    if (isNonInteractive) return;
+    cleanup();
+  });
 
   it('should generate the projects in the workspace root when the go-blueprint generator is run', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const projectName = uniq('gobp');
@@ -65,8 +74,8 @@ describe('Go Blueprint Generator', () => {
   }, 60_000);
 
   it('should generate the projects in a nested folder when the go-blueprint generator is run', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const projectName = uniq('gobp');
@@ -102,8 +111,8 @@ describe('Go Blueprint Generator', () => {
   }, 60_000);
 
   it('should support --dry-run without creating actual files', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const projectName = uniq('gobp');
