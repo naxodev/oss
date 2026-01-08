@@ -60,4 +60,4 @@ jobs:
       - run: pnpm exec nx affected -t lint test
 
       - if: ${{ matrix.os != 'windows-latest'}}
-        run: pnpm exec nx affected -t build e2e        
+        run: pnpm exec nx affected -t build e2e --yes
