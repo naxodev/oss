@@ -5,8 +5,11 @@
 
 /// <reference path="registry.d.ts" />
 
-export default () => {
+const teardown = () => {
   if (global.stopLocalRegistry) {
     global.stopLocalRegistry();
   }
 };
+
+export default teardown;
+module.exports = teardown;

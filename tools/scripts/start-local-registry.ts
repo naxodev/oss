@@ -8,7 +8,7 @@
 import { startLocalRegistry } from '@nx/js/plugins/jest/local-registry';
 import { releasePublish, releaseVersion } from 'nx/release';
 
-export default async () => {
+const setup = async () => {
   // local registry target to run
   const localRegistryTarget = '@naxodev/oss:local-registry';
   // storage folder for the local registry
@@ -35,3 +35,6 @@ export default async () => {
     firstRelease: true,
   });
 };
+
+export default setup;
+module.exports = setup;
