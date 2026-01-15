@@ -1,6 +1,5 @@
 import {
   convertNxGenerator,
-  ensurePackage,
   formatFiles,
   generateFiles,
   readProjectConfiguration,
@@ -10,6 +9,7 @@ import {
   updateProjectConfiguration,
 } from '@nx/devkit';
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node';
+import { configurationGenerator as vitestConfigurationGenerator } from '@nx/vitest/generators';
 import type { NormalizedSchema, Schema } from './schema';
 import { join } from 'path';
 import initGenerator from '../init/generator';
@@ -19,7 +19,6 @@ import {
   determineProjectNameAndRootOptions,
   ensureRootProjectName,
 } from '@nx/devkit/src/generators/project-name-and-root-utils';
-import { nxVersion } from '@nx/node/src/utils/versions';
 
 export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = await normalizeOptions(tree, schema);
@@ -41,27 +40,13 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
   });
 
   if (options.unitTestRunner === 'vitest') {
-    const { vitestGenerator, createOrEditViteConfig } = ensurePackage(
-      '@nx/vite',
-      nxVersion
-    );
-    await vitestGenerator(tree, {
+    await vitestConfigurationGenerator(tree, {
       project: options.name,
       uiFramework: 'none',
       coverageProvider: 'v8',
       skipFormat: true,
       testEnvironment: 'node',
     });
-    createOrEditViteConfig(
-      tree,
-      {
-        project: options.name,
-        includeLib: false,
-        includeVitest: true,
-        testEnvironment: 'node',
-      },
-      true
-    );
   }
 
   addCloudflareFiles(tree, options);

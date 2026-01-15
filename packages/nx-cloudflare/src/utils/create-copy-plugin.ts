@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as CopyWebpackPlugin from 'copy-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import { normalizePath } from 'nx/src/utils/path';
 import { basename, dirname, join, relative, resolve } from 'path';
 import { statSync } from 'fs';

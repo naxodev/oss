@@ -5,7 +5,13 @@
     "next/core-web-vitals",
     "../../.eslintrc.base.json"
   ],
-  "ignorePatterns": ["!**/*", ".next/**/*", ".vercel/**/*"],
+  "ignorePatterns": [
+    "!**/*",
+    ".next/**/*",
+    ".vercel/**/*",
+    "next.config.js",
+    "node_modules/**/*"
+  ],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],

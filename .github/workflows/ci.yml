@@ -59,5 +59,7 @@ jobs:
       - run: pnpm exec nx-cloud record -- nx format:check
       - run: pnpm exec nx affected -t lint test
 
+      - run: pnpm exec nx affected -t build --yes
+
       - if: ${{ matrix.os != 'windows-latest'}}
-        run: pnpm exec nx affected -t build e2e        
+        run: pnpm exec nx affected -t build e2e

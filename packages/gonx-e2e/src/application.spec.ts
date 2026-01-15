@@ -11,6 +11,9 @@ import { promisifiedTreeKill, runCommandUntil } from '@naxodev/e2e-utils';
 import { join } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 
+// Skip TUI-related tests in non-interactive environments (CI, Jest without TTY)
+const isNonInteractive = process.env.CI || !process.stdin.isTTY;
+
 describe('Go Applications (with go.work)', () => {
   beforeEach(() => {
     ensureNxProject('@naxodev/gonx', 'dist/packages/gonx');
@@ -60,6 +63,9 @@ describe('Go Applications (with go.work)', () => {
     // Verify the application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -103,6 +109,9 @@ describe('Go Applications (with go.work)', () => {
     // Verify the application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run serve and wait until the server starts
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
       output.includes(`Hello ${goapp}`)
@@ -120,6 +129,9 @@ describe('Go Applications (with go.work)', () => {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -154,6 +166,9 @@ func main() {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -196,6 +211,9 @@ func main() {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a Go file with go:generate directive
     writeFileSync(
@@ -259,8 +277,8 @@ var GeneratedVar = "placeholder"
   }, 30_000);
 
   it('should be able to run build, lint, test, generate and tidy commands on a CLI application', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -271,6 +289,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
@@ -355,8 +376,8 @@ var GeneratedVar = "placeholder"
   }, 30_000);
 
   it('should be able to run build, lint, test, generate and tidy commands on a TUI application', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -367,6 +388,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
@@ -402,8 +426,8 @@ var GeneratedVar = "placeholder"
   }, 120_000);
 
   it('should be able to run the serve command on a CLI application', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -414,6 +438,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -432,8 +459,8 @@ var GeneratedVar = "placeholder"
   }, 120_000);
 
   it('should be able to run the serve command on a TUI application', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -444,6 +471,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -517,6 +547,9 @@ describe('Go Applications (without go.work)', () => {
     // Verify the application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -560,6 +593,9 @@ describe('Go Applications (without go.work)', () => {
     // Verify the application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
+
     // Run serve and wait until the server starts
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
       output.includes(`Hello ${goapp}`)
@@ -577,6 +613,9 @@ describe('Go Applications (without go.work)', () => {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -611,6 +650,9 @@ func main() {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -653,6 +695,9 @@ func main() {
     runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Create a Go file with go:generate directive
     writeFileSync(
@@ -722,8 +767,8 @@ var GeneratedVar = "placeholder"
   });
 
   it('should be able to run build, lint, test, generate and tidy commands on a CLI application without go.work', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -734,6 +779,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
@@ -824,8 +872,8 @@ var GeneratedVar = "placeholder"
   });
 
   it('should be able to run build, lint, test, generate and tidy commands on a TUI application without go.work', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -836,6 +884,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     // Run tidy
     const tidyResults = runNxCommand(`tidy ${goapp}`);
@@ -871,8 +922,8 @@ var GeneratedVar = "placeholder"
   }, 120_000);
 
   it('should be able to run the serve command on a CLI application without go.work', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -883,6 +934,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the CLI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(
@@ -901,8 +955,8 @@ var GeneratedVar = "placeholder"
   }, 120_000);
 
   it('should be able to run the serve command on a TUI application without go.work', async () => {
-    if (process.env.CI) {
-      console.log('Skipping test in CI environment');
+    if (isNonInteractive) {
+      console.log('Skipping test in non-interactive environment');
       return;
     }
     const goapp = uniq('goapp');
@@ -913,6 +967,9 @@ var GeneratedVar = "placeholder"
 
     // Verify the TUI application files were created
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
+
+    // Reset Nx daemon to pick up new project
+    runNxCommand('reset');
 
     const tidyResults = runNxCommand(`tidy ${goapp}`);
     expect(tidyResults).toContain(

@@ -1,5 +1,5 @@
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'cloudflare-next-app',
   preset: '../../jest.preset.js',
   transform: {

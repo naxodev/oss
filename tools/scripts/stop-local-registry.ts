@@ -3,8 +3,13 @@
  * It is meant to be called in jest's globalTeardown.
  */
 
-export default () => {
+/// <reference path="registry.d.ts" />
+
+const teardown = () => {
   if (global.stopLocalRegistry) {
     global.stopLocalRegistry();
   }
 };
+
+export default teardown;
+module.exports = teardown;

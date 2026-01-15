@@ -35,8 +35,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@nx/devkit": "^21.0.0-rc.3",
-    "nx": "^21.0.0-rc.3",
+    "@nx/devkit": "^22.0.0",
+    "nx": "^22.0.0",
     "tslib": "^2.3.0",
     "npm-run-path": "4.0.1",
     "chalk": "^4.1.2",

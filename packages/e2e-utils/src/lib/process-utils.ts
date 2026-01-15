@@ -1,5 +1,5 @@
 import { promisify } from 'util';
-import * as treeKill from 'tree-kill';
+import treeKill from 'tree-kill';
 import { logError, logInfo, logSuccess } from './log-utils';
 import { check as portCheck } from 'tcp-port-used';
 

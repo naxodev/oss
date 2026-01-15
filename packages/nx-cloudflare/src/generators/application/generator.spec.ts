@@ -12,6 +12,9 @@ import { applicationGenerator } from './generator';
 describe('app', () => {
   let tree: Tree;
 
+  // Increase timeout for all tests since vitest configuration generator takes longer
+  jest.setTimeout(30_000);
+
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
 
@@ -115,7 +118,6 @@ describe('app', () => {
           ],
           "ignorePatterns": [
             "!**/*",
-            "**/vite.config.*.timestamp*",
             "**/vitest.config.*.timestamp*",
           ],
           "overrides": [

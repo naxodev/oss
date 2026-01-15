@@ -1,11 +1,22 @@
-export default {
+/* eslint-disable */
+const { readFileSync } = require('fs');
+
+// Reading the SWC compilation config for the spec files
+const swcJestConfig = JSON.parse(
+  readFileSync(`${__dirname}/.spec.swcrc`, 'utf-8')
+);
+
+// Disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves
+swcJestConfig.swcrc = false;
+
+module.exports = {
   displayName: 'gonx-e2e',
   preset: '../../jest.preset.js',
   transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
+    '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/gonx-e2e',
+  coverageDirectory: 'test-output/jest/coverage',
   globalSetup: '../../tools/scripts/start-local-registry.ts',
   globalTeardown: '../../tools/scripts/stop-local-registry.ts',
 };
