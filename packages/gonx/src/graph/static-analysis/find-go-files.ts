@@ -1,5 +1,6 @@
 import { readdir } from 'fs/promises';
 import { join } from 'path';
+import { logger } from '@nx/devkit';
 
 /**
  * Directories to exclude when searching for Go files.
@@ -68,8 +69,8 @@ export async function findGoFiles(dir: string): Promise<string[]> {
     for (const nested of nestedFiles) {
       files.push(...nested);
     }
-  } catch {
-    // Directory doesn't exist or can't be read - return empty
+  } catch (error) {
+    logger.warn(`Failed to read directory ${dir}: ${error}`);
   }
 
   return files;
