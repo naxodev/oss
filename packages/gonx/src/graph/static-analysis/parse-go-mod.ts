@@ -1,4 +1,5 @@
 import { readFile } from 'fs/promises';
+import { logger } from '@nx/devkit';
 import { GoModInfo } from '../types/go-mod-info';
 
 /**
@@ -39,7 +40,8 @@ export async function parseGoMod(filePath: string): Promise<GoModInfo | null> {
 
   try {
     content = await readFile(filePath, 'utf-8');
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to read go.mod file ${filePath}: ${error}`);
     return null;
   }
 
