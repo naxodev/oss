@@ -1,7 +1,7 @@
-import { vol } from 'memfs';
+import { fs, vol } from 'memfs';
 import { findGoFiles } from './find-go-files';
 
-jest.mock('fs/promises', () => require('memfs').fs.promises);
+jest.mock('fs/promises', () => fs.promises);
 
 describe('findGoFiles', () => {
   beforeEach(() => {

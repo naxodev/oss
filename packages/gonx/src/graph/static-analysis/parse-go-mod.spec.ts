@@ -1,7 +1,7 @@
-import { vol } from 'memfs';
+import { fs, vol } from 'memfs';
 import { parseGoMod } from './parse-go-mod';
 
-jest.mock('fs', () => require('memfs').fs);
+jest.mock('fs', () => fs);
 
 describe('parseGoMod', () => {
   beforeEach(() => {

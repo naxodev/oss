@@ -1,8 +1,8 @@
-import { vol } from 'memfs';
+import { fs, vol } from 'memfs';
 import { ProjectConfiguration } from '@nx/devkit';
 import { buildImportMap } from './build-import-map';
 
-jest.mock('fs', () => require('memfs').fs);
+jest.mock('fs', () => fs);
 
 describe('buildImportMap', () => {
   const workspaceRoot = '/workspace';

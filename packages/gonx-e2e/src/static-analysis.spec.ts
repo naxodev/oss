@@ -8,7 +8,7 @@ import {
   updateFile,
 } from '@nx/plugin/testing';
 import { join } from 'path';
-import { writeFileSync, mkdirSync, readFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
 
 describe('Static Analysis Dependency Detection', () => {
   beforeEach(() => {
@@ -109,7 +109,7 @@ replace ${libModulePath} => ../${golib}
       runNxCommand('reset');
 
       // Run nx graph to generate the project graph JSON
-      const graphOutput = runNxCommand('graph --file=graph.json');
+      runNxCommand('graph --file=graph.json');
 
       // Read the generated graph file
       const graphJson = readJson('graph.json');
