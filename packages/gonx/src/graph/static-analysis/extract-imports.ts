@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { initParser, SyntaxNode } from './parser-init';
 
 /**
@@ -21,7 +21,7 @@ export async function extractImports(filePath: string): Promise<string[]> {
   let content: string;
 
   try {
-    content = readFileSync(filePath, 'utf-8');
+    content = await readFile(filePath, 'utf-8');
   } catch {
     return [];
   }

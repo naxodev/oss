@@ -35,7 +35,7 @@ export async function createStaticAnalysisDependencies(
   const dependencies: RawProjectGraphDependency[] = [];
 
   // Build the import map from all projects
-  const { baseImportMap, projectReplaceDirectives } = buildImportMap(
+  const { baseImportMap, projectReplaceDirectives } = await buildImportMap(
     context.projects,
     workspaceRoot
   );

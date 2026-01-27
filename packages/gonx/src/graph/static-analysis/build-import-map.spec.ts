@@ -2,7 +2,7 @@ import { fs, vol } from 'memfs';
 import { ProjectConfiguration } from '@nx/devkit';
 import { buildImportMap } from './build-import-map';
 
-jest.mock('fs', () => fs);
+jest.mock('fs/promises', () => fs.promises);
 
 describe('buildImportMap', () => {
   const workspaceRoot = '/workspace';
@@ -12,7 +12,7 @@ describe('buildImportMap', () => {
   });
 
   describe('base import map', () => {
-    it('should map module path to project name', () => {
+    it('should map module path to project name', async () => {
       vol.fromJSON({
         '/workspace/libs/shared/go.mod':
           'module github.com/myorg/shared\n\ngo 1.21',
@@ -22,14 +22,14 @@ describe('buildImportMap', () => {
         'libs/shared': { root: 'libs/shared' },
       };
 
-      const result = buildImportMap(projects, workspaceRoot);
+      const result = await buildImportMap(projects, workspaceRoot);
 
       expect(result.baseImportMap.get('github.com/myorg/shared')).toBe(
         'libs/shared'
       );
     });
 
-    it('should map multiple projects', () => {
+    it('should map multiple projects', async () => {
       vol.fromJSON({
         '/workspace/apps/api/go.mod': 'module github.com/myorg/api\n\ngo 1.21',
         '/workspace/libs/shared/go.mod':
@@ -44,7 +44,7 @@ describe('buildImportMap', () => {
         'libs/utils': { root: 'libs/utils' },
       };
 
-      const result = buildImportMap(projects, workspaceRoot);
+      const result = await buildImportMap(projects, workspaceRoot);
 
       expect(result.baseImportMap.size).toBe(3);
       expect(result.baseImportMap.get('github.com/myorg/api')).toBe('apps/api');
@@ -56,7 +56,7 @@ describe('buildImportMap', () => {
       );
     });
 
-    it('should skip projects without go.mod', () => {
+    it('should skip projects without go.mod', async () => {
       vol.fromJSON({
         '/workspace/libs/shared/go.mod':
           'module github.com/myorg/shared\n\ngo 1.21',
@@ -68,7 +68,7 @@ describe('buildImportMap', () => {
         'libs/js-lib': { root: 'libs/js-lib' },
       };
 
-      const result = buildImportMap(projects, workspaceRoot);
+      const result = await buildImportMap(projects, workspaceRoot);
 
       expect(result.baseImportMap.size).toBe(1);
       expect(result.baseImportMap.get('github.com/myorg/shared')).toBe(
@@ -78,7 +78,7 @@ describe('buildImportMap', () => {
   });
 
   describe('replace directive handling', () => {
-    it('should resolve replace directive to target module path', () => {
+    it('should resolve replace directive to target module path', async () => {
       vol.fromJSON({
         '/workspace/apps/api/go.mod': `
 module github.com/myorg/api
@@ -94,7 +94,7 @@ replace github.com/external/common => ../common
         'apps/common': { root: 'apps/common' },
       };
 
-      const result = buildImportMap(projects, workspaceRoot);
+      const result = await buildImportMap(projects, workspaceRoot);
 
       // The replace directive maps github.com/external/common (the replaced path)
       // to github.com/myorg/common (the actual module path in the target's go.mod)
@@ -105,7 +105,7 @@ replace github.com/external/common => ../common
       );
     });
 
-    it('should set null for local path pointing to non-Nx directory', () => {
+    it('should set null for local path pointing to non-Nx directory', async () => {
       vol.fromJSON({
         '/workspace/apps/api/go.mod': `
 module github.com/myorg/api
@@ -118,14 +118,14 @@ replace github.com/vendor/pkg => ./vendor/pkg
         'apps/api': { root: 'apps/api' },
       };
 
-      const result = buildImportMap(projects, workspaceRoot);
+      const result = await buildImportMap(projects, workspaceRoot);
 
       const apiReplaces = result.projectReplaceDirectives.get('apps/api');
       expect(apiReplaces).toBeDefined();
       expect(apiReplaces!.get('github.com/vendor/pkg')).toBeNull();
     });
 
-    it('should handle module-to-module replacement', () => {
+    it('should handle module-to-module replacement', async () => {
       vol.fromJSON({
         '/workspace/apps/api/go.mod': `
 module github.com/myorg/api
@@ -138,14 +138,14 @@ replace github.com/old/pkg => github.com/new/pkg
         'apps/api': { root: 'apps/api' },
       };
 
-      const result = buildImportMap(projects, workspaceRoot);
+      const result = await buildImportMap(projects, workspaceRoot);
 
       const apiReplaces = result.projectReplaceDirectives.get('apps/api');
       expect(apiReplaces).toBeDefined();
       expect(apiReplaces!.get('github.com/old/pkg')).toBe('github.com/new/pkg');
     });
 
-    it('should scope replace directives per project', () => {
+    it('should scope replace directives per project', async () => {
       vol.fromJSON({
         '/workspace/apps/api/go.mod': `
 module github.com/myorg/api
@@ -171,7 +171,7 @@ replace github.com/myorg/common => ../../libs/common
         'libs/common': { root: 'libs/common' },
       };
 
-      const result = buildImportMap(projects, workspaceRoot);
+      const result = await buildImportMap(projects, workspaceRoot);
 
       // Each project has its own replace directive scope
       expect(result.projectReplaceDirectives.has('apps/api')).toBe(true);

@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { GoModInfo } from '../types/go-mod-info';
 
 /**
@@ -34,11 +34,11 @@ const REPLACE_BLOCK_LINE_REGEX =
  * @param filePath - Path to the go.mod file
  * @returns GoModInfo object or null if parsing fails
  */
-export function parseGoMod(filePath: string): GoModInfo | null {
+export async function parseGoMod(filePath: string): Promise<GoModInfo | null> {
   let content: string;
 
   try {
-    content = readFileSync(filePath, 'utf-8');
+    content = await readFile(filePath, 'utf-8');
   } catch {
     return null;
   }

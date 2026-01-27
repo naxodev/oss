@@ -19,10 +19,10 @@ import { isLocalPath } from './is-local-path';
  * @param workspaceRoot - Root directory of the Nx workspace
  * @returns ImportMapResult with base map and replace directives
  */
-export function buildImportMap(
+export async function buildImportMap(
   projects: Record<string, ProjectConfiguration>,
   workspaceRoot: string
-): ImportMapResult {
+): Promise<ImportMapResult> {
   const baseImportMap = new Map<string, string>();
   const projectReplaceDirectives = new Map<
     string,
@@ -39,7 +39,7 @@ export function buildImportMap(
   // Process each project
   for (const [projectName, config] of Object.entries(projects)) {
     const goModPath = join(workspaceRoot, config.root, 'go.mod');
-    const goModInfo = parseGoMod(goModPath);
+    const goModInfo = await parseGoMod(goModPath);
 
     if (!goModInfo) {
       continue;
@@ -74,7 +74,7 @@ export function buildImportMap(
       }
 
       // Map old path to target project's module path
-      const targetGoMod = parseGoMod(
+      const targetGoMod = await parseGoMod(
         join(workspaceRoot, projects[targetProject].root, 'go.mod')
       );
 
