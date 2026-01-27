@@ -40,38 +40,31 @@ const EXCLUDED_DIRS = new Set([
  * @returns Promise resolving to array of absolute file paths
  */
 export async function findGoFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-
   try {
     const entries = await readdir(dir, { withFileTypes: true });
 
-    const promises: Promise<string[]>[] = [];
+    const results = await Promise.all(
+      entries.map(async (entry) => {
+        const fullPath = join(dir, entry.name);
 
-    for (const entry of entries) {
-      const fullPath = join(dir, entry.name);
-
-      if (entry.isDirectory()) {
-        // Skip excluded and hidden directories
-        if (EXCLUDED_DIRS.has(entry.name) || entry.name.startsWith('.')) {
-          continue;
+        if (entry.isDirectory()) {
+          if (EXCLUDED_DIRS.has(entry.name) || entry.name.startsWith('.')) {
+            return [];
+          }
+          return findGoFiles(fullPath);
         }
-        // Recurse into subdirectory (in parallel)
-        promises.push(findGoFiles(fullPath));
-      } else if (entry.isFile()) {
-        if (entry.name.endsWith('.go')) {
-          files.push(fullPath);
-        }
-      }
-    }
 
-    // Wait for all subdirectory scans to complete
-    const nestedFiles = await Promise.all(promises);
-    for (const nested of nestedFiles) {
-      files.push(...nested);
-    }
+        if (entry.isFile() && entry.name.endsWith('.go')) {
+          return [fullPath];
+        }
+
+        return [];
+      })
+    );
+
+    return results.flat();
   } catch (error) {
     logger.warn(`Failed to read directory ${dir}: ${error}`);
+    return [];
   }
-
-  return files;
 }
