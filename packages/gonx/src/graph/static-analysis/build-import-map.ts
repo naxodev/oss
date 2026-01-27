@@ -65,7 +65,7 @@ export function buildImportMap(
       // Resolve local path relative to the project's go.mod directory
       const projectDir = resolve(workspaceRoot, config.root);
       const resolvedPath = resolve(projectDir, newPath);
-      const targetProject = findProjectForPath(resolvedPath, dirToProject);
+      const targetProject = dirToProject.get(resolvedPath);
 
       // Local path doesn't point to an Nx project - suppress to prevent false deps
       if (!targetProject) {
@@ -97,21 +97,4 @@ export function buildImportMap(
     baseImportMap,
     projectReplaceDirectives,
   };
-}
-
-/**
- * Finds the project that owns a given absolute path.
- *
- * For replace directive resolution, we only match if the resolved path
- * is exactly a project's root directory (since each Nx Go project is
- * a separate module with its own go.mod). Subdirectories within a project
- * don't count as separate projects.
- */
-function findProjectForPath(
-  absPath: string,
-  dirToProject: Map<string, string>
-): string | null {
-  // Only return a match if the path exactly matches a project root
-  // Subdirectories don't count since they're part of the parent module
-  return dirToProject.get(absPath) || null;
 }
