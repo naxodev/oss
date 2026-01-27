@@ -68,15 +68,9 @@ export async function createStaticAnalysisDependencies(
           projectName
         ]?.filter((f) => f.file.endsWith('.go'));
 
-        let goFiles: string[];
-
-        if (goFilesFromContext && goFilesFromContext.length > 0) {
-          // Use files from context (they're relative to workspace root)
-          goFiles = goFilesFromContext.map((f) => join(workspaceRoot, f.file));
-        } else {
-          // Scan directory for all Go files
-          goFiles = await findGoFiles(projectRoot);
-        }
+        const goFiles = goFilesFromContext?.length
+          ? goFilesFromContext.map((f) => join(workspaceRoot, f.file))
+          : await findGoFiles(projectRoot);
 
         // Process each Go file
         for (const filePath of goFiles) {
