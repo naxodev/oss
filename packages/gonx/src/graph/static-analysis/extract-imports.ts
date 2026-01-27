@@ -1,4 +1,5 @@
 import { readFile } from 'fs/promises';
+import { logger } from '@nx/devkit';
 import { initParser, SyntaxNode } from './parser-init';
 
 /**
@@ -22,7 +23,8 @@ export async function extractImports(filePath: string): Promise<string[]> {
 
   try {
     content = await readFile(filePath, 'utf-8');
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to read Go file ${filePath}: ${error}`);
     return [];
   }
 
