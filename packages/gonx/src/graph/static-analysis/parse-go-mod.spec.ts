@@ -1,4 +1,5 @@
 import { fs, vol } from 'memfs';
+import stripIndent from 'strip-indent';
 import { parseGoMod } from './parse-go-mod';
 
 jest.mock('fs/promises', () => fs.promises);
@@ -56,8 +57,13 @@ describe('parseGoMod', () => {
 
     it('should return null for missing module declaration', async () => {
       vol.fromJSON({
-        '/project/go.mod':
-          'go 1.21\n\nrequire (\n  github.com/foo/bar v1.0.0\n)',
+        '/project/go.mod': stripIndent(`
+          go 1.21
+
+          require (
+            github.com/foo/bar v1.0.0
+          )
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -85,13 +91,13 @@ describe('parseGoMod', () => {
   describe('single-line replace directives', () => {
     it('should parse simple replace directive', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp
 
-go 1.21
+          go 1.21
 
-replace github.com/old/pkg => github.com/new/pkg
-`,
+          replace github.com/old/pkg => github.com/new/pkg
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -105,11 +111,11 @@ replace github.com/old/pkg => github.com/new/pkg
 
     it('should parse replace directive with version on old path', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp
 
-replace github.com/old/pkg v1.0.0 => github.com/new/pkg
-`,
+          replace github.com/old/pkg v1.0.0 => github.com/new/pkg
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -122,11 +128,11 @@ replace github.com/old/pkg v1.0.0 => github.com/new/pkg
 
     it('should parse replace directive with versions on both paths', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp
 
-replace github.com/old/pkg v1.0.0 => github.com/new/pkg v2.0.0
-`,
+          replace github.com/old/pkg v1.0.0 => github.com/new/pkg v2.0.0
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -139,11 +145,11 @@ replace github.com/old/pkg v1.0.0 => github.com/new/pkg v2.0.0
 
     it('should parse replace directive with local path', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp
 
-replace github.com/myorg/common => ../common
-`,
+          replace github.com/myorg/common => ../common
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -156,12 +162,12 @@ replace github.com/myorg/common => ../common
 
     it('should parse multiple single-line replace directives', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp
 
-replace github.com/pkg1 => ../pkg1
-replace github.com/pkg2 => ../pkg2
-`,
+          replace github.com/pkg1 => ../pkg1
+          replace github.com/pkg2 => ../pkg2
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -176,13 +182,13 @@ replace github.com/pkg2 => ../pkg2
   describe('block replace directives', () => {
     it('should parse replace block with single directive', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp
 
-replace (
-  github.com/old/pkg => github.com/new/pkg
-)
-`,
+          replace (
+            github.com/old/pkg => github.com/new/pkg
+          )
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -196,15 +202,15 @@ replace (
 
     it('should parse replace block with multiple directives', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp
 
-replace (
-  github.com/pkg1 => ../pkg1
-  github.com/pkg2 v1.0.0 => ../pkg2
-  github.com/pkg3 => github.com/other/pkg3 v2.0.0
-)
-`,
+          replace (
+            github.com/pkg1 => ../pkg1
+            github.com/pkg2 v1.0.0 => ../pkg2
+            github.com/pkg3 => github.com/other/pkg3 v2.0.0
+          )
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -222,11 +228,11 @@ replace (
   describe('comment handling', () => {
     it('should ignore inline comments', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp // my app module
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp // my app module
 
-replace github.com/old/pkg => ../pkg // local replacement
-`,
+          replace github.com/old/pkg => ../pkg // local replacement
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
@@ -240,14 +246,14 @@ replace github.com/old/pkg => ../pkg // local replacement
 
     it('should ignore multi-line comments', async () => {
       vol.fromJSON({
-        '/project/go.mod': `
-module github.com/myorg/myapp
+        '/project/go.mod': stripIndent(`
+          module github.com/myorg/myapp
 
-/* This is a
-   multi-line comment */
+          /* This is a
+             multi-line comment */
 
-replace github.com/old/pkg => ../pkg
-`,
+          replace github.com/old/pkg => ../pkg
+        `),
       });
 
       const result = await parseGoMod('/project/go.mod');
