@@ -86,25 +86,16 @@ export async function parseGoMod(filePath: string): Promise<GoModInfo | null> {
       continue;
     }
 
-    if (inReplaceBlock) {
-      // Inside a block - use block line regex (no "replace" keyword)
-      const match = REPLACE_BLOCK_LINE_REGEX.exec(trimmedLine);
-      if (match) {
-        const oldPath = match[1] || match[2];
-        const newPath = match[3] || match[4];
-        if (oldPath && newPath) {
-          replaceDirectives.set(oldPath, newPath);
-        }
-      }
-    } else {
-      // Outside a block - check for single-line replace directive
-      const match = REPLACE_SINGLE_LINE_REGEX.exec(trimmedLine);
-      if (match) {
-        const oldPath = match[1] || match[2];
-        const newPath = match[3] || match[4];
-        if (oldPath && newPath) {
-          replaceDirectives.set(oldPath, newPath);
-        }
+    const regex = inReplaceBlock
+      ? REPLACE_BLOCK_LINE_REGEX
+      : REPLACE_SINGLE_LINE_REGEX;
+    const match = regex.exec(trimmedLine);
+
+    if (match) {
+      const oldPath = match[1] || match[2];
+      const newPath = match[3] || match[4];
+      if (oldPath && newPath) {
+        replaceDirectives.set(oldPath, newPath);
       }
     }
   }
