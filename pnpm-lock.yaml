@@ -246,6 +246,9 @@ importers:
       semver:
         specifier: ^7.6.0
         version: 7.7.1
+      strip-indent:
+        specifier: ^3.0.0
+        version: 3.0.0
       tcp-port-used:
         specifier: ^1.0.2
         version: 1.0.2

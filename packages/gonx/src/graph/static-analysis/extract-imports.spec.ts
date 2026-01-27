@@ -1,6 +1,7 @@
 import { mkdtemp, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import stripIndent from 'strip-indent';
 import { extractImports } from './extract-imports';
 
 describe('extractImports', () => {
@@ -19,14 +20,15 @@ describe('extractImports', () => {
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import "fmt"
+          import "fmt"
 
-func main() {
-  fmt.Println("hello")
-}
-`
+          func main() {
+            fmt.Println("hello")
+          }
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -38,12 +40,13 @@ func main() {
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import \`path/filepath\`
+          import \`path/filepath\`
 
-func main() {}
-`
+          func main() {}
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -57,16 +60,17 @@ func main() {}
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import (
-  "fmt"
-  "strings"
-  "os"
-)
+          import (
+            "fmt"
+            "strings"
+            "os"
+          )
 
-func main() {}
-`
+          func main() {}
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -80,14 +84,15 @@ func main() {}
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import f "fmt"
+          import f "fmt"
 
-func main() {
-  f.Println("hello")
-}
-`
+          func main() {
+            f.Println("hello")
+          }
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -99,15 +104,16 @@ func main() {
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import (
-  f "fmt"
-  s "strings"
-)
+          import (
+            f "fmt"
+            s "strings"
+          )
 
-func main() {}
-`
+          func main() {}
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -121,12 +127,13 @@ func main() {}
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import . "testing"
+          import . "testing"
 
-func TestMain(t *T) {}
-`
+          func TestMain(t *T) {}
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -138,12 +145,13 @@ func TestMain(t *T) {}
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import _ "image/png"
+          import _ "image/png"
 
-func main() {}
-`
+          func main() {}
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -157,19 +165,20 @@ func main() {}
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-/*
-#include <stdio.h>
-*/
-import "C"
+          /*
+          #include <stdio.h>
+          */
+          import "C"
 
-import "fmt"
+          import "fmt"
 
-func main() {
-  fmt.Println("hello")
-}
-`
+          func main() {
+            fmt.Println("hello")
+          }
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -184,10 +193,11 @@ func main() {
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-func main() {}
-`
+          func main() {}
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -214,15 +224,16 @@ func main() {}
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import (
-  "github.com/myorg/shared/utils"
-  "github.com/external/library"
-)
+          import (
+            "github.com/myorg/shared/utils"
+            "github.com/external/library"
+          )
 
-func main() {}
-`
+          func main() {}
+        `)
       );
 
       const imports = await extractImports(filePath);
@@ -237,17 +248,18 @@ func main() {}
       const filePath = join(tempDir, 'main.go');
       await writeFile(
         filePath,
-        `package main
+        stripIndent(`
+          package main
 
-import (
-  "fmt"
-  "os"
+          import (
+            "fmt"
+            "os"
 
-  "github.com/myorg/shared"
-)
+            "github.com/myorg/shared"
+          )
 
-func main() {}
-`
+          func main() {}
+        `)
       );
 
       const imports = await extractImports(filePath);
