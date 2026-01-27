@@ -48,43 +48,48 @@ export function buildImportMap(
     // Add to base import map
     baseImportMap.set(goModInfo.modulePath, projectName);
 
-    // Process replace directives for this project
-    if (goModInfo.replaceDirectives.size > 0) {
-      const replaceMap = new Map<string, string | null>();
+    // Skip replace directive processing if none exist
+    if (goModInfo.replaceDirectives.size === 0) {
+      continue;
+    }
 
-      for (const [oldPath, newPath] of goModInfo.replaceDirectives) {
-        if (isLocalPath(newPath)) {
-          // Resolve local path relative to the project's go.mod directory
-          const projectDir = resolve(workspaceRoot, config.root);
-          const resolvedPath = resolve(projectDir, newPath);
+    const replaceMap = new Map<string, string | null>();
 
-          // Find which Nx project this path belongs to
-          const targetProject = findProjectForPath(resolvedPath, dirToProject);
-
-          if (targetProject) {
-            // Map old path to target project's module path
-            const targetGoMod = parseGoMod(
-              join(workspaceRoot, projects[targetProject].root, 'go.mod')
-            );
-            if (targetGoMod) {
-              replaceMap.set(oldPath, targetGoMod.modulePath);
-            } else {
-              // Can't determine target module path - suppress
-              replaceMap.set(oldPath, null);
-            }
-          } else {
-            // Local path doesn't point to an Nx project - suppress to prevent false deps
-            replaceMap.set(oldPath, null);
-          }
-        } else {
-          // Module-to-module replacement
-          replaceMap.set(oldPath, newPath);
-        }
+    for (const [oldPath, newPath] of goModInfo.replaceDirectives) {
+      // Module-to-module replacement
+      if (!isLocalPath(newPath)) {
+        replaceMap.set(oldPath, newPath);
+        continue;
       }
 
-      if (replaceMap.size > 0) {
-        projectReplaceDirectives.set(projectName, replaceMap);
+      // Resolve local path relative to the project's go.mod directory
+      const projectDir = resolve(workspaceRoot, config.root);
+      const resolvedPath = resolve(projectDir, newPath);
+      const targetProject = findProjectForPath(resolvedPath, dirToProject);
+
+      // Local path doesn't point to an Nx project - suppress to prevent false deps
+      if (!targetProject) {
+        replaceMap.set(oldPath, null);
+        continue;
       }
+
+      // Map old path to target project's module path
+      const targetGoMod = parseGoMod(
+        join(workspaceRoot, projects[targetProject].root, 'go.mod')
+      );
+
+      // Can't determine target module path - suppress
+      if (!targetGoMod) {
+        replaceMap.set(oldPath, null);
+        continue;
+      }
+
+      // Local path points to valid Nx project - map to its module path
+      replaceMap.set(oldPath, targetGoMod.modulePath);
+    }
+
+    if (replaceMap.size > 0) {
+      projectReplaceDirectives.set(projectName, replaceMap);
     }
   }
 
