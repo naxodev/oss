@@ -39,31 +39,19 @@ export async function extractImports(filePath: string): Promise<string[]> {
 
   // Find all import_declaration nodes
   visitImportDeclarations(tree.rootNode, (node) => {
-    // Handle import_spec_list (grouped imports)
     const specList = node.namedChildren.find(
       (child) => child.type === 'import_spec_list'
     );
 
-    if (specList) {
-      // Multiple imports in parentheses
-      for (const spec of specList.namedChildren) {
-        if (spec.type === 'import_spec') {
-          const importPath = extractImportPath(spec);
-          if (importPath && importPath !== 'C') {
-            imports.push(importPath);
-          }
-        }
-      }
-    } else {
-      // Single import
-      const spec = node.namedChildren.find(
-        (child) => child.type === 'import_spec'
-      );
-      if (spec) {
-        const importPath = extractImportPath(spec);
-        if (importPath && importPath !== 'C') {
-          imports.push(importPath);
-        }
+    // Collect import specs from either grouped or single imports
+    const specs = specList
+      ? specList.namedChildren.filter((child) => child.type === 'import_spec')
+      : node.namedChildren.filter((child) => child.type === 'import_spec');
+
+    for (const spec of specs) {
+      const importPath = extractImportPath(spec);
+      if (importPath && importPath !== 'C') {
+        imports.push(importPath);
       }
     }
   });
