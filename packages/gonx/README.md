@@ -48,6 +48,36 @@ npx create-nx-workspace go-workspace --preset=@naxodev/gonx
 nx add @naxodev/gonx
 ```
 
+## Plugin Options
+
+Configure the plugin in your `nx.json`:
+
+```json
+{
+  "plugins": [
+    {
+      "plugin": "@naxodev/gonx",
+      "options": {
+        "dependencyStrategy": "go-runtime"
+      }
+    }
+  ]
+}
+```
+
+| Option                  | Type    | Default        | Description                                    |
+| ----------------------- | ------- | -------------- | ---------------------------------------------- |
+| `dependencyStrategy`    | string  | `"go-runtime"` | How to detect dependencies between Go projects |
+| `skipGoDependencyCheck` | boolean | `false`        | Disable dependency detection entirely          |
+
+### Dependency Strategy Options
+
+- **`go-runtime`** (default): Uses `go list -m -json`. Requires Go installed.
+- **`static-analysis`**: Uses tree-sitter to parse Go files. No Go required.
+- **`auto`**: Tries `go-runtime` first, falls back to `static-analysis`.
+
+See [Static Analysis Documentation](./docs/static-analysis.md) for details.
+
 ## Docs
 
 To read the full documentation, check out the [docs](https://gonx.naxo.dev/) site.
