@@ -1,12 +1,3 @@
-/**
- * Strategy for detecting dependencies between Go projects.
- *
- * - `go-runtime`: Uses `go list -m -json` command (requires Go installed)
- * - `static-analysis`: Uses tree-sitter WASM parsing (no Go required)
- * - `auto`: Tries go-runtime first, falls back to static-analysis if Go unavailable
- */
-export type DependencyStrategy = 'go-runtime' | 'static-analysis' | 'auto';
-
 // Expected format of the plugin options defined in nx.json
 export interface GoPluginOptions {
   buildTargetName?: string;
@@ -18,19 +9,7 @@ export interface GoPluginOptions {
   releasePublishTargetName?: string;
   tagName?: string;
   /**
-   * If true, the plugin will not require
-   * to have Go installed to compute a Nx workspace graph.
-   *
-   * Be aware that if Go is not installed, the plugin will not be able
-   * to detect dependencies between Go projects and this is source of misunderstanding.
+   * If true, dependency detection between Go projects is disabled entirely.
    */
   skipGoDependencyCheck?: boolean;
-  /**
-   * Strategy for detecting dependencies between Go projects.
-   *
-   * - `go-runtime` (default): Uses `go list -m -json` command (requires Go installed)
-   * - `static-analysis`: Uses tree-sitter WASM parsing (no Go required)
-   * - `auto`: Tries go-runtime first, falls back to static-analysis if Go unavailable
-   */
-  dependencyStrategy?: DependencyStrategy;
 }

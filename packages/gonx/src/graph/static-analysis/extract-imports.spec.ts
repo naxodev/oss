@@ -1,12 +1,12 @@
 // In ts-jest, require('web-tree-sitter') returns the Emscripten Module
 // directly instead of { Parser, Language, ... } named exports.
-// Normalize the module shape to match the TypeScript declarations.
+// Normalize the module shape so Parser and Language resolve correctly.
 jest.mock('web-tree-sitter', () => {
   const actual = jest.requireActual('web-tree-sitter');
   const Parser = actual.Parser ?? actual;
   return {
     __esModule: true,
-    default: Parser,
+    Parser,
     get Language() {
       return actual.Language ?? Parser.Language;
     },

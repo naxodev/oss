@@ -3,7 +3,6 @@
  * Provides a singleton parser instance with Go language support.
  */
 import { join, dirname } from 'path';
-import TreeSitter, { Language } from 'web-tree-sitter';
 
 // Tree-sitter types (subset of web-tree-sitter's types used by this plugin)
 interface Parser {
@@ -57,8 +56,10 @@ export async function initParser(): Promise<Parser> {
 }
 
 async function doInit(): Promise<Parser> {
-  await TreeSitter.init();
-  const parser = new TreeSitter();
+  const { Parser: TreeSitterParser, Language } = await import('web-tree-sitter');
+
+  await TreeSitterParser.init();
+  const parser = new TreeSitterParser();
 
   const wasmPath = getWasmPath();
   let Go;

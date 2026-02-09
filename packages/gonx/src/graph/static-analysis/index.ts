@@ -1,6 +1,6 @@
 /**
- * Static analysis strategy for Go dependency detection.
- * Uses tree-sitter to parse Go source files without requiring the Go toolchain.
+ * Go dependency detection using tree-sitter static analysis.
+ * Parses Go source files without requiring the Go toolchain.
  */
 import {
   CreateDependenciesContext,
@@ -18,13 +18,11 @@ import { resolveImport } from './resolve-import';
 /**
  * Creates project dependencies using static analysis.
  *
- * This is an alternative to the go-runtime strategy that:
  * - Does NOT require Go to be installed
- * - Does NOT require go.work file
  * - Uses tree-sitter WASM for import parsing
  * - Properly handles replace directives in go.mod
  *
- * @param options - Plugin options (unused in this implementation)
+ * @param options - Plugin options
  * @param context - Nx dependency context
  * @returns Array of project dependencies
  */
@@ -109,8 +107,7 @@ export async function createStaticAnalysisDependencies(
 
 /**
  * Removes duplicate dependencies, keeping one entry per source->target->sourceFile.
- * This preserves per-file tracking to match the go-runtime strategy behavior,
- * which is important for incremental updates when files are added or removed.
+ * Preserves per-file tracking for incremental updates when files change.
  */
 function deduplicateDependencies(
   dependencies: RawProjectGraphDependency[]
