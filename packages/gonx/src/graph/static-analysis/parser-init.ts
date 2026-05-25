@@ -2,6 +2,7 @@
  * Tree-sitter parser initialization and management.
  * Provides a singleton parser instance with Go language support.
  */
+import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 
 // Tree-sitter types (subset of web-tree-sitter's types used by this plugin)
@@ -56,7 +57,9 @@ export async function initParser(): Promise<Parser> {
 }
 
 async function doInit(): Promise<Parser> {
-  const { Parser: TreeSitterParser, Language } = await import('web-tree-sitter');
+  const { Parser: TreeSitterParser, Language } = await import(
+    'web-tree-sitter'
+  );
 
   await TreeSitterParser.init();
   const parser = new TreeSitterParser();
@@ -64,7 +67,16 @@ async function doInit(): Promise<Parser> {
   const wasmPath = getWasmPath();
   let Go;
   try {
-    Go = await Language.load(wasmPath);
+    // Read the WASM file ourselves and pass the bytes. Given a path string,
+    // web-tree-sitter's `Language.load` reads it via a dynamic
+    // `import('fs/promises')`, which throws under Jest's VM
+    // (ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING_FLAG). Passing a Uint8Array
+    // takes the buffer branch and avoids that dynamic import. The
+    // `new Uint8Array` wrap converts Node's `Buffer` (typed as
+    // `Uint8Array<ArrayBufferLike>`) into the `Uint8Array<ArrayBuffer>` the
+    // signature expects.
+    const wasmBytes = new Uint8Array(readFileSync(wasmPath));
+    Go = await Language.load(wasmBytes);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
