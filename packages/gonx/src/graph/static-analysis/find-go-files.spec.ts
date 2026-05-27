@@ -245,4 +245,21 @@ describe('findGoFiles', () => {
       expect(files).toHaveLength(1);
     });
   });
+
+  describe('error handling', () => {
+    // ENOENT is tolerated (returns []) because the directory may have been
+    // removed mid-scan. Any other errno must propagate so the graph build
+    // surfaces a real problem instead of silently dropping a project's deps.
+    it('should rethrow non-ENOENT errors (e.g. EACCES) instead of silently returning []', async () => {
+      mockReaddir.mockRejectedValueOnce(
+        Object.assign(new Error('EACCES: permission denied'), {
+          code: 'EACCES',
+        })
+      );
+
+      await expect(findGoFiles('/locked')).rejects.toMatchObject({
+        code: 'EACCES',
+      });
+    });
+  });
 });

@@ -62,4 +62,7 @@ jobs:
       - run: pnpm exec nx affected -t build --yes
 
       - if: ${{ matrix.os != 'windows-latest'}}
-        run: pnpm exec nx affected -t build e2e
+        # Serialize e2e: gonx-e2e and nx-cloudflare-e2e share one local registry
+        # (tools/scripts/start-local-registry.ts — same port and storage), so they
+        # cannot run concurrently. build is already cached from the previous step.
+        run: pnpm exec nx affected -t build e2e --parallel=1

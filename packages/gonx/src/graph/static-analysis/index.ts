@@ -8,6 +8,7 @@ import {
   RawProjectGraphDependency,
   workspaceRoot,
 } from '@nx/devkit';
+import { normalizePath } from 'nx/src/utils/path';
 import { join } from 'path';
 import { GoPluginOptions } from '../types/go-plugin-options';
 import { buildImportMap } from './build-import-map';
@@ -47,7 +48,14 @@ export async function createStaticAnalysisDependencies(
   const projectsToProcess = Object.keys(context.filesToProcess.projectFileMap);
 
   // Process projects with concurrency limit.
-  // p-limit v4+ is ESM-only, so we use dynamic import for CommonJS compatibility.
+  // p-limit v4+ is ESM-only and ts-jest compiles a static `import` to a hard
+  // `require()` evaluated at module load — any spec that touches this chain
+  // via `jest.mock('./static-analysis')` (auto-mock loads the real module to
+  // discover exports) then fails to parse p-limit's ESM source. Loading it
+  // lazily via dynamic import keeps the module-load path test-tooling-safe;
+  // ts-jest lowers `await import()` to a deferred `Promise.resolve().then(
+  // () => require(...))` that only runs when the function executes, by which
+  // point the spec's explicit `jest.mock('p-limit', ...)` has been hoisted.
   const pLimit = (await import('p-limit')).default;
   const limit = pLimit(10);
   await Promise.all(
@@ -83,10 +91,16 @@ export async function createStaticAnalysisDependencies(
             );
 
             if (targetProject) {
-              // Calculate relative file path for sourceFile
-              const sourceFile = filePath.startsWith(workspaceRoot)
-                ? filePath.slice(workspaceRoot.length + 1)
-                : filePath;
+              // Calculate relative file path for sourceFile, normalized to
+              // forward slashes. Nx looks up `sourceFile` by string equality
+              // against `projectFileMap`, which stores forward-slash paths,
+              // so a native Windows path with `\` would silently mismatch and
+              // the dependency edge would be dropped.
+              const sourceFile = normalizePath(
+                filePath.startsWith(workspaceRoot)
+                  ? filePath.slice(workspaceRoot.length + 1)
+                  : filePath
+              );
 
               dependencies.push({
                 type: DependencyType.static,

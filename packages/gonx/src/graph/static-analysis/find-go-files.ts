@@ -64,7 +64,15 @@ export async function findGoFiles(dir: string): Promise<string[]> {
 
     return results.flat();
   } catch (error) {
-    logger.warn(`Failed to read directory ${dir}: ${error}`);
-    return [];
+    // Only swallow ENOENT — the directory was removed between the parent
+    // `readdir` and the recursive call (e.g., a clean script running in
+    // parallel). Rethrow EACCES, programming errors, etc., so the graph
+    // build doesn't silently produce zero dependencies for the project.
+    const errnoErr = error as NodeJS.ErrnoException;
+    if (errnoErr && errnoErr.code === 'ENOENT') {
+      logger.warn(`Directory not found while scanning Go files: ${dir}`);
+      return [];
+    }
+    throw error;
   }
 }

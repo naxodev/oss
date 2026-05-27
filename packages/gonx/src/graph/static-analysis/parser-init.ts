@@ -4,24 +4,11 @@
  */
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
-
-// Tree-sitter types (subset of web-tree-sitter's types used by this plugin)
-interface Parser {
-  setLanguage(language: unknown): void;
-  parse(input: string): Tree | null;
-}
-
-interface Tree {
-  rootNode: SyntaxNode;
-}
-
-interface SyntaxNode {
-  type: string;
-  text: string;
-  children: SyntaxNode[];
-  namedChildren: SyntaxNode[];
-  childForFieldName(name: string): SyntaxNode | null;
-}
+// `import type` is fully erased at runtime, so this does not move the
+// dynamic `import('web-tree-sitter')` below to module-load time. The local
+// `Node as SyntaxNode` alias keeps the historical name used throughout this
+// plugin while binding to the real upstream class.
+import type { Parser, Tree, Node as SyntaxNode } from 'web-tree-sitter';
 
 // Singleton state
 let parserInstance: Parser | null = null;
@@ -52,7 +39,15 @@ export async function initParser(): Promise<Parser> {
     return initPromise;
   }
 
-  initPromise = doInit();
+  // Reset `initPromise` on rejection so a transient failure (EMFILE on the
+  // sync WASM read, a flaky filesystem, etc.) doesn't poison the singleton
+  // for the lifetime of the nx daemon process. Without this, every later
+  // caller would re-await the same rejected promise and the parser would
+  // be permanently broken until the process restarts.
+  initPromise = doInit().catch((err) => {
+    initPromise = null;
+    throw err;
+  });
   return initPromise;
 }
 

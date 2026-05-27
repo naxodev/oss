@@ -48,7 +48,12 @@ In your `nx.json`:
 
 - **No build tag support**: All `.go` files are parsed regardless of
   `//go:build` constraints. This may include platform-specific
-  dependencies that wouldn't be compiled in practice.
+  dependencies that wouldn't be compiled in practice. Cross-platform
+  code with OS-specific files (e.g. `foo_linux.go` and `foo_windows.go`
+  importing different sibling projects) will produce the **union** of
+  edges across all build tags. This can introduce false dependency
+  cycles between projects that are acyclic on any individual platform —
+  worth checking if you see unexpected cycles in `nx graph`.
 
 - **No cgo support**: The `import "C"` pseudo-import is filtered out.
 

@@ -258,4 +258,44 @@ describe('createStaticAnalysisDependencies', () => {
       sourceFile: 'svc/main.go',
     });
   });
+
+  // Nx looks up `sourceFile` against its `projectFileMap`, which uses forward
+  // slashes regardless of host OS. On Windows, `path.join` produces backslash
+  // paths and `filePath.slice(workspaceRoot.length + 1)` would yield e.g.
+  // `app\main.go`, mismatching the projectFileMap key and dropping the edge.
+  // The `normalizePath` call in `index.ts` is what guarantees forward slashes.
+  it('should normalize sourceFile to forward slashes for Windows-style paths', async () => {
+    mockBuildImportMap.mockResolvedValue({
+      baseImportMap: new Map([['github.com/myorg/lib', 'lib']]),
+      projectReplaceDirectives: new Map(),
+    });
+    mockExtractImports.mockResolvedValue(['github.com/myorg/lib']);
+    mockResolveImport.mockReturnValue('lib');
+    // Simulate findGoFiles returning a Windows-shaped backslash path under
+    // the workspaceRoot. We don't actually run on Windows here — the test
+    // pins the post-discovery normalization step regardless of host OS.
+    mockFindGoFiles.mockResolvedValue(['/workspace\\app\\main.go']);
+
+    const context = makeContext({
+      projects: {
+        app: { root: 'app' } as any,
+      },
+      filesToProcess: {
+        projectFileMap: { app: [] },
+        nonProjectFiles: [],
+      },
+    });
+
+    const result = await createStaticAnalysisDependencies(undefined, context);
+
+    expect(result).toHaveLength(1);
+    const dep = result[0];
+    // Narrow the StaticDependency | ImplicitDependency union; only the
+    // static variant carries `sourceFile`.
+    if (dep.type !== DependencyType.static) {
+      throw new Error(`expected a static dependency, got ${dep.type}`);
+    }
+    expect(dep.sourceFile).toBe('app/main.go');
+    expect(dep.sourceFile).not.toMatch(/\\/);
+  });
 });

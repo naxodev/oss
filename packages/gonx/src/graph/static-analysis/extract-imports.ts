@@ -24,8 +24,16 @@ export async function extractImports(filePath: string): Promise<string[]> {
   try {
     content = await readFile(filePath, 'utf-8');
   } catch (error) {
-    logger.warn(`Failed to read Go file ${filePath}: ${error}`);
-    return [];
+    // Only swallow ENOENT — the file was listed but disappeared before we
+    // could read it, which is benign during incremental scans. Rethrow
+    // anything else (EACCES, EISDIR, programming errors) so the graph build
+    // surfaces a real problem instead of silently dropping dependencies.
+    const errnoErr = error as NodeJS.ErrnoException;
+    if (errnoErr && errnoErr.code === 'ENOENT') {
+      logger.warn(`Go file vanished before read: ${filePath}`);
+      return [];
+    }
+    throw error;
   }
 
   if (!content.trim()) {
@@ -36,6 +44,13 @@ export async function extractImports(filePath: string): Promise<string[]> {
   const tree = parser.parse(content);
 
   if (!tree) {
+    // tree-sitter is lenient and normally returns a (possibly partial) tree
+    // even for malformed input; a null tree indicates either an internal
+    // parser failure or an input the grammar can't begin to parse. Warn so
+    // a silently-missing edge is at least traceable.
+    logger.warn(
+      `Tree-sitter returned no parse tree for ${filePath}; skipping its imports.`
+    );
     return [];
   }
 

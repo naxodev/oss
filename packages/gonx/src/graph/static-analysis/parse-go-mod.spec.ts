@@ -269,4 +269,38 @@ describe('parseGoMod', () => {
       );
     });
   });
+
+  describe('line endings', () => {
+    // go.mod files authored on Windows commonly use CRLF. The parser splits
+    // on '\n' and then matches block-start/end against the trimmed line, so
+    // a stray '\r' on `replace (` or `)` lines would silently drop every
+    // replace directive in the block — the worst-kind-of-silent failure mode.
+    it('should parse module declaration with CRLF line endings', async () => {
+      mockReadFile.mockResolvedValue(
+        'module github.com/myorg/myapp\r\n\r\ngo 1.21\r\n'
+      );
+
+      const result = await parseGoMod('/project/go.mod');
+
+      expect(result).not.toBeNull();
+      expect(result!.modulePath).toBe('github.com/myorg/myapp');
+    });
+
+    it('should parse a replace block with CRLF line endings', async () => {
+      mockReadFile.mockResolvedValue(
+        'module github.com/myorg/myapp\r\n' +
+          '\r\n' +
+          'replace (\r\n' +
+          '\tgithub.com/old/a => ../a\r\n' +
+          '\tgithub.com/old/b => ../b\r\n' +
+          ')\r\n'
+      );
+
+      const result = await parseGoMod('/project/go.mod');
+
+      expect(result).not.toBeNull();
+      expect(result!.replaceDirectives.get('github.com/old/a')).toBe('../a');
+      expect(result!.replaceDirectives.get('github.com/old/b')).toBe('../b');
+    });
+  });
 });
