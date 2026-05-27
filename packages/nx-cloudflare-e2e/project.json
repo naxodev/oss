@@ -12,6 +12,15 @@
         "jestConfig": "packages/nx-cloudflare-e2e/jest.config.ts",
         "runInBand": true
       },
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/jest.preset.js",
+        "{workspaceRoot}/tools/scripts/start-local-registry.ts",
+        "{workspaceRoot}/tools/scripts/stop-local-registry.ts",
+        "{workspaceRoot}/tools/scripts/registry.d.ts",
+        "{workspaceRoot}/.verdaccio/config.yml"
+      ],
       "dependsOn": ["^build"]
     },
     "test": {
