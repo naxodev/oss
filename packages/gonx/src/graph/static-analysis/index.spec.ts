@@ -15,6 +15,7 @@ jest.mock('./find-go-files');
 jest.mock('./resolve-import');
 
 import { DependencyType, CreateDependenciesContext } from '@nx/devkit';
+import { Replacement } from '../types/import-map-result';
 import { createStaticAnalysisDependencies } from './index';
 import { buildImportMap } from './build-import-map';
 import { extractImports } from './extract-imports';
@@ -213,8 +214,13 @@ describe('createStaticAnalysisDependencies', () => {
   });
 
   it('should process multiple projects and files', async () => {
-    const replaceDirectives = new Map([
-      ['app', new Map([['github.com/myorg/lib', '../lib']])],
+    const replaceDirectives = new Map<string, Map<string, Replacement>>([
+      [
+        'app',
+        new Map<string, Replacement>([
+          ['github.com/myorg/lib', { kind: 'remap', to: '../lib' }],
+        ]),
+      ],
     ]);
     mockBuildImportMap.mockResolvedValue({
       baseImportMap: new Map([

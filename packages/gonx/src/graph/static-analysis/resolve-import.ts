@@ -1,6 +1,7 @@
 /**
  * Resolves Go import paths to Nx project names using longest-prefix matching.
  */
+import { Replacement } from '../types/import-map-result';
 
 /**
  * Cache for sorted module paths to avoid re-sorting on every resolve call.
@@ -41,24 +42,20 @@ export function resolveImport(
   importPath: string,
   baseImportMap: Map<string, string>,
   sourceProject: string,
-  projectReplaceDirectives: Map<string, Map<string, string | null>>
+  projectReplaceDirectives: Map<string, Map<string, Replacement>>
 ): string | null {
   // Check if source project has replace directives
   const replaceMap = projectReplaceDirectives.get(sourceProject);
 
   if (replaceMap) {
     // Check for exact match in replace directives first
-    if (replaceMap.has(importPath)) {
-      const replacement = replaceMap.get(importPath);
-      if (replacement === null) {
-        // Null-suppression: this import should be ignored
+    const exact = replaceMap.get(importPath);
+    if (exact) {
+      if (exact.kind === 'suppress') {
+        // The directive intentionally points away from any project edge.
         return null;
       }
-      // Use the replacement path for lookup
-      const targetProject = findProjectByLongestPrefix(
-        replacement,
-        baseImportMap
-      );
+      const targetProject = findProjectByLongestPrefix(exact.to, baseImportMap);
       if (targetProject && targetProject !== sourceProject) {
         return targetProject;
       }
@@ -73,15 +70,16 @@ export function resolveImport(
         importPath.startsWith(replacePath + '/') ||
         importPath === replacePath
       ) {
-        const replacement = replaceMap.get(replacePath);
-        if (replacement === null) {
+        // Non-null assertion: `replacePath` came from `replaceMap.keys()`.
+        const replacement = replaceMap.get(replacePath) as Replacement;
+        if (replacement.kind === 'suppress') {
           return null;
         }
         // Construct the new import path with the replacement.
         // Note: suffix is either empty (exact match) or starts with '/'
         // because the condition above guarantees startsWith(replacePath + '/').
         const suffix = importPath.slice(replacePath.length);
-        const newImportPath = replacement + suffix;
+        const newImportPath = replacement.to + suffix;
         const targetProject = findProjectByLongestPrefix(
           newImportPath,
           baseImportMap

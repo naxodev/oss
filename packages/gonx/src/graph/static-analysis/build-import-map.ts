@@ -4,7 +4,7 @@
  */
 import { join, resolve } from 'path';
 import { ProjectConfiguration } from '@nx/devkit';
-import { ImportMapResult } from '../types/import-map-result';
+import { ImportMapResult, Replacement } from '../types/import-map-result';
 import { parseGoMod } from './parse-go-mod';
 import { isLocalPath } from './is-local-path';
 
@@ -24,10 +24,7 @@ export async function buildImportMap(
   workspaceRoot: string
 ): Promise<ImportMapResult> {
   const baseImportMap = new Map<string, string>();
-  const projectReplaceDirectives = new Map<
-    string,
-    Map<string, string | null>
-  >();
+  const projectReplaceDirectives = new Map<string, Map<string, Replacement>>();
 
   // Build a map of absolute directory paths to project names for local path resolution
   const dirToProject = new Map<string, string>();
@@ -53,12 +50,12 @@ export async function buildImportMap(
       continue;
     }
 
-    const replaceMap = new Map<string, string | null>();
+    const replaceMap = new Map<string, Replacement>();
 
     for (const [oldPath, newPath] of goModInfo.replaceDirectives) {
       // Module-to-module replacement
       if (!isLocalPath(newPath)) {
-        replaceMap.set(oldPath, newPath);
+        replaceMap.set(oldPath, { kind: 'remap', to: newPath });
         continue;
       }
 
@@ -69,7 +66,7 @@ export async function buildImportMap(
 
       // Local path doesn't point to an Nx project - suppress to prevent false deps
       if (!targetProject) {
-        replaceMap.set(oldPath, null);
+        replaceMap.set(oldPath, { kind: 'suppress' });
         continue;
       }
 
@@ -80,12 +77,15 @@ export async function buildImportMap(
 
       // Can't determine target module path - suppress
       if (!targetGoMod) {
-        replaceMap.set(oldPath, null);
+        replaceMap.set(oldPath, { kind: 'suppress' });
         continue;
       }
 
       // Local path points to valid Nx project - map to its module path
-      replaceMap.set(oldPath, targetGoMod.modulePath);
+      replaceMap.set(oldPath, {
+        kind: 'remap',
+        to: targetGoMod.modulePath,
+      });
     }
 
     if (replaceMap.size > 0) {

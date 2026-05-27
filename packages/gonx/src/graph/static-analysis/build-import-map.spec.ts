@@ -122,12 +122,13 @@ describe('buildImportMap', () => {
 
       const apiReplaces = result.projectReplaceDirectives.get('apps/api');
       expect(apiReplaces).toBeDefined();
-      expect(apiReplaces!.get('github.com/external/common')).toBe(
-        'github.com/myorg/common'
-      );
+      expect(apiReplaces!.get('github.com/external/common')).toEqual({
+        kind: 'remap',
+        to: 'github.com/myorg/common',
+      });
     });
 
-    it('should set null for local path pointing to non-Nx directory', async () => {
+    it('should set suppress for local path pointing to non-Nx directory', async () => {
       mockParseGoMod.mockImplementation(async (filePath) => {
         if (filePath === '/workspace/apps/api/go.mod') {
           return goMod('github.com/myorg/api', {
@@ -145,7 +146,9 @@ describe('buildImportMap', () => {
 
       const apiReplaces = result.projectReplaceDirectives.get('apps/api');
       expect(apiReplaces).toBeDefined();
-      expect(apiReplaces!.get('github.com/vendor/pkg')).toBeNull();
+      expect(apiReplaces!.get('github.com/vendor/pkg')).toEqual({
+        kind: 'suppress',
+      });
     });
 
     it('should handle module-to-module replacement', async () => {
@@ -166,7 +169,10 @@ describe('buildImportMap', () => {
 
       const apiReplaces = result.projectReplaceDirectives.get('apps/api');
       expect(apiReplaces).toBeDefined();
-      expect(apiReplaces!.get('github.com/old/pkg')).toBe('github.com/new/pkg');
+      expect(apiReplaces!.get('github.com/old/pkg')).toEqual({
+        kind: 'remap',
+        to: 'github.com/new/pkg',
+      });
     });
 
     it('should scope replace directives per project', async () => {
@@ -203,14 +209,16 @@ describe('buildImportMap', () => {
       expect(result.projectReplaceDirectives.has('apps/web')).toBe(true);
 
       const apiReplaces = result.projectReplaceDirectives.get('apps/api');
-      expect(apiReplaces!.get('github.com/myorg/common')).toBe(
-        'github.com/myorg/apps-common'
-      );
+      expect(apiReplaces!.get('github.com/myorg/common')).toEqual({
+        kind: 'remap',
+        to: 'github.com/myorg/apps-common',
+      });
 
       const webReplaces = result.projectReplaceDirectives.get('apps/web');
-      expect(webReplaces!.get('github.com/myorg/common')).toBe(
-        'github.com/myorg/libs-common'
-      );
+      expect(webReplaces!.get('github.com/myorg/common')).toEqual({
+        kind: 'remap',
+        to: 'github.com/myorg/libs-common',
+      });
     });
   });
 });

@@ -1,3 +1,4 @@
+import { Replacement } from '../types/import-map-result';
 import { resolveImport } from './resolve-import';
 
 describe('resolveImport', () => {
@@ -6,7 +7,7 @@ describe('resolveImport', () => {
       const baseImportMap = new Map([
         ['github.com/myorg/shared', 'libs/shared'],
       ]);
-      const projectReplaces = new Map<string, Map<string, string | null>>();
+      const projectReplaces = new Map<string, Map<string, Replacement>>();
 
       const result = resolveImport(
         'github.com/myorg/shared',
@@ -24,7 +25,7 @@ describe('resolveImport', () => {
       const baseImportMap = new Map([
         ['github.com/myorg/shared', 'libs/shared'],
       ]);
-      const projectReplaces = new Map<string, Map<string, string | null>>();
+      const projectReplaces = new Map<string, Map<string, Replacement>>();
 
       const result = resolveImport(
         'github.com/myorg/shared/utils',
@@ -42,7 +43,7 @@ describe('resolveImport', () => {
         ['github.com/myorg/shared', 'libs/shared'],
         ['github.com/myorg/shared/internal', 'libs/shared-internal'],
       ]);
-      const projectReplaces = new Map<string, Map<string, string | null>>();
+      const projectReplaces = new Map<string, Map<string, Replacement>>();
 
       // Should match 'github.com/myorg/shared/internal' not 'github.com/myorg/shared'
       const result = resolveImport(
@@ -59,7 +60,7 @@ describe('resolveImport', () => {
       const baseImportMap = new Map([
         ['github.com/myorg/shared', 'libs/shared'],
       ]);
-      const projectReplaces = new Map<string, Map<string, string | null>>();
+      const projectReplaces = new Map<string, Map<string, Replacement>>();
 
       const result = resolveImport(
         'github.com/external/library',
@@ -78,7 +79,7 @@ describe('resolveImport', () => {
         ['github.com/myorg/api', 'apps/api'],
         ['github.com/myorg/shared', 'libs/shared'],
       ]);
-      const projectReplaces = new Map<string, Map<string, string | null>>();
+      const projectReplaces = new Map<string, Map<string, Replacement>>();
 
       const result = resolveImport(
         'github.com/myorg/api/internal',
@@ -98,7 +99,12 @@ describe('resolveImport', () => {
         ['github.com/new/pkg', 'libs/new-pkg'],
       ]);
       const projectReplaces = new Map([
-        ['apps/api', new Map([['github.com/old/pkg', 'github.com/new/pkg']])],
+        [
+          'apps/api',
+          new Map<string, Replacement>([
+            ['github.com/old/pkg', { kind: 'remap', to: 'github.com/new/pkg' }],
+          ]),
+        ],
       ]);
 
       const result = resolveImport(
@@ -114,7 +120,12 @@ describe('resolveImport', () => {
     it('should apply replace directive prefix to subpackages', () => {
       const baseImportMap = new Map([['github.com/new/pkg', 'libs/new-pkg']]);
       const projectReplaces = new Map([
-        ['apps/api', new Map([['github.com/old/pkg', 'github.com/new/pkg']])],
+        [
+          'apps/api',
+          new Map<string, Replacement>([
+            ['github.com/old/pkg', { kind: 'remap', to: 'github.com/new/pkg' }],
+          ]),
+        ],
       ]);
 
       const result = resolveImport(
@@ -134,7 +145,12 @@ describe('resolveImport', () => {
       ]);
       const projectReplaces = new Map([
         // apps/web has the replace, not apps/api
-        ['apps/web', new Map([['github.com/old/pkg', 'github.com/new/pkg']])],
+        [
+          'apps/web',
+          new Map<string, Replacement>([
+            ['github.com/old/pkg', { kind: 'remap', to: 'github.com/new/pkg' }],
+          ]),
+        ],
       ]);
 
       const result = resolveImport(
@@ -156,7 +172,9 @@ describe('resolveImport', () => {
       const projectReplaces = new Map([
         [
           'apps/api',
-          new Map<string, string | null>([['github.com/vendor/pkg', null]]),
+          new Map<string, Replacement>([
+            ['github.com/vendor/pkg', { kind: 'suppress' }],
+          ]),
         ],
       ]);
 
@@ -177,7 +195,9 @@ describe('resolveImport', () => {
       const projectReplaces = new Map([
         [
           'apps/api',
-          new Map<string, string | null>([['github.com/vendor/pkg', null]]),
+          new Map<string, Replacement>([
+            ['github.com/vendor/pkg', { kind: 'suppress' }],
+          ]),
         ],
       ]);
 
@@ -197,7 +217,7 @@ describe('resolveImport', () => {
       const baseImportMap = new Map([
         ['github.com/myorg/shared', 'libs/shared'],
       ]);
-      const projectReplaces = new Map<string, Map<string, string | null>>();
+      const projectReplaces = new Map<string, Map<string, Replacement>>();
 
       const result = resolveImport(
         'fmt',
@@ -213,7 +233,7 @@ describe('resolveImport', () => {
       const baseImportMap = new Map([
         ['github.com/myorg/shared', 'libs/shared'],
       ]);
-      const projectReplaces = new Map<string, Map<string, string | null>>();
+      const projectReplaces = new Map<string, Map<string, Replacement>>();
 
       const result = resolveImport(
         'path/filepath',
