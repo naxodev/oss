@@ -1,4 +1,10 @@
-jest.mock('./static-analysis');
+// Explicit factory (not auto-mock) so Jest does not load the real
+// `./static-analysis` module — that module statically imports `p-limit`
+// (ESM-only), and ts-jest would resolve the require at module-load time
+// before any per-test `jest.mock('p-limit', ...)` could intercept it.
+jest.mock('./static-analysis', () => ({
+  createStaticAnalysisDependencies: jest.fn(),
+}));
 
 import { DependencyType } from '@nx/devkit';
 import { createDependencies } from './create-dependencies';
