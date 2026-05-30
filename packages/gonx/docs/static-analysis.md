@@ -55,11 +55,25 @@ Supported in the constraint expression:
 - `//go:build` modern boolean form: `&&`, `||`, `!`, parens
 - `// +build` legacy form (space-separated terms = OR, comma-separated
   within a term = AND, `!` per-term negation, multiple lines AND'd)
-- `unix` pseudo-tag (matches Linux, Darwin, BSDs, Solaris, AIX, etc.)
+- `unix` pseudo-tag (matches Linux, Darwin, the BSDs, Solaris, AIX, and
+  — note — Android, illumos, iOS, dragonfly, hurd; the full set Go ships
+  in `internal/syslist.UnixOS`)
 - GOOS values (`linux`, `darwin`, `windows`, …) and GOARCH values
   (`amd64`, `arm64`, `386`, …)
-- User-defined tags via the `BuildContext.tags` set (internal API; no
-  plugin option yet)
+- User-defined tags via the `BuildContext.tags` set (internal API; a
+  plugin-option surface is tracked in [#108](https://github.com/naxodev/oss/issues/108))
+
+Filename-based suffixes are also honored, matching Go's `go/build`
+algorithm:
+
+- `name_<GOOS>.go` — gates on GOOS (e.g. `signal_linux.go`)
+- `name_<GOARCH>.go` — gates on GOARCH (e.g. `sha1block_amd64.go`)
+- `name_<GOOS>_<GOARCH>.go` — gates on both (e.g. `zsyscall_darwin_arm64.go`)
+- Any of the above with a trailing `_test` before `.go`
+
+Note that `unix` is recognized only as an in-source build tag, **not** as
+a filename suffix — Go itself doesn't treat `foo_unix.go` as
+unix-gated, and neither do we.
 
 Behavior on edge cases:
 
@@ -72,11 +86,6 @@ Behavior on edge cases:
   failing graph construction.
 
 ## Limitations
-
-- **Filename-based constraints are not honored.** Files like
-  `foo_linux.go` or `bar_amd64.go` are always parsed regardless of
-  whether their filename suffix matches the host. Only in-source
-  `//go:build` / `// +build` lines are evaluated.
 
 - **No cgo support**: The `import "C"` pseudo-import is filtered out.
 

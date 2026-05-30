@@ -4,6 +4,7 @@ import {
   BuildContext,
   getDefaultBuildContext,
   shouldIncludeFile,
+  shouldIncludeFilename,
 } from './build-constraints';
 import { initParser, SyntaxNode } from './parser-init';
 
@@ -35,6 +36,12 @@ export async function extractImports(
   filePath: string,
   buildCtx: BuildContext = DEFAULT_BUILD_CONTEXT
 ): Promise<string[]> {
+  // Filename-suffix constraints are the cheapest check — skip the file
+  // read and parse entirely if `foo_linux.go` is on a Windows host.
+  if (!shouldIncludeFilename(filePath, buildCtx)) {
+    return [];
+  }
+
   let content: string;
 
   try {
@@ -57,8 +64,10 @@ export async function extractImports(
   }
 
   // Honor `//go:build` / `// +build` constraints — a file gated to a
-  // different platform contributes no edges on this host.
-  if (!shouldIncludeFile(content, buildCtx)) {
+  // different platform contributes no edges on this host. Pass the file
+  // path so the evaluator can attribute any malformed-constraint warnings
+  // to the source.
+  if (!shouldIncludeFile(content, buildCtx, filePath)) {
     return [];
   }
 

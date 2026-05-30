@@ -302,10 +302,42 @@ describe('extractImports', () => {
       const onLinux = await extractImports(filePath, {
         goos: 'linux',
         goarch: 'amd64',
+        tags: new Set(),
       });
       const onWindows = await extractImports(filePath, {
         goos: 'windows',
         goarch: 'amd64',
+        tags: new Set(),
+      });
+
+      expect(onLinux).toEqual(['fmt']);
+      expect(onWindows).toEqual([]);
+    });
+
+    it('skips files excluded by filename suffix (no in-source directive)', async () => {
+      // `foo_linux.go` is implicitly linux-only via Go's filename rules,
+      // with no //go:build line in the source.
+      const filePath = join(tempDir, 'signal_linux.go');
+      await writeFile(
+        filePath,
+        stripIndent(`
+          package main
+
+          import "fmt"
+
+          func main() { fmt.Println("linux only") }
+        `)
+      );
+
+      const onLinux = await extractImports(filePath, {
+        goos: 'linux',
+        goarch: 'amd64',
+        tags: new Set(),
+      });
+      const onWindows = await extractImports(filePath, {
+        goos: 'windows',
+        goarch: 'amd64',
+        tags: new Set(),
       });
 
       expect(onLinux).toEqual(['fmt']);
