@@ -17,24 +17,26 @@
 
 <hr>
 
-## ✨ Features
+## Features
 
-- ✅ Generate Go Applications
-  - ✅ Customizable Go module setup
-  - ✅ Well-structured Go code scaffolding
-- ✅ Generate Go Libraries
-- ✅ Full Nx integration
-  - ✅ Inferred Tasks: Build, Generate, Tidy, Test, Run, and Lint
-  - ✅ Cacheable Tasks: Build, Generate, Tidy, Test, and Lint
-  - ✅ GraphV2 Support
-  - ✅ Version Actions for Go release
-  - ✅ Nx Release Publish executor to release to list the module on the registry
-- ✅ Use official Go commands in the background
-- ✅ Efficient caching and dependency graph tools for Go projects
+- Generate Go Applications
+  - Customizable Go module setup
+  - Well-structured Go code scaffolding
+- Generate Go Libraries
+- Full Nx integration
+  - Inferred Tasks: Build, Generate, Tidy, Test, Run, and Lint
+  - Cacheable Tasks: Build, Generate, Tidy, Test, and Lint
+  - GraphV2 Support
+  - Version Actions for Go release
+  - Nx Release Publish executor
+- Use official Go commands in the background
+- Dependency detection via tree-sitter static analysis (no Go
+  required)
 
-## 🚀 Getting started
+## Getting started
 
-You need to have a [stable version of Go](https://go.dev/dl/) installed on your machine. And... you are ready!
+You need to have a [stable version of Go](https://go.dev/dl/)
+installed on your machine. And... you are ready!
 
 ### Generate a Nx workspace with Go support
 
@@ -48,13 +50,37 @@ npx create-nx-workspace go-workspace --preset=@naxodev/gonx
 nx add @naxodev/gonx
 ```
 
+## Plugin Options
+
+Configure the plugin in your `nx.json`:
+
+```json
+{
+  "plugins": [
+    {
+      "plugin": "@naxodev/gonx",
+      "options": {}
+    }
+  ]
+}
+```
+
+| Option                  | Type    | Default | Description                           |
+| ----------------------- | ------- | ------- | ------------------------------------- |
+| `skipGoDependencyCheck` | boolean | `false` | Disable dependency detection entirely |
+
+See [Dependency Detection](./docs/static-analysis.md) for details on
+how dependencies between Go projects are resolved.
+
 ## Docs
 
-To read the full documentation, check out the [docs](https://gonx.naxo.dev/) site.
+To read the full documentation, check out the
+[docs](https://gonx.naxo.dev/) site.
 
 ## Contributors
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks goes to these wonderful people
+([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -105,4 +131,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 ## Acknowledgements
 
-This project is a fork of [nx-go](https://github.com/nx-go/nx-go), a plugin for Nx that provides tools for building Go applications. Most credit goes to the original maintainers of nx-go - we've built upon their excellent foundation to modernize the plugin for the latest Nx features.
+This project is a fork of [nx-go](https://github.com/nx-go/nx-go), a
+plugin for Nx that provides tools for building Go applications. Most
+credit goes to the original maintainers of nx-go - we've built upon
+their excellent foundation to modernize the plugin for the latest Nx
+features.
