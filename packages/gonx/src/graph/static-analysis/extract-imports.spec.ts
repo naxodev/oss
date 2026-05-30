@@ -282,4 +282,34 @@ describe('extractImports', () => {
       expect(imports).toEqual(['fmt', 'os', 'github.com/myorg/shared']);
     });
   });
+
+  describe('build constraints', () => {
+    it('skips files excluded by //go:build for the given context', async () => {
+      const filePath = join(tempDir, 'plat.go');
+      await writeFile(
+        filePath,
+        stripIndent(`
+          //go:build linux
+
+          package main
+
+          import "fmt"
+
+          func main() { fmt.Println("linux only") }
+        `)
+      );
+
+      const onLinux = await extractImports(filePath, {
+        goos: 'linux',
+        goarch: 'amd64',
+      });
+      const onWindows = await extractImports(filePath, {
+        goos: 'windows',
+        goarch: 'amd64',
+      });
+
+      expect(onLinux).toEqual(['fmt']);
+      expect(onWindows).toEqual([]);
+    });
+  });
 });

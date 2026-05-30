@@ -1,6 +1,14 @@
 import { readFile } from 'fs/promises';
 import { logger } from '@nx/devkit';
+import {
+  BuildContext,
+  getDefaultBuildContext,
+  shouldIncludeFile,
+} from './build-constraints';
 import { initParser, SyntaxNode } from './parser-init';
+
+// Memoized for the lifetime of the process: GOOS/GOARCH don't change.
+const DEFAULT_BUILD_CONTEXT = getDefaultBuildContext();
 
 /**
  * Extracts import paths from a Go source file using tree-sitter.
@@ -15,10 +23,18 @@ import { initParser, SyntaxNode } from './parser-init';
  *
  * Filters out the cgo pseudo-import "C".
  *
+ * Files excluded by their `//go:build` or `// +build` constraints for the
+ * current platform are skipped — they contribute no edges to the graph.
+ *
  * @param filePath - Path to the Go source file
+ * @param buildCtx - Optional build context override. Defaults to the host's
+ *                   GOOS/GOARCH; mainly useful for tests.
  * @returns Array of import paths (excluding "C")
  */
-export async function extractImports(filePath: string): Promise<string[]> {
+export async function extractImports(
+  filePath: string,
+  buildCtx: BuildContext = DEFAULT_BUILD_CONTEXT
+): Promise<string[]> {
   let content: string;
 
   try {
@@ -37,6 +53,12 @@ export async function extractImports(filePath: string): Promise<string[]> {
   }
 
   if (!content.trim()) {
+    return [];
+  }
+
+  // Honor `//go:build` / `// +build` constraints — a file gated to a
+  // different platform contributes no edges on this host.
+  if (!shouldIncludeFile(content, buildCtx)) {
     return [];
   }
 
