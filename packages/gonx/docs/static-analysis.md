@@ -44,16 +44,48 @@ In your `nx.json`:
 | ----------------------- | ------- | ------- | ------------------------------------- |
 | `skipGoDependencyCheck` | boolean | `false` | Disable dependency detection entirely |
 
-## Limitations
+## Build constraints
 
-- **No build tag support**: All `.go` files are parsed regardless of
-  `//go:build` constraints. This may include platform-specific
-  dependencies that wouldn't be compiled in practice. Cross-platform
-  code with OS-specific files (e.g. `foo_linux.go` and `foo_windows.go`
-  importing different sibling projects) will produce the **union** of
-  edges across all build tags. This can introduce false dependency
-  cycles between projects that are acyclic on any individual platform —
-  worth checking if you see unexpected cycles in `nx graph`.
+`//go:build` and legacy `// +build` constraints are honored. The dep
+graph is computed against the host platform's GOOS/GOARCH — a file
+gated to a different platform contributes no edges on the host.
+
+Supported in the constraint expression:
+
+- `//go:build` modern boolean form: `&&`, `||`, `!`, parens
+- `// +build` legacy form (space-separated terms = OR, comma-separated
+  within a term = AND, `!` per-term negation, multiple lines AND'd)
+- `unix` pseudo-tag (matches Linux, Darwin, the BSDs, Solaris, AIX, and
+  — note — Android, illumos, iOS, dragonfly, hurd; the full set Go ships
+  in `internal/syslist.UnixOS`)
+- GOOS values (`linux`, `darwin`, `windows`, …) and GOARCH values
+  (`amd64`, `arm64`, `386`, …)
+- User-defined tags via the `BuildContext.tags` set (internal API; a
+  plugin-option surface is tracked in [#108](https://github.com/naxodev/oss/issues/108))
+
+Filename-based suffixes are also honored, matching Go's `go/build`
+algorithm:
+
+- `name_<GOOS>.go` — gates on GOOS (e.g. `signal_linux.go`)
+- `name_<GOARCH>.go` — gates on GOARCH (e.g. `sha1block_amd64.go`)
+- `name_<GOOS>_<GOARCH>.go` — gates on both (e.g. `zsyscall_darwin_arm64.go`)
+- Any of the above with a trailing `_test` before `.go`
+
+Note that `unix` is recognized only as an in-source build tag, **not** as
+a filename suffix — Go itself doesn't treat `foo_unix.go` as
+unix-gated, and neither do we.
+
+Behavior on edge cases:
+
+- `go1.X` version tags evaluate to `true` (we have no Go compiler
+  handy to consult; over-including is safer than under-including for
+  graph purposes).
+- The `cgo` pseudo-tag evaluates to `false` — static analysis never
+  invokes cgo.
+- A malformed expression falls back to "include the file" rather than
+  failing graph construction.
+
+## Limitations
 
 - **No cgo support**: The `import "C"` pseudo-import is filtered out.
 
