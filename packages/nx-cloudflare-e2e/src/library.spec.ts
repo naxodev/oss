@@ -10,6 +10,11 @@ import { join } from 'path';
 
 describe('Cloudflare Worker Library', () => {
   beforeEach(() => {
+    // Nx 22.7 defaults generated projects to ESLint flat config, whose config
+    // imports `typescript-eslint`. The bare e2e workspace never installs it, so
+    // force the eslintrc format used across this repo to keep `nx lint`
+    // resolvable (mirrors the plugin's generator unit-test expectations).
+    process.env.ESLINT_USE_FLAT_CONFIG = 'false';
     ensureNxProject('@naxodev/nx-cloudflare', 'dist/packages/nx-cloudflare');
   });
 
