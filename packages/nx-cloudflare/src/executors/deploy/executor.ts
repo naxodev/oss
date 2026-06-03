@@ -1,24 +1,15 @@
 import { DeployExecutorSchema } from './schema';
-import { ExecutorContext, workspaceRoot } from '@nx/devkit';
-import { fork } from 'child_process';
+import { ExecutorContext } from '@nx/devkit';
+import { spawn } from 'child_process';
 import { createCliOptions } from '../../utils/create-cli-options';
-import { resolve as pathResolve } from 'path';
+import { getProjectCwd } from '../../utils/project-paths';
 
 export default async function deployExecutor(
   options: DeployExecutorSchema,
   context: ExecutorContext
 ): Promise<{ success: boolean }> {
-  const projectRoot =
-    context.projectGraph?.nodes?.[context?.projectName]?.data?.root;
-
-  if (!projectRoot) {
-    throw new Error(
-      `Unable to find the Project Root for ${context.projectName}. Is it set in the project.json?`
-    );
-  }
-
+  const cwd = getProjectCwd(context);
   const args = createCliOptions({ ...options });
-  const cwd = pathResolve(workspaceRoot, projectRoot);
   const p = runWrangler(args, cwd);
   p.stdout.on('data', (message) => {
     process.stdout.write(message);
@@ -38,8 +29,8 @@ function runWrangler(args: string[], cwd: string) {
   try {
     const wranglerBin = require.resolve('wrangler/bin/wrangler');
 
-    return fork(wranglerBin, ['deploy', ...args], {
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+    return spawn(process.execPath, [wranglerBin, 'deploy', ...args], {
+      stdio: ['pipe', 'pipe', 'pipe'],
       cwd,
     });
   } catch (e) {

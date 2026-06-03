@@ -1,18 +1,16 @@
 import { ExecutorContext } from '@nx/devkit';
 import { ServeSchema } from './schema';
-import { join } from 'path';
-import { fork } from 'child_process';
+import { spawn } from 'child_process';
 import { createAsyncIterable } from '@nx/devkit/src/utils/async-iterable';
 import { waitForPortOpen } from '@nx/web/src/utils/wait-for-port-open';
 import { createCliOptions } from '../../utils/create-cli-options';
+import { getProjectCwd } from '../../utils/project-paths';
 
 export default async function* serveExecutor(
   options: ServeSchema,
   context: ExecutorContext
 ) {
-  const workspaceRoot = context.root;
-  const projectRoot =
-    context.projectsConfigurations.projects[context.projectName].root;
+  const cwd = getProjectCwd(context);
 
   const wranglerOptions = createCliOptions({ ...options });
 
@@ -20,11 +18,14 @@ export default async function* serveExecutor(
 
   yield* createAsyncIterable<{ success: boolean; baseUrl: string }>(
     async ({ done, next, error }) => {
-      process.env.PWD = join(workspaceRoot, projectRoot);
-      const server = fork(wranglerBin, ['dev', ...wranglerOptions], {
-        cwd: projectRoot,
-        stdio: 'inherit',
-      });
+      const server = spawn(
+        process.execPath,
+        [wranglerBin, 'dev', ...wranglerOptions],
+        {
+          cwd,
+          stdio: 'inherit',
+        }
+      );
 
       server.once('exit', (code) => {
         if (code === 0) {
@@ -35,7 +36,7 @@ export default async function* serveExecutor(
       });
 
       const killServer = () => {
-        if (server.connected) {
+        if (!server.killed) {
           server.kill('SIGTERM');
         }
       };

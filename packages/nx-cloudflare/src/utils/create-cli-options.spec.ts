@@ -27,9 +27,9 @@ describe('createCliOptions', () => {
   });
 
   it('renders an array as repeated flags rather than a comma-joined value', () => {
-    expect(createCliOptions({ route: ['a.example.com', 'b.example.com'] })).toEqual(
-      ['--route=a.example.com', '--route=b.example.com']
-    );
+    expect(
+      createCliOptions({ route: ['a.example.com', 'b.example.com'] })
+    ).toEqual(['--route=a.example.com', '--route=b.example.com']);
   });
 
   it('trims array values', () => {
