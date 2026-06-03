@@ -22,25 +22,51 @@ describe('createCliOptions', () => {
     expect(createCliOptions({ minify: true })).toEqual(['--minify']);
   });
 
-  it('renders a false boolean as --no-flag', () => {
-    expect(createCliOptions({ minify: false })).toEqual(['--no-minify']);
+  it('omits a false boolean rather than synthesizing --no-flag', () => {
+    // Wrangler accepts --no-<flag>, but the schemas default several booleans
+    // (noBundle, remote, dryRun, keepVars...) to false, which Nx injects. A
+    // bare false must not emit a no-op negation like --no-no-bundle.
+    expect(createCliOptions({ minify: false })).toEqual([]);
+  });
+
+  it('does not emit negated flags for injected false defaults', () => {
+    const serveDefaults = {
+      noBundle: false,
+      remote: false,
+      testScheduled: false,
+      localProtocol: 'http',
+      logLevel: 'log',
+      port: 8787,
+    };
+    const args = createCliOptions(serveDefaults);
+    expect(args.some((a) => a.startsWith('--no-'))).toBe(false);
+    expect(args).toContain('--local-protocol=http');
+    expect(args).toContain('--port=8787');
   });
 
   it('renders an array as repeated flags rather than a comma-joined value', () => {
     expect(
-      createCliOptions({ route: ['a.example.com', 'b.example.com'] })
-    ).toEqual(['--route=a.example.com', '--route=b.example.com']);
+      createCliOptions({ routes: ['a.example.com', 'b.example.com'] })
+    ).toEqual(['--routes=a.example.com', '--routes=b.example.com']);
   });
 
   it('trims array values', () => {
-    expect(createCliOptions({ route: [' a ', ' b '] })).toEqual([
-      '--route=a',
-      '--route=b',
+    expect(createCliOptions({ routes: [' a ', ' b '] })).toEqual([
+      '--routes=a',
+      '--routes=b',
     ]);
   });
 
   it('omits an empty array entirely', () => {
-    expect(createCliOptions({ route: [] })).toEqual([]);
+    expect(createCliOptions({ routes: [] })).toEqual([]);
+  });
+
+  it('emits one flag per key, in order, for a multi-key object', () => {
+    expect(createCliOptions({ name: 'w', minify: true, port: 8787 })).toEqual([
+      '--name=w',
+      '--minify',
+      '--port=8787',
+    ]);
   });
 
   it('drops undefined and null values', () => {

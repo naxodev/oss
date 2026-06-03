@@ -43,4 +43,8 @@ describe('getProjectCwd', () => {
     });
     expect(getProjectCwd(ctx)).toBe(resolve(workspaceRoot, 'apps/my-worker'));
   });
+
+  it('propagates the missing-root error', () => {
+    expect(() => getProjectCwd(context({}))).toThrow(/my-worker/);
+  });
 });

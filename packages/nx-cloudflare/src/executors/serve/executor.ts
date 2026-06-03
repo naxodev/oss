@@ -5,6 +5,7 @@ import { createAsyncIterable } from '@nx/devkit/src/utils/async-iterable';
 import { waitForPortOpen } from '@nx/web/src/utils/wait-for-port-open';
 import { createCliOptions } from '../../utils/create-cli-options';
 import { getProjectCwd } from '../../utils/project-paths';
+import { resolveWranglerBin } from '../../utils/wrangler';
 
 export default async function* serveExecutor(
   options: ServeSchema,
@@ -14,7 +15,7 @@ export default async function* serveExecutor(
 
   const wranglerOptions = createCliOptions({ ...options });
 
-  const wranglerBin = require.resolve('wrangler/bin/wrangler');
+  const wranglerBin = resolveWranglerBin();
 
   yield* createAsyncIterable<{ success: boolean; baseUrl: string }>(
     async ({ done, next, error }) => {
@@ -26,6 +27,14 @@ export default async function* serveExecutor(
           stdio: 'inherit',
         }
       );
+
+      // Surface a failed spawn instead of letting the 'error' event throw
+      // uncaught (and hang the dev server task).
+      server.once('error', (err) => {
+        error(
+          new Error(`Failed to start the Cloudflare worker: ${err.message}`)
+        );
+      });
 
       server.once('exit', (code) => {
         if (code === 0) {

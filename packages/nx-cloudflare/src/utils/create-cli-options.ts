@@ -18,13 +18,18 @@ export function createCliOptions<T extends Record<string, CliOptionValue>>(
     const arg = names(key).fileName; // kebab-case
 
     if (Array.isArray(value)) {
-      // Repeat the flag per item (e.g. --route=a --route=b), which is how
-      // wrangler/yargs expect array options rather than a comma-joined value.
+      // Repeat the flag per item (e.g. --routes=a --routes=b); wrangler treats
+      // a comma-joined value as a single entry, so each item gets its own flag.
       for (const item of value) {
         args.push(`--${arg}=${item.trim()}`);
       }
     } else if (typeof value === 'boolean') {
-      args.push(value ? `--${arg}` : `--no-${arg}`);
+      // Emit the flag only when true. Several schema booleans default to false
+      // (and Nx injects those defaults), so synthesizing `--no-<flag>` here
+      // would send unconditional no-op negations like `--no-no-bundle`.
+      if (value) {
+        args.push(`--${arg}`);
+      }
     } else {
       args.push(`--${arg}=${value}`);
     }

@@ -8,7 +8,6 @@ export interface Schema {
   skipFormat?: boolean;
   port?: number;
   accountId?: string;
-  addPlugin?: boolean;
 }
 
 export interface NormalizedSchema extends Schema {
