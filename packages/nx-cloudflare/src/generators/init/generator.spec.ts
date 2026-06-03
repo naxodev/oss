@@ -1,5 +1,4 @@
 import { addDependenciesToPackageJson, readJson, Tree } from '@nx/devkit';
-import { nxCloudflareVersion } from '../../utils/versions';
 import initGenerator from './generator';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 
@@ -16,10 +15,7 @@ describe('init', () => {
       const existingVersion = '1.0.0';
       addDependenciesToPackageJson(
         tree,
-        {
-          '@naxodev/nx-cloudflare': nxCloudflareVersion,
-          [existing]: existingVersion,
-        },
+        { [existing]: existingVersion },
         { [existing]: existingVersion }
       );
       await initGenerator(tree, {});
@@ -29,14 +25,7 @@ describe('init', () => {
       expect(packageJson.devDependencies['wrangler']).toBeDefined();
       // add tslib
       expect(packageJson.dependencies['tslib']).toBeDefined();
-      // move `@naxodev/nx-cloudflare` to dev
-      expect(
-        packageJson.dependencies['@naxodev/nx-cloudflare']
-      ).toBeUndefined();
-      expect(
-        packageJson.devDependencies['@naxodev/nx-cloudflare']
-      ).toBeDefined();
-      // move `@cloudflare/workers-types` to dev
+      // add `@cloudflare/workers-types` to dev
       expect(
         packageJson.dependencies['@cloudflare/workers-types']
       ).toBeUndefined();
@@ -54,17 +43,21 @@ describe('init', () => {
       expect(packageJson.dependencies[existing]).toBeDefined();
     });
 
-    it('should add hone if the hono template is selected', async () => {
-      const existing = 'existing';
-      const existingVersion = '1.0.0';
-      addDependenciesToPackageJson(
-        tree,
-        {
-          '@naxodev/nx-cloudflare': nxCloudflareVersion,
-          [existing]: existingVersion,
-        },
-        { [existing]: existingVersion }
-      );
+    it('does not add @naxodev/nx-cloudflare to the generated workspace', async () => {
+      // The plugin invoking the generator is already installed; re-pinning it
+      // to a registry version is redundant and collides with the e2e file:
+      // install. Mirrors how @naxodev/gonx's init leaves the plugin alone.
+      await initGenerator(tree, {});
+      const packageJson = readJson(tree, 'package.json');
+      expect(
+        packageJson.dependencies?.['@naxodev/nx-cloudflare']
+      ).toBeUndefined();
+      expect(
+        packageJson.devDependencies?.['@naxodev/nx-cloudflare']
+      ).toBeUndefined();
+    });
+
+    it('should add hono if the hono template is selected', async () => {
       await initGenerator(tree, { template: 'hono' });
       const packageJson = readJson(tree, 'package.json');
       // adds `hono`
