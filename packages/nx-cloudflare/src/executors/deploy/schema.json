@@ -33,32 +33,9 @@
       },
       "description": "Flags to use for compatibility checks."
     },
-    "latest": {
-      "type": "boolean",
-      "default": true,
-      "description": "Use the latest version of the Workers runtime."
-    },
     "assets": {
       "type": "string",
       "description": "Root folder of static assets to be served. Unlike --site, --assets does not require a Worker script to serve your assets."
-    },
-    "site": {
-      "type": "string",
-      "description": "Root folder of static assets for Workers Sites."
-    },
-    "siteInclude": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Array of .gitignore-style patterns that match file or directory names from the sites directory. Only matched items will be uploaded."
-    },
-    "siteExclude": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Array of .gitignore-style patterns that match file or directory names from the sites directory. Matched items will not be uploaded."
     },
     "var": {
       "type": "array",
@@ -96,9 +73,10 @@
       "type": "boolean",
       "description": "Minify the bundled script before deploying."
     },
-    "nodeCompat": {
+    "dryRun": {
       "type": "boolean",
-      "description": "Enable node.js compatibility."
+      "default": false,
+      "description": "Compile a project without actually deploying to live servers. Combined with --outdir, this is also useful for testing the output of a deploy."
     },
     "keepVars": {
       "type": "boolean",
