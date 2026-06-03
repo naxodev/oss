@@ -108,6 +108,9 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
     name: options.name,
     extension: options.js ? 'js' : 'ts',
     accountId: options.accountId ? getAccountId(options.accountId) : '',
+    // Pin the worker to its creation date so generated workers get a current
+    // Workers runtime instead of a stale hardcoded compatibility_date.
+    compatibilityDate: new Date().toISOString().split('T')[0],
   });
 
   // Generate template files with workers code
@@ -133,31 +136,27 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
 
 // Adds the targets to the project configuration
 function addTargets(tree: Tree, options: NormalizedSchema) {
-  try {
-    const projectConfiguration = readProjectConfiguration(tree, options.name);
+  const projectConfiguration = readProjectConfiguration(tree, options.name);
 
-    projectConfiguration.targets = {
-      ...(projectConfiguration.targets ?? {}),
-      serve: {
-        executor: '@naxodev/nx-cloudflare:serve',
-        options: {
-          port: options.port,
-        },
+  projectConfiguration.targets = {
+    ...(projectConfiguration.targets ?? {}),
+    serve: {
+      executor: '@naxodev/nx-cloudflare:serve',
+      options: {
+        port: options.port,
       },
+    },
 
-      deploy: {
-        executor: '@naxodev/nx-cloudflare:deploy',
-      },
-    };
+    deploy: {
+      executor: '@naxodev/nx-cloudflare:deploy',
+    },
+  };
 
-    if (projectConfiguration.targets.build) {
-      delete projectConfiguration.targets.build;
-    }
-
-    updateProjectConfiguration(tree, options.name, projectConfiguration);
-  } catch (e) {
-    console.error(e);
+  if (projectConfiguration.targets.build) {
+    delete projectConfiguration.targets.build;
   }
+
+  updateProjectConfiguration(tree, options.name, projectConfiguration);
 }
 
 function removeTestFiles(tree: Tree, options: NormalizedSchema) {
@@ -187,7 +186,6 @@ async function normalizeOptions(
   return {
     ...options,
     name: projectName,
-    frontendProject: options.frontendProject,
     unitTestRunner: options.unitTestRunner ?? 'vitest',
     template: options.template ?? 'fetch-handler',
     port: options.port ?? 3000,

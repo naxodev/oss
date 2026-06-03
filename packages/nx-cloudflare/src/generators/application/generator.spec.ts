@@ -207,16 +207,32 @@ describe('app', () => {
       expect(tree.exists('myWorkerApp/.gitignore')).toBeTruthy();
       expect(tree.exists('myWorkerApp/package.json')).toBeTruthy();
       expect(tree.exists('myWorkerApp/vitest.config.ts')).toBeTruthy();
-      expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8'))
-        .toMatchInlineSnapshot(`
+      const wrangler = tree
+        .read('myWorkerApp/wrangler.toml', 'utf-8')
+        .replace(
+          /compatibility_date = "\d{4}-\d{2}-\d{2}"/,
+          'compatibility_date = "<DATE>"'
+        );
+      expect(wrangler).toMatchInlineSnapshot(`
         "name = "myWorkerApp"
-        compatibility_date = "2024-01-01"
+        compatibility_date = "<DATE>"
         compatibility_flags = ["nodejs_compat"]
         main = "src/index.ts"
 
 
         "
       `);
+    });
+
+    it('should set the current date as the wrangler compatibility_date', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+      });
+      const today = new Date().toISOString().split('T')[0];
+      expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8')).toContain(
+        `compatibility_date = "${today}"`
+      );
     });
 
     it('should generate a vitest config file to allow the poolOptions when vitest is the test runner', async () => {

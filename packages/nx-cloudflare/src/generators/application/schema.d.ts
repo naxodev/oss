@@ -5,7 +5,6 @@ export interface Schema {
   js?: boolean;
   unitTestRunner?: 'vitest' | 'none';
   tags?: string;
-  frontendProject?: string;
   skipFormat?: boolean;
   port?: number;
   accountId?: string;
