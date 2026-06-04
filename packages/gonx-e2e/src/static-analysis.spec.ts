@@ -1,35 +1,32 @@
-import {
-  uniq,
-  tmpProjPath,
-  runNxCommand,
-  ensureNxProject,
-  cleanup,
-  readJson,
-} from '@nx/plugin/testing';
+import { uniq, tmpProjPath, readJson } from '@nx/plugin/testing';
+import { createTestProject, cleanup, runCLI } from '@naxodev/e2e-utils';
 import { join } from 'path';
 import { writeFileSync, readFileSync } from 'fs';
 
 describe('Dependency Detection', () => {
-  beforeEach(() => {
-    ensureNxProject('@naxodev/gonx', 'dist/packages/gonx');
+  beforeAll(() => {
+    // Create a real Nx workspace and install @naxodev/gonx from the local
+    // registry — exercises the published-tarball install path (peerDeps,
+    // exports) that the legacy ensureNxProject fixture never touched.
+    createTestProject('gonx');
 
     // Initialize Go support
-    runNxCommand('generate @naxodev/gonx:init');
-  });
+    runCLI('generate @naxodev/gonx:init');
+  }, 300_000);
 
-  afterEach(() => cleanup());
+  afterAll(() => cleanup());
 
   it('should detect dependencies between Go projects', async () => {
     const goapp = uniq('goapp');
     const golib = uniq('golib');
 
     // Generate a library first
-    runNxCommand(`generate @naxodev/gonx:library ${golib}`, {
+    runCLI(`generate @naxodev/gonx:library ${golib}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
     // Generate an application
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -68,13 +65,15 @@ replace ${libModulePath} => ../${golib}
     );
 
     // Reset Nx to pick up the changes
-    runNxCommand('reset');
+    runCLI('reset');
 
-    // Run nx graph to generate the project graph JSON
-    runNxCommand('graph --file=graph.json');
+    // Per-test graph file: the workspace is shared across tests (beforeAll), so
+    // a fixed name could let one test read a stale graph written by another.
+    const graphFile = `graph-${goapp}.json`;
+    runCLI(`graph --file=${graphFile}`);
 
     // Read the generated graph file
-    const graphJson = readJson('graph.json');
+    const graphJson = readJson(graphFile);
 
     // Verify that the dependency was detected
     const appDeps = graphJson.graph?.dependencies?.[goapp] || [];
@@ -91,15 +90,15 @@ replace ${libModulePath} => ../${golib}
     const golib2 = uniq('golib2');
 
     // Generate two libraries
-    runNxCommand(`generate @naxodev/gonx:library ${golib1}`, {
+    runCLI(`generate @naxodev/gonx:library ${golib1}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
-    runNxCommand(`generate @naxodev/gonx:library ${golib2}`, {
+    runCLI(`generate @naxodev/gonx:library ${golib2}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
     // Generate an application
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -171,11 +170,12 @@ replace ${lib1ModulePath} => ../${golib1}
     );
 
     // Reset Nx
-    runNxCommand('reset');
+    runCLI('reset');
 
-    // Generate and check the graph
-    runNxCommand('graph --file=graph.json');
-    const graphJson = readJson('graph.json');
+    // Generate and check the graph (per-test file; see note above).
+    const graphFile = `graph-${goapp}.json`;
+    runCLI(`graph --file=${graphFile}`);
+    const graphJson = readJson(graphFile);
 
     // Check app -> lib1 dependency
     const appDeps = graphJson.graph?.dependencies?.[goapp] || [];

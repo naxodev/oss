@@ -313,6 +313,26 @@ export function runCLI(
   }
 }
 
+/**
+ * Run `nx show project <name> --json` and return the parsed project
+ * configuration. Slices from the first brace so a stray banner/progress line
+ * ahead of the JSON payload can't make `JSON.parse` throw an opaque error.
+ *
+ * Note: this does not reset the Nx daemon — call `runCLI('reset')` first if the
+ * project was just generated.
+ */
+export function showProject(
+  projectName: string,
+  opts?: RunCmdOpts
+): {
+  root: string;
+  targets?: Record<string, { executor?: string }>;
+  [key: string]: unknown;
+} {
+  const out = runCLI(`show project ${projectName} --json`, opts);
+  return JSON.parse(out.slice(out.indexOf('{')));
+}
+
 export function runLernaCLI(
   command: string,
   opts: RunCmdOpts = {
