@@ -29,11 +29,6 @@
       },
       "description": "Flags to use for compatibility checks."
     },
-    "latest": {
-      "type": "boolean",
-      "default": true,
-      "description": "Use the latest version of the Workers runtime."
-    },
     "ip": {
       "type": "string",
       "description": "IP address to listen on, defaults to localhost."
@@ -64,37 +59,9 @@
       "default": "http",
       "description": "Protocol to listen to requests on."
     },
-    "localUpstream": {
-      "type": "string",
-      "description": "Host to act as origin in local mode, defaults to dev.host or route."
-    },
     "assets": {
       "type": "string",
       "description": "Root folder of static assets to be served. Unlike --site, --assets does not require a Worker script to serve your assets."
-    },
-    "site": {
-      "type": "string",
-      "description": "Root folder of static assets for Workers Sites."
-    },
-    "siteInclude": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Array of .gitignore-style patterns that match file or directory names from the sites directory. Only matched items will be uploaded."
-    },
-    "siteExclude": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Array of .gitignore-style patterns that match file or directory names from the sites directory. Matched items will not be uploaded."
-    },
-    "upstreamProtocol": {
-      "type": "string",
-      "enum": ["http", "https"],
-      "default": "https",
-      "description": "Protocol to forward requests to host on."
     },
     "var": {
       "type": "array",
@@ -117,10 +84,6 @@
     "minify": {
       "type": "boolean",
       "description": "Minify the script."
-    },
-    "nodeCompat": {
-      "type": "boolean",
-      "description": "Enable node.js compatibility."
     },
     "persistTo": {
       "type": "string",
