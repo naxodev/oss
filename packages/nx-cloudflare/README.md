@@ -27,7 +27,6 @@ Nx plugin for Cloudflare.
   - ✅ Vitest tests support
   - ✅ Serve and Deploy executors for workers.
 - ✅ Generate Cloudflare Worker Library
-- ✅ [Experimental] Cloudflare Pages builder for Next.JS projects.
 
 ## Installation
 
@@ -161,35 +160,6 @@ Available options:
 | bundler                  | swc, tsc, vite, esbuild, none | tsc         | Which bundler would you like to use to build the library? Choose 'none' to skip build setup.                                                                                           |
 | minimal                  | boolean                       | false       | Generate a library with a minimal setup. No README.md generated.                                                                                                                       |
 | simpleName               | boolean                       | false       | Don't include the directory in the generated file name.                                                                                                                                |
-
-### NextJS on Cloudflare
-
-#### Build Next application
-
-> This feature is ⚠️ **experimental**. We appreciate that you let us know of any issues that you find.
-
-To start using the Cloudflare Pages Next builder, start by replacing the builder executor in your application `project.json`.
-
-```json
-  ...
-  "targets": {
-    ...
-    "build": {
-      "executor": "@naxodev/nx-cloudflare:next-build",
-      ...
-    },
-    ...
-```
-
-Notice that you can use the same configurations as in the `@nx/next:build` executor.
-
-Now you can run the build command.
-
-```sh
-nx build <app-name>
-```
-
-And upload the content of the folder `.vercel/output/static` contained in the folder matching your configured output path.
 
 ## Acknowledgement
 
