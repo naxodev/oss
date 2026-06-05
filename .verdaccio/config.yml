@@ -8,6 +8,15 @@ uplinks:
     maxage: 60m
 
 packages:
+  # The workspace's own packages are published to this registry during e2e.
+  # They MUST NOT be proxied to npmjs: those scopes already exist upstream, so
+  # proxying makes Verdaccio reject the local publish as "already present" (409)
+  # and the e2e dist-tag never gets created. Keep them local-only.
+  '@naxodev/*':
+    access: $all
+    publish: $all
+    unpublish: $all
+
   '**':
     # give all users (including non-authenticated users) full access
     # because it is a local registry

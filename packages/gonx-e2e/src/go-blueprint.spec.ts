@@ -1,50 +1,33 @@
-import {
-  uniq,
-  runNxCommand,
-  ensureNxProject,
-  cleanup,
-  fileExists,
-  tmpProjPath,
-  readFile,
-} from '@nx/plugin/testing';
+import { uniq, fileExists, tmpProjPath, readFile } from '@nx/plugin/testing';
+import { createTestProject, cleanup, runCLI } from '@naxodev/e2e-utils';
 import { join } from 'path';
 
 const unsupportedFiles = ['.air.toml', 'README.md', 'Makefile'];
 
-// Skip these tests in non-interactive environments (CI, Jest without TTY)
+// The go-blueprint generator requires an interactive TTY, which CI (and jest's
+// piped stdin) never provides. Use describe.skip there so the suite reports as
+// skipped instead of vacuously passing.
 const isNonInteractive = process.env.CI || !process.stdin.isTTY;
+const describeBlueprint = isNonInteractive ? describe.skip : describe;
 
-describe('Go Blueprint Generator', () => {
+describeBlueprint('Go Blueprint Generator', () => {
   beforeAll(() => {
-    if (isNonInteractive) {
-      console.log(
-        'Skipping Go Blueprint tests in non-interactive environment (no TTY available)'
-      );
-    }
-  });
-
-  beforeEach(() => {
-    if (isNonInteractive) return;
-    ensureNxProject('@naxodev/gonx', 'dist/packages/gonx');
+    // Create a real Nx workspace and install @naxodev/gonx from the local
+    // registry — exercises the published-tarball install path (peerDeps,
+    // exports) that the legacy ensureNxProject fixture never touched.
+    createTestProject('gonx');
 
     // Initialize Go support
-    runNxCommand('generate @naxodev/gonx:init');
-  });
+    runCLI('generate @naxodev/gonx:init');
+  }, 300_000);
 
-  afterEach(() => {
-    if (isNonInteractive) return;
-    cleanup();
-  });
+  afterAll(() => cleanup());
 
   it('should generate the projects in the workspace root when the go-blueprint generator is run', async () => {
-    if (isNonInteractive) {
-      console.log('Skipping test in non-interactive environment');
-      return;
-    }
     const projectName = uniq('gobp');
 
     // Try to run the generator with minimal required options
-    const result = runNxCommand(
+    const result = runCLI(
       `generate @naxodev/gonx:go-blueprint ${projectName} --framework=gin --driver=sqlite --git=skip`
     );
 
@@ -74,14 +57,10 @@ describe('Go Blueprint Generator', () => {
   }, 60_000);
 
   it('should generate the projects in a nested folder when the go-blueprint generator is run', async () => {
-    if (isNonInteractive) {
-      console.log('Skipping test in non-interactive environment');
-      return;
-    }
     const projectName = uniq('gobp');
 
     // Try to run the generator with minimal required options
-    runNxCommand(
+    runCLI(
       `generate @naxodev/gonx:go-blueprint --directory="apps/${projectName}" --framework=gin --driver=sqlite --git=skip`
     );
 
@@ -111,14 +90,10 @@ describe('Go Blueprint Generator', () => {
   }, 60_000);
 
   it('should support --dry-run without creating actual files', async () => {
-    if (isNonInteractive) {
-      console.log('Skipping test in non-interactive environment');
-      return;
-    }
     const projectName = uniq('gobp');
 
     // Run generator with --dry-run flag
-    const result = runNxCommand(
+    const result = runCLI(
       `generate @naxodev/gonx:go-blueprint ${projectName} --framework=gin --driver=sqlite --git=skip --dry-run`
     );
 

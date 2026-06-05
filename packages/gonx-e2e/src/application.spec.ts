@@ -2,12 +2,15 @@ import {
   uniq,
   fileExists,
   tmpProjPath,
-  runNxCommand,
-  ensureNxProject,
-  cleanup,
   directoryExists,
 } from '@nx/plugin/testing';
-import { promisifiedTreeKill, runCommandUntil } from '@naxodev/e2e-utils';
+import {
+  createTestProject,
+  cleanup,
+  runCLI,
+  promisifiedTreeKill,
+  runCommandUntil,
+} from '@naxodev/e2e-utils';
 import { join } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 
@@ -15,19 +18,22 @@ import { writeFileSync, mkdirSync } from 'fs';
 const isNonInteractive = process.env.CI || !process.stdin.isTTY;
 
 describe('Go Applications (with go.work)', () => {
-  beforeEach(() => {
-    ensureNxProject('@naxodev/gonx', 'dist/packages/gonx');
+  beforeAll(() => {
+    // Create a real Nx workspace and install @naxodev/gonx from the local
+    // registry — exercises the published-tarball install path (peerDeps,
+    // exports) that the legacy ensureNxProject fixture never touched.
+    createTestProject('gonx');
 
     // Initialize Go support first with go.work support
-    runNxCommand('generate @naxodev/gonx:init --addGoDotWork');
-  });
+    runCLI('generate @naxodev/gonx:init --addGoDotWork');
+  }, 300_000);
 
-  afterEach(() => cleanup());
+  afterAll(() => cleanup());
 
   it('should be able to generate a Go application', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -39,7 +45,7 @@ describe('Go Applications (with go.work)', () => {
   it('should be able to generate an application with a specific directory', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(
+    runCLI(
       `generate @naxodev/gonx:application --directory="apps/${goapp}" --name=${goapp}`,
       { env: { NX_ADD_PLUGINS: 'true' } }
     );
@@ -56,7 +62,7 @@ describe('Go Applications (with go.work)', () => {
   it('should be able to run build, lint, test, generate and tidy commands on a Go application', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -64,28 +70,28 @@ describe('Go Applications (with go.work)', () => {
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Run tidy
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
 
     // Run lint
-    const lintResults = runNxCommand(`lint ${goapp}`);
+    const lintResults = runCLI(`lint ${goapp}`);
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${goapp}`
     );
 
     // Run generate
-    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    const generateResults = runCLI(`run ${goapp}:generate`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
     );
 
     // Run build
-    const buildResults = runNxCommand(`build ${goapp}`);
+    const buildResults = runCLI(`build ${goapp}`);
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
@@ -93,7 +99,7 @@ describe('Go Applications (with go.work)', () => {
     expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
 
     // Run test
-    const testResults = runNxCommand(`test ${goapp}`);
+    const testResults = runCLI(`test ${goapp}`);
     expect(testResults).toContain(
       `NX   Successfully ran target test for project ${goapp}`
     );
@@ -102,7 +108,7 @@ describe('Go Applications (with go.work)', () => {
   it('should be able to run the serve command on a Go application', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -110,7 +116,7 @@ describe('Go Applications (with go.work)', () => {
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Run serve and wait until the server starts
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
@@ -126,12 +132,12 @@ describe('Go Applications (with go.work)', () => {
   it('should be able to build a Go application with custom main option', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -150,9 +156,7 @@ func main() {
     );
 
     // Build with custom main option
-    const buildResults = runNxCommand(
-      `build ${goapp} --main=cmd/server/main.go`
-    );
+    const buildResults = runCLI(`build ${goapp} --main=cmd/server/main.go`);
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
@@ -163,12 +167,12 @@ func main() {
   it('should be able to serve a Go application with custom main option', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -208,12 +212,12 @@ func main() {
   it('should be able to run the generate command with custom flags', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Create a Go file with go:generate directive
     writeFileSync(
@@ -227,7 +231,7 @@ var GeneratedVar = "placeholder"
     );
 
     // Run generate with verbose flag
-    const generateResults = runNxCommand(`run ${goapp}:generate --flags=-v`);
+    const generateResults = runCLI(`run ${goapp}:generate --flags=-v`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
     );
@@ -236,7 +240,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a CLI application', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -254,7 +258,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a CLI application with a specific directory', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(
+    runCLI(
       `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --template=cli`,
       {
         env: { NX_ADD_PLUGINS: 'true' },
@@ -283,7 +287,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -291,28 +295,28 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Run tidy
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
 
     // Run lint
-    const lintResults = runNxCommand(`lint ${goapp}`);
+    const lintResults = runCLI(`lint ${goapp}`);
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${goapp}`
     );
 
     // Run generate
-    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    const generateResults = runCLI(`run ${goapp}:generate`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
     );
 
     // Run build
-    const buildResults = runNxCommand(`build ${goapp}`);
+    const buildResults = runCLI(`build ${goapp}`);
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
@@ -320,7 +324,7 @@ var GeneratedVar = "placeholder"
     expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
 
     // Run test
-    const testResults = runNxCommand(`test ${goapp}`);
+    const testResults = runCLI(`test ${goapp}`);
     expect(testResults).toContain(
       `NX   Successfully ran target test for project ${goapp}`
     );
@@ -329,7 +333,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a TUI application', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -350,7 +354,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a TUI application with a specific directory', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(
+    runCLI(
       `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --template=tui`,
       {
         env: { NX_ADD_PLUGINS: 'true' },
@@ -382,7 +386,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -390,28 +394,28 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Run tidy
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
 
     // Run lint
-    const lintResults = runNxCommand(`lint ${goapp}`);
+    const lintResults = runCLI(`lint ${goapp}`);
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${goapp}`
     );
 
     // Run generate
-    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    const generateResults = runCLI(`run ${goapp}:generate`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
     );
 
     // Run build
-    const buildResults = runNxCommand(`build ${goapp}`);
+    const buildResults = runCLI(`build ${goapp}`);
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
@@ -419,7 +423,7 @@ var GeneratedVar = "placeholder"
     expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
 
     // Run test
-    const testResults = runNxCommand(`test ${goapp}`);
+    const testResults = runCLI(`test ${goapp}`);
     expect(testResults).toContain(
       `NX   Successfully ran target test for project ${goapp}`
     );
@@ -432,7 +436,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -440,9 +444,9 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
@@ -465,7 +469,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -473,9 +477,9 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
@@ -493,19 +497,22 @@ var GeneratedVar = "placeholder"
 });
 
 describe('Go Applications (without go.work)', () => {
-  beforeEach(() => {
-    ensureNxProject('@naxodev/gonx', 'dist/packages/gonx');
+  beforeAll(() => {
+    // Create a real Nx workspace and install @naxodev/gonx from the local
+    // registry — exercises the published-tarball install path (peerDeps,
+    // exports) that the legacy ensureNxProject fixture never touched.
+    createTestProject('gonx');
 
     // Initialize Go support without go.work support (new default)
-    runNxCommand('generate @naxodev/gonx:init');
-  });
+    runCLI('generate @naxodev/gonx:init');
+  }, 300_000);
 
-  afterEach(() => cleanup());
+  afterAll(() => cleanup());
 
   it('should be able to generate a Go application without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -520,7 +527,7 @@ describe('Go Applications (without go.work)', () => {
   it('should be able to generate an application with a specific directory without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(
+    runCLI(
       `generate @naxodev/gonx:application --directory="apps/${goapp}" --name=${goapp}`,
       { env: { NX_ADD_PLUGINS: 'true' } }
     );
@@ -540,7 +547,7 @@ describe('Go Applications (without go.work)', () => {
   it('should be able to run build, lint, test, generate and tidy commands on a Go application without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -548,28 +555,28 @@ describe('Go Applications (without go.work)', () => {
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Run tidy
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
 
     // Run lint
-    const lintResults = runNxCommand(`lint ${goapp}`);
+    const lintResults = runCLI(`lint ${goapp}`);
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${goapp}`
     );
 
     // Run generate
-    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    const generateResults = runCLI(`run ${goapp}:generate`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
     );
 
     // Run build
-    const buildResults = runNxCommand(`build ${goapp}`);
+    const buildResults = runCLI(`build ${goapp}`);
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
@@ -577,7 +584,7 @@ describe('Go Applications (without go.work)', () => {
     expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
 
     // Run test
-    const testResults = runNxCommand(`test ${goapp}`);
+    const testResults = runCLI(`test ${goapp}`);
     expect(testResults).toContain(
       `NX   Successfully ran target test for project ${goapp}`
     );
@@ -586,7 +593,7 @@ describe('Go Applications (without go.work)', () => {
   it('should be able to run the serve command on a Go application without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -594,7 +601,7 @@ describe('Go Applications (without go.work)', () => {
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Run serve and wait until the server starts
     const p = await runCommandUntil(`serve ${goapp}`, (output: string) =>
@@ -610,12 +617,12 @@ describe('Go Applications (without go.work)', () => {
   it('should be able to build a Go application with custom main option without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -634,9 +641,7 @@ func main() {
     );
 
     // Build with custom main option
-    const buildResults = runNxCommand(
-      `build ${goapp} --main=cmd/server/main.go`
-    );
+    const buildResults = runCLI(`build ${goapp} --main=cmd/server/main.go`);
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
@@ -647,12 +652,12 @@ func main() {
   it('should be able to serve a Go application with custom main option without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Create a custom main.go file in a subdirectory
     const customMainDir = join(tmpProjPath(), `${goapp}/cmd/server`);
@@ -692,12 +697,12 @@ func main() {
   it('should be able to run the generate command with custom flags without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp}`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp}`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Create a Go file with go:generate directive
     writeFileSync(
@@ -711,7 +716,7 @@ var GeneratedVar = "placeholder"
     );
 
     // Run generate with verbose flag
-    const generateResults = runNxCommand(`run ${goapp}:generate --flags=-v`);
+    const generateResults = runCLI(`run ${goapp}:generate --flags=-v`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
     );
@@ -720,7 +725,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a CLI application without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -741,7 +746,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a CLI application without go.work in a specific directory', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(
+    runCLI(
       `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --template=cli`,
       {
         env: { NX_ADD_PLUGINS: 'true' },
@@ -773,7 +778,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -781,28 +786,28 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Run tidy
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
 
     // Run lint
-    const lintResults = runNxCommand(`lint ${goapp}`);
+    const lintResults = runCLI(`lint ${goapp}`);
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${goapp}`
     );
 
     // Run generate
-    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    const generateResults = runCLI(`run ${goapp}:generate`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
     );
 
     // Run build
-    const buildResults = runNxCommand(`build ${goapp}`);
+    const buildResults = runCLI(`build ${goapp}`);
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
@@ -810,7 +815,7 @@ var GeneratedVar = "placeholder"
     expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
 
     // Run test
-    const testResults = runNxCommand(`test ${goapp}`);
+    const testResults = runCLI(`test ${goapp}`);
     expect(testResults).toContain(
       `NX   Successfully ran target test for project ${goapp}`
     );
@@ -819,7 +824,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a TUI application without go.work', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -843,7 +848,7 @@ var GeneratedVar = "placeholder"
   it('should be able to generate a TUI application without go.work in a specific directory', async () => {
     const goapp = uniq('goapp');
 
-    runNxCommand(
+    runCLI(
       `generate @naxodev/gonx:application --directory="apps/${goapp}" ${goapp} --template=tui`,
       {
         env: { NX_ADD_PLUGINS: 'true' },
@@ -878,7 +883,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -886,28 +891,28 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
     // Run tidy
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
 
     // Run lint
-    const lintResults = runNxCommand(`lint ${goapp}`);
+    const lintResults = runCLI(`lint ${goapp}`);
     expect(lintResults).toContain(
       `NX   Successfully ran target lint for project ${goapp}`
     );
 
     // Run generate
-    const generateResults = runNxCommand(`run ${goapp}:generate`);
+    const generateResults = runCLI(`run ${goapp}:generate`);
     expect(generateResults).toContain(
       `NX   Successfully ran target generate for project ${goapp}`
     );
 
     // Run build
-    const buildResults = runNxCommand(`build ${goapp}`);
+    const buildResults = runCLI(`build ${goapp}`);
     expect(buildResults).toContain(
       `NX   Successfully ran target build for project ${goapp}`
     );
@@ -915,7 +920,7 @@ var GeneratedVar = "placeholder"
     expect(directoryExists(join(tmpProjPath(), `dist/${goapp}`))).toBeTruthy();
 
     // Run test
-    const testResults = runNxCommand(`test ${goapp}`);
+    const testResults = runCLI(`test ${goapp}`);
     expect(testResults).toContain(
       `NX   Successfully ran target test for project ${goapp}`
     );
@@ -928,7 +933,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=cli`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -936,9 +941,9 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );
@@ -961,7 +966,7 @@ var GeneratedVar = "placeholder"
     }
     const goapp = uniq('goapp');
 
-    runNxCommand(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
+    runCLI(`generate @naxodev/gonx:application ${goapp} --template=tui`, {
       env: { NX_ADD_PLUGINS: 'true' },
     });
 
@@ -969,9 +974,9 @@ var GeneratedVar = "placeholder"
     expect(fileExists(join(tmpProjPath(), `${goapp}/main.go`))).toBeTruthy();
 
     // Reset Nx daemon to pick up new project
-    runNxCommand('reset');
+    runCLI('reset');
 
-    const tidyResults = runNxCommand(`tidy ${goapp}`);
+    const tidyResults = runCLI(`tidy ${goapp}`);
     expect(tidyResults).toContain(
       `NX   Successfully ran target tidy for project ${goapp}`
     );

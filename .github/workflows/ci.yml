@@ -31,6 +31,9 @@ env:
 jobs:
   main:
     runs-on: ubuntu-latest
+    # Backstop so a hung task (e.g. an e2e install blocked on a torn-down local
+    # registry) fails fast instead of burning the 6h GitHub default.
+    timeout-minutes: 40
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -61,5 +64,8 @@ jobs:
 
       - run: pnpm exec nx affected -t build --yes
 
+      # Run e2e serially: the suites share one local Verdaccio registry, so
+      # running them in parallel races on registry ownership/teardown and can
+      # hang the run. Build deps are already built by the step above.
       - if: ${{ matrix.os != 'windows-latest'}}
-        run: pnpm exec nx affected -t build e2e
+        run: pnpm exec nx affected -t e2e --parallel=1
