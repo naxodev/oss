@@ -70,14 +70,6 @@
       }
     },
     {
-      "plugin": "@nx/next/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "devTargetName": "dev",
-        "startTargetName": "start"
-      }
-    },
-    {
       "plugin": "@nx/jest/plugin",
       "options": {
         "targetName": "test"
@@ -90,14 +82,7 @@
       }
     }
   ],
-  "generators": {
-    "@nx/next": {
-      "application": {
-        "style": "css",
-        "linter": "eslint"
-      }
-    }
-  },
+  "generators": {},
   "nxCloudAccessToken": "OWEyN2E2OTktMWM2Ni00MmQwLWE1YmEtNjI2MDMwNDg1MWVjfHJlYWQtd3JpdGU=",
   "release": {
     "projectsRelationship": "independent",
