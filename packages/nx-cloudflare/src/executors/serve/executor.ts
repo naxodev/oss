@@ -2,7 +2,7 @@ import { ExecutorContext } from '@nx/devkit';
 import { ServeSchema } from './schema';
 import { spawn } from 'child_process';
 import { createAsyncIterable } from '@nx/devkit/src/utils/async-iterable';
-import { waitForPortOpen } from '@nx/web/src/utils/wait-for-port-open';
+import { waitForPortOpen } from '../../utils/wait-for-port-open';
 import { createCliOptions } from '../../utils/create-cli-options';
 import { getProjectCwd } from '../../utils/project-paths';
 import { resolveWranglerBin } from '../../utils/wrangler';
@@ -55,7 +55,21 @@ export default async function* serveExecutor(
       process.on('SIGTERM', () => killServer());
       process.on('SIGHUP', () => killServer());
 
-      await waitForPortOpen(options.port);
+      // createAsyncIterable invokes this listener fire-and-forget, so a
+      // rejection here would surface as an unhandled rejection instead of
+      // failing the executor. Route it through error() like the spawn paths.
+      try {
+        await waitForPortOpen(options.port);
+      } catch (err) {
+        error(
+          new Error(
+            `Cloudflare worker did not start listening on port ${
+              options.port
+            }: ${err instanceof Error ? err.message : String(err)}`
+          )
+        );
+        return;
+      }
 
       next({
         success: true,

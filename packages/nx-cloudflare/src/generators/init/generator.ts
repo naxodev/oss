@@ -5,11 +5,11 @@ import {
   Tree,
 } from '@nx/devkit';
 import { initGenerator as nodeInitGenerator } from '@nx/js';
-import { tslibVersion } from '@nx/node/src/utils/versions';
 import type { InitGeneratorSchema } from './schema';
 import {
   cloudflareWorkersTypeVersions,
   honoVersion,
+  tslibVersion,
   vitestPoolWorkersVersion,
   vitestVersion,
   wranglerVersion,

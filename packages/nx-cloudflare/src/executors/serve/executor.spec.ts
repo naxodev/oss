@@ -8,7 +8,7 @@ jest.mock('child_process', () => ({
 }));
 
 const waitForPortOpenMock = jest.fn();
-jest.mock('@nx/web/src/utils/wait-for-port-open', () => ({
+jest.mock('../../utils/wait-for-port-open', () => ({
   waitForPortOpen: (...args: unknown[]) => waitForPortOpenMock(...args),
 }));
 
@@ -68,5 +68,20 @@ describe('serve executor', () => {
     // Emitting 'error' must be handled (no throw) and reject the iteration.
     server.emit('error', new Error('spawn ENOENT'));
     await expect(next).rejects.toThrow(/wrangler|worker/i);
+  });
+
+  it('routes a port-wait failure through error() instead of rejecting uncaught', async () => {
+    const server = fakeServer();
+    spawnMock.mockReturnValue(server);
+    waitForPortOpenMock.mockRejectedValue(
+      Object.assign(new Error('refused'), { code: 'ECONNREFUSED' })
+    );
+
+    const gen = serveExecutor({ port: 8787 } as never, context());
+    // createAsyncIterable runs the listener fire-and-forget, so the rejection
+    // must reach the iteration via error(), not escape as an unhandled rejection.
+    await expect(gen.next()).rejects.toThrow(
+      /did not start listening on port 8787/i
+    );
   });
 });
