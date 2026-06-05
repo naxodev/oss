@@ -199,7 +199,7 @@ describe('app', () => {
       expect(tsconfig.extends).toBe('../tsconfig.json');
     });
 
-    it('should create the common configuration files', async () => {
+    it('should create the common configuration files with wrangler.jsonc by default', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         directory: 'myWorkerApp',
@@ -207,6 +207,34 @@ describe('app', () => {
       expect(tree.exists('myWorkerApp/.gitignore')).toBeTruthy();
       expect(tree.exists('myWorkerApp/package.json')).toBeTruthy();
       expect(tree.exists('myWorkerApp/vitest.config.ts')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/wrangler.jsonc')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/wrangler.toml')).toBeFalsy();
+      const wrangler = tree
+        .read('myWorkerApp/wrangler.jsonc', 'utf-8')
+        .replace(
+          /"compatibility_date": "\d{4}-\d{2}-\d{2}"/,
+          '"compatibility_date": "<DATE>"'
+        );
+      expect(wrangler).toMatchInlineSnapshot(`
+        "{
+          "$schema": "../node_modules/wrangler/config-schema.json",
+          "name": "myWorkerApp",
+          "compatibility_date": "<DATE>",
+          "compatibility_flags": ["nodejs_compat"],
+          "main": "src/index.ts"
+        }
+        "
+      `);
+    });
+
+    it('should generate wrangler.toml when configFormat is toml', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        configFormat: 'toml',
+      });
+      expect(tree.exists('myWorkerApp/wrangler.toml')).toBeTruthy();
+      expect(tree.exists('myWorkerApp/wrangler.jsonc')).toBeFalsy();
       const wrangler = tree
         .read('myWorkerApp/wrangler.toml', 'utf-8')
         .replace(
@@ -218,10 +246,77 @@ describe('app', () => {
         compatibility_date = "<DATE>"
         compatibility_flags = ["nodejs_compat"]
         main = "src/index.ts"
-
-
         "
       `);
+    });
+
+    it('should render the account_id in wrangler.jsonc when provided', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        accountId: 'abc123',
+      });
+      const wrangler = tree
+        .read('myWorkerApp/wrangler.jsonc', 'utf-8')
+        .replace(
+          /"compatibility_date": "\d{4}-\d{2}-\d{2}"/,
+          '"compatibility_date": "<DATE>"'
+        );
+      expect(wrangler).toMatchInlineSnapshot(`
+        "{
+          "$schema": "../node_modules/wrangler/config-schema.json",
+          "name": "myWorkerApp",
+          "compatibility_date": "<DATE>",
+          "compatibility_flags": ["nodejs_compat"],
+          "main": "src/index.ts",
+          "account_id": "abc123"
+        }
+        "
+      `);
+    });
+
+    it('should render the account_id in wrangler.toml when provided', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        configFormat: 'toml',
+        accountId: 'abc123',
+      });
+      const wrangler = tree
+        .read('myWorkerApp/wrangler.toml', 'utf-8')
+        .replace(
+          /compatibility_date = "\d{4}-\d{2}-\d{2}"/,
+          'compatibility_date = "<DATE>"'
+        );
+      expect(wrangler).toMatchInlineSnapshot(`
+        "name = "myWorkerApp"
+        compatibility_date = "<DATE>"
+        compatibility_flags = ["nodejs_compat"]
+        main = "src/index.ts"
+        account_id = "abc123"
+        "
+      `);
+    });
+
+    it('should reference the wrangler config schema relative to the workspace root', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myDir/myWorkerApp',
+      });
+      expect(tree.read('myDir/myWorkerApp/wrangler.jsonc', 'utf-8')).toContain(
+        `"$schema": "../../node_modules/wrangler/config-schema.json"`
+      );
+    });
+
+    it('should set main to the .js entry in the config when js is true', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        js: true,
+      });
+      expect(tree.read('myWorkerApp/wrangler.jsonc', 'utf-8')).toContain(
+        `"main": "src/index.js"`
+      );
     });
 
     it('should set the current date as the wrangler compatibility_date', async () => {
@@ -230,8 +325,8 @@ describe('app', () => {
         directory: 'myWorkerApp',
       });
       const today = new Date().toISOString().split('T')[0];
-      expect(tree.read('myWorkerApp/wrangler.toml', 'utf-8')).toContain(
-        `compatibility_date = "${today}"`
+      expect(tree.read('myWorkerApp/wrangler.jsonc', 'utf-8')).toContain(
+        `"compatibility_date": "${today}"`
       );
     });
 
@@ -248,13 +343,24 @@ describe('app', () => {
           test: {
             poolOptions: {
               workers: {
-                wrangler: { configPath: './wrangler.toml' },
+                wrangler: { configPath: './wrangler.jsonc' },
               },
             },
           },
         });
         "
       `);
+    });
+
+    it('should point the vitest configPath at wrangler.toml when configFormat is toml', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        configFormat: 'toml',
+      });
+      expect(tree.read('myWorkerApp/vitest.config.ts', 'utf-8')).toContain(
+        `wrangler: { configPath: './wrangler.toml' }`
+      );
     });
   });
 

@@ -8,6 +8,7 @@ export interface Schema {
   skipFormat?: boolean;
   port?: number;
   accountId?: string;
+  configFormat?: 'jsonc' | 'toml';
 }
 
 export interface NormalizedSchema extends Schema {

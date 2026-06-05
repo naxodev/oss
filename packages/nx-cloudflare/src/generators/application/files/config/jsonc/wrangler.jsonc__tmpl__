@@ -1,0 +1,8 @@
+{
+  "$schema": "<%= schema %>",
+  "name": "<%= name %>",
+  "compatibility_date": "<%= compatibilityDate %>",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.<%= extension %>"<% if (accountId) { %>,
+  "account_id": "<%= accountId %>"<% } %>
+}

@@ -51,6 +51,12 @@
       "description": "The Cloudflare account identifier where the worker will be deployed",
       "type": "string"
     },
+    "configFormat": {
+      "description": "Format of the generated Wrangler configuration file.",
+      "type": "string",
+      "enum": ["jsonc", "toml"],
+      "default": "jsonc"
+    },
     "rootProject": {
       "description": "Create worker application at the root of the workspace",
       "type": "boolean",
