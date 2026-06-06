@@ -42,7 +42,7 @@
     "chalk": "^4.1.2",
     "@melkeydev/go-blueprint": "0.10.11",
     "p-limit": "^6.2.0",
-    "web-tree-sitter": "^0.26.3",
+    "web-tree-sitter": "0.26.3",
     "tree-sitter-go": "^0.25.0"
   }
 }
