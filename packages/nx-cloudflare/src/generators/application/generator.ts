@@ -2,6 +2,7 @@ import {
   convertNxGenerator,
   formatFiles,
   generateFiles,
+  offsetFromRoot,
   readProjectConfiguration,
   toJS,
   Tree,
@@ -14,7 +15,6 @@ import type { NormalizedSchema, Schema } from './schema';
 import { join } from 'path';
 import initGenerator from '../init/generator';
 import { vitestImports } from './utils/vitest-imports';
-import { getAccountId } from './utils/get-account-id';
 import {
   determineProjectNameAndRootOptions,
   ensureRootProjectName,
@@ -101,17 +101,38 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
     join(options.projectRoot, `src/main.${options.js ? 'js' : 'ts'}`)
   );
 
-  // General configuration files for workers
-  generateFiles(tree, join(__dirname, './files/common'), options.projectRoot, {
+  const substitutions = {
     ...options,
     tmpl: '',
     name: options.name,
     extension: options.js ? 'js' : 'ts',
-    accountId: options.accountId ? getAccountId(options.accountId) : '',
+    accountId: options.accountId ?? '',
+    configFileName: `wrangler.${options.configFormat}`,
+    // Point the JSONC $schema at the wrangler package hoisted to the workspace
+    // root so editors validate the config regardless of the project's depth.
+    schema: `${offsetFromRoot(
+      options.projectRoot
+    )}node_modules/wrangler/config-schema.json`,
     // Pin the worker to its creation date so generated workers get a current
     // Workers runtime instead of a stale hardcoded compatibility_date.
     compatibilityDate: new Date().toISOString().split('T')[0],
-  });
+  };
+
+  // General configuration files for workers
+  generateFiles(
+    tree,
+    join(__dirname, './files/common'),
+    options.projectRoot,
+    substitutions
+  );
+
+  // Wrangler config in the selected format (jsonc by default, or toml)
+  generateFiles(
+    tree,
+    join(__dirname, `./files/config/${options.configFormat}`),
+    options.projectRoot,
+    substitutions
+  );
 
   // Generate template files with workers code
   if (options.template && options.template !== 'none') {
@@ -188,6 +209,7 @@ async function normalizeOptions(
     name: projectName,
     unitTestRunner: options.unitTestRunner ?? 'vitest',
     template: options.template ?? 'fetch-handler',
+    configFormat: options.configFormat ?? 'jsonc',
     port: options.port ?? 3000,
     projectRoot,
     projectType: 'application',

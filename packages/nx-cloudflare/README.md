@@ -69,12 +69,33 @@ Available options:
 | projectNameAndRootFormat | as-provided, derived                         | as-provided   | Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`). |
 | port                     | number                                       | 8787          | The port in which the worker will be run on development mode                                                                                                                           |
 | accountId                | string                                       | null          | The Cloudflare account identifier where the worker will be deployed                                                                                                                    |
+| configFormat             | jsonc, toml                                  | jsonc         | Format of the generated Wrangler configuration file (`wrangler.jsonc` or `wrangler.toml`).                                                                                             |
 | js                       | boolean                                      | false         | Use JavaScript instead of TypeScript                                                                                                                                                   |
 | tags                     | string                                       | null          | Add tags to the application (used for linting).                                                                                                                                        |
 | unitTestRunner           | vitest, none                                 | vitest        | Test runner to use for unit tests.                                                                                                                                                     |
 | directory                | string                                       | null          | The directory of the new application.                                                                                                                                                  |
 | rootProject              | boolean                                      | false         | Create worker application at the root of the workspace                                                                                                                                 |
 | skipFormat               | boolean                                      | false         | Skip formatting files.                                                                                                                                                                 |
+
+##### Wrangler configuration format
+
+The generator emits a [`wrangler.jsonc`](https://developers.cloudflare.com/workers/wrangler/configuration/) by default — Cloudflare's recommended format, and the only one that some newer Wrangler features support. The generated file includes a `$schema` reference (resolved relative to the workspace-root `node_modules`) so editors validate and autocomplete the config:
+
+```jsonc
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "my-worker-app",
+  "compatibility_date": "2026-06-05",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.ts"
+}
+```
+
+To generate a `wrangler.toml` instead, pass `--configFormat=toml`:
+
+```bash
+nx g @naxodev/nx-cloudflare:application my-worker-app --configFormat=toml
+```
 
 #### Serve worker on dev mode
 
