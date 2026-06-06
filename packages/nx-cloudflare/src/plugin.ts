@@ -15,19 +15,27 @@ import {
 
 /** Options to rename the inferred Cloudflare Worker targets. */
 export interface CloudflarePluginOptions {
+  /** Name for the inferred `wrangler dev` target. @default 'serve' */
   serveTargetName?: string;
+  /** Name for the inferred `wrangler deploy` target. @default 'deploy' */
   deployTargetName?: string;
+  /** Name for the inferred `wrangler types` target. @default 'typegen' */
   typegenTargetName?: string;
+  /**
+   * Name for the inferred `wrangler versions upload` target.
+   * @default 'version-upload'
+   */
   versionUploadTargetName?: string;
+  /** Name for the inferred `wrangler tail` target. @default 'tail' */
   tailTargetName?: string;
 }
 
-interface NormalizedOptions {
-  serveTargetName: string;
-  deployTargetName: string;
-  typegenTargetName: string;
-  versionUploadTargetName: string;
-  tailTargetName: string;
+/** {@link CloudflarePluginOptions} with every default applied. */
+type NormalizedOptions = Required<CloudflarePluginOptions>;
+
+/** Render an unknown thrown value as a concise, log-friendly reason. */
+function errorReason(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
 }
 
 function normalizeOptions(
@@ -76,16 +84,22 @@ function buildWorkerTargets(
 
 /**
  * Read and validate a wrangler config. Returns its raw content when valid, or
- * null (after warning) when the file is unreadable, an empty .toml, or
- * unparseable json/jsonc. Returning the content lets callers reuse the single
- * read for cache-key hashing instead of reading the file twice.
+ * null (after warning) when the file is unreadable, an empty `.toml`, or
+ * json/jsonc that fails to parse. The gate is structural, not semantic: a
+ * parseable but minimal config (e.g. `{}`) is accepted, since Wrangler
+ * validates its own contents at runtime. `.toml` has no parser here, so
+ * non-empty is the only available proxy for "usable". Returning the content
+ * lets callers reuse the single read for cache-key hashing instead of reading
+ * the file twice.
  */
 function readValidConfig(absConfigPath: string): string | null {
   let content: string;
   try {
     content = readFileSync(absConfigPath, 'utf-8');
   } catch (e) {
-    logger.warn(`[nx-cloudflare] Could not read ${absConfigPath}: ${e}`);
+    logger.warn(
+      `[nx-cloudflare] Could not read ${absConfigPath}: ${errorReason(e)}`
+    );
     return null;
   }
 
@@ -104,24 +118,45 @@ function readValidConfig(absConfigPath: string): string | null {
     return content;
   } catch (e) {
     logger.warn(
-      `[nx-cloudflare] Skipping unparseable wrangler config ${absConfigPath}: ${e}`
+      `[nx-cloudflare] Skipping unparseable wrangler config ${absConfigPath}: ${errorReason(
+        e
+      )}`
     );
     return null;
   }
 }
 
-type TargetsCache = Record<string, Record<string, TargetConfiguration>>;
+type TargetsCache = Record<string, ReturnType<typeof buildWorkerTargets>>;
 
 function readTargetsCache(cachePath: string): TargetsCache {
+  if (!existsSync(cachePath)) {
+    return {};
+  }
+  // A present-but-unreadable cache (corruption, a format change after an Nx
+  // bump, permissions) recomputes targets rather than failing the graph, but
+  // is surfaced so the degraded caching isn't silent.
   try {
-    return existsSync(cachePath) ? readJsonFile(cachePath) : {};
-  } catch {
+    return readJsonFile(cachePath);
+  } catch (e) {
+    logger.warn(
+      `[nx-cloudflare] Ignoring unreadable targets cache ${cachePath}; ` +
+        `recomputing targets. Reason: ${errorReason(e)}`
+    );
     return {};
   }
 }
 
 function writeTargetsCache(cachePath: string, cache: TargetsCache): void {
-  writeJsonFile(cachePath, cache);
+  // The cache is a best-effort optimization: a write failure must neither abort
+  // graph construction nor mask an in-flight error from the caller's try block.
+  try {
+    writeJsonFile(cachePath, cache);
+  } catch (e) {
+    logger.warn(
+      `[nx-cloudflare] Could not write targets cache ${cachePath}; ` +
+        `targets will be recomputed next run. Reason: ${errorReason(e)}`
+    );
+  }
 }
 
 function createNodesInternal(
@@ -139,7 +174,9 @@ function createNodesInternal(
     siblings = readdirSync(join(context.workspaceRoot, projectRoot));
   } catch (e) {
     logger.warn(
-      `[nx-cloudflare] Could not read project directory ${projectRoot}: ${e}`
+      `[nx-cloudflare] Could not read project directory ${projectRoot}: ${errorReason(
+        e
+      )}`
     );
     return {};
   }
@@ -157,10 +194,11 @@ function createNodesInternal(
   }
 
   const normalized = normalizeOptions(options);
+  // The cache file is already partitioned by an options hash (see below), so the
+  // per-entry key only needs to distinguish projects by path and content.
   const cacheKey = createHash('sha256')
     .update(configFile)
     .update(content)
-    .update(JSON.stringify(normalized))
     .digest('hex');
 
   targetsCache[cacheKey] ??= buildWorkerTargets(projectRoot, normalized);
@@ -168,6 +206,13 @@ function createNodesInternal(
   return { projects: { [projectRoot]: { targets: targetsCache[cacheKey] } } };
 }
 
+/**
+ * Nx inference plugin. For every `wrangler.{toml,jsonc,json}` that sits beside a
+ * `project.json`/`package.json` and parses, infers the Worker lifecycle targets
+ * (serve, deploy, typegen, version-upload, tail). The per-config target
+ * calculation is memoized in a cache file under `cacheDir`, keyed by the plugin
+ * options so different option sets never share entries.
+ */
 export const createNodesV2: CreateNodesV2<CloudflarePluginOptions> = [
   '**/wrangler.{toml,jsonc,json}',
   async (configFiles, options, context) => {

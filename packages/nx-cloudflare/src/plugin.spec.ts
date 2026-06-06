@@ -53,11 +53,10 @@ describe('nx-cloudflare createNodesV2', () => {
     rmSync(workspaceRoot, { recursive: true, force: true });
   });
 
-  it('matches wrangler configs by extension', () => {
-    expect(configGlob).toBe('**/wrangler.{toml,jsonc,json}');
-  });
-
   it('infers the five Worker targets for a valid jsonc config', async () => {
+    // The exported glob is the contract Nx uses to discover configs.
+    expect(configGlob).toBe('**/wrangler.{toml,jsonc,json}');
+
     writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
     writeFile(
       workspaceRoot,
@@ -150,7 +149,7 @@ describe('nx-cloudflare createNodesV2', () => {
     const result = await run(workspaceRoot, 'apps/bad/wrangler.jsonc');
 
     expect(result).toEqual({});
-    expect(warn).toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('unparseable'));
     warn.mockRestore();
   });
 
@@ -162,7 +161,7 @@ describe('nx-cloudflare createNodesV2', () => {
     const result = await run(workspaceRoot, 'apps/empty/wrangler.toml');
 
     expect(result).toEqual({});
-    expect(warn).toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('empty'));
     warn.mockRestore();
   });
 
@@ -189,7 +188,9 @@ describe('nx-cloudflare createNodesV2', () => {
     const result = await run(workspaceRoot, 'apps/ghost/wrangler.jsonc');
 
     expect(result).toEqual({});
-    expect(warn).toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('project directory')
+    );
     warn.mockRestore();
   });
 
@@ -204,5 +205,75 @@ describe('nx-cloudflare createNodesV2', () => {
     expect(second.projects['apps/worker'].targets.typegen).toMatchObject({
       cache: true,
     });
+  });
+
+  it('infers targets for a plain wrangler.json (non-jsonc) config', async () => {
+    // The glob matches `.json` too; it takes the same parse path as `.jsonc`.
+    writeFile(workspaceRoot, 'apps/jsonworker/project.json', '{"name":"jw"}');
+    writeFile(workspaceRoot, 'apps/jsonworker/wrangler.json', '{"name":"jw"}');
+
+    const result = await run(workspaceRoot, 'apps/jsonworker/wrangler.json');
+
+    expect(result.projects['apps/jsonworker'].targets.deploy).toMatchObject({
+      command: 'wrangler deploy',
+    });
+  });
+
+  it('accepts a parseable but minimal ({}) jsonc config', async () => {
+    // Why: the gate is structural, not semantic. An empty object parses, so
+    // targets are inferred; Wrangler validates the real config at runtime.
+    // (Contrast empty .toml, which is rejected — see the empty-toml test.)
+    writeFile(workspaceRoot, 'apps/min/project.json', '{"name":"min"}');
+    writeFile(workspaceRoot, 'apps/min/wrangler.jsonc', '{}');
+
+    const result = await run(workspaceRoot, 'apps/min/wrangler.jsonc');
+
+    expect(result.projects['apps/min'].targets.deploy).toMatchObject({
+      command: 'wrangler deploy',
+    });
+  });
+
+  it('reflects plugin options in cached targets, not just config content', async () => {
+    // Why: same config content, different options. If the cache keyed on
+    // content alone, the second run would be served the first run's
+    // default-named targets. Guards the options->cache-path keying.
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker"}');
+
+    const defaults = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+    const custom = await run(workspaceRoot, 'apps/worker/wrangler.jsonc', {
+      serveTargetName: 'dev',
+    });
+
+    expect(Object.keys(defaults.projects['apps/worker'].targets)).toContain(
+      'serve'
+    );
+    const customTargets = custom.projects['apps/worker'].targets;
+    expect(Object.keys(customTargets)).toContain('dev');
+    expect(Object.keys(customTargets)).not.toContain('serve');
+  });
+
+  it('handles multiple configs in one invocation, isolating failures', async () => {
+    // Why: the real entry point receives many files sharing one cache. A bad
+    // config must degrade to {} without taking down a valid sibling.
+    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    writeFile(workspaceRoot, 'apps/a/project.json', '{"name":"a"}');
+    writeFile(workspaceRoot, 'apps/a/wrangler.jsonc', '{"name":"a"}');
+    writeFile(workspaceRoot, 'apps/b/project.json', '{"name":"b"}');
+    writeFile(workspaceRoot, 'apps/b/wrangler.jsonc', '{ invalid ');
+
+    const results = await createNodesFn(
+      ['apps/a/wrangler.jsonc', 'apps/b/wrangler.jsonc'],
+      {},
+      ctx(workspaceRoot)
+    );
+    const byFile = Object.fromEntries(results);
+
+    expect(
+      byFile['apps/a/wrangler.jsonc'].projects['apps/a'].targets.deploy
+    ).toMatchObject({ command: 'wrangler deploy' });
+    expect(byFile['apps/b/wrangler.jsonc']).toEqual({});
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('unparseable'));
+    warn.mockRestore();
   });
 });
