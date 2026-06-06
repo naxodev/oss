@@ -45,6 +45,10 @@
       "types": "./src/index.d.ts",
       "default": "./src/index.js"
     },
+    "./plugin": {
+      "types": "./src/plugin.d.ts",
+      "default": "./src/plugin.js"
+    },
     "./package.json": "./package.json",
     "./generators.json": "./generators.json",
     "./executors.json": "./executors.json",
