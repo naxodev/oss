@@ -116,6 +116,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
     // Pin the worker to its creation date so generated workers get a current
     // Workers runtime instead of a stale hardcoded compatibility_date.
     compatibilityDate: new Date().toISOString().split('T')[0],
+    port: options.port,
   };
 
   // General configuration files for workers
@@ -210,7 +211,7 @@ async function normalizeOptions(
     unitTestRunner: options.unitTestRunner ?? 'vitest',
     template: options.template ?? 'fetch-handler',
     configFormat: options.configFormat ?? 'jsonc',
-    port: options.port ?? 3000,
+    port: options.port ?? 8787,
     projectRoot,
     projectType: 'application',
     projectName,

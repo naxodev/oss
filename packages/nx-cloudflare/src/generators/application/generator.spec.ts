@@ -47,6 +47,26 @@ describe('app', () => {
       expect(project.targets.build).toBeUndefined();
     });
 
+    it('writes the requested port into the wrangler config dev.port', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+        port: 4321,
+      });
+      const config = tree.read('myWorkerApp/wrangler.jsonc', 'utf-8');
+      // dev.port carries the port now that there is no serve executor.
+      expect(config).toContain('"port": 4321');
+    });
+
+    it('defaults the wrangler dev port to 8787', async () => {
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+      });
+      const config = tree.read('myWorkerApp/wrangler.jsonc', 'utf-8');
+      expect(config).toContain('"port": 8787');
+    });
+
     it('should update tags', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
@@ -221,7 +241,8 @@ describe('app', () => {
           "name": "myWorkerApp",
           "compatibility_date": "<DATE>",
           "compatibility_flags": ["nodejs_compat"],
-          "main": "src/index.ts"
+          "main": "src/index.ts",
+          "dev": { "port": 8787 }
         }
         "
       `);
@@ -246,6 +267,9 @@ describe('app', () => {
         compatibility_date = "<DATE>"
         compatibility_flags = ["nodejs_compat"]
         main = "src/index.ts"
+
+        [dev]
+        port = 8787
         "
       `);
     });
@@ -269,6 +293,7 @@ describe('app', () => {
           "compatibility_date": "<DATE>",
           "compatibility_flags": ["nodejs_compat"],
           "main": "src/index.ts",
+          "dev": { "port": 8787 },
           "account_id": "abc123"
         }
         "
@@ -293,6 +318,9 @@ describe('app', () => {
         compatibility_date = "<DATE>"
         compatibility_flags = ["nodejs_compat"]
         main = "src/index.ts"
+
+        [dev]
+        port = 8787
         account_id = "abc123"
         "
       `);
