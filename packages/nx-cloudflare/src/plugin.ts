@@ -1,12 +1,16 @@
 import { dirname, join } from 'node:path';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import {
   type CreateNodesContextV2,
   type CreateNodesV2,
   type TargetConfiguration,
+  cacheDir,
   createNodesFromFiles,
   logger,
   parseJson,
+  readJsonFile,
+  writeJsonFile,
 } from '@nx/devkit';
 
 /** Options to rename the inferred Cloudflare Worker targets. */
@@ -71,18 +75,18 @@ function buildWorkerTargets(
 }
 
 /**
- * A wrangler config is "valid enough" to infer targets from when:
- *  - json/jsonc parses (comments allowed), or
- *  - toml is readable and non-empty (toml is legacy; we do not add a parser).
- * Returns false and warns on failure so the project is skipped, not silently.
+ * Read and validate a wrangler config. Returns its raw content when valid, or
+ * null (after warning) when the file is unreadable, an empty .toml, or
+ * unparseable json/jsonc. Returning the content lets callers reuse the single
+ * read for cache-key hashing instead of reading the file twice.
  */
-function configIsValid(absConfigPath: string): boolean {
+function readValidConfig(absConfigPath: string): string | null {
   let content: string;
   try {
     content = readFileSync(absConfigPath, 'utf-8');
   } catch (e) {
     logger.warn(`[nx-cloudflare] Could not read ${absConfigPath}: ${e}`);
-    return false;
+    return null;
   }
 
   if (absConfigPath.endsWith('.toml')) {
@@ -90,26 +94,41 @@ function configIsValid(absConfigPath: string): boolean {
       logger.warn(
         `[nx-cloudflare] Skipping empty wrangler config ${absConfigPath}`
       );
-      return false;
+      return null;
     }
-    return true;
+    return content;
   }
 
   try {
     parseJson(content);
-    return true;
+    return content;
   } catch (e) {
     logger.warn(
       `[nx-cloudflare] Skipping unparseable wrangler config ${absConfigPath}: ${e}`
     );
-    return false;
+    return null;
   }
+}
+
+type TargetsCache = Record<string, Record<string, TargetConfiguration>>;
+
+function readTargetsCache(cachePath: string): TargetsCache {
+  try {
+    return existsSync(cachePath) ? readJsonFile(cachePath) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeTargetsCache(cachePath: string, cache: TargetsCache): void {
+  writeJsonFile(cachePath, cache);
 }
 
 function createNodesInternal(
   configFile: string,
   options: CloudflarePluginOptions | undefined,
-  context: CreateNodesContextV2
+  context: CreateNodesContextV2,
+  targetsCache: TargetsCache
 ) {
   const projectRoot = dirname(configFile);
 
@@ -123,21 +142,42 @@ function createNodesInternal(
     return {};
   }
 
-  if (!configIsValid(join(context.workspaceRoot, configFile))) {
+  const absConfigPath = join(context.workspaceRoot, configFile);
+  const content = readValidConfig(absConfigPath);
+  if (content === null) {
     return {};
   }
 
-  const targets = buildWorkerTargets(projectRoot, normalizeOptions(options));
-  return { projects: { [projectRoot]: { targets } } };
+  const normalized = normalizeOptions(options);
+  const cacheKey = createHash('sha256')
+    .update(configFile)
+    .update(content)
+    .update(JSON.stringify(normalized))
+    .digest('hex');
+
+  targetsCache[cacheKey] ??= buildWorkerTargets(projectRoot, normalized);
+
+  return { projects: { [projectRoot]: { targets: targetsCache[cacheKey] } } };
 }
 
 export const createNodesV2: CreateNodesV2<CloudflarePluginOptions> = [
   '**/wrangler.{toml,jsonc,json}',
-  (configFiles, options, context) =>
-    createNodesFromFiles(
-      (configFile, opts, ctx) => createNodesInternal(configFile, opts, ctx),
-      configFiles,
-      options,
-      context
-    ),
+  async (configFiles, options, context) => {
+    const optionsHash = createHash('sha256')
+      .update(JSON.stringify(options ?? {}))
+      .digest('hex');
+    const cachePath = join(cacheDir, `nx-cloudflare-${optionsHash}.hash`);
+    const targetsCache = readTargetsCache(cachePath);
+    try {
+      return await createNodesFromFiles(
+        (configFile, opts, ctx) =>
+          createNodesInternal(configFile, opts, ctx, targetsCache),
+        configFiles,
+        options,
+        context
+      );
+    } finally {
+      writeTargetsCache(cachePath, targetsCache);
+    }
+  },
 ];

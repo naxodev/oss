@@ -180,4 +180,17 @@ describe('nx-cloudflare createNodesV2', () => {
       command: 'wrangler dev',
     });
   });
+
+  it('returns identical targets across repeated runs (cache safe)', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker"}');
+
+    const first = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+    const second = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+
+    expect(second).toEqual(first);
+    expect(second.projects['apps/worker'].targets.typegen).toMatchObject({
+      cache: true,
+    });
+  });
 });
