@@ -22,7 +22,7 @@ describe('app', () => {
   });
 
   describe('not nested', () => {
-    it('should update project config', async () => {
+    it('should update project config without executor targets', async () => {
       await applicationGenerator(tree, {
         name: 'myWorkerApp',
         directory: 'myWorkerApp',
@@ -30,21 +30,11 @@ describe('app', () => {
       });
       const project = readProjectConfiguration(tree, 'myWorkerApp');
       expect(project.root).toEqual('myWorkerApp');
-      expect(project.targets).toEqual(
-        expect.objectContaining({
-          serve: {
-            executor: '@naxodev/nx-cloudflare:serve',
-            options: {
-              port: 3001,
-            },
-          },
-
-          deploy: {
-            executor: '@naxodev/nx-cloudflare:deploy',
-          },
-        })
-      );
-      expect(project.targets.build).toBeUndefined();
+      // serve/deploy now come from the inference plugin, not project.json.
+      expect(project.targets?.serve).toBeUndefined();
+      expect(project.targets?.deploy).toBeUndefined();
+      // No build target: wrangler bundles on deploy.
+      expect(project.targets?.build).toBeUndefined();
     });
 
     it('writes the requested port into the wrangler config dev.port', async () => {
