@@ -1,15 +1,3 @@
 {
-  "executors": {
-    "serve": {
-      "implementation": "./src/executors/serve/executor",
-      "schema": "./src/executors/serve/schema.json",
-      "description": "Serve cloudflare worker"
-    },
-    "deploy": {
-      "implementation": "./src/executors/deploy/executor",
-      "schema": "./src/executors/deploy/schema.json",
-      "description": "Deploy worker to Cloudflare",
-      "aliases": ["publish"]
-    }
-  }
+  "executors": {}
 }

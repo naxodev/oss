@@ -52,9 +52,6 @@
     "./package.json": "./package.json",
     "./generators.json": "./generators.json",
     "./executors.json": "./executors.json",
-    "./src/executors/*/executor": "./src/executors/*/executor.js",
-    "./src/executors/*/schema.json": "./src/executors/*/schema.json",
-    "./src/executors/*/schema": "./src/executors/*/schema.d.ts",
     "./src/generators/*/generator": "./src/generators/*/generator.js",
     "./src/generators/*/schema.json": "./src/generators/*/schema.json",
     "./src/generators/*/schema": "./src/generators/*/schema.d.ts"
