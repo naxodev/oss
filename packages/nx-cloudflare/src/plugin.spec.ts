@@ -181,6 +181,18 @@ describe('nx-cloudflare createNodesV2', () => {
     });
   });
 
+  it('skips a config whose project directory cannot be read and warns', async () => {
+    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    // No directory is created for apps/ghost, so the project-marker readdir
+    // throws ENOENT. Inference must degrade to {} for this one config rather
+    // than aborting graph construction for the whole workspace.
+    const result = await run(workspaceRoot, 'apps/ghost/wrangler.jsonc');
+
+    expect(result).toEqual({});
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
   it('returns identical targets across repeated runs (cache safe)', async () => {
     writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
     writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker"}');

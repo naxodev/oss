@@ -134,7 +134,15 @@ function createNodesInternal(
 
   // Only infer targets for real Nx projects: a sibling project.json or
   // package.json. Otherwise this wrangler file is not a project root.
-  const siblings = readdirSync(join(context.workspaceRoot, projectRoot));
+  let siblings: string[];
+  try {
+    siblings = readdirSync(join(context.workspaceRoot, projectRoot));
+  } catch (e) {
+    logger.warn(
+      `[nx-cloudflare] Could not read project directory ${projectRoot}: ${e}`
+    );
+    return {};
+  }
   if (
     !siblings.includes('project.json') &&
     !siblings.includes('package.json')
