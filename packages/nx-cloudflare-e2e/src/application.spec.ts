@@ -49,7 +49,7 @@ describe('Cloudflare Worker Applications', () => {
     ).toBeTruthy();
   }, 120_000);
 
-  it('should resolve the serve and deploy executors from the installed package', () => {
+  it('infers Worker targets from the installed plugin', () => {
     const workerapp = uniq('workerapp');
 
     runCLI(
@@ -62,12 +62,21 @@ describe('Cloudflare Worker Applications', () => {
 
     const project = showProject(workerapp);
 
-    expect(project.targets?.serve?.executor).toBe(
+    // serve/deploy/typegen/version-upload/tail come from the createNodesV2
+    // plugin (registered by the generator's init step), not from executors.
+    for (const target of [
+      'serve',
+      'deploy',
+      'typegen',
+      'version-upload',
+      'tail',
+    ]) {
+      expect(project.targets?.[target]).toBeDefined();
+    }
+    expect(project.targets?.serve?.executor).not.toBe(
       '@naxodev/nx-cloudflare:serve'
     );
-    expect(project.targets?.deploy?.executor).toBe(
-      '@naxodev/nx-cloudflare:deploy'
-    );
+    expect(project.targets?.serve?.continuous).toBe(true);
   }, 120_000);
 
   it('should be able to generate and serve a fetch-handler application', async () => {
@@ -173,11 +182,12 @@ describe('Cloudflare Worker Applications', () => {
     // Reset the Nx daemon so the freshly generated project is in the graph.
     runCLI('reset');
 
-    // The default-directory project must still resolve the installed package's
-    // executors (not just scaffold files).
+    // The default-directory project must still expose the inferred serve
+    // target (not just scaffold files).
     const project = showProject(workerapp);
     expect(project.root).toBe(workerapp);
-    expect(project.targets?.serve?.executor).toBe(
+    expect(project.targets?.serve).toBeDefined();
+    expect(project.targets?.serve?.executor).not.toBe(
       '@naxodev/nx-cloudflare:serve'
     );
   }, 120_000);
