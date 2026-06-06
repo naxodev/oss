@@ -12,12 +12,16 @@
  * (`name_<GOOS>.go`, `name_<GOARCH>.go`, `name_<GOOS>_<GOARCH>.go`, with an
  * optional trailing `_test`). See `shouldIncludeFilename`.
  *
- * Known limitations:
- *  - `go1.X` version tags are treated as always-true: we have no compiler
- *    handy to consult, and over-including is safer than under-including
- *    for graph computation. Tracked in #108 (lift policy onto context).
- *  - The pseudo-tag `cgo` is treated as false (static analysis never runs
- *    cgo). Same tracking issue (#108).
+ * Build policy lives on `BuildContext`, not hardcoded in the matcher:
+ *  - `cgo` evaluates to `ctx.cgoEnabled ?? false` — static analysis never
+ *    runs cgo, so it defaults off.
+ *  - `go1.M` version tags evaluate against `ctx.goVersion` when supplied
+ *    (`ctx-minor >= tag-minor`); with no version handy they're treated as
+ *    satisfied, since over-including is safer than under-including for graph
+ *    computation.
+ *
+ * @see https://pkg.go.dev/go/build#hdr-Build_Constraints — the constraint spec this implements
+ * @see https://go.googlesource.com/proposal/+/master/design/draft-gobuild.md — why `//go:build` replaced `// +build`
  */
 
 import { logger } from '@nx/devkit';
@@ -30,6 +34,11 @@ import { platform, arch } from 'os';
 // is a single-line change. The exported `GoOS` adds a `(string & {})` escape
 // hatch so unknown Node platforms still pass through `nodePlatformToGoos`
 // without losing autocomplete on the canonical set.
+//
+// The `(string & {})` open-union trick keeps autocomplete on the known set; the
+// value lists mirror Go's `internal/syslist`.
+// @see https://github.com/microsoft/TypeScript/issues/29729
+// @see https://github.com/golang/go/blob/master/src/internal/syslist/syslist.go
 
 /** Canonical Go `GOOS` values per `internal/syslist.KnownOS`. */
 const KNOWN_GOOSES_LIST = [
@@ -128,14 +137,29 @@ export interface BuildContext {
   readonly goarch: GoArch;
   /** User-supplied tags (e.g. `integration`, `debug`). Default empty. */
   readonly tags: ReadonlySet<string>;
+  /**
+   * Whether cgo is enabled in the target environment. Static analysis never
+   * invokes cgo, so the matcher treats this as `false` when unset — a
+   * `//go:build cgo` file is excluded unless a caller opts in.
+   */
+  readonly cgoEnabled?: boolean;
+  /**
+   * Target Go toolchain version as `1.N`. A `go1.M` build tag means "requires
+   * Go 1.M or newer"; when `goVersion` is set the matcher gates on `N >= M`
+   * (compared numerically). When unset, every `go1.M` tag is satisfied, since
+   * over-including is safer than under-including for graph computation.
+   *
+   * @see https://pkg.go.dev/go/build#hdr-Build_Constraints — `go1.N` release tags
+   */
+  readonly goVersion?: `1.${number}`;
 }
 
 /**
  * Mapping from Node's `process.platform` to Go's GOOS. Keys are constrained
  * to `NodeJS.Platform` and values to `KnownGoOS`, so a typo on either side is
  * a compile error. Entries are listed only for platforms Go's `internal/syslist`
- * actually recognizes — others (e.g. Node's `haiku`, `cygwin`) fall through to
- * the original value in `nodePlatformToGoos`.
+ * actually recognizes — others (e.g. Node's `haiku`) fall through to the
+ * original value in `nodePlatformToGoos`, which special-cases `cygwin`.
  */
 const NODE_PLATFORM_TO_GOOS: Readonly<
   Partial<Record<NodeJS.Platform, KnownGoOS>>
@@ -170,7 +194,17 @@ const NODE_ARCH_TO_GOARCH: Readonly<Record<string, KnownGoArch>> = {
 };
 
 function nodePlatformToGoos(p: NodeJS.Platform): GoOS {
-  // Best-effort: unknown Node platforms (e.g. cygwin, haiku) pass through.
+  // Cygwin runs unix-like Go binaries, but Go has no `cygwin` GOOS. Passing
+  // it through would exclude `linux`/`unix`-gated files, violating the
+  // over-include policy on cygwin hosts. Map to linux (the closest GOOS) and
+  // warn so the substitution is visible.
+  if (p === 'cygwin') {
+    logger.warn(
+      'Detected cygwin Node host; mapping to linux for Go build-constraint evaluation.'
+    );
+    return 'linux';
+  }
+  // Best-effort: other unknown Node platforms (e.g. haiku) pass through.
   return NODE_PLATFORM_TO_GOOS[p] ?? p;
 }
 
@@ -180,14 +214,20 @@ function nodeArchToGoarch(a: string): GoArch {
 
 /**
  * Derive a default `BuildContext` from the current Node process.
- * The result is process-stable — safe to memoize at module level.
+ * The result is process-stable — safe to memoize at module level (the sole
+ * caller does). Freezing the object stops a caller reassigning a field of the
+ * shared default; the `tags` set's immutability is the job of its
+ * `ReadonlySet` type, since `Object.freeze` does not lock a Set's contents at
+ * runtime (the empty-set freeze is a harmless backstop, not the guarantee).
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze — `Object.freeze` does not lock a Set's contents
  */
 export function getDefaultBuildContext(): BuildContext {
-  return {
+  return Object.freeze({
     goos: nodePlatformToGoos(platform()),
     goarch: nodeArchToGoarch(arch()),
-    tags: new Set(),
-  };
+    tags: Object.freeze(new Set<string>()),
+  });
 }
 
 /**
@@ -521,11 +561,33 @@ function matchTag(tag: string, ctx: BuildContext): boolean {
   if (tag === ctx.goos) return true;
   if (tag === ctx.goarch) return true;
   if (tag === 'unix' && UNIX_OSES.has(ctx.goos)) return true;
-  // Go-version tags: assume the user's compiler satisfies them. Over-
-  // including is safer than under-including for graph purposes.
-  if (/^go1\.\d+$/.test(tag)) return true;
-  // We never invoke cgo from static analysis.
-  if (tag === 'cgo') return false;
+  const goVersion = /^go1\.(\d+)$/.exec(tag);
+  if (goVersion) {
+    return satisfiesGoVersion(ctx.goVersion, Number(goVersion[1]));
+  }
+  if (tag === 'cgo') return ctx.cgoEnabled ?? false;
   if (ctx.tags.has(tag)) return true;
   return false;
+}
+
+/**
+ * Evaluate a `go1.M` tag (its minor version) against the context's Go version.
+ * An unset `ctx.goVersion` satisfies every tag (over-include); a set version
+ * gates on `ctx-minor >= tag-minor`, compared numerically so `1.9` correctly
+ * fails `go1.10` (lexical comparison would wrongly include it).
+ *
+ * The `\`1.${number}\`` type can be subverted at an `as` boundary or once
+ * `goVersion` is fed from external config, yielding an unparseable value. We
+ * over-include in that case rather than letting `Number('x') >= M` (`NaN >= M`,
+ * always false) silently drop the file — under-including is the worse failure.
+ * Validation of a user-facing `goVersion` belongs at that future input boundary.
+ */
+function satisfiesGoVersion(
+  goVersion: BuildContext['goVersion'],
+  tagMinor: number
+): boolean {
+  if (goVersion === undefined) return true;
+  const parsed = /^1\.(\d+)$/.exec(goVersion);
+  if (!parsed) return true;
+  return Number(parsed[1]) >= tagMinor;
 }

@@ -60,8 +60,9 @@ Supported in the constraint expression:
   in `internal/syslist.UnixOS`)
 - GOOS values (`linux`, `darwin`, `windows`, …) and GOARCH values
   (`amd64`, `arm64`, `386`, …)
-- User-defined tags via the `BuildContext.tags` set (internal API; a
-  plugin-option surface is tracked in [#108](https://github.com/naxodev/oss/issues/108))
+- User-defined tags via the `BuildContext.tags` set, plus `cgo` and `go1.N`
+  policy via `BuildContext.cgoEnabled` / `BuildContext.goVersion` (internal
+  API; not yet exposed as a plugin option)
 
 Filename-based suffixes are also honored, matching Go's `go/build`
 algorithm:
@@ -77,11 +78,11 @@ unix-gated, and neither do we.
 
 Behavior on edge cases:
 
-- `go1.X` version tags evaluate to `true` (we have no Go compiler
+- `go1.X` version tags evaluate to `true` by default (no Go compiler
   handy to consult; over-including is safer than under-including for
-  graph purposes).
-- The `cgo` pseudo-tag evaluates to `false` — static analysis never
-  invokes cgo.
+  graph purposes). Set `BuildContext.goVersion` to gate on `N >= M`.
+- The `cgo` pseudo-tag evaluates to `false` by default — static analysis
+  never invokes cgo. Set `BuildContext.cgoEnabled` to opt in.
 - A malformed expression falls back to "include the file" rather than
   failing graph construction.
 
