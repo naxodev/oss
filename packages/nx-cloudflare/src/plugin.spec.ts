@@ -110,4 +110,24 @@ describe('nx-cloudflare createNodesV2', () => {
     );
     expect(targets.dev).toMatchObject({ command: 'wrangler dev', continuous: true });
   });
+
+  it('returns no targets when no project.json/package.json sits beside the config', async () => {
+    // Config present, but the directory has no Nx project marker.
+    writeFile(workspaceRoot, 'apps/loose/wrangler.jsonc', '{"name":"loose"}');
+
+    const result = await run(workspaceRoot, 'apps/loose/wrangler.jsonc');
+
+    expect(result).toEqual({});
+  });
+
+  it('accepts a package.json as the project marker', async () => {
+    writeFile(workspaceRoot, 'apps/pkg/package.json', '{"name":"pkg"}');
+    writeFile(workspaceRoot, 'apps/pkg/wrangler.jsonc', '{"name":"pkg"}');
+
+    const result = await run(workspaceRoot, 'apps/pkg/wrangler.jsonc');
+
+    expect(result.projects['apps/pkg'].targets.deploy).toMatchObject({
+      command: 'wrangler deploy',
+    });
+  });
 });

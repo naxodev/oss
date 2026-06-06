@@ -1,4 +1,5 @@
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
+import { readdirSync } from 'node:fs';
 import {
   type CreateNodesContextV2,
   type CreateNodesV2,
@@ -69,9 +70,17 @@ function buildWorkerTargets(
 function createNodesInternal(
   configFile: string,
   options: CloudflarePluginOptions | undefined,
-  _context: CreateNodesContextV2
+  context: CreateNodesContextV2
 ) {
   const projectRoot = dirname(configFile);
+
+  // Only infer targets for real Nx projects: a sibling project.json or
+  // package.json. Otherwise this wrangler file is not a project root.
+  const siblings = readdirSync(join(context.workspaceRoot, projectRoot));
+  if (!siblings.includes('project.json') && !siblings.includes('package.json')) {
+    return {};
+  }
+
   const targets = buildWorkerTargets(projectRoot, normalizeOptions(options));
   return { projects: { [projectRoot]: { targets } } };
 }
