@@ -1,7 +1,7 @@
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { CreateNodesContextV2 } from '@nx/devkit';
+import { logger, type CreateNodesContextV2 } from '@nx/devkit';
 import { createNodesV2, type CloudflarePluginOptions } from './plugin';
 
 const [configGlob, createNodesFn] = createNodesV2;
@@ -11,7 +11,11 @@ function setupWorkspace(): string {
   return mkdtempSync(join(tmpdir(), 'nx-cf-'));
 }
 
-function writeFile(workspaceRoot: string, relPath: string, content: string): void {
+function writeFile(
+  workspaceRoot: string,
+  relPath: string,
+  content: string
+): void {
   const abs = join(workspaceRoot, relPath);
   mkdirSync(join(abs, '..'), { recursive: true });
   writeFileSync(abs, content);
@@ -30,7 +34,11 @@ async function run(
   configFile: string,
   options: CloudflarePluginOptions = {}
 ) {
-  const results = await createNodesFn([configFile], options, ctx(workspaceRoot));
+  const results = await createNodesFn(
+    [configFile],
+    options,
+    ctx(workspaceRoot)
+  );
   return results[0][1];
 }
 
@@ -108,7 +116,10 @@ describe('nx-cloudflare createNodesV2', () => {
     expect(Object.keys(targets).sort()).toEqual(
       ['dev', 'logs', 'publish', 'types', 'upload'].sort()
     );
-    expect(targets.dev).toMatchObject({ command: 'wrangler dev', continuous: true });
+    expect(targets.dev).toMatchObject({
+      command: 'wrangler dev',
+      continuous: true,
+    });
   });
 
   it('returns no targets when no project.json/package.json sits beside the config', async () => {
@@ -128,6 +139,45 @@ describe('nx-cloudflare createNodesV2', () => {
 
     expect(result.projects['apps/pkg'].targets.deploy).toMatchObject({
       command: 'wrangler deploy',
+    });
+  });
+
+  it('skips an unparseable jsonc config and warns', async () => {
+    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    writeFile(workspaceRoot, 'apps/bad/project.json', '{"name":"bad"}');
+    writeFile(workspaceRoot, 'apps/bad/wrangler.jsonc', '{ not valid json ');
+
+    const result = await run(workspaceRoot, 'apps/bad/wrangler.jsonc');
+
+    expect(result).toEqual({});
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('skips an empty toml config and warns', async () => {
+    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    writeFile(workspaceRoot, 'apps/empty/project.json', '{"name":"empty"}');
+    writeFile(workspaceRoot, 'apps/empty/wrangler.toml', '   \n  ');
+
+    const result = await run(workspaceRoot, 'apps/empty/wrangler.toml');
+
+    expect(result).toEqual({});
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('accepts a non-empty toml config (no strict parse)', async () => {
+    writeFile(workspaceRoot, 'apps/tomlworker/project.json', '{"name":"tw"}');
+    writeFile(
+      workspaceRoot,
+      'apps/tomlworker/wrangler.toml',
+      'name = "tw"\nmain = "src/index.ts"\n'
+    );
+
+    const result = await run(workspaceRoot, 'apps/tomlworker/wrangler.toml');
+
+    expect(result.projects['apps/tomlworker'].targets.serve).toMatchObject({
+      command: 'wrangler dev',
     });
   });
 });

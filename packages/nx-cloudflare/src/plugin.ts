@@ -1,10 +1,12 @@
 import { dirname, join } from 'node:path';
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import {
   type CreateNodesContextV2,
   type CreateNodesV2,
   type TargetConfiguration,
   createNodesFromFiles,
+  logger,
+  parseJson,
 } from '@nx/devkit';
 
 /** Options to rename the inferred Cloudflare Worker targets. */
@@ -31,7 +33,8 @@ function normalizeOptions(
     serveTargetName: options?.serveTargetName ?? 'serve',
     deployTargetName: options?.deployTargetName ?? 'deploy',
     typegenTargetName: options?.typegenTargetName ?? 'typegen',
-    versionUploadTargetName: options?.versionUploadTargetName ?? 'version-upload',
+    versionUploadTargetName:
+      options?.versionUploadTargetName ?? 'version-upload',
     tailTargetName: options?.tailTargetName ?? 'tail',
   };
 }
@@ -67,6 +70,42 @@ function buildWorkerTargets(
   };
 }
 
+/**
+ * A wrangler config is "valid enough" to infer targets from when:
+ *  - json/jsonc parses (comments allowed), or
+ *  - toml is readable and non-empty (toml is legacy; we do not add a parser).
+ * Returns false and warns on failure so the project is skipped, not silently.
+ */
+function configIsValid(absConfigPath: string): boolean {
+  let content: string;
+  try {
+    content = readFileSync(absConfigPath, 'utf-8');
+  } catch (e) {
+    logger.warn(`[nx-cloudflare] Could not read ${absConfigPath}: ${e}`);
+    return false;
+  }
+
+  if (absConfigPath.endsWith('.toml')) {
+    if (content.trim().length === 0) {
+      logger.warn(
+        `[nx-cloudflare] Skipping empty wrangler config ${absConfigPath}`
+      );
+      return false;
+    }
+    return true;
+  }
+
+  try {
+    parseJson(content);
+    return true;
+  } catch (e) {
+    logger.warn(
+      `[nx-cloudflare] Skipping unparseable wrangler config ${absConfigPath}: ${e}`
+    );
+    return false;
+  }
+}
+
 function createNodesInternal(
   configFile: string,
   options: CloudflarePluginOptions | undefined,
@@ -77,7 +116,14 @@ function createNodesInternal(
   // Only infer targets for real Nx projects: a sibling project.json or
   // package.json. Otherwise this wrangler file is not a project root.
   const siblings = readdirSync(join(context.workspaceRoot, projectRoot));
-  if (!siblings.includes('project.json') && !siblings.includes('package.json')) {
+  if (
+    !siblings.includes('project.json') &&
+    !siblings.includes('package.json')
+  ) {
+    return {};
+  }
+
+  if (!configIsValid(join(context.workspaceRoot, configFile))) {
     return {};
   }
 
