@@ -63,14 +63,23 @@ function buildWorkerTargets(
   const run = (
     command: string,
     extra: Partial<TargetConfiguration> = {}
-  ): TargetConfiguration => ({
-    command,
-    options: { cwd: projectRoot },
-    ...extra,
-  });
+  ): TargetConfiguration => {
+    const { options: extraOptions, ...rest } = extra;
+    return {
+      command,
+      options: { cwd: projectRoot, ...extraOptions },
+      ...rest,
+    };
+  };
 
   return {
-    [options.serveTargetName]: run('wrangler dev', { continuous: true }),
+    [options.serveTargetName]: run('wrangler dev', {
+      continuous: true,
+      // `wrangler dev` prints "[wrangler:info] Ready on http://..." once the
+      // local server is actually listening. Gate dependent tasks on that,
+      // replacing the old serve executor's waitForPortOpen readiness check.
+      options: { readyWhen: 'Ready on' },
+    }),
     [options.deployTargetName]: run('wrangler deploy'),
     [options.typegenTargetName]: run('wrangler types', {
       cache: true,

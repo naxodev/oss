@@ -71,10 +71,12 @@ describe('nx-cloudflare createNodesV2', () => {
       ['deploy', 'serve', 'tail', 'typegen', 'version-upload'].sort()
     );
 
-    // Why: serve is the local dev server and must stay alive across the run.
+    // Why: serve is the local dev server, must stay alive across the run, and
+    // signals readiness via wrangler's "Ready on ..." line so dependent tasks
+    // wait for the port to actually be listening.
     expect(targets.serve).toMatchObject({
       command: 'wrangler dev',
-      options: { cwd: 'apps/worker' },
+      options: { cwd: 'apps/worker', readyWhen: 'Ready on' },
       continuous: true,
     });
     // Why: tail streams logs indefinitely, so it is also continuous.
