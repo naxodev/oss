@@ -196,19 +196,6 @@ describe('nx-cloudflare createNodesV2', () => {
     warn.mockRestore();
   });
 
-  it('returns identical targets across repeated runs (cache safe)', async () => {
-    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
-    writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker"}');
-
-    const first = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
-    const second = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
-
-    expect(second).toEqual(first);
-    expect(second.projects['apps/worker'].targets.typegen).toMatchObject({
-      cache: true,
-    });
-  });
-
   it('infers targets for a plain wrangler.json (non-jsonc) config', async () => {
     // The glob matches `.json` too; it takes the same parse path as `.jsonc`.
     writeFile(workspaceRoot, 'apps/jsonworker/project.json', '{"name":"jw"}');
@@ -235,10 +222,9 @@ describe('nx-cloudflare createNodesV2', () => {
     });
   });
 
-  it('reflects plugin options in cached targets, not just config content', async () => {
-    // Why: same config content, different options. If the cache keyed on
-    // content alone, the second run would be served the first run's
-    // default-named targets. Guards the options->cache-path keying.
+  it('reflects plugin options in target names, not just config content', async () => {
+    // Why: same config content, different options must yield differently named
+    // targets. Guards that options flow through to the inferred target set.
     writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
     writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker"}');
 
@@ -256,7 +242,7 @@ describe('nx-cloudflare createNodesV2', () => {
   });
 
   it('handles multiple configs in one invocation, isolating failures', async () => {
-    // Why: the real entry point receives many files sharing one cache. A bad
+    // Why: the real entry point receives many files in one invocation. A bad
     // config must degrade to {} without taking down a valid sibling.
     const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
     writeFile(workspaceRoot, 'apps/a/project.json', '{"name":"a"}');
