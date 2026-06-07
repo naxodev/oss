@@ -156,17 +156,40 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
   }
 }
 
-// Strip the executor targets the node application generator adds. Wrangler
-// bundles on deploy, so Worker projects have no separate build step, and the
-// node generator's @nx/js:node `serve` would shadow the inferred one. serve,
-// deploy and the rest are inferred by the createNodesV2 plugin (see plugin.ts).
+// The @nx/node application generator adds Node-oriented targets that don't
+// apply to a Cloudflare Worker. Wrangler bundles on deploy, so there is no
+// separate `build` step; the @nx/js:node `serve` would shadow the inferred one;
+// and `prune`/`prune-lockfile`/`copy-workspace-modules` are Node deployment
+// helpers that `dependsOn: ['build']` and would dangle once `build` is gone.
+// serve, deploy and the Worker lifecycle targets are inferred by the
+// createNodesV2 plugin instead (see plugin.ts). `lint`/`test` are kept.
+// This list is coupled to @nx/node's emitted targets; a generator test asserts
+// no surviving target depends on a stripped one, so a new build-dependent
+// target in a future @nx/node would fail CI rather than dangle silently.
+const NODE_APP_TARGETS_TO_REMOVE = [
+  'build',
+  'serve',
+  'prune',
+  'prune-lockfile',
+  'copy-workspace-modules',
+] as const;
+
 function removeNodeAppTargets(tree: Tree, options: NormalizedSchema) {
   const projectConfiguration = readProjectConfiguration(tree, options.name);
   const targets = projectConfiguration.targets;
+  if (!targets) {
+    return;
+  }
 
-  if (targets?.build || targets?.serve) {
-    delete targets.build;
-    delete targets.serve;
+  let changed = false;
+  for (const target of NODE_APP_TARGETS_TO_REMOVE) {
+    if (targets[target]) {
+      delete targets[target];
+      changed = true;
+    }
+  }
+
+  if (changed) {
     updateProjectConfiguration(tree, options.name, projectConfiguration);
   }
 }
