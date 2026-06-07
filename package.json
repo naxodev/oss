@@ -4,6 +4,9 @@
   "license": "MIT",
   "scripts": {},
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "@angular-devkit/core": "~17.3.7",
     "@cloudflare/vitest-pool-workers": "^0.12.0",
