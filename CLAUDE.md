@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`@naxodev/oss` is an Nx 22 monorepo (pnpm workspace, Node 22) that publishes two independent Nx plugins to npm:
+`@naxodev/oss` is an Nx 22 monorepo (bun workspace, Node 22) that publishes two independent Nx plugins to npm:
 
 - **`@naxodev/nx-cloudflare`** (`packages/nx-cloudflare`) — Nx plugin for Cloudflare Workers (generators, executors, and a `createNodesV2` inference plugin around Wrangler).
 - **`@naxodev/gonx`** (`packages/gonx`) — Nx plugin for using Go in an Nx workspace (fork of nx-go, modernized). Includes a tree-sitter–based Go static-analysis graph.
@@ -13,27 +13,27 @@ Supporting (non-published) projects: `e2e-utils` (shared e2e helpers), `nx-cloud
 
 ## Commands
 
-All Nx invocations use `pnpm exec nx ...`. The package manager is **pnpm** (not npm/yarn).
+All Nx invocations use `bunx nx ...`. The package manager is **bun** (not npm/yarn/pnpm).
 
 ```bash
 # Build a single plugin (outputs to dist/packages/<name>)
-pnpm exec nx build nx-cloudflare
-pnpm exec nx build gonx
+bunx nx build nx-cloudflare
+bunx nx build gonx
 
 # Lint / test a project
-pnpm exec nx lint gonx
-pnpm exec nx test nx-cloudflare
+bunx nx lint gonx
+bunx nx test nx-cloudflare
 
 # Run only what's affected (this is what CI runs)
-pnpm exec nx affected -t lint test build
+bunx nx affected -t lint test build
 
 # Formatting (Prettier, via nx)
-pnpm exec nx format:check      # verify
-pnpm exec nx format:write      # fix
+bunx nx format:check      # verify
+bunx nx format:write      # fix
 
 # e2e (spins up a local Verdaccio registry — see note below)
-pnpm exec nx e2e nx-cloudflare-e2e
-pnpm exec nx e2e gonx-e2e
+bunx nx e2e nx-cloudflare-e2e
+bunx nx e2e gonx-e2e
 ```
 
 ### Running a single unit test
@@ -42,9 +42,9 @@ Unit tests run on **Jest** (via `@nx/jest`, ts-jest). Pass Jest CLI args after `
 
 ```bash
 # By file
-pnpm exec nx test gonx -- src/graph/static-analysis/parse-go-mod.spec.ts
+bunx nx test gonx -- src/graph/static-analysis/parse-go-mod.spec.ts
 # By test name
-pnpm exec nx test nx-cloudflare -- -t "deploy executor"
+bunx nx test nx-cloudflare -- -t "deploy executor"
 ```
 
 Note: the Nx config registers both the Jest and Vite plugins under the `test` target name; the actual unit suites here are Jest. The `@naxodev/nx-cloudflare` package scaffolds **Vitest** configs into _generated_ user projects — don't confuse the scaffolded test setup with this repo's own test setup.

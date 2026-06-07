@@ -3,7 +3,7 @@
 /coverage
 /tmp
 /.github
-pnpm-lock.yaml
+bun.lock
 .vercel
 .next
 

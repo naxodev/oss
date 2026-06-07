@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "cli": {
-    "packageManager": "pnpm"
+    "packageManager": "bun"
   },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
@@ -89,7 +89,7 @@
     "projects": ["gonx", "nx-cloudflare"],
     "version": {
       "useLegacyVersioning": false,
-      "preVersionCommand": "pnpm exec nx run-many -t build",
+      "preVersionCommand": "bunx nx run-many -t build",
       "conventionalCommits": true
     },
     "git": {
