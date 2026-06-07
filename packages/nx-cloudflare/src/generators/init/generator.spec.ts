@@ -1,4 +1,9 @@
-import { addDependenciesToPackageJson, readJson, Tree } from '@nx/devkit';
+import {
+  addDependenciesToPackageJson,
+  readJson,
+  readNxJson,
+  Tree,
+} from '@nx/devkit';
 import initGenerator from './generator';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 
@@ -62,6 +67,27 @@ describe('init', () => {
       const packageJson = readJson(tree, 'package.json');
       // adds `hono`
       expect(packageJson.dependencies['hono']).toBeDefined();
+    });
+  });
+
+  describe('plugin registration', () => {
+    it('registers the inference plugin in nx.json', async () => {
+      await initGenerator(tree, {});
+      const plugins = readNxJson(tree)?.plugins ?? [];
+      expect(plugins).toContain('@naxodev/nx-cloudflare/plugin');
+    });
+
+    it('does not duplicate the plugin on a second run', async () => {
+      await initGenerator(tree, {});
+      await initGenerator(tree, {});
+      const plugins = readNxJson(tree)?.plugins ?? [];
+      const count = plugins.filter(
+        (p) =>
+          p === '@naxodev/nx-cloudflare/plugin' ||
+          (typeof p === 'object' &&
+            p.plugin === '@naxodev/nx-cloudflare/plugin')
+      ).length;
+      expect(count).toBe(1);
     });
   });
 

@@ -51,7 +51,7 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
 
   addCloudflareFiles(tree, options);
   updateTsAppConfig(tree, options);
-  addTargets(tree, options);
+  removeNodeAppTargets(tree, options);
 
   if (options.unitTestRunner === 'none') {
     removeTestFiles(tree, options);
@@ -116,6 +116,7 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
     // Pin the worker to its creation date so generated workers get a current
     // Workers runtime instead of a stale hardcoded compatibility_date.
     compatibilityDate: new Date().toISOString().split('T')[0],
+    port: options.port,
   };
 
   // General configuration files for workers
@@ -155,29 +156,19 @@ function addCloudflareFiles(tree: Tree, options: NormalizedSchema) {
   }
 }
 
-// Adds the targets to the project configuration
-function addTargets(tree: Tree, options: NormalizedSchema) {
+// Strip the executor targets the node application generator adds. Wrangler
+// bundles on deploy, so Worker projects have no separate build step, and the
+// node generator's @nx/js:node `serve` would shadow the inferred one. serve,
+// deploy and the rest are inferred by the createNodesV2 plugin (see plugin.ts).
+function removeNodeAppTargets(tree: Tree, options: NormalizedSchema) {
   const projectConfiguration = readProjectConfiguration(tree, options.name);
+  const targets = projectConfiguration.targets;
 
-  projectConfiguration.targets = {
-    ...(projectConfiguration.targets ?? {}),
-    serve: {
-      executor: '@naxodev/nx-cloudflare:serve',
-      options: {
-        port: options.port,
-      },
-    },
-
-    deploy: {
-      executor: '@naxodev/nx-cloudflare:deploy',
-    },
-  };
-
-  if (projectConfiguration.targets.build) {
-    delete projectConfiguration.targets.build;
+  if (targets?.build || targets?.serve) {
+    delete targets.build;
+    delete targets.serve;
+    updateProjectConfiguration(tree, options.name, projectConfiguration);
   }
-
-  updateProjectConfiguration(tree, options.name, projectConfiguration);
 }
 
 function removeTestFiles(tree: Tree, options: NormalizedSchema) {
@@ -210,7 +201,7 @@ async function normalizeOptions(
     unitTestRunner: options.unitTestRunner ?? 'vitest',
     template: options.template ?? 'fetch-handler',
     configFormat: options.configFormat ?? 'jsonc',
-    port: options.port ?? 3000,
+    port: options.port ?? 8787,
     projectRoot,
     projectType: 'application',
     projectName,

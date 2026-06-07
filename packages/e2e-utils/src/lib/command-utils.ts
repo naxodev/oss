@@ -326,7 +326,7 @@ export function showProject(
   opts?: RunCmdOpts
 ): {
   root: string;
-  targets?: Record<string, { executor?: string }>;
+  targets?: Record<string, { executor?: string; continuous?: boolean }>;
   [key: string]: unknown;
 } {
   const out = runCLI(`show project ${projectName} --json`, opts);

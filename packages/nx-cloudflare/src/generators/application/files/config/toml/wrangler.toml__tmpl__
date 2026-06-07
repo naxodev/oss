@@ -2,5 +2,8 @@ name = "<%= name %>"
 compatibility_date = "<%= compatibilityDate %>"
 compatibility_flags = ["nodejs_compat"]
 main = "src/index.<%= extension %>"
+
+[dev]
+port = <%= port %>
 <% if (accountId) { %>account_id = "<%= accountId %>"
 <% } %>
