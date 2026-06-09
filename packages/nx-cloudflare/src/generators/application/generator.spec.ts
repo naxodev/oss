@@ -35,6 +35,49 @@ describe('app', () => {
       expect(project.targets?.deploy).toBeUndefined();
       // No build target: wrangler bundles on deploy.
       expect(project.targets?.build).toBeUndefined();
+      // @nx/node's Node deployment helpers dangle once build is gone (they
+      // dependsOn build) and are meaningless for a Worker, so they are stripped.
+      expect(project.targets?.prune).toBeUndefined();
+      expect(project.targets?.['prune-lockfile']).toBeUndefined();
+      expect(project.targets?.['copy-workspace-modules']).toBeUndefined();
+    });
+
+    it('keeps the lint target that the worker still needs', async () => {
+      // The strip list is an allowlist of node-app targets that don't apply to
+      // a Worker; flipping it to a denylist (or an over-broad loop) would also
+      // wipe lint/test. Lock in that a kept target survives.
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+      });
+      const project = readProjectConfiguration(tree, 'myWorkerApp');
+      expect(project.targets?.lint).toBeDefined();
+    });
+
+    it('leaves no surviving target depending on a stripped one', async () => {
+      // The bug this guards: a future @nx/node version could add another
+      // build-dependent target outside the allowlist, silently reintroducing a
+      // dangling dependsOn. Assert structurally that nothing left in the project
+      // depends on a target we removed, rather than naming today's targets.
+      await applicationGenerator(tree, {
+        name: 'myWorkerApp',
+        directory: 'myWorkerApp',
+      });
+      const project = readProjectConfiguration(tree, 'myWorkerApp');
+      const stripped = [
+        'build',
+        'serve',
+        'prune',
+        'prune-lockfile',
+        'copy-workspace-modules',
+      ];
+      for (const target of Object.values(project.targets ?? {})) {
+        for (const dep of target.dependsOn ?? []) {
+          const depTarget =
+            typeof dep === 'string' ? dep.replace(/^\^/, '') : dep.target;
+          expect(stripped).not.toContain(depTarget);
+        }
+      }
     });
 
     it('writes the requested port into the wrangler config dev.port', async () => {
