@@ -1,9 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
-    "moduleResolution": "node10",
+    "outDir": "../../dist/out-tsc/gonx-e2e/spec",
+    "tsBuildInfoFile": "../../dist/out-tsc/gonx-e2e/spec/tsconfig.spec.tsbuildinfo",
     "types": ["jest", "node"]
   },
   "include": [

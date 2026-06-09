@@ -1,10 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
+    "outDir": "../../dist/out-tsc/nx-cloudflare/spec",
+    "tsBuildInfoFile": "../../dist/out-tsc/nx-cloudflare/spec/tsconfig.spec.tsbuildinfo",
     "types": ["jest", "node"]
   },
+  "references": [{ "path": "./tsconfig.lib.json" }],
   "include": [
     "jest.config.ts",
     "src/**/*.test.ts",

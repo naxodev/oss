@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/gonx"
+    },
+    {
+      "path": "./packages/nx-cloudflare"
+    },
+    {
+      "path": "./packages/e2e-utils"
+    },
+    {
+      "path": "./packages/gonx-e2e"
+    },
+    {
+      "path": "./packages/nx-cloudflare-e2e"
+    }
+  ]
+}

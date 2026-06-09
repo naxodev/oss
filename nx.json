@@ -64,6 +64,18 @@
   },
   "plugins": [
     {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build-ts",
+          "configName": "tsconfig.lib.json"
+        }
+      }
+    },
+    {
       "plugin": "@nx/eslint/plugin",
       "options": {
         "targetName": "lint"
