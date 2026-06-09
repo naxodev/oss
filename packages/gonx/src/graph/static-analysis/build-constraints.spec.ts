@@ -126,7 +126,9 @@ describe('shouldIncludeFile', () => {
       expect(shouldIncludeFile(content, WINDOWS_AMD64)).toBe(false);
     });
 
-    it('treats `go1.X` tags as always satisfied', () => {
+    it('treats `go1.X` tags as satisfied when no goVersion is set', () => {
+      // With no target version handy the matcher over-includes every
+      // `go1.X` tag; `goVersion`-gated behavior is covered separately.
       const content = withConstraint('//go:build go1.22');
       expect(shouldIncludeFile(content, LINUX_AMD64)).toBe(true);
       expect(shouldIncludeFile(content, WINDOWS_AMD64)).toBe(true);
@@ -264,6 +266,113 @@ describe('shouldIncludeFile', () => {
       const content = 'package foo\n\n//go:build windows\n\nimport "fmt"\n';
       expect(shouldIncludeFile(content, LINUX_AMD64)).toBe(true);
     });
+  });
+});
+
+describe('cgo policy via BuildContext.cgoEnabled', () => {
+  it('treats `cgo` as false by default (static analysis never runs cgo)', () => {
+    const content = withConstraint('//go:build cgo');
+    expect(shouldIncludeFile(content, LINUX_AMD64)).toBe(false);
+  });
+
+  it('matches `cgo` when the context opts in with cgoEnabled', () => {
+    const content = withConstraint('//go:build cgo');
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, cgoEnabled: true })
+    ).toBe(true);
+  });
+
+  it('includes a `!cgo` file by default (cgo off → !cgo true)', () => {
+    // The common case: a pure-Go fallback gated `//go:build !cgo` must
+    // enter the graph, since static analysis never runs cgo. Guards the
+    // `?? false` default against being flipped to `?? true`.
+    const content = withConstraint('//go:build !cgo');
+    expect(shouldIncludeFile(content, LINUX_AMD64)).toBe(true);
+  });
+
+  it('honors `!cgo` against an opted-in context', () => {
+    // `darwin,!cgo` with cgo enabled → darwin AND NOT cgo → false.
+    const content = withConstraint('// +build darwin,!cgo');
+    expect(
+      shouldIncludeFile(content, { ...DARWIN_ARM64, cgoEnabled: true })
+    ).toBe(false);
+  });
+});
+
+describe('Go-version policy via BuildContext.goVersion', () => {
+  it('treats every `go1.N` tag as satisfied when goVersion is unset', () => {
+    const content = withConstraint('//go:build go1.20');
+    expect(shouldIncludeFile(content, LINUX_AMD64)).toBe(true);
+  });
+
+  it('excludes a go1.20-gated file under goVersion 1.18', () => {
+    const content = withConstraint('//go:build go1.20');
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, goVersion: '1.18' })
+    ).toBe(false);
+  });
+
+  it('includes a go1.20-gated file under goVersion 1.22', () => {
+    const content = withConstraint('//go:build go1.20');
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, goVersion: '1.22' })
+    ).toBe(true);
+  });
+
+  it('satisfies a go1.18-gated file under goVersion 1.18 (boundary is >=)', () => {
+    const content = withConstraint('//go:build go1.18');
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, goVersion: '1.18' })
+    ).toBe(true);
+  });
+
+  it('compares versions numerically, not lexically (1.9 does not satisfy go1.10)', () => {
+    // String comparison would put '1.9' > '1.10' and wrongly include.
+    const content = withConstraint('//go:build go1.10');
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, goVersion: '1.9' })
+    ).toBe(false);
+  });
+
+  it('over-includes (does not exclude) when goVersion is unparseable', () => {
+    // `BuildContext` is an internal API fed from external sources; a
+    // malformed version must NOT silently drop edges. A naive
+    // `Number('x') >= M` is `NaN >= M` → false → exclude, the opposite of
+    // the documented over-include policy. Unparseable behaves like unset.
+    const content = withConstraint('//go:build go1.20');
+    expect(
+      shouldIncludeFile(content, {
+        ...LINUX_AMD64,
+        goVersion: '1.x' as `1.${number}`,
+      })
+    ).toBe(true);
+  });
+
+  it('gates go1.N through the legacy // +build path too', () => {
+    // `go1.N` tags appear in pre-1.17 legacy headers; version policy must
+    // hold regardless of which constraint syntax reaches `matchTag`.
+    const content = withConstraint('// +build go1.20');
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, goVersion: '1.18' })
+    ).toBe(false);
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, goVersion: '1.22' })
+    ).toBe(true);
+  });
+
+  it('combines version gating with a GOOS term under &&', () => {
+    // Real headers look like `go1.20 && linux`; the numeric version result
+    // must compose correctly with the boolean evaluator.
+    const content = withConstraint('//go:build go1.20 && linux');
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, goVersion: '1.18' })
+    ).toBe(false);
+    expect(
+      shouldIncludeFile(content, { ...DARWIN_ARM64, goVersion: '1.22' })
+    ).toBe(false);
+    expect(
+      shouldIncludeFile(content, { ...LINUX_AMD64, goVersion: '1.22' })
+    ).toBe(true);
   });
 });
 
@@ -460,10 +569,34 @@ describe('getDefaultBuildContext', () => {
   });
 
   it('passes unknown Node platforms through unchanged', () => {
-    // Best-effort fallback: a niche Node platform (e.g. cygwin) is
-    // returned as-is. Documented behavior.
+    // Best-effort fallback: a niche Node platform Go has no GOOS for (e.g.
+    // haiku) is returned as-is. Documented behavior.
+    mockedPlatform.mockReturnValue('haiku' as NodeJS.Platform);
+    mockedArch.mockReturnValue('x64');
+    expect(getDefaultBuildContext().goos).toBe('haiku');
+  });
+
+  it('maps cygwin to linux and warns', () => {
+    // Cygwin runs unix-like Go binaries, but Go has no `cygwin` GOOS.
+    // Passing `cygwin` through would exclude `linux`/`unix`-gated files,
+    // violating the over-include policy. Map to linux and warn.
     mockedPlatform.mockReturnValue('cygwin' as NodeJS.Platform);
     mockedArch.mockReturnValue('x64');
-    expect(getDefaultBuildContext().goos).toBe('cygwin');
+    expect(getDefaultBuildContext().goos).toBe('linux');
+    expect(mockedWarn).toHaveBeenCalledWith(expect.stringContaining('cygwin'));
+  });
+
+  it('freezes the returned context so its fields cannot be reassigned', () => {
+    // The shared default is frozen so a caller can't swap `goos`/`tags`
+    // out from under others. The object freeze is the real guarantee here
+    // (it throws on reassignment in strict mode); `tags` immutability is
+    // enforced by its `ReadonlySet` type, since `Object.freeze` does not
+    // lock a Set's contents at runtime.
+    const ctx = getDefaultBuildContext();
+    expect(Object.isFrozen(ctx)).toBe(true);
+    expect(() => {
+      (ctx as { goos: string }).goos = 'windows';
+    }).toThrow();
+    expect(ctx.tags.size).toBe(0);
   });
 });

@@ -70,6 +70,13 @@ async function doInit(): Promise<Parser> {
     // `new Uint8Array` wrap converts Node's `Buffer` (typed as
     // `Uint8Array<ArrayBufferLike>`) into the `Uint8Array<ArrayBuffer>` the
     // signature expects.
+    //
+    // This couples us to the `Language.load(bytes)` overload. `web-tree-sitter`
+    // is pinned to an exact version in package.json, and `parser-init.spec.ts`
+    // contract-tests this path against the real library so a breaking upgrade
+    // fails loudly instead of silently.
+    //
+    // @see https://jestjs.io/docs/ecmascript-modules — the Jest VM/ESM limitation behind the workaround
     const wasmBytes = new Uint8Array(readFileSync(wasmPath));
     Go = await Language.load(wasmBytes);
   } catch (error) {
