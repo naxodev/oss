@@ -95,6 +95,10 @@
         "wrangler": "catalog:",
       },
     },
+    "packages/e2e-utils": {
+      "name": "@naxodev/e2e-utils",
+      "version": "0.0.0",
+    },
     "packages/gonx": {
       "name": "@naxodev/gonx",
       "version": "3.0.0",
@@ -110,6 +114,13 @@
         "web-tree-sitter": "0.26.3",
       },
     },
+    "packages/gonx-e2e": {
+      "name": "@naxodev/gonx-e2e",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@naxodev/e2e-utils": "workspace:*",
+      },
+    },
     "packages/nx-cloudflare": {
       "name": "@naxodev/nx-cloudflare",
       "version": "6.0.0",
@@ -122,6 +133,13 @@
       },
       "peerDependencies": {
         "wrangler": "^4.0.0",
+      },
+    },
+    "packages/nx-cloudflare-e2e": {
+      "name": "@naxodev/nx-cloudflare-e2e",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@naxodev/e2e-utils": "workspace:*",
       },
     },
   },
@@ -854,9 +872,15 @@
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@0.2.4", "", { "dependencies": { "@emnapi/core": "^1.1.0", "@emnapi/runtime": "^1.1.0", "@tybys/wasm-util": "^0.9.0" } }, "sha512-9zESzOO5aDByvhIAsOy9TbpZ0Ur2AJbUI7UT73kcUTS2mxAMHOBaa1st/jAymNoCtvrit99kkzT1FZuXVcgfIQ=="],
 
+    "@naxodev/e2e-utils": ["@naxodev/e2e-utils@workspace:packages/e2e-utils"],
+
     "@naxodev/gonx": ["@naxodev/gonx@workspace:packages/gonx"],
 
+    "@naxodev/gonx-e2e": ["@naxodev/gonx-e2e@workspace:packages/gonx-e2e"],
+
     "@naxodev/nx-cloudflare": ["@naxodev/nx-cloudflare@workspace:packages/nx-cloudflare"],
+
+    "@naxodev/nx-cloudflare-e2e": ["@naxodev/nx-cloudflare-e2e@workspace:packages/nx-cloudflare-e2e"],
 
     "@noble/hashes": ["@noble/hashes@1.4.0", "", {}, "sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg=="],
 
