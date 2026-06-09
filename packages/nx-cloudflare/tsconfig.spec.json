@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc/nx-cloudflare/spec",
     "tsBuildInfoFile": "../../dist/out-tsc/nx-cloudflare/spec/tsconfig.spec.tsbuildinfo",
+    "isolatedModules": true,
     "types": ["jest", "node"]
   },
   "references": [{ "path": "./tsconfig.lib.json" }],

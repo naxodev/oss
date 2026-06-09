@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc/gonx/spec",
     "tsBuildInfoFile": "../../dist/out-tsc/gonx/spec/tsconfig.spec.tsbuildinfo",
+    "isolatedModules": true,
     "types": ["jest", "node"]
   },
   "references": [{ "path": "./tsconfig.lib.json" }],
