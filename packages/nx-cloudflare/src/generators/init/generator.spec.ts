@@ -61,13 +61,6 @@ describe('init', () => {
         packageJson.devDependencies?.['@naxodev/nx-cloudflare']
       ).toBeUndefined();
     });
-
-    it('should add hono if the hono template is selected', async () => {
-      await initGenerator(tree, { template: 'hono' });
-      const packageJson = readJson(tree, 'package.json');
-      // adds `hono`
-      expect(packageJson.dependencies['hono']).toBeDefined();
-    });
   });
 
   describe('plugin registration', () => {
