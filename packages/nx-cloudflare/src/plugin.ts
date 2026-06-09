@@ -1,16 +1,12 @@
 import { dirname, join } from 'node:path';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync } from 'node:fs';
 import {
   type CreateNodesContextV2,
   type CreateNodesV2,
   type TargetConfiguration,
-  cacheDir,
   createNodesFromFiles,
   logger,
   parseJson,
-  readJsonFile,
-  writeJsonFile,
 } from '@nx/devkit';
 
 /** Options to rename the inferred Cloudflare Worker targets. */
@@ -97,9 +93,8 @@ function buildWorkerTargets(
  * json/jsonc that fails to parse. The gate is structural, not semantic: a
  * parseable but minimal config (e.g. `{}`) is accepted, since Wrangler
  * validates its own contents at runtime. `.toml` has no parser here, so
- * non-empty is the only available proxy for "usable". Returning the content
- * lets callers reuse the single read for cache-key hashing instead of reading
- * the file twice.
+ * non-empty is the only available proxy for "usable". The validated content is
+ * returned (callers treat it as a truthy validity signal).
  */
 function readValidConfig(absConfigPath: string): string | null {
   let content: string;
@@ -135,44 +130,10 @@ function readValidConfig(absConfigPath: string): string | null {
   }
 }
 
-type TargetsCache = Record<string, ReturnType<typeof buildWorkerTargets>>;
-
-function readTargetsCache(cachePath: string): TargetsCache {
-  if (!existsSync(cachePath)) {
-    return {};
-  }
-  // A present-but-unreadable cache (corruption, a format change after an Nx
-  // bump, permissions) recomputes targets rather than failing the graph, but
-  // is surfaced so the degraded caching isn't silent.
-  try {
-    return readJsonFile(cachePath);
-  } catch (e) {
-    logger.warn(
-      `[nx-cloudflare] Ignoring unreadable targets cache ${cachePath}; ` +
-        `recomputing targets. Reason: ${errorReason(e)}`
-    );
-    return {};
-  }
-}
-
-function writeTargetsCache(cachePath: string, cache: TargetsCache): void {
-  // The cache is a best-effort optimization: a write failure must neither abort
-  // graph construction nor mask an in-flight error from the caller's try block.
-  try {
-    writeJsonFile(cachePath, cache);
-  } catch (e) {
-    logger.warn(
-      `[nx-cloudflare] Could not write targets cache ${cachePath}; ` +
-        `targets will be recomputed next run. Reason: ${errorReason(e)}`
-    );
-  }
-}
-
 function createNodesInternal(
   configFile: string,
   options: CloudflarePluginOptions | undefined,
-  context: CreateNodesContextV2,
-  targetsCache: TargetsCache
+  context: CreateNodesContextV2
 ) {
   const projectRoot = dirname(configFile);
 
@@ -197,49 +158,28 @@ function createNodesInternal(
   }
 
   const absConfigPath = join(context.workspaceRoot, configFile);
-  const content = readValidConfig(absConfigPath);
-  if (content === null) {
+  if (readValidConfig(absConfigPath) === null) {
     return {};
   }
 
-  const normalized = normalizeOptions(options);
-  // The cache file is already partitioned by an options hash (see below), so the
-  // per-entry key only needs to distinguish projects by path and content.
-  const cacheKey = createHash('sha256')
-    .update(configFile)
-    .update(content)
-    .digest('hex');
-
-  targetsCache[cacheKey] ??= buildWorkerTargets(projectRoot, normalized);
-
-  return { projects: { [projectRoot]: { targets: targetsCache[cacheKey] } } };
+  const targets = buildWorkerTargets(projectRoot, normalizeOptions(options));
+  return { projects: { [projectRoot]: { targets } } };
 }
 
 /**
  * Nx inference plugin. For every `wrangler.{toml,jsonc,json}` that sits beside a
  * `project.json`/`package.json` and parses, infers the Worker lifecycle targets
- * (serve, deploy, typegen, version-upload, tail). The per-config target
- * calculation is memoized in a cache file under `cacheDir`, keyed by the plugin
- * options so different option sets never share entries.
+ * (serve, deploy, typegen, version-upload, tail). Inference is intentionally
+ * uncached. Official Nx plugins (@nx/vite, @nx/eslint, @nx/jest) memoize their
+ * createNodesV2 targets in a `workspaceDataDirectory` cache keyed by a project
+ * file + lockfile hash, but the work here is trivial — per config a dir read,
+ * one config read+parse, and building a small static targets object — so a
+ * cache earns only marginal speed while adding staleness risk across plugin
+ * upgrades (no key can capture a change in this code's target-construction
+ * logic). `@naxodev/gonx`'s createNodesV2 is likewise uncached.
  */
 export const createNodesV2: CreateNodesV2<CloudflarePluginOptions> = [
   '**/wrangler.{toml,jsonc,json}',
-  async (configFiles, options, context) => {
-    const optionsHash = createHash('sha256')
-      .update(JSON.stringify(options ?? {}))
-      .digest('hex');
-    const cachePath = join(cacheDir, `nx-cloudflare-${optionsHash}.hash`);
-    const targetsCache = readTargetsCache(cachePath);
-    try {
-      return await createNodesFromFiles(
-        (configFile, opts, ctx) =>
-          createNodesInternal(configFile, opts, ctx, targetsCache),
-        configFiles,
-        options,
-        context
-      );
-    } finally {
-      writeTargetsCache(cachePath, targetsCache);
-    }
-  },
+  (configFiles, options, context) =>
+    createNodesFromFiles(createNodesInternal, configFiles, options, context),
 ];
