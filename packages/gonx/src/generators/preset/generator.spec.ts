@@ -1,14 +1,19 @@
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  mock,
+  spyOn,
+} from 'bun:test';
 import type { Tree } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
-import applicationGenerator from '../application/generator';
-import libraryGenerator from '../library/generator';
-import goBlueprintGenerator from '../go-blueprint/go-blueprint';
+import * as appGeneratorModule from '../application/generator';
+import * as libGeneratorModule from '../library/generator';
+import * as blueprintGeneratorModule from '../go-blueprint/go-blueprint';
 import presetGenerator from './generator';
 import type { PresetGeneratorSchema } from './schema';
-
-jest.mock('../application/generator');
-jest.mock('../library/generator');
-jest.mock('../go-blueprint/go-blueprint');
 
 describe('preset generator', () => {
   let tree: Tree;
@@ -17,27 +22,35 @@ describe('preset generator', () => {
     name: 'test-project',
   };
 
-  beforeEach(() => (tree = createTreeWithEmptyWorkspace()));
-  afterEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    tree = createTreeWithEmptyWorkspace();
+    spyOn(appGeneratorModule, 'default').mockResolvedValue(undefined);
+    spyOn(libGeneratorModule, 'default').mockResolvedValue(undefined);
+    spyOn(blueprintGeneratorModule, 'default').mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
 
   it('should run application generator by default', async () => {
     await presetGenerator(tree, baseOptions);
-    expect(applicationGenerator).toHaveBeenCalledWith(tree, baseOptions);
-    expect(libraryGenerator).not.toHaveBeenCalled();
+    expect(appGeneratorModule.default).toHaveBeenCalledWith(tree, baseOptions);
+    expect(libGeneratorModule.default).not.toHaveBeenCalled();
   });
 
   it('should run library generator when type is library', async () => {
     const options = { ...baseOptions, type: 'library' as const };
     await presetGenerator(tree, options);
-    expect(libraryGenerator).toHaveBeenCalledWith(tree, options);
-    expect(applicationGenerator).not.toHaveBeenCalled();
+    expect(libGeneratorModule.default).toHaveBeenCalledWith(tree, options);
+    expect(appGeneratorModule.default).not.toHaveBeenCalled();
   });
 
   it('should run application generator when type is binary', async () => {
     const options = { ...baseOptions, type: 'binary' as const };
     await presetGenerator(tree, options);
-    expect(applicationGenerator).toHaveBeenCalledWith(tree, options);
-    expect(libraryGenerator).not.toHaveBeenCalled();
+    expect(appGeneratorModule.default).toHaveBeenCalledWith(tree, options);
+    expect(libGeneratorModule.default).not.toHaveBeenCalled();
   });
 
   it('should handle additional options and pass them through', async () => {
@@ -49,22 +62,18 @@ describe('preset generator', () => {
       tags: 'test,lib',
     };
     await presetGenerator(tree, options);
-    expect(libraryGenerator).toHaveBeenCalledWith(tree, options);
-    expect(applicationGenerator).not.toHaveBeenCalled();
+    expect(libGeneratorModule.default).toHaveBeenCalledWith(tree, options);
+    expect(appGeneratorModule.default).not.toHaveBeenCalled();
   });
 
   it('should handle undefined type as default application', async () => {
     const options = { ...baseOptions, type: undefined };
     await presetGenerator(tree, options);
-    expect(applicationGenerator).toHaveBeenCalledWith(tree, options);
-    expect(libraryGenerator).not.toHaveBeenCalled();
+    expect(appGeneratorModule.default).toHaveBeenCalledWith(tree, options);
+    expect(libGeneratorModule.default).not.toHaveBeenCalled();
   });
 
   describe('go-blueprint type', () => {
-    beforeEach(() => {
-      (goBlueprintGenerator as jest.Mock).mockResolvedValue(undefined);
-    });
-
     it('should run go-blueprint generator when type is go-blueprint', async () => {
       const options = {
         ...baseOptions,
@@ -74,12 +83,12 @@ describe('preset generator', () => {
         git: 'commit' as const,
       };
       await presetGenerator(tree, options);
-      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, {
+      expect(blueprintGeneratorModule.default).toHaveBeenCalledWith(tree, {
         ...options,
         feature: [],
       });
-      expect(applicationGenerator).not.toHaveBeenCalled();
-      expect(libraryGenerator).not.toHaveBeenCalled();
+      expect(appGeneratorModule.default).not.toHaveBeenCalled();
+      expect(libGeneratorModule.default).not.toHaveBeenCalled();
     });
 
     it('should provide default values for go-blueprint required options', async () => {
@@ -88,7 +97,7 @@ describe('preset generator', () => {
         type: 'go-blueprint' as const,
       };
       await presetGenerator(tree, options);
-      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, {
+      expect(blueprintGeneratorModule.default).toHaveBeenCalledWith(tree, {
         ...options,
         driver: 'none',
         framework: 'gin',
@@ -107,7 +116,10 @@ describe('preset generator', () => {
         feature: ['docker', 'react'],
       };
       await presetGenerator(tree, options);
-      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, options);
+      expect(blueprintGeneratorModule.default).toHaveBeenCalledWith(
+        tree,
+        options
+      );
     });
 
     it('should handle partial go-blueprint options with defaults', async () => {
@@ -118,7 +130,7 @@ describe('preset generator', () => {
         // driver and git not provided
       };
       await presetGenerator(tree, options);
-      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, {
+      expect(blueprintGeneratorModule.default).toHaveBeenCalledWith(tree, {
         ...options,
         driver: 'none',
         git: 'skip',
@@ -138,7 +150,7 @@ describe('preset generator', () => {
         tags: 'api,service',
       };
       await presetGenerator(tree, options);
-      expect(goBlueprintGenerator).toHaveBeenCalledWith(tree, {
+      expect(blueprintGeneratorModule.default).toHaveBeenCalledWith(tree, {
         ...options,
         feature: [],
       });

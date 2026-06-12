@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'bun:test';
 import { isLocalPath } from './is-local-path';
 
 describe('isLocalPath', () => {

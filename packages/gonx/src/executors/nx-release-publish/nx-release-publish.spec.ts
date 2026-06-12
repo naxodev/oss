@@ -1,26 +1,34 @@
+import {
+  describe,
+  it,
+  expect,
+  mock,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from 'bun:test';
 import { ExecutorContext, output, readJsonFile } from '@nx/devkit';
 import * as childProcess from 'node:child_process';
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import executor from './nx-release-publish';
 import { NxReleasePublishExecutorSchema } from './schema';
 
 // Mock all the external dependencies
-jest.mock('node:child_process');
-jest.mock('node:fs');
-jest.mock('node:path');
-jest.mock('@nx/devkit', () => {
-  const original = jest.requireActual('@nx/devkit');
-  return {
-    ...original,
-    joinPathFragments: jest.fn((root, fragment) => path.join(root, fragment)),
-    readJsonFile: jest.fn(),
-    output: {
-      error: jest.fn(),
-      logSingleLine: jest.fn(),
-    },
-  };
-});
+mock.module('node:child_process', () => ({
+  execSync: mock(),
+}));
+mock.module('node:fs', () => ({
+  readFileSync: mock(),
+}));
+mock.module('@nx/devkit', () => ({
+  ...require('@nx/devkit'),
+  joinPathFragments: mock((...args: string[]) => args.join('/')),
+  readJsonFile: mock(),
+  output: {
+    error: mock(),
+    logSingleLine: mock(),
+  },
+}));
 
 // Mock console methods to avoid polluting test output
 const originalConsoleLog = console.log;
@@ -51,21 +59,33 @@ describe('nx-release-publish executor', () => {
     },
   } as unknown as ExecutorContext;
 
+  const mockFs = fs as unknown as { readFileSync: Mock<() => string> };
+  const mockChildProcess = childProcess as unknown as {
+    execSync: Mock<(cmd: string) => string>;
+  };
+  const mockReadJsonFile = readJsonFile as unknown as Mock<() => unknown>;
+  const mockOutput = output as unknown as {
+    error: Mock<() => void>;
+    logSingleLine: Mock<() => void>;
+  };
+
   // Setup before each test
   beforeEach(() => {
-    jest.clearAllMocks();
-    console.log = jest.fn();
-    console.warn = jest.fn();
-    console.error = jest.fn();
+    mockFs.readFileSync.mockClear();
+    mockChildProcess.execSync.mockClear();
+    mockReadJsonFile.mockClear();
+    mockOutput.error.mockClear();
+    mockOutput.logSingleLine.mockClear();
+
+    console.log = mock() as unknown as typeof console.log;
+    console.warn = mock() as unknown as typeof console.warn;
+    console.error = mock() as unknown as typeof console.error;
 
     // Mock fs.readFileSync to return our mock go.mod content
-    (fs.readFileSync as jest.Mock).mockReturnValue(mockGoModContent);
-
-    // Mock path.join to simply concatenate
-    (path.join as jest.Mock).mockImplementation((...args) => args.join('/'));
+    mockFs.readFileSync.mockReturnValue(mockGoModContent);
 
     // Mock execSync with a default success behavior
-    (childProcess.execSync as jest.Mock).mockImplementation((command) => {
+    mockChildProcess.execSync.mockImplementation((command: string) => {
       if (command.includes('git tag')) {
         return 'v1.2.3';
       }
@@ -82,7 +102,7 @@ describe('nx-release-publish executor', () => {
 
   it('should successfully publish a Go module', async () => {
     // Arrange
-    (readJsonFile as jest.Mock).mockReturnValue({
+    mockReadJsonFile.mockReturnValue({
       release: {
         releaseTagPattern: 'v{version}',
       },
@@ -106,7 +126,7 @@ describe('nx-release-publish executor', () => {
 
   it('should handle dry run mode correctly', async () => {
     // Arrange
-    (readJsonFile as jest.Mock).mockReturnValue({
+    mockReadJsonFile.mockReturnValue({
       release: {
         releaseTagPattern: 'v{version}',
       },
@@ -125,7 +145,8 @@ describe('nx-release-publish executor', () => {
 
     // Check for the dry run messages separately, without expecting exact format matching
     expect(console.log).toHaveBeenCalled();
-    const logCalls = (console.log as jest.Mock).mock.calls;
+    const logCalls = (console.log as unknown as Mock<(...args: any[]) => void>)
+      .mock.calls;
     const runMessage = logCalls.some(
       (call) =>
         call[0] &&
@@ -149,7 +170,7 @@ describe('nx-release-publish executor', () => {
     const originalEnv = process.env;
     process.env = { ...originalEnv, NX_DRY_RUN: 'true' };
 
-    (readJsonFile as jest.Mock).mockReturnValue({
+    mockReadJsonFile.mockReturnValue({
       release: {
         releaseTagPattern: 'v{version}',
       },
@@ -174,14 +195,14 @@ describe('nx-release-publish executor', () => {
 
   it('should use custom tag pattern from nx.json', async () => {
     // Arrange
-    (readJsonFile as jest.Mock).mockReturnValue({
+    mockReadJsonFile.mockReturnValue({
       release: {
         releaseTagPattern: '{projectName}-v{version}',
       },
     });
 
     // Mock git tag command to return a tag with the custom pattern
-    (childProcess.execSync as jest.Mock).mockImplementation((command) => {
+    mockChildProcess.execSync.mockImplementation((command: string) => {
       if (command.includes('git tag')) {
         return 'test-module-v2.0.0';
       }
@@ -202,7 +223,7 @@ describe('nx-release-publish executor', () => {
       expect.stringContaining('Found latest version tag: test-module-v2.0.0')
     );
     // Update to match the actual implementation behavior
-    const calls = (childProcess.execSync as jest.Mock).mock.calls;
+    const calls = mockChildProcess.execSync.mock.calls;
     const goProxyCallIndex = calls.findIndex(
       (call) =>
         typeof call[0] === 'string' &&
@@ -253,7 +274,7 @@ describe('nx-release-publish executor', () => {
 
   it('should fail if module name cannot be found in go.mod', async () => {
     // Arrange
-    (fs.readFileSync as jest.Mock).mockReturnValue('invalid go.mod content');
+    mockFs.readFileSync.mockReturnValue('invalid go.mod content');
 
     // Act
     const result = await executor(options, mockContext);
@@ -267,7 +288,7 @@ describe('nx-release-publish executor', () => {
 
   it('should fail if no valid tag is found', async () => {
     // Arrange
-    (childProcess.execSync as jest.Mock).mockImplementation((command) => {
+    mockChildProcess.execSync.mockImplementation((command: string) => {
       if (command.includes('git tag')) {
         return '';
       }
@@ -286,7 +307,7 @@ describe('nx-release-publish executor', () => {
 
   it('should handle git command failures gracefully', async () => {
     // Arrange
-    (childProcess.execSync as jest.Mock).mockImplementation((command) => {
+    mockChildProcess.execSync.mockImplementation((command: string) => {
       if (command.includes('git tag')) {
         throw new Error('Git command failed');
       }
@@ -297,7 +318,7 @@ describe('nx-release-publish executor', () => {
       return '';
     });
 
-    (readJsonFile as jest.Mock).mockReturnValue({
+    mockReadJsonFile.mockReturnValue({
       release: {
         releaseTagPattern: 'v{version}',
       },
@@ -315,12 +336,12 @@ describe('nx-release-publish executor', () => {
 
   it('should handle nx.json read failures gracefully', async () => {
     // Arrange
-    (readJsonFile as jest.Mock).mockImplementation(() => {
+    mockReadJsonFile.mockImplementation(() => {
       throw new Error('Failed to read nx.json');
     });
 
     // Ensure we get a failing publish to make the test pass
-    (childProcess.execSync as jest.Mock).mockImplementation((command) => {
+    mockChildProcess.execSync.mockImplementation((command: string) => {
       if (command.includes('git tag')) {
         return 'v1.2.3';
       }
@@ -344,14 +365,14 @@ describe('nx-release-publish executor', () => {
 
   it('should handle publish command failures', async () => {
     // Arrange
-    (readJsonFile as jest.Mock).mockReturnValue({
+    mockReadJsonFile.mockReturnValue({
       release: {
         releaseTagPattern: 'v{version}',
       },
     });
 
     // Mock execSync to throw an error for the go list command
-    (childProcess.execSync as jest.Mock).mockImplementation((command) => {
+    mockChildProcess.execSync.mockImplementation((command: string) => {
       if (command.includes('git tag')) {
         return 'v1.2.3';
       }

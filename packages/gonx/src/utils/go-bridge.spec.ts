@@ -1,3 +1,4 @@
+import { describe, it, expect, mock, spyOn, beforeEach } from 'bun:test';
 import type { Tree } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import * as child_process from 'child_process';
@@ -15,12 +16,10 @@ import {
   supportsGoWorkspace,
 } from './go-bridge';
 
-jest.mock('child_process', () => ({
-  execSync: jest
-    .fn()
-    .mockReturnValue(
-      Buffer.from('go version go1.24.1 windows/amd64\n', 'utf-8')
-    ),
+mock.module('child_process', () => ({
+  execSync: mock(() =>
+    Buffer.from('go version go1.24.1 windows/amd64\n', 'utf-8')
+  ),
 }));
 
 describe('Go bridge', () => {
@@ -34,7 +33,7 @@ describe('Go bridge', () => {
     });
 
     it('should throw error if go version not found', () => {
-      jest.spyOn(child_process, 'execSync').mockImplementationOnce(() => null);
+      spyOn(child_process, 'execSync').mockImplementationOnce(() => null);
       expect(() => getGoVersion()).toThrow(
         'Cannot retrieve current Go version'
       );
@@ -47,7 +46,7 @@ describe('Go bridge', () => {
     });
 
     it('should throw error if go version not found', () => {
-      jest.spyOn(child_process, 'execSync').mockImplementationOnce(() => null);
+      spyOn(child_process, 'execSync').mockImplementationOnce(() => null);
       expect(() => getGoShortVersion()).toThrow(
         'Cannot retrieve current Go version'
       );
@@ -57,13 +56,13 @@ describe('Go bridge', () => {
   describe('Method: getGoModules', () => {
     it('should return output of go list -m -json command', () => {
       const mockOutput = '{"Path":"example.com/module","Version":"v1.0.0"}';
-      jest.spyOn(child_process, 'execSync').mockReturnValueOnce(mockOutput);
+      spyOn(child_process, 'execSync').mockReturnValueOnce(mockOutput);
       const result = getGoModules('/path/to/project', false);
       expect(result).toEqual(mockOutput);
     });
 
     it('should return empty string if command fails and failSilently is true', () => {
-      jest.spyOn(child_process, 'execSync').mockImplementationOnce(() => {
+      spyOn(child_process, 'execSync').mockImplementationOnce(() => {
         throw new Error('Command failed');
       });
       const result = getGoModules('/path/to/project', true);
@@ -71,7 +70,7 @@ describe('Go bridge', () => {
     });
 
     it('should throw error if command fails and failSilently is false', () => {
-      jest.spyOn(child_process, 'execSync').mockImplementationOnce(() => {
+      spyOn(child_process, 'execSync').mockImplementationOnce(() => {
         throw new Error('Command failed');
       });
       expect(() => getGoModules('/path/to/project', false)).toThrow(
@@ -81,35 +80,29 @@ describe('Go bridge', () => {
   });
 
   describe('Method: supportsGoWorkspace', () => {
-    it.each`
-      version     | expected
-      ${'0.1'}    | ${false}
-      ${'1.17'}   | ${false}
-      ${'1.18'}   | ${true}
-      ${'1.18.5'} | ${true}
-      ${'1.20'}   | ${true}
-      ${'2.10'}   | ${true}
-    `(
-      'should return $expected if version is $version',
-      ({ version, expected }) => {
-        jest
-          .spyOn(child_process, 'execSync')
-          .mockReturnValueOnce(
-            Buffer.from(`go version go${version} windows/amd64`, 'utf-8')
-          );
-        expect(supportsGoWorkspace()).toBe(expected);
-      }
-    );
+    it.each([
+      ['0.1', false],
+      ['1.17', false],
+      ['1.18', true],
+      ['1.18.5', true],
+      ['1.20', true],
+      ['2.10', true],
+    ])('should return %p if version is %p', (version, expected) => {
+      spyOn(child_process, 'execSync').mockReturnValueOnce(
+        Buffer.from(`go version go${version} windows/amd64`, 'utf-8')
+      );
+      expect(supportsGoWorkspace()).toBe(expected);
+    });
   });
 
   describe('Method: isGoWorkspace', () => {
     it('should return true if go.work exists', () => {
-      jest.spyOn(tree, 'exists').mockReturnValue(true);
+      spyOn(tree, 'exists').mockReturnValue(true);
       expect(isGoWorkspace(tree)).toBeTruthy();
     });
 
     it('should return false if go.work not exists', () => {
-      jest.spyOn(tree, 'exists').mockReturnValue(false);
+      spyOn(tree, 'exists').mockReturnValue(false);
       expect(isGoWorkspace(tree)).toBeFalsy();
     });
   });
@@ -133,8 +126,8 @@ describe('Go bridge', () => {
 
   describe('Method: createGoMod', () => {
     it('should write go.mod if not exists', () => {
-      const spyWrite = jest.spyOn(tree, 'write');
-      jest.spyOn(tree, 'exists').mockReturnValue(false);
+      const spyWrite = spyOn(tree, 'write');
+      spyOn(tree, 'exists').mockReturnValue(false);
       createGoMod(tree, 'moduleName', 'libs/data-access');
       expect(spyWrite).toHaveBeenCalledWith(
         join('libs/data-access', 'go.mod'),
@@ -143,8 +136,8 @@ describe('Go bridge', () => {
     });
 
     it('should not write go.mod if exists', async () => {
-      const spyWrite = jest.spyOn(tree, 'write');
-      jest.spyOn(tree, 'exists').mockReturnValue(true);
+      const spyWrite = spyOn(tree, 'write');
+      spyOn(tree, 'exists').mockReturnValue(true);
       createGoMod(tree, 'pkg');
       expect(spyWrite).not.toHaveBeenCalled();
     });
@@ -152,15 +145,15 @@ describe('Go bridge', () => {
 
   describe('Method: createGoWork', () => {
     it('should write go.work if not exists', () => {
-      const spyWrite = jest.spyOn(tree, 'write');
-      jest.spyOn(tree, 'exists').mockReturnValue(false);
+      const spyWrite = spyOn(tree, 'write');
+      spyOn(tree, 'exists').mockReturnValue(false);
       createGoWork(tree);
       expect(spyWrite).toHaveBeenCalledWith(GO_WORK_FILE, 'go 1.24\n');
     });
 
     it('should not write go.work if exists', async () => {
-      const spyWrite = jest.spyOn(tree, 'write');
-      jest.spyOn(tree, 'exists').mockReturnValue(true);
+      const spyWrite = spyOn(tree, 'write');
+      spyOn(tree, 'exists').mockReturnValue(true);
       createGoWork(tree);
       expect(spyWrite).not.toHaveBeenCalled();
     });
@@ -168,22 +161,25 @@ describe('Go bridge', () => {
 
   describe('Method: addGoWorkDependency', () => {
     const setNextGoWorkContent = (content: string) =>
-      jest
-        .spyOn(tree, 'read')
-        .mockReturnValueOnce(
-          Buffer.from(content, 'utf-8') as unknown as string
-        );
+      spyOn(tree, 'read').mockReturnValueOnce(
+        Buffer.from(content, 'utf-8') as unknown as string
+      );
 
-    it.each`
-      content                                        | newContent
-      ${'go 1.24\n'}                                 | ${'go 1.24\n\nuse ./new-app\n'}
-      ${'go 1.24\n\nuse ./app1\n'}                   | ${'go 1.24\n\nuse (\n\t./app1\n\t./new-app\n)\n'}
-      ${'go 1.24\n\nuse (\n\t./app1\n\t./app2\n)\n'} | ${'go 1.24\n\nuse (\n\t./app1\n\t./app2\n\t./new-app\n)\n'}
-    `(
-      'should add new dependency to go.work with content $content',
-      ({ content, newContent }) => {
+    it.each([
+      ['go 1.24\n', 'go 1.24\n\nuse ./new-app\n'],
+      [
+        'go 1.24\n\nuse ./app1\n',
+        'go 1.24\n\nuse (\n\t./app1\n\t./new-app\n)\n',
+      ],
+      [
+        'go 1.24\n\nuse (\n\t./app1\n\t./app2\n)\n',
+        'go 1.24\n\nuse (\n\t./app1\n\t./app2\n\t./new-app\n)\n',
+      ],
+    ])(
+      'should add new dependency to go.work with content %p',
+      (content, newContent) => {
         setNextGoWorkContent(content);
-        const spyWrite = jest.spyOn(tree, 'write');
+        const spyWrite = spyOn(tree, 'write');
         addGoWorkDependency(tree, 'new-app');
         expect(spyWrite).toHaveBeenCalledWith(GO_WORK_FILE, newContent);
       }
@@ -191,7 +187,7 @@ describe('Go bridge', () => {
 
     it('should not add new dependency to go.work if already exists', () => {
       setNextGoWorkContent('go 1.24\n\nuse ./app1\n');
-      const spyWrite = jest.spyOn(tree, 'write');
+      const spyWrite = spyOn(tree, 'write');
       addGoWorkDependency(tree, 'app1');
       expect(spyWrite).not.toHaveBeenCalled();
     });

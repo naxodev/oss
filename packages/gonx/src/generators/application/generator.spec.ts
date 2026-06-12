@@ -1,4 +1,10 @@
-import * as devkit from '@nx/devkit';
+import { describe, it, expect, mock, beforeEach } from 'bun:test';
+
+const mockFormatFiles = mock();
+mock.module('@nx/devkit', () => ({
+  formatFiles: mockFormatFiles,
+}));
+
 import { addProjectConfiguration, readJson, Tree, writeJson } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import applicationGenerator from './generator';
@@ -8,7 +14,7 @@ describe('application generator', () => {
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
-    jest.clearAllMocks();
+    mockFormatFiles.mockClear();
   });
 
   describe('not nested', () => {
@@ -126,26 +132,24 @@ describe('application generator', () => {
     it('should format files by default', async () => {
       // Create necessary directories for the files
       tree.write('apps/myGoApp/main.go', 'package main');
-      jest.spyOn(devkit, 'formatFiles');
 
       await applicationGenerator(tree, {
         directory: 'myGoApp',
       });
 
-      expect(devkit.formatFiles).toHaveBeenCalled();
+      expect(mockFormatFiles).toHaveBeenCalled();
     });
 
     it('should not format files when --skipFormat=true', async () => {
       // Create necessary directories for the files
       tree.write('apps/myGoApp/main.go', 'package main');
-      jest.spyOn(devkit, 'formatFiles');
 
       await applicationGenerator(tree, {
         directory: 'myGoApp',
         skipFormat: true,
       });
 
-      expect(devkit.formatFiles).not.toHaveBeenCalled();
+      expect(mockFormatFiles).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,11 +1,12 @@
+import { describe, it, expect, mock, spyOn } from 'bun:test';
 import { ExecutorContext } from '@nx/devkit';
 import * as commonFunctions from '../../utils';
 import executor from './executor';
 
-jest.mock('../../utils', () => ({
-  executeCommand: jest.fn().mockResolvedValue({ success: true }),
-  extractProjectRoot: jest.fn(() => 'apps/project'),
-  extractCWD: jest.fn((options: any) => {
+mock.module('../../utils', () => ({
+  executeCommand: mock().mockResolvedValue({ success: true }),
+  extractProjectRoot: mock(() => 'apps/project'),
+  extractCWD: mock((options: any) => {
     if (options.main) {
       return 'apps/project/cmd';
     } else {
@@ -31,7 +32,7 @@ const context: ExecutorContext = {
 
 describe('Serve Executor', () => {
   it('should run Go program with default parameters', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor({}, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', './...'], {
@@ -41,7 +42,7 @@ describe('Serve Executor', () => {
   });
 
   it('should run Go program with custom args', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor({ args: ['--help'] }, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', './...', '--help'], {
@@ -51,7 +52,7 @@ describe('Serve Executor', () => {
   });
 
   it('should run Go program with custom executable', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor({ cmd: 'tinygo' }, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(
@@ -61,7 +62,7 @@ describe('Serve Executor', () => {
   });
 
   it('should remove directory from main file path', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor({}, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', './...'], {
@@ -71,7 +72,7 @@ describe('Serve Executor', () => {
   });
 
   it('should use "." as run path when main option is provided', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor({ main: 'cmd/main.go' }, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', '.'], {
@@ -81,7 +82,7 @@ describe('Serve Executor', () => {
   });
 
   it('should use "./..." as run path when main option is not provided', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor({}, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', './...'], {
@@ -91,7 +92,7 @@ describe('Serve Executor', () => {
   });
 
   it('should use "./..." as run path when main option is empty string', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor({ main: '' }, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['run', './...'], {
@@ -101,7 +102,7 @@ describe('Serve Executor', () => {
   });
 
   it('should use "." as run path when main option is provided with custom args', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor(
       { main: 'cmd/main.go', args: ['--help'] },
       context

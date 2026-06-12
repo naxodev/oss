@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'bun:test';
 import { applicationGenerator, libraryGenerator, initGenerator } from './index';
 
 describe('@naxodev/nx-cloudflare public API', () => {

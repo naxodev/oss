@@ -1,15 +1,18 @@
+import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import stripIndent from 'strip-indent';
 import { readFile } from 'fs/promises';
 import { parseGoMod } from './parse-go-mod';
 
-jest.mock('fs/promises');
-jest.mock('@nx/devkit', () => ({ logger: { warn: jest.fn() } }));
+mock.module('fs/promises', () => ({
+  readFile: mock(),
+}));
+mock.module('@nx/devkit', () => ({ logger: { warn: mock() } }));
 
-const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
+const mockReadFile = readFile as unknown as Mock<typeof readFile>;
 
 describe('parseGoMod', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockReadFile.mockClear();
   });
 
   describe('module declaration parsing', () => {

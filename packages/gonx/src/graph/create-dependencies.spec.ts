@@ -1,19 +1,20 @@
-// Explicit factory (not auto-mock) so Jest does not load the real
+// Explicit factory (not auto-mock) so bun does not load the real
 // `./static-analysis` module — that module statically imports `p-limit`
-// (ESM-only), and ts-jest would resolve the require at module-load time
-// before any per-test `jest.mock('p-limit', ...)` could intercept it.
-jest.mock('./static-analysis', () => ({
-  createStaticAnalysisDependencies: jest.fn(),
+// (ESM-only), and the module loader would resolve the require at module-load
+// time before any per-test mock could intercept it.
+import { describe, it, expect, beforeEach, mock, type Mock } from 'bun:test';
+
+mock.module('./static-analysis', () => ({
+  createStaticAnalysisDependencies: mock(),
 }));
 
 import { DependencyType } from '@nx/devkit';
 import { createDependencies } from './create-dependencies';
 import { createStaticAnalysisDependencies } from './static-analysis';
 
-const mockStaticAnalysis =
-  createStaticAnalysisDependencies as jest.MockedFunction<
-    typeof createStaticAnalysisDependencies
-  >;
+const mockStaticAnalysis = createStaticAnalysisDependencies as unknown as Mock<
+  typeof createStaticAnalysisDependencies
+>;
 
 describe('createDependencies', () => {
   const baseContext = {
@@ -32,7 +33,7 @@ describe('createDependencies', () => {
   } as Parameters<typeof createDependencies>[1];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockStaticAnalysis.mockClear();
 
     mockStaticAnalysis.mockResolvedValue([
       {

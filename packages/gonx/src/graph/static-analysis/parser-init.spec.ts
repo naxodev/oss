@@ -8,6 +8,7 @@
 // Go parser, so a `web-tree-sitter` upgrade that drops or changes that overload
 // fails loudly here instead of silently breaking graph construction.
 
+import { describe, it, expect, afterEach } from 'bun:test';
 import { initParser, resetParser } from './parser-init';
 
 afterEach(() => {

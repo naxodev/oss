@@ -14,30 +14,39 @@
  * shaped paths the filesystem can actually read on POSIX hosts.
  */
 
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
+import {
+  describe,
+  it,
+  expect,
+  mock,
+  spyOn,
+  beforeEach,
+  afterEach,
+  afterAll,
+} from 'bun:test';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readdirSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-jest.mock('p-limit', () => ({
-  __esModule: true,
+// bun:test does not support live-binding getters on mock.module exports, so
+// we create the shared workspace root BEFORE the mock factory runs (the
+// factory is called on first import of the module). Each test gets its own
+// sub-directory within this root and cleans it up in afterEach.
+const workspaceRoot = mkdtempSync(join(tmpdir(), 'gonx-static-analysis-'));
+
+mock.module('p-limit', () => ({
   default:
     () =>
     <T>(fn: () => T) =>
       fn(),
 }));
 
-// `workspaceRoot` is captured per-use via this getter so each test can
-// point the orchestrator at a fresh tmpdir without re-importing modules.
-let currentWorkspaceRoot = '';
-jest.mock('@nx/devkit', () => {
-  const actual = jest.requireActual('@nx/devkit');
-  return {
-    ...actual,
-    get workspaceRoot() {
-      return currentWorkspaceRoot;
-    },
-  };
-});
+mock.module('@nx/devkit', () => ({
+  ...require('@nx/devkit'),
+  // workspaceRoot captured as a string at factory call time — must be set
+  // before the first import of any module that transitively imports index.ts.
+  workspaceRoot,
+}));
 
 import { CreateDependenciesContext, DependencyType } from '@nx/devkit';
 import { createStaticAnalysisDependencies } from './index';
@@ -51,11 +60,17 @@ function writeFile(root: string, rel: string, content: string): void {
   writeFileSync(fullPath, content);
 }
 
+/** Clean all entries under the shared workspace root between tests. */
+function cleanWorkspaceRoot(): void {
+  for (const entry of readdirSync(workspaceRoot)) {
+    rmSync(join(workspaceRoot, entry), { recursive: true, force: true });
+  }
+}
+
 /**
  * Build a minimal `CreateDependenciesContext` for tests.
  */
 function makeContext(
-  workspaceRoot: string,
   overrides: Partial<CreateDependenciesContext> = {}
 ): CreateDependenciesContext {
   return {
@@ -76,21 +91,18 @@ function makeContext(
 }
 
 describe('createStaticAnalysisDependencies', () => {
-  let workspaceRoot: string;
-
   beforeEach(() => {
-    workspaceRoot = mkdtempSync(join(tmpdir(), 'gonx-static-analysis-'));
-    currentWorkspaceRoot = workspaceRoot;
+    cleanWorkspaceRoot();
   });
 
-  afterEach(() => {
+  afterAll(() => {
     rmSync(workspaceRoot, { recursive: true, force: true });
   });
 
   it('returns empty when no project has a go.mod', async () => {
     // No go.mod anywhere → buildImportMap returns an empty base map and
     // the orchestrator short-circuits before scanning files.
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: { app: { root: 'app' } as any },
     });
 
@@ -136,7 +148,7 @@ func main() { fmt.Println(lib.Hello()) }
 `
     );
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: {
         app: { root: 'app' } as any,
         lib: { root: 'lib' } as any,
@@ -187,7 +199,7 @@ func _() { _ = lib.X }
 `
     );
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: {
         app: { root: 'app' } as any,
         lib: { root: 'lib' } as any,
@@ -234,7 +246,7 @@ func main() { fmt.Println(pkg.X) }
 `
     );
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: { app: { root: 'app' } as any },
       filesToProcess: {
         projectFileMap: { app: [{ file: 'app/main.go', hash: 'h' }] },
@@ -273,7 +285,7 @@ func main() {}
 `
     );
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: {
         app: { root: 'app' } as any,
         lib: { root: 'lib' } as any,
@@ -306,7 +318,7 @@ func main() {}
     );
     writeFile(workspaceRoot, 'lib/lib.go', 'package lib\n');
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: { lib: { root: 'lib' } as any },
       filesToProcess: {
         projectFileMap: { ghost: [{ file: 'ghost/main.go', hash: 'h' }] },
@@ -349,7 +361,7 @@ func main() { _ = lib.X; _ = sub.X }
 `
     );
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: {
         app: { root: 'app' } as any,
         lib: { root: 'lib' } as any,
@@ -398,7 +410,7 @@ func main() { _ = lib.X; _ = sub.X }
       'package main\nimport "github.com/myorg/lib"\nfunc B() { _ = lib.X }\n'
     );
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: {
         app: { root: 'app' } as any,
         lib: { root: 'lib' } as any,
@@ -459,7 +471,7 @@ func main() { _ = lib.X; _ = sub.X }
       'package main\nimport "github.com/myorg/lib"\nfunc main() { _ = lib.X }\n'
     );
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: {
         app: { root: 'app' } as any,
         svc: { root: 'svc' } as any,
@@ -506,7 +518,7 @@ func main() { _ = lib.X; _ = sub.X }
       'package lib\nimport "github.com/myorg/lib/sub"\nfunc Use() { _ = sub.X }\n'
     );
 
-    const context = makeContext(workspaceRoot, {
+    const context = makeContext({
       projects: { lib: { root: 'lib' } as any },
       filesToProcess: {
         projectFileMap: { lib: [{ file: 'lib/lib.go', hash: 'h' }] },
@@ -524,9 +536,8 @@ func main() { _ = lib.X; _ = sub.X }
   // we cannot actually read on POSIX hosts.
   describe('sourceFile normalization', () => {
     // Re-import in a scope where the collaborator is mockable.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const findGoFilesModule = require('./find-go-files');
-    const findGoFilesSpy = jest.spyOn(findGoFilesModule, 'findGoFiles');
+    const findGoFilesSpy = spyOn(findGoFilesModule, 'findGoFiles');
 
     afterEach(() => {
       findGoFilesSpy.mockReset();
@@ -557,18 +568,18 @@ func main() { _ = lib.X; _ = sub.X }
       // We don't write a real app/main.go because we'll mock findGoFiles
       // to return a backslash-shaped path that no real fs can read.
       // Instead, intercept the extractImports call too via a single
-      // jest.spyOn so the file content is supplied synthetically.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // spyOn so the file content is supplied synthetically.
       const extractImportsModule = require('./extract-imports');
-      const extractSpy = jest
-        .spyOn(extractImportsModule, 'extractImports')
-        .mockResolvedValue(['github.com/myorg/lib']);
+      const extractSpy = spyOn(
+        extractImportsModule,
+        'extractImports'
+      ).mockResolvedValue(['github.com/myorg/lib']);
 
       const backslashPath = `${workspaceRoot}\\app\\main.go`;
       findGoFilesSpy.mockResolvedValue([backslashPath]);
 
       try {
-        const context = makeContext(workspaceRoot, {
+        const context = makeContext({
           projects: {
             app: { root: 'app' } as any,
             lib: { root: 'lib' } as any,

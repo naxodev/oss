@@ -1,16 +1,19 @@
+import { describe, it, expect, mock, spyOn } from 'bun:test';
 import type { ExecutorContext } from '@nx/devkit';
 import * as commonFunctions from '../../utils';
+import {
+  buildFlagIfEnabled,
+  buildStringFlagIfValid,
+} from '../../utils/execute-command';
 import executor from './executor';
 import type { TestExecutorSchema } from './schema';
 
-jest.mock('../../utils', () => {
-  const { buildFlagIfEnabled, buildStringFlagIfValid } =
-    jest.requireActual('../../utils');
+mock.module('../../utils', () => {
   return {
     buildFlagIfEnabled,
     buildStringFlagIfValid,
-    executeCommand: jest.fn().mockResolvedValue({ success: true }),
-    extractProjectRoot: jest.fn(() => 'apps/project'),
+    executeCommand: mock().mockResolvedValue({ success: true }),
+    extractProjectRoot: mock(() => 'apps/project'),
   };
 });
 
@@ -24,7 +27,7 @@ const context: ExecutorContext = {
 
 describe('Test Executor', () => {
   it('should execute test of a go project with default options', async () => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor(options, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(['test', './...'], {
@@ -32,17 +35,16 @@ describe('Test Executor', () => {
     });
   });
 
-  it.each`
-    config                              | flag
-    ${{ verbose: true }}                | ${'-v'}
-    ${{ cover: true }}                  | ${'-cover'}
-    ${{ coverProfile: 'coverage.out' }} | ${'-coverprofile=coverage.out'}
-    ${{ race: true }}                   | ${'-race'}
-    ${{ run: 'TestProjection' }}        | ${'-run=TestProjection'}
-    ${{ count: 1 }}                     | ${'-count=1'}
-    ${{ timeout: '10m' }}               | ${'-timeout=10m'}
-  `('should add flag $flag if enabled', async ({ config, flag }) => {
-    const spyExecute = jest.spyOn(commonFunctions, 'executeCommand');
+  it.each([
+    [{ verbose: true }, '-v'],
+    [{ cover: true }, '-cover'],
+    [{ coverProfile: 'coverage.out' }, '-coverprofile=coverage.out'],
+    [{ race: true }, '-race'],
+    [{ run: 'TestProjection' }, '-run=TestProjection'],
+    [{ count: 1 }, '-count=1'],
+    [{ timeout: '10m' }, '-timeout=10m'],
+  ])('should add flag %p if enabled', async (config, flag) => {
+    const spyExecute = spyOn(commonFunctions, 'executeCommand');
     const output = await executor({ ...options, ...config }, context);
     expect(output.success).toBeTruthy();
     expect(spyExecute).toHaveBeenCalledWith(expect.arrayContaining([flag]), {

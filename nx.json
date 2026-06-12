@@ -80,18 +80,6 @@
       "options": {
         "targetName": "lint"
       }
-    },
-    {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      }
-    },
-    {
-      "plugin": "@nx/vite/plugin",
-      "options": {
-        "targetName": "test"
-      }
     }
   ],
   "generators": {},

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, spyOn } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -127,7 +128,7 @@ describe('move-to-inference migration', () => {
     // strip-only drops executor options; a customized target must be surfaced
     // (fail loud) so the consumer re-expresses it in the wrangler config. A
     // target with no options is removed silently.
-    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
     addProjectConfiguration(tree, 'worker', {
       root: 'apps/worker',
       projectType: 'application',

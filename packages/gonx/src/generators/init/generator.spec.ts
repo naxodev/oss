@@ -1,3 +1,12 @@
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  mock,
+  spyOn,
+} from 'bun:test';
 import type { Tree } from '@nx/devkit';
 import * as nxDevkit from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
@@ -5,16 +14,16 @@ import * as shared from '../../utils';
 import initGenerator from './generator';
 import { InitGeneratorSchema } from './schema';
 
-jest.mock('@nx/devkit', () => ({
-  formatFiles: jest.fn(),
-  logger: { warn: jest.fn() },
+mock.module('@nx/devkit', () => ({
+  formatFiles: mock(),
+  logger: { warn: mock() },
 }));
-jest.mock('../../utils', () => ({
-  addNxPlugin: jest.fn(),
-  createGoWork: jest.fn(),
-  ensureGoConfigInSharedGlobals: jest.fn(),
-  getProjectScope: jest.fn().mockReturnValue('proj'),
-  supportsGoWorkspace: jest.fn().mockReturnValue(true),
+mock.module('../../utils', () => ({
+  addNxPlugin: mock(),
+  createGoWork: mock(),
+  ensureGoConfigInSharedGlobals: mock(),
+  getProjectScope: mock().mockReturnValue('proj'),
+  supportsGoWorkspace: mock().mockReturnValue(true),
 }));
 
 describe('init generator', () => {
@@ -22,7 +31,15 @@ describe('init generator', () => {
   const options: InitGeneratorSchema = {};
 
   beforeEach(() => (tree = createTreeWithEmptyWorkspace()));
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    (shared.addNxPlugin as ReturnType<typeof mock>).mockClear();
+    (shared.createGoWork as ReturnType<typeof mock>).mockClear();
+    (
+      shared.ensureGoConfigInSharedGlobals as ReturnType<typeof mock>
+    ).mockClear();
+    (shared.supportsGoWorkspace as ReturnType<typeof mock>).mockClear();
+    (nxDevkit.formatFiles as ReturnType<typeof mock>).mockClear();
+  });
 
   it('should add Nx plugin', async () => {
     await initGenerator(tree, options);
@@ -30,13 +47,13 @@ describe('init generator', () => {
   });
 
   it('should create go workspace if supported and flag is set', async () => {
-    jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
+    spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
     await initGenerator(tree, { ...options, addGoDotWork: true });
     expect(shared.createGoWork).toHaveBeenCalledWith(tree);
   });
 
   it('should not create go workspace if flag is not set', async () => {
-    jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
+    spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
     await initGenerator(tree, options);
     expect(shared.createGoWork).not.toHaveBeenCalled();
   });
@@ -52,14 +69,14 @@ describe('init generator', () => {
   });
 
   it('should not create go workspace when flag is not set even if workspace supports it', async () => {
-    jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
+    spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(true);
     await initGenerator(tree, { ...options, addGoDotWork: false });
     expect(shared.createGoWork).not.toHaveBeenCalled();
     expect(shared.ensureGoConfigInSharedGlobals).not.toHaveBeenCalled();
   });
 
   it('should not create go workspace when workspace does not support it even if flag is set', async () => {
-    jest.spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(false);
+    spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(false);
     await initGenerator(tree, { ...options, addGoDotWork: true });
     expect(shared.createGoWork).not.toHaveBeenCalled();
     expect(shared.ensureGoConfigInSharedGlobals).toHaveBeenCalledWith(tree);

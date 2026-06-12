@@ -4,13 +4,8 @@
     "outDir": "../../dist/out-tsc/gonx/spec",
     "tsBuildInfoFile": "../../dist/out-tsc/gonx/spec/tsconfig.spec.tsbuildinfo",
     "isolatedModules": true,
-    "types": ["jest", "node"]
+    "types": ["bun", "node"]
   },
   "references": [{ "path": "./tsconfig.lib.json" }],
-  "include": [
-    "jest.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
+  "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
 }

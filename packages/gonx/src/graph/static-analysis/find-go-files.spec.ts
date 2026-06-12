@@ -1,11 +1,14 @@
+import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import { Dirent } from 'fs';
 import { readdir } from 'fs/promises';
 import { findGoFiles } from './find-go-files';
 
-jest.mock('fs/promises');
-jest.mock('@nx/devkit', () => ({ logger: { warn: jest.fn() } }));
+mock.module('fs/promises', () => ({
+  readdir: mock(),
+}));
+mock.module('@nx/devkit', () => ({ logger: { warn: mock() } }));
 
-const mockReaddir = readdir as jest.MockedFunction<typeof readdir>;
+const mockReaddir = readdir as unknown as Mock<typeof readdir>;
 
 function dirent(name: string, type: 'file' | 'directory'): Dirent {
   return {
@@ -55,7 +58,7 @@ function setupFs(files: Record<string, string>): void {
 
 describe('findGoFiles', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockReaddir.mockClear();
     mockReaddir.mockRejectedValue(
       Object.assign(new Error('ENOENT'), { code: 'ENOENT' })
     );

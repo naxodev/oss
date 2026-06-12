@@ -1,3 +1,12 @@
+import {
+  describe,
+  it,
+  expect,
+  mock,
+  spyOn,
+  beforeEach,
+  type Mock,
+} from 'bun:test';
 import { logger, ExecutorContext } from '@nx/devkit';
 import * as child_process from 'child_process';
 import * as path from 'path';
@@ -10,15 +19,19 @@ import {
 } from './execute-command';
 import * as fileUtils from 'nx/src/utils/fileutils';
 
-const mockFileUtils = jest.mocked(fileUtils);
+mock.module('@nx/devkit', () => ({
+  logger: { info: mock(), error: mock() },
+}));
+mock.module('child_process', () => ({
+  execSync: mock(),
+}));
+mock.module('nx/src/utils/fileutils', () => ({
+  fileExists: mock(),
+}));
 
-jest.mock('@nx/devkit', () => ({
-  logger: { info: jest.fn(), error: jest.fn() },
-}));
-jest.mock('child_process');
-jest.mock('nx/src/utils/fileutils', () => ({
-  fileExists: jest.fn(),
-}));
+const mockFileUtils = fileUtils as unknown as {
+  fileExists: Mock<() => boolean>;
+};
 
 describe('Execute command', () => {
   describe('Method: extractProjectRoot', () => {
@@ -77,7 +90,7 @@ describe('Execute command', () => {
 
     it('should handle error when spawning a go command', async () => {
       const spawnError = new Error('spawn error');
-      jest.spyOn(child_process, 'execSync').mockImplementationOnce(() => {
+      spyOn(child_process, 'execSync').mockImplementationOnce(() => {
         throw spawnError;
       });
       const result = await executeCommand(['version']);

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -144,7 +145,7 @@ describe('nx-cloudflare createNodesV2', () => {
   });
 
   it('skips an unparseable jsonc config and warns', async () => {
-    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
     writeFile(workspaceRoot, 'apps/bad/project.json', '{"name":"bad"}');
     writeFile(workspaceRoot, 'apps/bad/wrangler.jsonc', '{ not valid json ');
 
@@ -156,7 +157,7 @@ describe('nx-cloudflare createNodesV2', () => {
   });
 
   it('skips an empty toml config and warns', async () => {
-    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
     writeFile(workspaceRoot, 'apps/empty/project.json', '{"name":"empty"}');
     writeFile(workspaceRoot, 'apps/empty/wrangler.toml', '   \n  ');
 
@@ -183,7 +184,7 @@ describe('nx-cloudflare createNodesV2', () => {
   });
 
   it('skips a config whose project directory cannot be read and warns', async () => {
-    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
     // No directory is created for apps/ghost, so the project-marker readdir
     // throws ENOENT. Inference must degrade to {} for this one config rather
     // than aborting graph construction for the whole workspace.
@@ -244,7 +245,7 @@ describe('nx-cloudflare createNodesV2', () => {
   it('handles multiple configs in one invocation, isolating failures', async () => {
     // Why: the real entry point receives many files in one invocation. A bad
     // config must degrade to {} without taking down a valid sibling.
-    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
     writeFile(workspaceRoot, 'apps/a/project.json', '{"name":"a"}');
     writeFile(workspaceRoot, 'apps/a/wrangler.jsonc', '{"name":"a"}');
     writeFile(workspaceRoot, 'apps/b/project.json', '{"name":"b"}');

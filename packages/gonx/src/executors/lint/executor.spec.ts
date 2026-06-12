@@ -1,11 +1,12 @@
+import { describe, it, expect, mock } from 'bun:test';
 import { ExecutorContext } from '@nx/devkit';
 import * as sharedFunctions from '../../utils';
 import executor from './executor';
 import { LintExecutorSchema } from './schema';
 
-jest.mock('../../utils', () => ({
-  executeCommand: jest.fn().mockResolvedValue({ success: true }),
-  extractProjectRoot: jest.fn(() => 'apps/project'),
+mock.module('../../utils', () => ({
+  executeCommand: mock().mockResolvedValue({ success: true }),
+  extractProjectRoot: mock(() => 'apps/project'),
 }));
 
 const options: LintExecutorSchema = {};

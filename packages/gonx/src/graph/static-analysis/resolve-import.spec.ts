@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'bun:test';
 import { Replacement } from '../types/import-map-result';
 import { resolveImport } from './resolve-import';
 
