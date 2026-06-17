@@ -35,7 +35,18 @@ jest.mock('../../utils/run-c3', () => ({
     );
     writeFileSync(
       join(options.directory, 'package.json'),
-      JSON.stringify({ name: 'scaffold', dependencies: { hono: '^4' } })
+      JSON.stringify({
+        name: 'scaffold',
+        scripts: {
+          deploy: 'wrangler deploy',
+          dev: 'wrangler dev',
+          start: 'wrangler dev',
+          'cf-typegen': 'wrangler types',
+          test: 'vitest',
+          build: 'vite build',
+        },
+        dependencies: { hono: '^4' },
+      })
     );
     writeFileSync(
       join(options.directory, 'node_modules/dep/index.js'),
@@ -44,6 +55,16 @@ jest.mock('../../utils/run-c3', () => ({
     writeFileSync(
       join(options.directory, 'pnpm-lock.yaml'),
       'lockfileVersion: 9'
+    );
+    // Editor/agent config C3 emits that clashes with workspace-level config.
+    mkdirSync(join(options.directory, '.vscode'), { recursive: true });
+    writeFileSync(join(options.directory, '.vscode/settings.json'), '{}');
+    writeFileSync(join(options.directory, '.prettierrc'), '{"useTabs":true}');
+    writeFileSync(join(options.directory, '.editorconfig'), 'root = true');
+    writeFileSync(join(options.directory, 'AGENTS.md'), '# Cloudflare');
+    writeFileSync(
+      join(options.directory, '.gitignore'),
+      '.wrangler/\n.dev.vars*'
     );
   }),
 }));
@@ -105,6 +126,37 @@ describe('create-cloudflare generator', () => {
 
     expect(tree.exists('apps/my-worker/node_modules/dep/index.js')).toBe(false);
     expect(tree.exists('apps/my-worker/pnpm-lock.yaml')).toBe(false);
+  });
+
+  it('prunes C3 editor/agent config that clashes with the workspace, keeping .gitignore', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+    });
+
+    expect(tree.exists('apps/my-worker/.prettierrc')).toBe(false);
+    expect(tree.exists('apps/my-worker/.editorconfig')).toBe(false);
+    expect(tree.exists('apps/my-worker/AGENTS.md')).toBe(false);
+    expect(tree.exists('apps/my-worker/.vscode/settings.json')).toBe(false);
+    // The worker-specific .gitignore (.wrangler/, .dev.vars) is kept.
+    expect(tree.exists('apps/my-worker/.gitignore')).toBe(true);
+  });
+
+  it('strips package.json scripts that duplicate inferred Wrangler targets, keeping the rest', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+    });
+
+    const scripts = readJson(tree, 'apps/my-worker/package.json').scripts ?? {};
+    // wrangler deploy/dev/types come from the createNodesV2 plugin
+    expect(scripts.deploy).toBeUndefined();
+    expect(scripts.dev).toBeUndefined();
+    expect(scripts.start).toBeUndefined();
+    expect(scripts['cf-typegen']).toBeUndefined();
+    // no inferred equivalent → kept
+    expect(scripts.test).toBe('vitest');
+    expect(scripts.build).toBe('vite build');
   });
 
   it('sets the project package.json name to the Nx project name', async () => {

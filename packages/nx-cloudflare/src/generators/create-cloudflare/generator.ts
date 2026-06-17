@@ -52,6 +52,7 @@ export async function createCloudflareGenerator(
     rmSync(scaffoldRoot, { recursive: true, force: true });
   }
 
+  pruneScaffoldExtras(tree, options.projectRoot);
   updateProjectPackageJson(tree, options);
   retargetWranglerSchema(tree, options.projectRoot);
   ensureInferencePluginRegistered(tree);
@@ -65,6 +66,28 @@ export async function createCloudflareGenerator(
   // C3 installs inside the (discarded) temp scaffold; the project's deps are
   // reconciled by a single install at the workspace root.
   return () => installPackagesTask(tree);
+}
+
+// Editor/agent config C3 scaffolds that conflicts with or duplicates
+// workspace-level config: a project `.editorconfig` with `root = true` halts the
+// workspace cascade, a `.prettierrc` makes `nx format` reformat the project
+// inconsistently, `.vscode` settings belong at the workspace root, and AGENTS.md
+// is per-template noise. The worker's `.gitignore` is kept — it carries the
+// useful wrangler ignores (.wrangler/, .dev.vars).
+const C3_EXTRAS_TO_PRUNE = [
+  '.prettierrc',
+  '.editorconfig',
+  'AGENTS.md',
+  '.vscode',
+];
+
+function pruneScaffoldExtras(tree: Tree, projectRoot: string): void {
+  for (const entry of C3_EXTRAS_TO_PRUNE) {
+    const path = joinPathFragments(projectRoot, entry);
+    if (tree.exists(path)) {
+      tree.delete(path);
+    }
+  }
 }
 
 // Targets are always inferred from the Wrangler config (createNodesV2), so a
@@ -86,9 +109,23 @@ function maybeWriteProjectJson(tree: Tree, options: NormalizedSchema): void {
   });
 }
 
+// Wrangler commands the createNodesV2 plugin already exposes as inferred
+// targets. C3 also adds package.json scripts for them; dropping the scripts
+// leaves the inferred targets as the single source of truth. Matched by command
+// value so framework scripts (build/preview) and `test` (vitest) — which have no
+// inferred equivalent — are kept.
+const INFERRED_WRANGLER_COMMANDS = new Set([
+  'wrangler deploy',
+  'wrangler dev',
+  'wrangler types',
+  'wrangler versions upload',
+  'wrangler tail',
+]);
+
 // Align the package identity with Nx: C3 names the package after the temp
 // scaffold folder, so rename it; in inference mode (no project.json) the
-// package.json also carries the project's tags under its `nx` property.
+// package.json also carries the project's tags under its `nx` property. Also
+// drops scripts that duplicate inferred Wrangler targets.
 function updateProjectPackageJson(tree: Tree, options: NormalizedSchema): void {
   const packageJsonPath = joinPathFragments(
     options.projectRoot,
@@ -101,6 +138,16 @@ function updateProjectPackageJson(tree: Tree, options: NormalizedSchema): void {
     json.name = options.projectName;
     if (!options.useProjectJson && options.parsedTags.length > 0) {
       json.nx = { ...json.nx, tags: options.parsedTags };
+    }
+    if (json.scripts) {
+      for (const [name, command] of Object.entries(json.scripts)) {
+        if (
+          typeof command === 'string' &&
+          INFERRED_WRANGLER_COMMANDS.has(command.trim())
+        ) {
+          delete json.scripts[name];
+        }
+      }
     }
     return json;
   });
