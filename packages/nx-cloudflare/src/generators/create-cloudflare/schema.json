@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "NxCloudflareCreateCloudflare",
+  "title": "Scaffold a Cloudflare project with create-cloudflare (C3)",
+  "description": "Wraps the Cloudflare create-cloudflare (C3) CLI, then makes the scaffolded project Nx-ready (Wrangler target inference, workspace-managed dependencies).",
+  "type": "object",
+  "properties": {
+    "directory": {
+      "description": "The directory of the new application.",
+      "type": "string",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Which directory do you want to create the application in?"
+    },
+    "name": {
+      "description": "The name of the application.",
+      "type": "string",
+      "pattern": "^[a-zA-Z][^:]*$",
+      "x-priority": "important"
+    },
+    "type": {
+      "description": "Worker template, forwarded to C3 `--type` (e.g. hello-world, hello-world-durable-object, scheduled, queues, openapi). Provide exactly one of type, framework, or template.",
+      "type": "string",
+      "x-priority": "important"
+    },
+    "framework": {
+      "description": "Web framework, forwarded to C3 `--framework` (e.g. react, hono, next, astro, svelte, vue). Provide exactly one of type, framework, or template.",
+      "type": "string"
+    },
+    "template": {
+      "description": "Remote git template, forwarded to C3 `--template`. Provide exactly one of type, framework, or template.",
+      "type": "string"
+    },
+    "lang": {
+      "description": "Language of the generated scaffold, forwarded to C3 `--lang`.",
+      "type": "string",
+      "enum": ["ts", "js", "python"],
+      "default": "ts"
+    },
+    "c3Version": {
+      "description": "Override the pinned create-cloudflare version to invoke.",
+      "type": "string"
+    },
+    "c3Args": {
+      "description": "Additional raw flags forwarded to create-cloudflare. Generator-controlled flags (git, deploy, open, auto-update) cannot be overridden.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "description": "Add tags to the application (used for linting).",
+      "type": "string"
+    },
+    "useProjectJson": {
+      "description": "Write an explicit project.json. Off by default — the worker is registered from its package.json and Wrangler config via target inference.",
+      "type": "boolean",
+      "default": false
+    },
+    "skipFormat": {
+      "description": "Skip formatting files.",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": ["directory"]
+}

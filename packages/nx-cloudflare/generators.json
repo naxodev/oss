@@ -6,6 +6,12 @@
       "description": "application generator",
       "aliases": ["app"]
     },
+    "create-cloudflare": {
+      "factory": "./src/generators/create-cloudflare/generator",
+      "schema": "./src/generators/create-cloudflare/schema.json",
+      "description": "Scaffold a Cloudflare project with create-cloudflare (C3) and make it Nx-ready",
+      "aliases": ["c3"]
+    },
     "init": {
       "factory": "./src/generators/init/generator",
       "schema": "./src/generators/init/schema.json",
