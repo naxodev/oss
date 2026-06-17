@@ -10,7 +10,6 @@ import { initGenerator as nodeInitGenerator } from '@nx/js';
 import type { InitGeneratorSchema } from './schema';
 import {
   cloudflareWorkersTypeVersions,
-  honoVersion,
   tslibVersion,
   vitestPoolWorkersVersion,
   vitestVersion,
@@ -43,7 +42,7 @@ export async function initGenerator(tree: Tree, schema: InitGeneratorSchema) {
     skipFormat: true,
   });
 
-  const installTask = updateDependencies(tree, schema);
+  const installTask = updateDependencies(tree);
   ensurePluginRegistered(tree);
   if (!schema.skipFormat) {
     await formatFiles(tree);
@@ -55,18 +54,15 @@ export async function initGenerator(tree: Tree, schema: InitGeneratorSchema) {
   };
 }
 
-function updateDependencies(tree: Tree, schema: InitGeneratorSchema) {
+function updateDependencies(tree: Tree) {
   // We intentionally do not add `@naxodev/nx-cloudflare` itself: the plugin
   // invoking this generator is already installed, so re-pinning it is
   // redundant and previously collided with the e2e's file: install. This
   // mirrors how @naxodev/gonx's init leaves the plugin alone.
-  const honoPackage = schema.template === 'hono' ? { hono: honoVersion } : {};
-
   return addDependenciesToPackageJson(
     tree,
     {
       tslib: tslibVersion,
-      ...honoPackage,
     },
     {
       wrangler: wranglerVersion,
