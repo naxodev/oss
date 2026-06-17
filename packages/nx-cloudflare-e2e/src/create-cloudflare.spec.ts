@@ -48,9 +48,25 @@ describe('create-cloudflare generator (C3 wrapper)', () => {
     expect(existsSync(join(root, 'node_modules'))).toBeFalsy();
     expect(existsSync(join(root, 'pnpm-lock.yaml'))).toBeFalsy();
 
+    // C3's editor/agent config that clashes with the workspace is pruned; the
+    // worker-specific .gitignore (.wrangler/, .dev.vars) is kept.
+    expect(existsSync(join(root, '.prettierrc'))).toBeFalsy();
+    expect(existsSync(join(root, '.editorconfig'))).toBeFalsy();
+    expect(existsSync(join(root, '.vscode'))).toBeFalsy();
+    expect(existsSync(join(root, 'AGENTS.md'))).toBeFalsy();
+    expect(fileExists(join(root, '.gitignore'))).toBeTruthy();
+
     // The package identity was aligned with the Nx project.
     const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf-8'));
     expect(pkg.name).toBe(app);
+
+    // Scripts duplicating inferred Wrangler targets are dropped; `test` (vitest,
+    // no inferred equivalent) is kept.
+    const scripts = pkg.scripts ?? {};
+    expect(scripts.deploy).toBeUndefined();
+    expect(scripts.dev).toBeUndefined();
+    expect(scripts['cf-typegen']).toBeUndefined();
+    expect(scripts.test).toBeDefined();
 
     // The Wrangler $schema was retargeted to the workspace root.
     const wrangler = readFileSync(join(root, 'wrangler.jsonc'), 'utf-8');
