@@ -1,3 +1,4 @@
+import { expect } from 'bun:test';
 import { promisify } from 'util';
 import treeKill from 'tree-kill';
 import { logError, logInfo, logSuccess } from './log-utils';

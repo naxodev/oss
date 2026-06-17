@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import { uniq, fileExists, tmpProjPath, readFile } from '@nx/plugin/testing';
 import { createTestProject, cleanup, runCLI } from '@naxodev/e2e-utils';
 import { join } from 'path';

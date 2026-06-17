@@ -3,12 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc/gonx-e2e/spec",
     "tsBuildInfoFile": "../../dist/out-tsc/gonx-e2e/spec/tsconfig.spec.tsbuildinfo",
-    "types": ["jest", "node"]
+    "types": ["bun", "node"]
   },
-  "include": [
-    "jest.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
+  "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
 }

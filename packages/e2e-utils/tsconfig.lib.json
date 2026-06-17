@@ -4,7 +4,7 @@
     "outDir": "../../dist/out-tsc/e2e-utils/lib",
     "tsBuildInfoFile": "../../dist/out-tsc/e2e-utils/lib/tsconfig.lib.tsbuildinfo",
     "declaration": true,
-    "types": ["node", "jest"],
+    "types": ["node", "bun"],
     "esModuleInterop": true
   },
   "include": ["src/**/*.ts"],

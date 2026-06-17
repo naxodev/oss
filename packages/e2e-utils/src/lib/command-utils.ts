@@ -167,6 +167,7 @@ export function runCommandAsync(
           NX_INTERNAL_USE_LEGACY_VERSIONING: 'false',
           ...(opts.env || getStrippedEnvironmentVariables()),
           FORCE_COLOR: 'false',
+          NX_NO_CLOUD: 'true',
         },
         encoding: 'utf-8',
       },
@@ -214,6 +215,7 @@ export function runCommandUntil(
       ...getStrippedEnvironmentVariables(),
       ...opts.env,
       FORCE_COLOR: 'false',
+      NX_NO_CLOUD: 'true',
     },
     windowsHide: false,
   });
@@ -286,6 +288,11 @@ export function runCLI(
         NX_INTERNAL_USE_LEGACY_VERSIONING: 'false',
         ...getStrippedEnvironmentVariables(),
         ...opts.env,
+        // getStrippedEnvironmentVariables() drops NX_* keys; force the
+        // generated workspace's nx commands off Nx Cloud so they use the
+        // local task runner (the cloud runner's cache write can fail in a
+        // throwaway workspace with no cloud credentials).
+        NX_NO_CLOUD: 'true',
       },
       encoding: 'utf-8',
       stdio: 'pipe',

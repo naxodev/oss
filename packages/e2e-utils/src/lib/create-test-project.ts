@@ -57,7 +57,7 @@ export function installPlugin(pluginName: string) {
   // `@e2e` tag against npmjs — where it does not exist — and fail confusingly.
   // The default matches the `local-registry` target's port in project.json.
   const registry = process.env.npm_config_registry ?? 'http://localhost:4873';
-  execSync(`pnpm add @naxodev/${pluginName}@e2e --registry=${registry}`, {
+  execSync(`bun add @naxodev/${pluginName}@e2e --registry=${registry}`, {
     cwd: localTmpDir,
     stdio: 'inherit',
     env: process.env,
@@ -68,7 +68,7 @@ function runNxNewCommand() {
   const localTmpDir = dirname(tmpProjPath());
 
   execSync(
-    `npx --yes create-nx-workspace@${nxVersion} proj --preset apps --nxCloud=skip --no-interactive --packageManager=pnpm`,
+    `npx --yes create-nx-workspace@${nxVersion} proj --preset apps --nxCloud=skip --no-interactive --packageManager=bun`,
     {
       cwd: localTmpDir,
       stdio: 'inherit',
