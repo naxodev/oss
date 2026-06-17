@@ -38,16 +38,18 @@ bunx nx e2e gonx-e2e
 
 ### Running a single unit test
 
-Unit tests run on **Jest** (via `@nx/jest`, ts-jest). Pass Jest CLI args after `--`:
+Unit tests run on **`bun test`** (native `bun:test`). The `test` target (in each plugin's `project.json`) runs `tools/scripts/bun-test.ts`, a per-file runner that executes each spec in its own bun process — bun evaluates every spec's top-level `mock.module` before running any test, so a single shared process leaks module mocks across files. Run a single file directly with bun:
 
 ```bash
-# By file
-bunx nx test gonx -- src/graph/static-analysis/parse-go-mod.spec.ts
+# By file (run bun directly from the project dir)
+cd packages/gonx && bun test src/graph/static-analysis/parse-go-mod.spec.ts
 # By test name
-bunx nx test nx-cloudflare -- -t "deploy executor"
+cd packages/nx-cloudflare && bun test src/plugin.spec.ts -t "infers"
+# Whole project via Nx (uses the per-file isolation runner)
+bunx nx test gonx
 ```
 
-Note: the Nx config registers both the Jest and Vite plugins under the `test` target name; the actual unit suites here are Jest. The `@naxodev/nx-cloudflare` package scaffolds **Vitest** configs into _generated_ user projects — don't confuse the scaffolded test setup with this repo's own test setup.
+Note: the `@naxodev/nx-cloudflare` package scaffolds **Vitest** configs into _generated_ user projects — don't confuse the scaffolded test setup with this repo's own `bun test` setup. The e2e suites also run via `bun test`, with a bun preload (`tools/scripts/e2e-bun-setup.ts`) replacing jest's globalSetup/teardown to manage the local Verdaccio registry.
 
 ## Architecture
 

@@ -46,18 +46,11 @@ jobs:
         with:
           bun-version-file: package.json
 
-      # pnpm is NOT used to install this repo. It remains available only
-      # because the e2e harness shells out to `pnpm` to scaffold its
-      # throwaway test workspace (migrated to bun in Phase 3).
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 10
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      # Restore the dependency cache that `cache: 'pnpm'` previously provided.
+      # Cache the bun install cache across runs.
       - uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
