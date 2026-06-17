@@ -11,6 +11,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Supporting (non-published) projects: `e2e-utils` (shared e2e helpers), `nx-cloudflare-e2e` / `gonx-e2e` (e2e suites), and `gonx-docs` (Astro Starlight docs site at `packages/docs/gonx-docs`).
 
+**Workspace structure:** a **bun workspace** (`workspaces: ["packages/*"]`) using **TypeScript project linking** — a composite `tsconfig.base.json` (`module/moduleResolution: nodenext`, `customConditions: ["@naxodev/source"]`), a root solution `tsconfig.json` with project `references`, and the `@nx/js/typescript` inference plugin (managed by `nx sync`); there are no `tsconfig` `paths`. Shared dependency versions live in a single root `catalog` (referenced as `"catalog:"`); the two plugins' **published** runtime deps stay explicit (loose ranges). Tests run on `bun test` (see below).
+
 ## Commands
 
 All Nx invocations use `bunx nx ...`. The package manager is **bun** (not npm/yarn/pnpm).
@@ -80,7 +82,7 @@ Because releases are conventional-commit driven, commit messages and **PR titles
 
 e2e suites (`*-e2e`) install the **published tarball** from a local Verdaccio registry into a freshly generated Nx workspace (`packages/e2e-utils/src/lib/create-test-project.ts` → real `create-nx-workspace` + install), so they exercise peerDependencies, the `exports` map, and migrations the way real consumers do — not a copied `dist` fixture.
 
-The two e2e projects **share one Verdaccio instance** (same port/storage). `tools/scripts/start-local-registry.ts` coordinates ownership via per-pid lock files so parallel `globalSetup`/`globalTeardown` don't race. Consequently CI runs e2e **serially** (`--parallel=1`), and e2e is skipped on Windows.
+The two e2e projects **share one Verdaccio instance** (same port/storage). `tools/scripts/start-local-registry.ts` coordinates ownership via per-pid lock files so parallel bun-test preload setups/teardowns (`tools/scripts/e2e-bun-setup.ts`) don't race. Consequently CI runs e2e **serially** (`--parallel=1`), and e2e is skipped on Windows.
 
 ## CI
 
