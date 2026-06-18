@@ -1,4 +1,5 @@
 import {
+  addDependenciesToPackageJson,
   convertNxGenerator,
   detectPackageManager,
   formatFiles,
@@ -21,7 +22,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { NormalizedSchema, Schema } from './schema';
-import { createCloudflareVersion } from '../../utils/versions';
+import { createCloudflareVersion, nxVitestVersion } from '../../utils/versions';
 import { runC3 } from '../../utils/run-c3';
 import { importDirectoryToTree } from '../../utils/import-tree';
 
@@ -55,7 +56,8 @@ export async function createCloudflareGenerator(
   pruneScaffoldExtras(tree, options.projectRoot);
   updateProjectPackageJson(tree, options);
   retargetWranglerSchema(tree, options.projectRoot);
-  ensureInferencePluginRegistered(tree);
+  ensurePluginRegistered(tree, INFERENCE_PLUGIN);
+  ensureVitestTestTarget(tree, options.projectRoot);
   maybeWriteProjectJson(tree, options);
   warnIfNoWranglerConfig(tree, options.projectRoot);
 
@@ -112,8 +114,9 @@ function maybeWriteProjectJson(tree: Tree, options: NormalizedSchema): void {
 // Wrangler commands the createNodesV2 plugin already exposes as inferred
 // targets. C3 also adds package.json scripts for them; dropping the scripts
 // leaves the inferred targets as the single source of truth. Matched by command
-// value so framework scripts (build/preview) and `test` (vitest) — which have no
-// inferred equivalent — are kept.
+// value so framework scripts (build/preview) — which have no inferred equivalent
+// — are kept. The `test` script is dropped separately, but only when @nx/vitest
+// is wired to infer it (see ensureVitestTestTarget).
 const INFERRED_WRANGLER_COMMANDS = new Set([
   'wrangler deploy',
   'wrangler dev',
@@ -155,23 +158,75 @@ function updateProjectPackageJson(tree: Tree, options: NormalizedSchema): void {
 
 const INFERENCE_PLUGIN = '@naxodev/nx-cloudflare/plugin';
 
-// The scaffold's Nx targets come from the createNodesV2 plugin, which only runs
-// if it's listed in nx.json. Installing the package doesn't register it, so
-// ensure it's present (idempotently) or the project would have no targets.
-function ensureInferencePluginRegistered(tree: Tree): void {
+// A createNodesV2 plugin only contributes targets if it's listed in nx.json;
+// installing the package doesn't register it. Add it (idempotently, matching
+// both the string and object plugin forms) or the inferred targets never appear.
+function ensurePluginRegistered(tree: Tree, plugin: string): void {
   const nxJson = readNxJson(tree);
   if (!nxJson) {
     return;
   }
   const plugins = nxJson.plugins ?? [];
   const isRegistered = plugins.some(
-    (plugin) =>
-      (typeof plugin === 'string' ? plugin : plugin.plugin) === INFERENCE_PLUGIN
+    (p) => (typeof p === 'string' ? p : p.plugin) === plugin
   );
   if (!isRegistered) {
-    nxJson.plugins = [...plugins, INFERENCE_PLUGIN];
+    nxJson.plugins = [...plugins, plugin];
     updateNxJson(tree, nxJson);
   }
+}
+
+const VITEST_PLUGIN = '@nx/vitest';
+
+// C3's Worker templates ship a vitest setup (vitest.config.mts + a spec), but
+// nothing in the workspace turns it into an Nx `test` target. @nx/vitest's
+// createNodesV2 infers `test` from a vitest config — so when the scaffold has
+// one, register the plugin and add it as a devDependency. Skipped otherwise to
+// avoid foisting an unused plugin + dependency on workspaces whose template has
+// no vitest config. Note: @nx/vitest exposes createNodesV2 from its package
+// root (no `/plugin` subpath in Nx 22).
+const VITEST_CONFIG_FILES = [
+  'vitest.config.ts',
+  'vitest.config.mts',
+  'vitest.config.cts',
+  'vitest.config.js',
+  'vitest.config.mjs',
+  'vitest.config.cjs',
+];
+
+function ensureVitestTestTarget(tree: Tree, projectRoot: string): void {
+  const hasVitestConfig = VITEST_CONFIG_FILES.some((file) =>
+    tree.exists(joinPathFragments(projectRoot, file))
+  );
+  if (!hasVitestConfig) {
+    return;
+  }
+  ensurePluginRegistered(tree, VITEST_PLUGIN);
+  addDependenciesToPackageJson(tree, {}, { [VITEST_PLUGIN]: nxVitestVersion });
+  dropVitestScript(tree, projectRoot);
+}
+
+// The inferred @nx/vitest `test` target is the single source of truth, so a
+// script that just invokes vitest duplicates it — drop it. Same reasoning as the
+// wrangler-script stripping in updateProjectPackageJson, gated on @nx/vitest
+// being wired. Matched by command value, not name, so a non-vitest script (e.g.
+// `test: jest`) survives.
+function dropVitestScript(tree: Tree, projectRoot: string): void {
+  const packageJsonPath = joinPathFragments(projectRoot, 'package.json');
+  if (!tree.exists(packageJsonPath)) {
+    return;
+  }
+  updateJson(tree, packageJsonPath, (json) => {
+    if (json.scripts) {
+      for (const [name, command] of Object.entries(json.scripts)) {
+        const cmd = typeof command === 'string' ? command.trim() : '';
+        if (cmd === 'vitest' || cmd.startsWith('vitest ')) {
+          delete json.scripts[name];
+        }
+      }
+    }
+    return json;
+  });
 }
 
 const WRANGLER_CONFIG_FILES = [

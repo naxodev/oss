@@ -18,6 +18,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createCloudflareGenerator } from './generator';
 import { runC3 } from '../../utils/run-c3';
+import { nxVitestVersion } from '../../utils/versions';
 
 // Simulate C3 by writing a minimal scaffold (including the install artifacts C3
 // always produces) into the temp dir it is handed, so unit tests never spawn a
@@ -74,6 +75,11 @@ mock.module('../../utils/run-c3', () => ({
     writeFileSync(
       join(options.directory, '.gitignore'),
       '.wrangler/\n.dev.vars*'
+    );
+    // C3's Worker templates scaffold a vitest setup the generator wires into Nx.
+    writeFileSync(
+      join(options.directory, 'vitest.config.mts'),
+      'export default {};'
     );
   }),
 }));
@@ -151,7 +157,7 @@ describe('create-cloudflare generator', () => {
     expect(tree.exists('apps/my-worker/.gitignore')).toBe(true);
   });
 
-  it('strips package.json scripts that duplicate inferred Wrangler targets, keeping the rest', async () => {
+  it('strips package.json scripts that duplicate inferred targets, keeping the rest', async () => {
     await createCloudflareGenerator(tree, {
       directory: 'apps/my-worker',
       type: 'hello-world',
@@ -163,8 +169,9 @@ describe('create-cloudflare generator', () => {
     expect(scripts.dev).toBeUndefined();
     expect(scripts.start).toBeUndefined();
     expect(scripts['cf-typegen']).toBeUndefined();
+    // `test` (vitest) is now inferred by @nx/vitest → dropped too
+    expect(scripts.test).toBeUndefined();
     // no inferred equivalent → kept
-    expect(scripts.test).toBe('vitest');
     expect(scripts.build).toBe('vite build');
   });
 
@@ -264,6 +271,146 @@ describe('create-cloudflare generator', () => {
     const count = (readNxJson(tree)?.plugins ?? [])
       .map(pluginName)
       .filter((p) => p === PLUGIN).length;
+    expect(count).toBe(1);
+  });
+
+  it('registers the @nx/vitest plugin so the scaffold gets an inferred test target', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/w',
+      type: 'hello-world',
+    });
+
+    const plugins = readNxJson(tree)?.plugins ?? [];
+    expect(plugins.map(pluginName)).toContain('@nx/vitest');
+  });
+
+  it('adds @nx/vitest as a devDependency so the inferred test target can resolve it', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/w',
+      type: 'hello-world',
+    });
+
+    expect(readJson(tree, 'package.json').devDependencies?.['@nx/vitest']).toBe(
+      nxVitestVersion
+    );
+  });
+
+  it('does not wire @nx/vitest when the scaffold ships no vitest config', async () => {
+    runC3Mock.mockImplementationOnce((options) => {
+      mkdirSync(join(options.directory, 'src'), { recursive: true });
+      writeFileSync(
+        join(options.directory, 'src/index.ts'),
+        'export default {};'
+      );
+      writeFileSync(
+        join(options.directory, 'wrangler.jsonc'),
+        '{"name":"scaffold","main":"src/index.ts"}'
+      );
+      writeFileSync(
+        join(options.directory, 'package.json'),
+        '{"name":"scaffold","scripts":{"test":"vitest"}}'
+      );
+      // deliberately no vitest.config.*
+    });
+
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/no-tests',
+      type: 'hello-world',
+    });
+
+    const plugins = readNxJson(tree)?.plugins ?? [];
+    expect(plugins.map(pluginName)).not.toContain('@nx/vitest');
+    expect(
+      readJson(tree, 'package.json').devDependencies?.['@nx/vitest']
+    ).toBeUndefined();
+    // No inferred test target here, so the `test` script is left in place.
+    expect(readJson(tree, 'apps/no-tests/package.json').scripts?.test).toBe(
+      'vitest'
+    );
+  });
+
+  it('drops vitest scripts by command value, including arg forms and non-`test` names', async () => {
+    runC3Mock.mockImplementationOnce((options) => {
+      mkdirSync(join(options.directory, 'src'), { recursive: true });
+      writeFileSync(
+        join(options.directory, 'src/index.ts'),
+        'export default {};'
+      );
+      writeFileSync(
+        join(options.directory, 'wrangler.jsonc'),
+        '{"name":"scaffold","main":"src/index.ts"}'
+      );
+      writeFileSync(
+        join(options.directory, 'vitest.config.mts'),
+        'export default {};'
+      );
+      writeFileSync(
+        join(options.directory, 'package.json'),
+        JSON.stringify({
+          name: 'scaffold',
+          scripts: { test: 'vitest run', 'test:unit': 'vitest --coverage' },
+        })
+      );
+    });
+
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/w',
+      type: 'hello-world',
+    });
+
+    const scripts = readJson(tree, 'apps/w/package.json').scripts ?? {};
+    expect(scripts.test).toBeUndefined();
+    expect(scripts['test:unit']).toBeUndefined();
+  });
+
+  it('keeps non-vitest scripts when wiring the test target', async () => {
+    runC3Mock.mockImplementationOnce((options) => {
+      mkdirSync(join(options.directory, 'src'), { recursive: true });
+      writeFileSync(
+        join(options.directory, 'src/index.ts'),
+        'export default {};'
+      );
+      writeFileSync(
+        join(options.directory, 'wrangler.jsonc'),
+        '{"name":"scaffold","main":"src/index.ts"}'
+      );
+      writeFileSync(
+        join(options.directory, 'vitest.config.mts'),
+        'export default {};'
+      );
+      writeFileSync(
+        join(options.directory, 'package.json'),
+        JSON.stringify({
+          name: 'scaffold',
+          // `test: jest` is not vitest; `vitest-ui` is a different binary.
+          scripts: { test: 'jest', ui: 'vitest-ui --open' },
+        })
+      );
+    });
+
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/w',
+      type: 'hello-world',
+    });
+
+    const scripts = readJson(tree, 'apps/w/package.json').scripts ?? {};
+    expect(scripts.test).toBe('jest');
+    expect(scripts.ui).toBe('vitest-ui --open');
+  });
+
+  it('does not duplicate @nx/vitest when already registered', async () => {
+    const nxJson = readNxJson(tree) ?? {};
+    nxJson.plugins = ['@nx/vitest'];
+    updateNxJson(tree, nxJson);
+
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/w',
+      type: 'hello-world',
+    });
+
+    const count = (readNxJson(tree)?.plugins ?? [])
+      .map(pluginName)
+      .filter((p) => p === '@nx/vitest').length;
     expect(count).toBe(1);
   });
 
