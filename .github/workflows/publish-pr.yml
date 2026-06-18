@@ -1,0 +1,180 @@
+name: Publish PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write # required for npm OIDC trusted publishing
+
+concurrency:
+  group: publish-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish Preview Packages
+    # Skip forks (can't mint this repo's OIDC token) and unlabeled PRs.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'publish-preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      # setup-node provides node + npm (used below for `npm pkg set`,
+      # `npm publish`, and the npm upgrade). No registry-url on purpose: it
+      # writes an .npmrc with //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN},
+      # and an empty/unresolved token there breaks OIDC trusted publishing.
+      # Tokenless OIDC needs no auth line in .npmrc.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - run: bun install --frozen-lockfile
+
+      - name: Upgrade npm for OIDC trusted publishing
+        # npm OIDC trusted publishing needs npm >= 11.5.1; Node 22 ships 10.x.
+        run: npm install -g npm@latest
+        shell: bash
+
+      - name: Set preview version
+        id: version
+        run: |
+          # run_attempt makes re-runs of the same run get a fresh version —
+          # npm versions are immutable, so a re-run reusing the version would
+          # collide on any package already published in the prior attempt.
+          VERSION="0.0.0-pr.${{ github.event.pull_request.number }}.${{ github.run_number }}.${{ github.run_attempt }}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing version: $VERSION"
+        shell: bash
+
+      - name: Set preview version in package manifests
+        # Write the preview version straight into each source package.json. We
+        # don't use `nx release version` here: that subcommand rejects the
+        # repo's top-level `release.git` config in nx.json. An explicit version
+        # needs none of its conventional-commit machinery anyway — the build
+        # below copies the bumped manifest into dist/, which is what publish packs.
+        run: |
+          for project in gonx nx-cloudflare; do
+            (cd "packages/$project" && npm pkg set version="${{ steps.version.outputs.version }}")
+          done
+        shell: bash
+
+      - name: Build packages
+        run: bunx nx run-many -t build
+        shell: bash
+
+      - name: Publish packages
+        # Tokenless publish via npm OIDC trusted publishing (configured on npmjs
+        # for this workflow). We publish the built dist dirs directly with npm —
+        # the reference OIDC implementation — rather than `nx release publish`,
+        # which delegates to the workspace package manager (bun) whose OIDC
+        # exchange doesn't engage here (it falls through to "npm adduser"). No
+        # token: a static one hits the
+        # account's 2FA-on-writes rule; OIDC is exempt and emits provenance
+        # automatically. Relies on id-token: write (above).
+        run: |
+          for project in gonx nx-cloudflare; do
+            npm publish "dist/packages/$project" \
+              --tag "pr-${{ github.event.pull_request.number }}" \
+              --access public
+          done
+        shell: bash
+        env:
+          npm_config_registry: https://registry.npmjs.org
+
+      - name: Verify both packages published
+        # Don't claim success from a static comment — confirm the registry
+        # actually serves both packages at the new version, so a partial publish
+        # fails loudly instead of posting install instructions that 404.
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          for pkg in @naxodev/gonx @naxodev/nx-cloudflare; do
+            published=false
+            for attempt in 1 2 3 4 5; do
+              if npm view "$pkg@$VERSION" version >/dev/null 2>&1; then
+                echo "✓ $pkg@$VERSION is live"
+                published=true
+                break
+              fi
+              echo "… $pkg@$VERSION not visible yet (attempt $attempt/5), retrying"
+              sleep 5
+            done
+            if [ "$published" = false ]; then
+              echo "::error::$pkg@$VERSION not found on the registry after publish — partial publish?"
+              exit 1
+            fi
+          done
+        shell: bash
+
+      - name: Find previous preview comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- pr-preview-packages -->'
+          direction: last
+
+      - name: Minimize previous preview comment
+        if: steps.find-comment.outputs.comment-id != ''
+        # Cosmetic only, and it runs after a successful publish — never let a
+        # benign GitHub API hiccup turn a green publish red or suppress the
+        # install-instructions comment below. Surface failures as a warning.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMENT_NODE_ID: ${{ steps.find-comment.outputs.comment-node-id }}
+        run: |
+          # $id is a GraphQL variable, not a shell variable — it must stay
+          # unexpanded inside the single-quoted query (gh binds it via -f id=).
+          # shellcheck disable=SC2016
+          gh api graphql -f query='
+            mutation ($id: ID!) {
+              minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) {
+                minimizedComment { isMinimized }
+              }
+            }' -f id="$COMMENT_NODE_ID" \
+            || echo "::warning::Failed to minimize previous preview comment (non-fatal); continuing."
+        shell: bash
+
+      - name: Comment on PR
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- pr-preview-packages -->
+            **Preview packages published** for commit ${{ github.event.pull_request.head.sha }}
+
+            **Version:** `${{ steps.version.outputs.version }}`
+            **Tag:** `pr-${{ github.event.pull_request.number }}` (floats to the latest preview)
+
+            ```sh
+            npm i @naxodev/gonx@pr-${{ github.event.pull_request.number }}
+            npm i @naxodev/nx-cloudflare@pr-${{ github.event.pull_request.number }}
+            ```
+
+            Or pin the exact build from this commit:
+            ```sh
+            npm i @naxodev/gonx@${{ steps.version.outputs.version }}
+            npm i @naxodev/nx-cloudflare@${{ steps.version.outputs.version }}
+            ```
