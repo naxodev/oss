@@ -2,9 +2,7 @@ import {
   addDependenciesToPackageJson,
   convertNxGenerator,
   formatFiles,
-  readNxJson,
   Tree,
-  updateNxJson,
 } from '@nx/devkit';
 import { initGenerator as nodeInitGenerator } from '@nx/js';
 import type { InitGeneratorSchema } from './schema';
@@ -15,26 +13,7 @@ import {
   vitestVersion,
   wranglerVersion,
 } from '../../utils/versions';
-
-const INFERENCE_PLUGIN = '@naxodev/nx-cloudflare/plugin';
-
-// Register the createNodesV2 inference plugin so Worker targets
-// (serve/deploy/typegen/version-upload/tail) are inferred from the wrangler
-// config. Idempotent: matches both the string and object plugin forms.
-function ensurePluginRegistered(tree: Tree): void {
-  const nxJson = readNxJson(tree) ?? {};
-  const plugins = nxJson.plugins ?? [];
-  const alreadyRegistered = plugins.some((p) =>
-    typeof p === 'string'
-      ? p === INFERENCE_PLUGIN
-      : p.plugin === INFERENCE_PLUGIN
-  );
-  if (alreadyRegistered) {
-    return;
-  }
-  nxJson.plugins = [...plugins, INFERENCE_PLUGIN];
-  updateNxJson(tree, nxJson);
-}
+import { ensurePluginRegistered } from '../../utils/inference-plugin';
 
 export async function initGenerator(tree: Tree, schema: InitGeneratorSchema) {
   const initTask = await nodeInitGenerator(tree, {

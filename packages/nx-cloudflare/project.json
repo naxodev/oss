@@ -28,6 +28,11 @@
             "input": "./packages/nx-cloudflare",
             "glob": "generators.json",
             "output": "./"
+          },
+          {
+            "input": "./packages/nx-cloudflare",
+            "glob": "migrations.json",
+            "output": "./"
           }
         ]
       }
