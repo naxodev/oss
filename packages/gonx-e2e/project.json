@@ -6,7 +6,7 @@
   "implicitDependencies": ["gonx", "e2e-utils"],
   "targets": {
     "e2e": {
-      "command": "bun test --preload tools/scripts/e2e-bun-setup.ts packages/gonx-e2e/src",
+      "command": "bun test --preload ./tools/scripts/e2e-bun-setup.ts packages/gonx-e2e/src",
       "inputs": [
         "default",
         "^production",

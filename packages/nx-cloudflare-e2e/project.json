@@ -6,7 +6,7 @@
   "implicitDependencies": ["nx-cloudflare"],
   "targets": {
     "e2e": {
-      "command": "bun test --preload tools/scripts/e2e-bun-setup.ts packages/nx-cloudflare-e2e/src",
+      "command": "bun test --preload ./tools/scripts/e2e-bun-setup.ts packages/nx-cloudflare-e2e/src",
       "inputs": [
         "default",
         "^production",

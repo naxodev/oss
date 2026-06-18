@@ -1,21 +1,14 @@
-import { output, PackageManager } from '@nx/devkit';
+import { output } from '@nx/devkit';
 import {
-  detectPackageManager,
   ensureCypressInstallation,
   ensurePlaywrightBrowsersInstallation,
-  getNpmMajorVersion,
-  getPnpmVersion,
-  getPublishedVersion,
   getStrippedEnvironmentVariables,
-  getYarnMajorVersion,
   isVerboseE2ERun,
+  npmRegistryEnv,
 } from './get-env-info';
 import { ChildProcess, exec, execSync } from 'child_process';
-import { join } from 'path';
 import { logError, stripConsoleColors } from './log-utils';
-import { existsSync } from 'fs-extra';
-import { gte } from 'semver';
-import { fileExists, readJson, tmpProjPath } from '@nx/plugin/testing';
+import { tmpProjPath } from '@nx/plugin/testing';
 
 export interface RunCmdOpts {
   silenceError?: boolean;
@@ -26,10 +19,7 @@ export interface RunCmdOpts {
   redirectStderr?: boolean;
 }
 
-export function getPackageManagerCommand({
-  path = tmpProjPath(),
-  packageManager = detectPackageManager(path),
-} = {}): {
+export function getPackageManagerCommand(): {
   createWorkspace: string;
   run: (script: string, args: string) => string;
   runNx: string;
@@ -43,86 +33,22 @@ export function getPackageManagerCommand({
   runLerna: string;
   exec: string;
 } {
-  const npmMajorVersion = getNpmMajorVersion();
-  const yarnMajorVersion = getYarnMajorVersion(path);
-  const pnpmVersion = getPnpmVersion();
-  const publishedVersion = getPublishedVersion();
-  const isYarnWorkspace = fileExists(join(path, 'package.json'))
-    ? readJson('package.json').workspaces
-    : false;
-  const isPnpmWorkspace = existsSync(join(path, 'pnpm-workspace.yaml'));
-
+  // e2e workspaces are always created with bun (see create-test-project), so
+  // every command goes through bun — no package-manager detection needed.
   return {
-    npm: {
-      createWorkspace: `npx ${
-        npmMajorVersion && +npmMajorVersion >= 7 ? '--yes' : ''
-      } create-nx-workspace@${publishedVersion}`,
-      run: (script: string, args: string) => `npm run ${script} -- ${args}`,
-      runNx: `npx nx`,
-      runNxSilent: `npx nx`,
-      runUninstalledPackage: `npx --yes`,
-      install: 'npm install',
-      ciInstall: 'npm ci',
-      addProd: `npm install --legacy-peer-deps`,
-      addDev: `npm install --legacy-peer-deps -D`,
-      list: 'npm ls --depth 10',
-      runLerna: `npx lerna`,
-      exec: 'npx',
-    },
-    yarn: {
-      createWorkspace: `npx ${
-        npmMajorVersion && +npmMajorVersion >= 7 ? '--yes' : ''
-      } create-nx-workspace@${publishedVersion}`,
-      run: (script: string, args: string) => `yarn ${script} ${args}`,
-      runNx: `yarn nx`,
-      runNxSilent:
-        yarnMajorVersion && +yarnMajorVersion >= 2
-          ? 'yarn nx'
-          : `yarn --silent nx`,
-      runUninstalledPackage: 'npx --yes',
-      install: 'yarn',
-      ciInstall: 'yarn --frozen-lockfile',
-      addProd: isYarnWorkspace ? 'yarn add -W' : 'yarn add',
-      addDev: isYarnWorkspace ? 'yarn add -DW' : 'yarn add -D',
-      list: 'yarn list --pattern',
-      runLerna:
-        yarnMajorVersion && +yarnMajorVersion >= 2
-          ? 'yarn lerna'
-          : `yarn --silent lerna`,
-      exec: 'yarn',
-    },
-    // Pnpm 3.5+ adds nx to
-    pnpm: {
-      createWorkspace: `pnpm dlx create-nx-workspace@${publishedVersion}`,
-      run: (script: string, args: string) => `pnpm run ${script} -- ${args}`,
-      runNx: `pnpm exec nx`,
-      runNxSilent: `pnpm exec nx`,
-      runUninstalledPackage: 'pnpm dlx',
-      // We need to install with --no-frozen-lockfile when running e2e tests because pnpm will pick up the fact we are in CI and default to --frozen-lockfile
-      install: 'pnpm install --no-frozen-lockfile',
-      ciInstall: 'pnpm install --frozen-lockfile',
-      addProd: isPnpmWorkspace ? 'pnpm add -w' : 'pnpm add',
-      addDev: isPnpmWorkspace ? 'pnpm add -Dw' : 'pnpm add -D',
-      list: 'pnpm ls --depth 10',
-      runLerna: `pnpm exec lerna`,
-      exec: pnpmVersion && gte(pnpmVersion, '6.13.0') ? 'pnpm exec' : 'pnpx',
-    },
-    bun: {
-      // See note in runCreateWorkspace in create-project-utils.ts for why we don't set @{version} for `bunx create-nx-workspace` right now
-      createWorkspace: `bunx create-nx-workspace`,
-      run: (script: string, args: string) => `bun run ${script} -- ${args}`,
-      runNx: `bunx nx`,
-      runNxSilent: `bunx nx`,
-      runUninstalledPackage: `bunx --yes`,
-      install: 'bun install',
-      ciInstall: 'bun install --no-cache',
-      addProd: 'bun install',
-      addDev: 'bun install -D',
-      list: 'bun pm ls',
-      runLerna: `bunx lerna`,
-      exec: 'bun',
-    },
-  }[packageManager.trim() as PackageManager];
+    createWorkspace: `bunx create-nx-workspace`,
+    run: (script: string, args: string) => `bun run ${script} -- ${args}`,
+    runNx: `bunx nx`,
+    runNxSilent: `bunx nx`,
+    runUninstalledPackage: `bunx --yes`,
+    install: 'bun install',
+    ciInstall: 'bun install --no-cache',
+    addProd: 'bun install',
+    addDev: 'bun install -D',
+    list: 'bun pm ls',
+    runLerna: `bunx lerna`,
+    exec: 'bun',
+  };
 }
 
 export function runE2ETests(runner?: 'cypress' | 'playwright') {
@@ -168,6 +94,10 @@ export function runCommandAsync(
           ...(opts.env || getStrippedEnvironmentVariables()),
           FORCE_COLOR: 'false',
           NX_NO_CLOUD: 'true',
+          // Default installs (incl. nx-generator- and C3-triggered ones) to
+          // npmjs; only @naxodev/* resolves from Verdaccio (scoped in the
+          // workspace .npmrc). See npmRegistryEnv.
+          ...npmRegistryEnv(),
         },
         encoding: 'utf-8',
       },
@@ -175,6 +105,7 @@ export function runCommandAsync(
         if (!opts.silenceError && err) {
           logError(`Original command: ${command}`, `${stdout}\n\n${stderr}`);
           reject(err);
+          return;
         }
 
         const outputs = {
@@ -216,6 +147,8 @@ export function runCommandUntil(
       ...opts.env,
       FORCE_COLOR: 'false',
       NX_NO_CLOUD: 'true',
+      // See runCommandAsync — keep installs off Verdaccio's npmjs uplink.
+      ...npmRegistryEnv(),
     },
     windowsHide: false,
   });
@@ -293,6 +226,8 @@ export function runCLI(
         // local task runner (the cloud runner's cache write can fail in a
         // throwaway workspace with no cloud credentials).
         NX_NO_CLOUD: 'true',
+        // See runCommandAsync — keep installs off Verdaccio's npmjs uplink.
+        ...npmRegistryEnv(),
       },
       encoding: 'utf-8',
       stdio: 'pipe',
