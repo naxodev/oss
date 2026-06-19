@@ -74,7 +74,7 @@ Both plugins infer Nx targets from project files rather than requiring hand-writ
 
 ### Releases
 
-Releases are **independent per project** (`nx.json` → `release.projects: ["gonx", "nx-cloudflare"]`), driven by Conventional Commits. Versioning/changelog/GitHub-release creation are handled by `nx release`. Publishing is triggered by **publishing a GitHub Release** whose tag follows `{projectName}@v{version}` (e.g. `gonx@v3.0.0`); `.github/workflows/release.yml` parses the project from the tag, builds it, and runs `nx release publish` with npm provenance. Prereleases (GitHub "prerelease" flag) publish under the `next` npm tag, otherwise `latest`.
+Releases are **independent per project** (`nx.json` → `release.projects: ["gonx", "nx-cloudflare"]`), driven by Conventional Commits. Versioning/changelog/GitHub-release creation are handled by `nx release`. **Production releases are published manually from a maintainer's machine** (the npm account requires 2FA for writes, so publishing needs an interactive OTP) — there is no CI publish workflow. See `CONTRIBUTING.md` → Releasing for the step-by-step flow. Prereleases publish under the `next` npm tag, otherwise `latest`. Separately, `.github/workflows/publish-pr.yml` publishes throwaway **PR preview** packages (`0.0.0-pr.*`, dist-tag `pr-<n>`) via OIDC trusted publishing when a PR carries the `publish-preview` label.
 
 Because releases are conventional-commit driven, commit messages and **PR titles matter** — squash-merge lands the PR title as the commit subject. Use Conventional Commits with the package scope, e.g. `feat(nx-cloudflare): ...`, `fix(gonx): ...`, `feat(nx-cloudflare)!: ...` for breaking changes.
 
