@@ -197,6 +197,9 @@ const setup = async () => {
       stageChanges: false,
       gitCommit: false,
       gitTag: false,
+      // nx.json sets release.git.push:true for manual production releases;
+      // the local e2e publish must never push (CI runs detached-HEAD).
+      gitPush: false,
       firstRelease: true,
       versionActionsOptionsOverrides: {
         skipLockFileUpdate: true,
