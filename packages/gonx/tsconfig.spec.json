@@ -1,14 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
-    "types": ["jest", "node"]
+    "outDir": "../../dist/out-tsc/gonx/spec",
+    "tsBuildInfoFile": "../../dist/out-tsc/gonx/spec/tsconfig.spec.tsbuildinfo",
+    "isolatedModules": true,
+    "types": ["bun", "node"]
   },
-  "include": [
-    "jest.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
+  "references": [{ "path": "./tsconfig.lib.json" }],
+  "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
 }

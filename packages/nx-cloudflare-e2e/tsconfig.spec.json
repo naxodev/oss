@@ -1,14 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
-    "types": ["jest", "node"]
+    "outDir": "../../dist/out-tsc/nx-cloudflare-e2e/spec",
+    "tsBuildInfoFile": "../../dist/out-tsc/nx-cloudflare-e2e/spec/tsconfig.spec.tsbuildinfo",
+    "types": ["bun", "node"]
   },
-  "include": [
-    "jest.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
+  "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
 }

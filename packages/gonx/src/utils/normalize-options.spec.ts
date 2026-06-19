@@ -1,16 +1,17 @@
+import { describe, it, expect, mock, beforeEach } from 'bun:test';
 import type { Tree } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { normalizeOptions } from './normalize-options';
 
-jest.mock('@nx/devkit', () => ({
-  names: jest.fn().mockReturnValue({
+mock.module('@nx/devkit', () => ({
+  names: mock().mockReturnValue({
     fileName: 'backend-filename',
     propertyName: 'backendFilename',
   }),
-  readJson: jest.fn().mockReturnValue({ name: '@naxodev/backend' }),
+  readJson: mock().mockReturnValue({ name: '@naxodev/backend' }),
 }));
-jest.mock('@nx/devkit/src/generators/project-name-and-root-utils', () => ({
-  determineProjectNameAndRootOptions: jest.fn().mockReturnValue({
+mock.module('@nx/devkit/src/generators/project-name-and-root-utils', () => ({
+  determineProjectNameAndRootOptions: mock().mockReturnValue({
     projectName: 'backend',
     projectRoot: '/tmp',
     projectNameAndRootFormat: 'as-provided',

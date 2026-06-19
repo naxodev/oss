@@ -1,16 +1,17 @@
+import { describe, it, expect, mock } from 'bun:test';
 import { ExecutorContext } from '@nx/devkit';
 import * as path from 'path';
 import * as sharedFunctions from '../../utils';
+import { buildStringFlagIfValid } from '../../utils/execute-command';
 import executor from './executor';
 import { BuildExecutorSchema } from './schema';
 
-jest.mock('../../utils', () => {
-  const { buildStringFlagIfValid } = jest.requireActual('../../utils');
+mock.module('../../utils', () => {
   return {
     buildStringFlagIfValid,
-    executeCommand: jest.fn().mockResolvedValue({ success: true }),
-    extractProjectRoot: jest.fn(() => 'apps/project'),
-    extractCWD: jest.fn(
+    executeCommand: mock().mockResolvedValue({ success: true }),
+    extractProjectRoot: mock(() => 'apps/project'),
+    extractCWD: mock(
       (options: BuildExecutorSchema, context: ExecutorContext) => {
         if (options.main) {
           return 'apps/project/cmd';
@@ -85,18 +86,18 @@ describe('Build Executor', () => {
     );
   });
 
-  it.each`
-    config                       | flag
-    ${{ buildMode: 'c-shared' }} | ${'-buildmode=c-shared'}
-  `('should add flag $flag if enabled', async ({ config, flag }) => {
-    expect(
-      (await executor({ ...options, ...config }, context)).success
-    ).toBeTruthy();
-    expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
-      expect.arrayContaining([flag]),
-      expect.anything()
-    );
-  });
+  it.each([[{ buildMode: 'c-shared' }, '-buildmode=c-shared']])(
+    'should add flag %p if enabled',
+    async (config, flag) => {
+      expect(
+        (await executor({ ...options, ...config }, context)).success
+      ).toBeTruthy();
+      expect(sharedFunctions.executeCommand).toHaveBeenCalledWith(
+        expect.arrayContaining([flag]),
+        expect.anything()
+      );
+    }
+  );
 
   it('should use "." as run path when main option is provided', async () => {
     await executor({ ...options, main: 'cmd/main.go' }, context);

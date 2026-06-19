@@ -1,11 +1,14 @@
+import { describe, it, expect, beforeEach, mock, type Mock } from 'bun:test';
 import { ProjectConfiguration } from '@nx/devkit';
 import { buildImportMap } from './build-import-map';
 import { parseGoMod } from './parse-go-mod';
 import { GoModInfo } from '../types/go-mod-info';
 
-jest.mock('./parse-go-mod');
+mock.module('./parse-go-mod', () => ({
+  parseGoMod: mock(),
+}));
 
-const mockParseGoMod = parseGoMod as jest.MockedFunction<typeof parseGoMod>;
+const mockParseGoMod = parseGoMod as unknown as Mock<typeof parseGoMod>;
 
 function goMod(
   modulePath: string,
@@ -21,7 +24,7 @@ describe('buildImportMap', () => {
   const workspaceRoot = '/workspace';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockParseGoMod.mockClear();
     mockParseGoMod.mockResolvedValue(null);
   });
 

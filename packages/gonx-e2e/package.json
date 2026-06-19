@@ -1,0 +1,9 @@
+{
+  "name": "@naxodev/gonx-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "devDependencies": {
+    "@naxodev/e2e-utils": "workspace:*"
+  }
+}

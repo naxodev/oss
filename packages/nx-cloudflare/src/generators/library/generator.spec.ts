@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, setDefaultTimeout } from 'bun:test';
 import {
   getProjects,
   readJson,
@@ -38,7 +39,9 @@ describe('lib', () => {
         directory: 'my-lib',
         config: 'npm-scripts',
       });
-      expect(readJson(tree, '/my-lib/package.json')).toEqual({
+      expect(
+        readJson<Record<string, unknown>>(tree, '/my-lib/package.json')
+      ).toEqual({
         name: '@proj/my-lib',
         version: '0.0.1',
         private: true,
@@ -590,7 +593,7 @@ describe('lib', () => {
 
   describe('--bundler=vite', () => {
     // extend timeout of test
-    jest.setTimeout(100000);
+    setDefaultTimeout(100000);
     it('should add build and test targets with vite and vitest', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,

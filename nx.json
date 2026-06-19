@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "cli": {
-    "packageManager": "pnpm"
+    "packageManager": "bun"
   },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
@@ -64,21 +64,21 @@
   },
   "plugins": [
     {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build-ts",
+          "configName": "tsconfig.lib.json"
+        }
+      }
+    },
+    {
       "plugin": "@nx/eslint/plugin",
       "options": {
         "targetName": "lint"
-      }
-    },
-    {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      }
-    },
-    {
-      "plugin": "@nx/vite/plugin",
-      "options": {
-        "targetName": "test"
       }
     }
   ],
@@ -89,7 +89,7 @@
     "projects": ["gonx", "nx-cloudflare"],
     "version": {
       "useLegacyVersioning": false,
-      "preVersionCommand": "pnpm exec nx run-many -t build",
+      "preVersionCommand": "bunx nx run-many -t build",
       "conventionalCommits": true
     },
     "git": {

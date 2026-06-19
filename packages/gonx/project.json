@@ -6,6 +6,12 @@
   "tags": ["scope:public", "type:plugin"],
   "implicitDependencies": ["gonx-docs"],
   "targets": {
+    "test": {
+      "command": "bun ../../tools/scripts/bun-test.ts",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],

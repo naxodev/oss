@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import { uniq, fileExists, tmpProjPath } from '@nx/plugin/testing';
 import {
   createTestProject,

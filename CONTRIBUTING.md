@@ -7,14 +7,14 @@
 Start by installing all dependencies:
 
 ```bash
-pnpm
+bun install
 ```
 
 Run the tests:
 
 ```bash
-pnpm nx test <project>
-pnpm nx e2e <project>
+bunx nx test <project>
+bunx nx e2e <project>
 ```
 
 ## <a name="rules"></a> Coding Rules

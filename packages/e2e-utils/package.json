@@ -1,0 +1,12 @@
+{
+  "name": "@naxodev/e2e-utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    ".": {
+      "@naxodev/source": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  }
+}

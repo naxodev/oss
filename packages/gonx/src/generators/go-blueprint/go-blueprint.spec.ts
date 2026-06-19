@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, mock, type Mock } from 'bun:test';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { Tree } from '@nx/devkit';
 import { fork, spawn } from 'child_process';
@@ -6,23 +7,23 @@ import { goBlueprintGenerator } from './go-blueprint';
 import { GoBlueprintGeneratorSchema } from './schema';
 
 // Mock what we need
-jest.mock('child_process');
-jest.mock('../init/generator', () => ({
-  initGenerator: jest.fn().mockResolvedValue(() => Promise.resolve()),
+mock.module('child_process', () => ({
+  fork: mock(),
+  spawn: mock(),
+}));
+mock.module('../init/generator', () => ({
+  initGenerator: mock().mockResolvedValue(() => Promise.resolve()),
 }));
 
-// Mock require.resolve to return a fake binary path
-const mockRequireResolve = jest.fn();
-
 // Mock generateFiles specifically to avoid filesystem dependencies in tests
-const mockedGenerateFiles = jest.fn();
-jest.mock('@nx/devkit', () => ({
-  ...jest.requireActual('@nx/devkit'),
+const mockedGenerateFiles = mock();
+mock.module('@nx/devkit', () => ({
+  ...require('@nx/devkit'),
   generateFiles: (...args: any[]) => mockedGenerateFiles(...args),
 }));
 
-const mockedFork = fork as jest.MockedFunction<typeof fork>;
-const mockedSpawn = spawn as jest.MockedFunction<typeof spawn>;
+const mockedFork = fork as unknown as Mock<typeof fork>;
+const mockedSpawn = spawn as unknown as Mock<typeof spawn>;
 
 describe('go-blueprint generator', () => {
   let tree: Tree;
@@ -42,14 +43,9 @@ describe('go-blueprint generator', () => {
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
-    jest.clearAllMocks();
-
-    // Mock require.resolve to return a fake binary path
-    mockRequireResolve.mockReturnValue('/fake/path/to/go-blueprint');
-    (global as any).require = {
-      ...require,
-      resolve: mockRequireResolve,
-    };
+    mockedFork.mockClear();
+    mockedSpawn.mockClear();
+    mockedGenerateFiles.mockClear();
 
     // Mock successful fork by default
     const mockProcess = createMockChildProcess();

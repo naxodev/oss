@@ -4,6 +4,9 @@
   "include": [],
   "references": [
     {
+      "path": "../e2e-utils"
+    },
+    {
       "path": "./tsconfig.spec.json"
     }
   ]

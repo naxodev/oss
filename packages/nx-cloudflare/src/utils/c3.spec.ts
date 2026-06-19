@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'bun:test';
 import { buildC3Command } from './c3';
 
 describe('buildC3Command', () => {

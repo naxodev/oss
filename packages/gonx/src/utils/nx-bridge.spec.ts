@@ -1,3 +1,12 @@
+import {
+  describe,
+  it,
+  expect,
+  mock,
+  spyOn,
+  beforeEach,
+  afterEach,
+} from 'bun:test';
 import type { NxJsonConfiguration, Tree } from '@nx/devkit';
 import * as nxDevkit from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
@@ -9,22 +18,30 @@ import {
   isProjectUsingNxGo,
 } from './nx-bridge';
 
-jest.mock('@nx/devkit');
-jest.mock('./go-bridge', () => ({
-  isGoWorkspace: jest.fn().mockReturnValue(false),
+mock.module('@nx/devkit', () => ({
+  readNxJson: mock(),
+  updateNxJson: mock(),
+}));
+mock.module('./go-bridge', () => ({
+  isGoWorkspace: mock().mockReturnValue(false),
 }));
 
 describe('Nx bridge', () => {
   let tree: Tree;
 
   beforeEach(() => (tree = createTreeWithEmptyWorkspace()));
-  afterEach(() => jest.resetAllMocks());
+  afterEach(() => {
+    (nxDevkit.readNxJson as ReturnType<typeof mock>).mockReset();
+    (nxDevkit.updateNxJson as ReturnType<typeof mock>).mockReset();
+    (goBridge.isGoWorkspace as ReturnType<typeof mock>).mockReset();
+    (goBridge.isGoWorkspace as ReturnType<typeof mock>).mockReturnValue(false);
+  });
 
   describe('Method: addNxPlugin', () => {
     it('should add the plugin to the plugins array if not already included', () => {
       const nxJson = { plugins: [] } as NxJsonConfiguration;
-      const spyUpdateNxJson = jest.spyOn(nxDevkit, 'updateNxJson');
-      jest.spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
+      const spyUpdateNxJson = spyOn(nxDevkit, 'updateNxJson');
+      spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
       addNxPlugin(tree);
       // Check for an object with the plugin property equal to NX_PLUGIN_NAME
       expect(nxJson.plugins).toContainEqual(
@@ -45,8 +62,8 @@ describe('Nx bridge', () => {
         },
       };
       const nxJson = { plugins: [pluginConfig] } as NxJsonConfiguration;
-      const spyUpdateNxJson = jest.spyOn(nxDevkit, 'updateNxJson');
-      jest.spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
+      const spyUpdateNxJson = spyOn(nxDevkit, 'updateNxJson');
+      spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
       addNxPlugin(tree);
       expect(nxJson.plugins).toEqual([pluginConfig]);
       expect(spyUpdateNxJson).not.toHaveBeenCalled();
@@ -54,24 +71,60 @@ describe('Nx bridge', () => {
   });
 
   describe('Method: ensureGoConfigInSharedGlobals', () => {
-    it.each`
-      sharedGlobals                          | isGoWorkspace | updated  | expectedSharedGlobals                                                    | description
-      ${[]}                                  | ${false}      | ${false} | ${[]}                                                                    | ${'workspace is not using go.work'}
-      ${[`{workspaceRoot}/${GO_MOD_FILE}`]}  | ${false}      | ${false} | ${[`{workspaceRoot}/${GO_MOD_FILE}`]}                                    | ${'workspace is not using go.work but has go.mod'}
-      ${[]}                                  | ${true}       | ${true}  | ${[`{workspaceRoot}/${GO_WORK_FILE}`]}                                   | ${'workspace is using go.work and no shared globals exist'}
-      ${[`{workspaceRoot}/${GO_WORK_FILE}`]} | ${true}       | ${false} | ${[`{workspaceRoot}/${GO_WORK_FILE}`]}                                   | ${'workspace is using go.work and go.work already in shared globals'}
-      ${[`{workspaceRoot}/${GO_MOD_FILE}`]}  | ${true}       | ${true}  | ${[`{workspaceRoot}/${GO_MOD_FILE}`, `{workspaceRoot}/${GO_WORK_FILE}`]} | ${'workspace is using go.work but only has go.mod in shared globals'}
-    `(
-      'should modify sharedGlobals if $description',
+    it.each([
+      {
+        sharedGlobals: [],
+        isGoWorkspace: false,
+        updated: false,
+        expectedSharedGlobals: [],
+        description: 'workspace is not using go.work',
+      },
+      {
+        sharedGlobals: [`{workspaceRoot}/${GO_MOD_FILE}`],
+        isGoWorkspace: false,
+        updated: false,
+        expectedSharedGlobals: [`{workspaceRoot}/${GO_MOD_FILE}`],
+        description: 'workspace is not using go.work but has go.mod',
+      },
+      {
+        sharedGlobals: [],
+        isGoWorkspace: true,
+        updated: true,
+        expectedSharedGlobals: [`{workspaceRoot}/${GO_WORK_FILE}`],
+        description: 'workspace is using go.work and no shared globals exist',
+      },
+      {
+        sharedGlobals: [`{workspaceRoot}/${GO_WORK_FILE}`],
+        isGoWorkspace: true,
+        updated: false,
+        expectedSharedGlobals: [`{workspaceRoot}/${GO_WORK_FILE}`],
+        description:
+          'workspace is using go.work and go.work already in shared globals',
+      },
+      {
+        sharedGlobals: [`{workspaceRoot}/${GO_MOD_FILE}`],
+        isGoWorkspace: true,
+        updated: true,
+        expectedSharedGlobals: [
+          `{workspaceRoot}/${GO_MOD_FILE}`,
+          `{workspaceRoot}/${GO_WORK_FILE}`,
+        ],
+        description:
+          'workspace is using go.work but only has go.mod in shared globals',
+      },
+    ])(
+      'should modify sharedGlobals if %p',
       ({ sharedGlobals, isGoWorkspace, updated, expectedSharedGlobals }) => {
         const nxJson = {
           namedInputs: { sharedGlobals },
-        } as NxJsonConfiguration;
-        const spyUpdateNxJson = jest.spyOn(nxDevkit, 'updateNxJson');
-        jest.spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
-        jest.spyOn(goBridge, 'isGoWorkspace').mockReturnValue(isGoWorkspace);
+        } as unknown as NxJsonConfiguration;
+        const spyUpdateNxJson = spyOn(nxDevkit, 'updateNxJson');
+        spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
+        spyOn(goBridge, 'isGoWorkspace').mockReturnValue(isGoWorkspace);
         ensureGoConfigInSharedGlobals(tree);
-        expect(nxJson.namedInputs.sharedGlobals).toEqual(expectedSharedGlobals);
+        expect(nxJson.namedInputs.sharedGlobals).toEqual([
+          ...expectedSharedGlobals,
+        ]);
         expect(spyUpdateNxJson).toHaveBeenCalledTimes(updated ? 1 : 0);
       }
     );

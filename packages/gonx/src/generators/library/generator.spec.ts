@@ -1,5 +1,12 @@
-import * as devkit from '@nx/devkit';
+import { describe, it, expect, mock, spyOn, beforeEach } from 'bun:test';
+
+const mockFormatFiles = mock();
+mock.module('@nx/devkit', () => ({
+  formatFiles: mockFormatFiles,
+}));
+
 import { addProjectConfiguration, readJson, Tree, writeJson } from '@nx/devkit';
+import * as devkit from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import libraryGenerator from './generator';
 
@@ -8,7 +15,7 @@ describe('library generator', () => {
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
-    jest.clearAllMocks();
+    mockFormatFiles.mockClear();
   });
 
   describe('not nested', () => {
@@ -42,7 +49,7 @@ describe('library generator', () => {
       });
 
       // Mock the names function from nx/devkit used in the generator
-      jest.spyOn(devkit, 'names').mockReturnValue({
+      spyOn(devkit, 'names').mockReturnValue({
         name: 'myGoLib',
         className: 'MyGoLib',
         propertyName: 'myGoLib',
@@ -105,7 +112,7 @@ describe('library generator', () => {
       });
 
       // Mock the names function from nx/devkit used in the generator
-      jest.spyOn(devkit, 'names').mockReturnValue({
+      spyOn(devkit, 'names').mockReturnValue({
         name: 'myGoLib',
         className: 'MyGoLib',
         propertyName: 'myGoLib',
@@ -141,26 +148,24 @@ describe('library generator', () => {
     it('should format files by default', async () => {
       // Create necessary directories for files
       tree.write('libs/myGoLib/myGoLib.go', 'package mygolib');
-      jest.spyOn(devkit, 'formatFiles');
 
       await libraryGenerator(tree, {
         directory: 'myGoLib',
       });
 
-      expect(devkit.formatFiles).toHaveBeenCalled();
+      expect(mockFormatFiles).toHaveBeenCalled();
     });
 
     it('should not format files when --skipFormat=true', async () => {
       // Create necessary directories for files
       tree.write('libs/myGoLib/myGoLib.go', 'package mygolib');
-      jest.spyOn(devkit, 'formatFiles');
 
       await libraryGenerator(tree, {
         directory: 'myGoLib',
         skipFormat: true,
       });
 
-      expect(devkit.formatFiles).not.toHaveBeenCalled();
+      expect(mockFormatFiles).not.toHaveBeenCalled();
     });
   });
 });

@@ -4,50 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`@naxodev/oss` is an Nx 22 monorepo (pnpm workspace, Node 22) that publishes two independent Nx plugins to npm:
+`@naxodev/oss` is an Nx 22 monorepo (bun workspace, Node 22) that publishes two independent Nx plugins to npm:
 
 - **`@naxodev/nx-cloudflare`** (`packages/nx-cloudflare`) — Nx plugin for Cloudflare Workers (generators, executors, and a `createNodesV2` inference plugin around Wrangler).
 - **`@naxodev/gonx`** (`packages/gonx`) — Nx plugin for using Go in an Nx workspace (fork of nx-go, modernized). Includes a tree-sitter–based Go static-analysis graph.
 
 Supporting (non-published) projects: `e2e-utils` (shared e2e helpers), `nx-cloudflare-e2e` / `gonx-e2e` (e2e suites), and `gonx-docs` (Astro Starlight docs site at `packages/docs/gonx-docs`).
 
+**Workspace structure:** a **bun workspace** (`workspaces: ["packages/*"]`) using **TypeScript project linking** — a composite `tsconfig.base.json` (`module/moduleResolution: nodenext`, `customConditions: ["@naxodev/source"]`), a root solution `tsconfig.json` with project `references`, and the `@nx/js/typescript` inference plugin (managed by `nx sync`); there are no `tsconfig` `paths`. Shared dependency versions live in a single root `catalog` (referenced as `"catalog:"`); the two plugins' **published** runtime deps stay explicit (loose ranges). Tests run on `bun test` (see below).
+
 ## Commands
 
-All Nx invocations use `pnpm exec nx ...`. The package manager is **pnpm** (not npm/yarn).
+All Nx invocations use `bunx nx ...`. The package manager is **bun** (not npm/yarn/pnpm).
 
 ```bash
 # Build a single plugin (outputs to dist/packages/<name>)
-pnpm exec nx build nx-cloudflare
-pnpm exec nx build gonx
+bunx nx build nx-cloudflare
+bunx nx build gonx
 
 # Lint / test a project
-pnpm exec nx lint gonx
-pnpm exec nx test nx-cloudflare
+bunx nx lint gonx
+bunx nx test nx-cloudflare
 
 # Run only what's affected (this is what CI runs)
-pnpm exec nx affected -t lint test build
+bunx nx affected -t lint test build
 
 # Formatting (Prettier, via nx)
-pnpm exec nx format:check      # verify
-pnpm exec nx format:write      # fix
+bunx nx format:check      # verify
+bunx nx format:write      # fix
 
 # e2e (spins up a local Verdaccio registry — see note below)
-pnpm exec nx e2e nx-cloudflare-e2e
-pnpm exec nx e2e gonx-e2e
+bunx nx e2e nx-cloudflare-e2e
+bunx nx e2e gonx-e2e
 ```
 
 ### Running a single unit test
 
-Unit tests run on **Jest** (via `@nx/jest`, ts-jest). Pass Jest CLI args after `--`:
+Unit tests run on **`bun test`** (native `bun:test`). The `test` target (in each plugin's `project.json`) runs `tools/scripts/bun-test.ts`, a per-file runner that executes each spec in its own bun process — bun evaluates every spec's top-level `mock.module` before running any test, so a single shared process leaks module mocks across files. Run a single file directly with bun:
 
 ```bash
-# By file
-pnpm exec nx test gonx -- src/graph/static-analysis/parse-go-mod.spec.ts
+# By file (run bun directly from the project dir)
+cd packages/gonx && bun test src/graph/static-analysis/parse-go-mod.spec.ts
 # By test name
-pnpm exec nx test nx-cloudflare -- -t "deploy executor"
+cd packages/nx-cloudflare && bun test src/plugin.spec.ts -t "infers"
+# Whole project via Nx (uses the per-file isolation runner)
+bunx nx test gonx
 ```
 
-Note: the Nx config registers both the Jest and Vite plugins under the `test` target name; the actual unit suites here are Jest. The `@naxodev/nx-cloudflare` package scaffolds **Vitest** configs into _generated_ user projects — don't confuse the scaffolded test setup with this repo's own test setup.
+Note: the `@naxodev/nx-cloudflare` package scaffolds **Vitest** configs into _generated_ user projects — don't confuse the scaffolded test setup with this repo's own `bun test` setup. The e2e suites also run via `bun test`, with a bun preload (`tools/scripts/e2e-bun-setup.ts`) replacing jest's globalSetup/teardown to manage the local Verdaccio registry.
 
 ## Architecture
 
@@ -78,7 +82,7 @@ Because releases are conventional-commit driven, commit messages and **PR titles
 
 e2e suites (`*-e2e`) install the **published tarball** from a local Verdaccio registry into a freshly generated Nx workspace (`packages/e2e-utils/src/lib/create-test-project.ts` → real `create-nx-workspace` + install), so they exercise peerDependencies, the `exports` map, and migrations the way real consumers do — not a copied `dist` fixture.
 
-The two e2e projects **share one Verdaccio instance** (same port/storage). `tools/scripts/start-local-registry.ts` coordinates ownership via per-pid lock files so parallel `globalSetup`/`globalTeardown` don't race. Consequently CI runs e2e **serially** (`--parallel=1`), and e2e is skipped on Windows.
+The two e2e projects **share one Verdaccio instance** (same port/storage). `tools/scripts/start-local-registry.ts` coordinates ownership via per-pid lock files so parallel bun-test preload setups/teardowns (`tools/scripts/e2e-bun-setup.ts`) don't race. Consequently CI runs e2e **serially** (`--parallel=1`), and e2e is skipped on Windows.
 
 ## CI
 

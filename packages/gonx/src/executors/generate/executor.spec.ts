@@ -1,12 +1,13 @@
+import { describe, it, expect, mock } from 'bun:test';
 import { ExecutorContext } from '@nx/devkit';
 import * as sharedFunctions from '../../utils';
 import executor from './executor';
 import { GenerateExecutorSchema } from './schema';
 
-jest.mock('../../utils', () => {
+mock.module('../../utils', () => {
   return {
-    executeCommand: jest.fn().mockResolvedValue({ success: true }),
-    extractCWD: jest.fn(() => 'apps/project'),
+    executeCommand: mock().mockResolvedValue({ success: true }),
+    extractCWD: mock(() => 'apps/project'),
   };
 });
 

@@ -1,8 +1,10 @@
-jest.mock('@nx/devkit', () => ({ logger: { warn: jest.fn() } }));
-jest.mock('os', () => ({
-  ...jest.requireActual('os'),
-  platform: jest.fn(() => 'linux'),
-  arch: jest.fn(() => 'x64'),
+import { describe, it, expect, beforeEach, mock, type Mock } from 'bun:test';
+
+mock.module('@nx/devkit', () => ({ logger: { warn: mock() } }));
+mock.module('os', () => ({
+  ...require('os'),
+  platform: mock(() => 'linux'),
+  arch: mock(() => 'x64'),
 }));
 
 import { logger } from '@nx/devkit';
@@ -14,9 +16,9 @@ import {
   shouldIncludeFilename,
 } from './build-constraints';
 
-const mockedWarn = logger.warn as jest.MockedFunction<typeof logger.warn>;
-const mockedPlatform = platform as jest.MockedFunction<typeof platform>;
-const mockedArch = arch as jest.MockedFunction<typeof arch>;
+const mockedWarn = logger.warn as unknown as Mock<typeof logger.warn>;
+const mockedPlatform = platform as unknown as Mock<typeof platform>;
+const mockedArch = arch as unknown as Mock<typeof arch>;
 
 const EMPTY_TAGS: ReadonlySet<string> = new Set();
 const LINUX_AMD64: BuildContext = {

@@ -1,3 +1,12 @@
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  mock,
+  spyOn,
+  type Mock,
+} from 'bun:test';
 import * as devkit from '@nx/devkit';
 import { logger, readJson, readNxJson, updateNxJson, Tree } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
@@ -13,8 +22,8 @@ import { runC3 } from '../../utils/run-c3';
 // Simulate C3 by writing a minimal scaffold (including the install artifacts C3
 // always produces) into the temp dir it is handed, so unit tests never spawn a
 // real process or hit the network.
-jest.mock('../../utils/run-c3', () => ({
-  runC3: jest.fn((options: { directory: string }) => {
+mock.module('../../utils/run-c3', () => ({
+  runC3: mock((options: { directory: string }) => {
     mkdirSync(join(options.directory, 'src'), { recursive: true });
     mkdirSync(join(options.directory, 'node_modules/dep'), { recursive: true });
     writeFileSync(
@@ -69,7 +78,7 @@ jest.mock('../../utils/run-c3', () => ({
   }),
 }));
 
-const runC3Mock = runC3 as jest.MockedFunction<typeof runC3>;
+const runC3Mock = runC3 as unknown as Mock<typeof runC3>;
 
 describe('create-cloudflare generator', () => {
   let tree: Tree;
@@ -203,9 +212,9 @@ describe('create-cloudflare generator', () => {
   });
 
   it('returns a task that installs packages at the workspace root', async () => {
-    const installSpy = jest
-      .spyOn(devkit, 'installPackagesTask')
-      .mockImplementation(() => undefined);
+    const installSpy = spyOn(devkit, 'installPackagesTask').mockImplementation(
+      () => undefined
+    );
 
     const task = await createCloudflareGenerator(tree, {
       directory: 'apps/w',
@@ -272,7 +281,7 @@ describe('create-cloudflare generator', () => {
   });
 
   it('warns loudly when the scaffold has no wrangler config at the project root', async () => {
-    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
     runC3Mock.mockImplementationOnce((options) => {
       mkdirSync(join(options.directory, 'src'), { recursive: true });
       writeFileSync(
@@ -298,7 +307,7 @@ describe('create-cloudflare generator', () => {
   });
 
   it('does not warn when a wrangler config is present', async () => {
-    const warn = jest.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
 
     await createCloudflareGenerator(tree, {
       directory: 'apps/my-worker',
