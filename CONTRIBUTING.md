@@ -17,6 +17,59 @@ bunx nx test <project>
 bunx nx e2e <project>
 ```
 
+## Releasing
+
+Each package (`gonx`, `nx-cloudflare`) is released independently and **published manually from a maintainer's machine**. The npm account requires two-factor authentication for writes, so publishing needs a one-time password (OTP) — which is why it runs locally rather than in CI. There is no automated publish workflow; this is the only release path. (`publish-pr.yml` is separate — it publishes throwaway PR previews via OIDC.)
+
+### Before you start
+
+- Push access to `main` and a clean checkout with release tags available: `git fetch --tags`.
+- Logged in to npm with publish rights to the `@naxodev` scope, with your authenticator app to hand: `npm login`.
+
+### Steps
+
+1. Sync `main` and fetch tags:
+
+   ```bash
+   git switch main && git pull && git fetch --tags
+   ```
+
+2. Version, write the changelog, tag, push, and create the GitHub release. Preview with `--dry-run` first:
+
+   ```bash
+   bunx nx release --projects=<project> --skip-publish --dry-run
+   bunx nx release --projects=<project> --skip-publish
+   ```
+
+   This bumps the version from your Conventional Commits, updates the changelog, commits, tags `<project>@vX.Y.Z`, pushes the commit and tag (`release.git.push` is enabled in `nx.json`), and creates the GitHub release. Use the top-level `nx release` — the `nx release version` subcommand is rejected by this repo's `release.git` config.
+
+3. Build so `dist/` carries the new version (publish packs `dist/`, and step 2 leaves it built at the previous version):
+
+   ```bash
+   bunx nx build <project>
+   ```
+
+4. Publish, entering a fresh OTP from your authenticator:
+
+   ```bash
+   bunx nx release publish --projects=<project> --otp=<code>
+   ```
+
+### Prereleases
+
+Publish under the `next` dist-tag instead of `latest`:
+
+```bash
+bunx nx release publish --projects=<project> --tag next --otp=<code>
+```
+
+### Verify
+
+```bash
+npm view @naxodev/<package> version          # latest release
+npm view @naxodev/<package> dist-tags        # all tags, including next
+```
+
 ## <a name="rules"></a> Coding Rules
 
 To ensure consistency throughout the source code, keep these rules in mind as you are working:

@@ -94,7 +94,8 @@
     },
     "git": {
       "commit": true,
-      "commitArgs": "--no-verify"
+      "commitArgs": "--no-verify",
+      "push": true
     },
     "changelog": {
       "projectChangelogs": {
