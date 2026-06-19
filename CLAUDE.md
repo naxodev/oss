@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`@naxodev/oss` is an Nx 22 monorepo (bun workspace, Node 22) that publishes two independent Nx plugins to npm:
+`@naxodev/oss` is an Nx 23 monorepo (bun workspace, Node 22) that publishes two independent Nx plugins to npm:
 
 - **`@naxodev/nx-cloudflare`** (`packages/nx-cloudflare`) — Nx plugin for Cloudflare Workers (generators, executors, and a `createNodesV2` inference plugin around Wrangler).
 - **`@naxodev/gonx`** (`packages/gonx`) — Nx plugin for using Go in an Nx workspace (fork of nx-go, modernized). Includes a tree-sitter–based Go static-analysis graph.

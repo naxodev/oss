@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { logger, type CreateNodesContextV2 } from '@nx/devkit';
-import { createNodesV2, type CloudflarePluginOptions } from './plugin';
+import { logger, type CreateNodesContext } from '@nx/devkit';
+import { createNodes, type CloudflarePluginOptions } from './plugin';
 
-const [configGlob, createNodesFn] = createNodesV2;
+const [configGlob, createNodesFn] = createNodes;
 
 /** Build a workspace temp dir; caller writes fixtures into it. */
 function setupWorkspace(): string {
@@ -22,11 +22,11 @@ function writeFile(
   writeFileSync(abs, content);
 }
 
-function ctx(workspaceRoot: string): CreateNodesContextV2 {
+function ctx(workspaceRoot: string): CreateNodesContext {
   return {
     workspaceRoot,
     nxJsonConfiguration: {},
-  } as unknown as CreateNodesContextV2;
+  } as unknown as CreateNodesContext;
 }
 
 /** Run the plugin for one config file and return the per-file result object. */
@@ -43,7 +43,7 @@ async function run(
   return results[0][1];
 }
 
-describe('nx-cloudflare createNodesV2', () => {
+describe('nx-cloudflare createNodes', () => {
   let workspaceRoot: string;
 
   beforeEach(() => {

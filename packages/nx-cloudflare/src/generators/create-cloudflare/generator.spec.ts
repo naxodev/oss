@@ -164,7 +164,7 @@ describe('create-cloudflare generator', () => {
     });
 
     const scripts = readJson(tree, 'apps/my-worker/package.json').scripts ?? {};
-    // wrangler deploy/dev/types come from the createNodesV2 plugin
+    // wrangler deploy/dev/types come from the createNodes plugin
     expect(scripts.deploy).toBeUndefined();
     expect(scripts.dev).toBeUndefined();
     expect(scripts.start).toBeUndefined();
@@ -248,7 +248,7 @@ describe('create-cloudflare generator', () => {
     ]);
   });
 
-  it('registers the createNodesV2 inference plugin in nx.json', async () => {
+  it('registers the createNodes inference plugin in nx.json', async () => {
     await createCloudflareGenerator(tree, {
       directory: 'apps/w',
       type: 'hello-world',

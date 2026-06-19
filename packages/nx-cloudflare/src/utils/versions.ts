@@ -8,7 +8,7 @@ export const vitestVersion = '^4.1.0';
 // Version of the @nx/vitest inference plugin added to a consumer workspace when a
 // scaffold ships a vitest config, so its `test` target is inferred. Tracks the
 // workspace Nx major, mirroring how this package pins @nx/devkit and @nx/js.
-export const nxVitestVersion = '^22.0.0';
+export const nxVitestVersion = '^23.0.0';
 
 // Default version of create-cloudflare (C3) the create-cloudflare generator invokes.
 // Pinned exact (not ^) so the scaffold is reproducible; overridable per-run via

@@ -1,4 +1,4 @@
-import { CreateNodesContextV2, ProjectConfiguration } from '@nx/devkit';
+import { CreateNodesContext, ProjectConfiguration } from '@nx/devkit';
 import { dirname } from 'path';
 import { GoPluginOptions } from '../types/go-plugin-options';
 import { hasMainPackage } from './has-main-package';
@@ -9,7 +9,7 @@ export function createNodesInternal(
   options: GoPluginOptions = {},
   // context is not used, but TypeScript needs the parameter
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  context: CreateNodesContextV2
+  context: CreateNodesContext
 ) {
   // Get the full project root directory
   const projectRoot = dirname(configFilePath);

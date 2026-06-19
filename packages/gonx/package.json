@@ -6,6 +6,7 @@
   "types": "./src/index.d.ts",
   "executors": "./executors.json",
   "generators": "./generators.json",
+  "nx-migrations": "./migrations.json",
   "description": "Modern Nx plugin to use Go in a Nx workspace",
   "homepage": "https://gonx.naxo.dev/",
   "repository": {
@@ -35,8 +36,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@nx/devkit": "^22.0.0",
-    "nx": "^22.0.0",
+    "@nx/devkit": "^23.0.0",
+    "nx": "^23.0.0",
     "tslib": "^2.3.0",
     "npm-run-path": "4.0.1",
     "chalk": "^4.1.2",

@@ -2,7 +2,7 @@ import { readNxJson, updateNxJson, type Tree } from '@nx/devkit';
 
 export const INFERENCE_PLUGIN = '@naxodev/nx-cloudflare/plugin';
 
-// Register the createNodesV2 inference plugin so Worker targets
+// Register the createNodes inference plugin so Worker targets
 // (serve/deploy/typegen/version-upload/tail) are inferred from the wrangler
 // config. Idempotent: matches both the string and object plugin forms. Shared
 // by the init generator (fresh apps) and the move-to-inference migration

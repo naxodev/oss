@@ -1,0 +1,17 @@
+{
+  "packageJsonUpdates": {
+    "4.0.0": {
+      "version": "4.0.0",
+      "packages": {
+        "nx": {
+          "version": "^23.0.0",
+          "alwaysAddToPackageJson": false
+        },
+        "@nx/devkit": {
+          "version": "^23.0.0",
+          "alwaysAddToPackageJson": false
+        }
+      }
+    }
+  }
+}
