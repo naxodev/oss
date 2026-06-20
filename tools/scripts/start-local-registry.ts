@@ -23,7 +23,7 @@
 import { startLocalRegistry } from '@nx/js/plugins/jest/local-registry';
 import { releasePublish, releaseVersion } from 'nx/release';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { claimRegistry } from '@naxodev/e2e-utils';
+import { claimRegistry } from './e2e-registry';
 
 const STORAGE_DIR = './tmp/local-registry/storage';
 

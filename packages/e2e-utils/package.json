@@ -8,8 +8,5 @@
       "@naxodev/source": "./src/index.ts",
       "default": "./src/index.ts"
     }
-  },
-  "dependencies": {
-    "tcp-port-used": "catalog:"
   }
 }

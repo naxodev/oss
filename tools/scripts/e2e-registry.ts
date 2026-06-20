@@ -36,7 +36,7 @@ function cleanStaleLocks(): void {
     } catch {
       // ESRCH (no such process) or EPERM (process exists but owned by
       // another user). Treat both as "this lock can't represent a live
-      // jest in our run" and clear it.
+      // test process in our run" and clear it.
       try {
         rmSync(join(LOCK_DIR, entry), { force: true });
       } catch {
