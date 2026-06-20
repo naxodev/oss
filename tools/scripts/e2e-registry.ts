@@ -132,9 +132,18 @@ export async function claimRegistry(
       /* ignore */
     }
   };
+  // Guard against a double teardown: a second release() on an owner would
+  // re-invoke stopVerdaccio() on an already-stopped instance and re-run a 30s
+  // port wait. Teardown paths (finally blocks, error handlers) are exactly
+  // where defensive double-calls happen, so make release() idempotent.
+  let released = false;
   const nonOwner = (): RegistryClaim => ({
     isOwner: false,
-    release: async () => dropLock(),
+    release: async () => {
+      if (released) return;
+      released = true;
+      dropLock();
+    },
   });
 
   // A bound port may be a live concurrent peer's verdaccio — or a serial
@@ -142,19 +151,40 @@ export async function claimRegistry(
   // take ownership; if it stays bound, connect as a non-owner.
   if (await isRegistryPortInUse(REGISTRY_PORT)) {
     const freed = await waitForPortFree(REGISTRY_PORT, PORT_WAIT_TIMEOUT_MS);
-    if (!freed) return nonOwner();
+    if (!freed) {
+      console.warn(
+        `[e2e-registry] port ${REGISTRY_PORT} still bound after ` +
+          `${PORT_WAIT_TIMEOUT_MS}ms; assuming a live peer owns the registry ` +
+          `and joining as a non-owner.`
+      );
+      return nonOwner();
+    }
   }
 
   let stopVerdaccio: () => void;
   try {
     stopVerdaccio = await startVerdaccio();
-  } catch {
-    return nonOwner();
+  } catch (e) {
+    // A lost port race is benign — a peer won the bind, so connect as a
+    // non-owner. Any other failure (renamed local-registry target, unwritable
+    // storage, verdaccio crash) means no registry will be listening; surface it
+    // here instead of letting it resurface as a confusing `ConnectionRefused`
+    // on `bun add @naxodev/*@e2e` much later.
+    if (await isRegistryPortInUse(REGISTRY_PORT)) return nonOwner();
+    console.error(
+      `[e2e-registry] startLocalRegistry failed and port ${REGISTRY_PORT} is ` +
+        `still free — no registry will be available: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+    );
+    throw e;
   }
 
   return {
     isOwner: true,
     release: async () => {
+      if (released) return;
+      released = true;
       dropLock();
       await drainAndStop(stopVerdaccio);
     },

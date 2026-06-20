@@ -1,21 +1,13 @@
 /**
- * Starts a local registry for e2e testing, safe under concurrent bun-test
- * preload `beforeAll` invocations (see `tools/scripts/e2e-bun-setup.ts`).
+ * Owner's post-claim work for the shared local registry, run from the bun-test
+ * e2e preload (`tools/scripts/e2e-bun-setup.ts`).
  *
- * Multiple e2e projects (gonx-e2e, nx-cloudflare-e2e) share one verdaccio
- * instance (same port + storage). To avoid the race where one project's
- * teardown kills verdaccio while another is still mid-test, we coordinate via
- * per-process lock files:
- *
- * - Every setup writes a `<pid>.lock` file under `tmp/local-registry/locks`
- *   and atomically claims ownership of the registry only if the port is free
- *   at the moment `startLocalRegistry` succeeds. Losers of the port race
- *   become non-owners.
- * - Every teardown deletes its own lock. Non-owner teardowns stop there; the
- *   owner teardown waits for the lock directory to drain (i.e. refcount → 0)
- *   before stopping verdaccio.
- * - On the next setup, any lock whose pid no longer exists is cleared
- *   (cleanup from crashed prior runs).
+ * The cross-process coordination that lets gonx-e2e and nx-cloudflare-e2e share
+ * one verdaccio instance (per-pid lock files, owner election, refcount drain,
+ * port handoff) lives in `e2e-registry.ts` (`claimRegistry`). This module is the
+ * owner half: once it wins the claim it versions + publishes the plugins at
+ * `0.0.0-e2e`, snapshots/restores the on-disk `package.json` files, and wires
+ * `global.stopLocalRegistry` to the claim's refcounted teardown.
  */
 
 /// <reference path="registry.d.ts" />

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { type CreateNodesContext } from '@nx/devkit';
+import { logger, type CreateNodesContext } from '@nx/devkit';
 import { createNodes, type BunTestPluginOptions } from './plugin';
 
 const [configGlob, createNodesFn] = createNodes;
@@ -117,5 +117,27 @@ describe('bun-test createNodes', () => {
 
     const result = await run(workspaceRoot, 'packages/pkg/tsconfig.spec.json');
     expect(result.projects['packages/pkg'].targets.test).toBeDefined();
+  });
+
+  it('still infers a test target (and warns) when project.json is unparseable', async () => {
+    // A corrupt sibling project.json must NOT silently strip the project's unit
+    // tests: isE2eProject swallows the parse error, warns, and returns false so
+    // the test target is still inferred.
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
+    try {
+      writeFile(workspaceRoot, 'packages/lib/project.json', '{ not valid json');
+      writeFile(workspaceRoot, 'packages/lib/tsconfig.spec.json', '{}');
+
+      const result = await run(
+        workspaceRoot,
+        'packages/lib/tsconfig.spec.json'
+      );
+
+      expect(result.projects['packages/lib'].targets.test).toBeDefined();
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0][0]).toContain('packages/lib/project.json');
+    } finally {
+      warn.mockRestore();
+    }
   });
 });
