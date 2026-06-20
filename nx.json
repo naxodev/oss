@@ -80,6 +80,10 @@
       "options": {
         "targetName": "lint"
       }
+    },
+    {
+      "plugin": "@naxodev/bun-test",
+      "options": { "testTargetName": "test" }
     }
   ],
   "generators": {},

@@ -11,14 +11,21 @@ function setupWorkspace(): string {
   return mkdtempSync(join(tmpdir(), 'bun-test-plugin-'));
 }
 
-function writeFile(workspaceRoot: string, relPath: string, content: string): void {
+function writeFile(
+  workspaceRoot: string,
+  relPath: string,
+  content: string
+): void {
   const abs = join(workspaceRoot, relPath);
   mkdirSync(join(abs, '..'), { recursive: true });
   writeFileSync(abs, content);
 }
 
 function ctx(workspaceRoot: string): CreateNodesContext {
-  return { workspaceRoot, nxJsonConfiguration: {} } as unknown as CreateNodesContext;
+  return {
+    workspaceRoot,
+    nxJsonConfiguration: {},
+  } as unknown as CreateNodesContext;
 }
 
 async function run(
@@ -26,8 +33,14 @@ async function run(
   configFile: string,
   options: BunTestPluginOptions = {}
 ): Promise<{ projects: Record<string, { targets: Record<string, unknown> }> }> {
-  const results = await createNodesFn([configFile], options, ctx(workspaceRoot));
-  return results[0][1] as { projects: Record<string, { targets: Record<string, unknown> }> };
+  const results = await createNodesFn(
+    [configFile],
+    options,
+    ctx(workspaceRoot)
+  );
+  return results[0][1] as {
+    projects: Record<string, { targets: Record<string, unknown> }>;
+  };
 }
 
 describe('bun-test createNodes', () => {
@@ -53,10 +66,14 @@ describe('bun-test createNodes', () => {
     const targets = result.projects['packages/lib'].targets;
 
     expect(targets.test).toEqual({
-      command: 'bun {workspaceRoot}/tools/scripts/bun-test.ts',
+      command: 'bun ../../tools/scripts/bun-test.ts',
       options: { cwd: '{projectRoot}' },
       cache: true,
-      inputs: ['default', '^production', { externalDependencies: ['bun'] }],
+      inputs: [
+        'default',
+        '^production',
+        '{workspaceRoot}/tools/scripts/bun-test.ts',
+      ],
       metadata: {
         technologies: ['bun'],
         description: 'Run unit tests with bun test (per-file isolation)',

@@ -28,10 +28,21 @@ function errorReason(e: unknown): string {
  */
 function buildTestTarget(): TargetConfiguration {
   return {
-    command: 'bun {workspaceRoot}/tools/scripts/bun-test.ts',
+    // Path is relative to `cwd` (the project root), NOT a `{workspaceRoot}`
+    // token: nx:run-commands does not interpolate `{workspaceRoot}` mid-command,
+    // so the token form throws at graph construction. This assumes the
+    // `packages/<name>/` layout (depth 2), matching the hand-written target this
+    // replaces.
+    command: 'bun ../../tools/scripts/bun-test.ts',
     options: { cwd: '{projectRoot}' },
     cache: true,
-    inputs: ['default', '^production', { externalDependencies: ['bun'] }],
+    // Track the shared runner so editing it invalidates every project's cached
+    // `test` result (it lives outside {projectRoot}, so `default` won't catch it).
+    inputs: [
+      'default',
+      '^production',
+      '{workspaceRoot}/tools/scripts/bun-test.ts',
+    ],
     metadata: {
       technologies: ['bun'],
       description: 'Run unit tests with bun test (per-file isolation)',
@@ -89,5 +100,10 @@ function createNodesInternal(
 export const createNodes: CreateNodes<BunTestPluginOptions> = [
   '**/tsconfig.spec.json',
   (configFiles, options, context) =>
-    createNodesFromFiles(createNodesInternal, configFiles, options ?? {}, context),
+    createNodesFromFiles(
+      createNodesInternal,
+      configFiles,
+      options ?? {},
+      context
+    ),
 ];

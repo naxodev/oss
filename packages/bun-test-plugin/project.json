@@ -4,5 +4,15 @@
   "sourceRoot": "packages/bun-test-plugin/src",
   "projectType": "library",
   "tags": ["type:tooling"],
-  "targets": {}
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/bun-test-plugin",
+        "main": "packages/bun-test-plugin/src/index.ts",
+        "tsConfig": "packages/bun-test-plugin/tsconfig.lib.json"
+      }
+    }
+  }
 }
