@@ -1,4 +1,11 @@
 {
+  "generators": {
+    "update-2-0-0-go-work-consolidation": {
+      "version": "2.0.0",
+      "description": "Guide the v2.0.0 go.work / convert-to-one-mod consolidation and executor changes for workspaces upgrading from gonx 1.x.",
+      "prompt": "./src/migrations/update-2-0-0/go-work-consolidation.md"
+    }
+  },
   "packageJsonUpdates": {
     "4.0.0": {
       "version": "4.0.0",
