@@ -41,10 +41,11 @@ function getReleaseTagPattern(
     const nxJsonPath = join(workspaceRoot, 'nx.json');
     const nxJson = readJsonFile<NxJsonConfiguration>(nxJsonPath);
 
-    // Check for release configuration in nx.json
-    if (nxJson.release && nxJson.release.releaseTagPattern) {
+    // Check for release configuration in nx.json. As of Nx 23 the flat
+    // `releaseTagPattern` was consolidated into the nested `releaseTag.pattern`.
+    if (nxJson.release && nxJson.release.releaseTag?.pattern) {
       // Replace {projectName} with the actual project name in the pattern
-      const tagPattern = nxJson.release.releaseTagPattern.replace(
+      const tagPattern = nxJson.release.releaseTag.pattern.replace(
         '{projectName}',
         projectName
       );

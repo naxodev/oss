@@ -3,13 +3,26 @@
     "update-7-0-0-move-to-inference": {
       "version": "7.0.0",
       "description": "Remove hard-written serve/deploy/next-build executor targets (now inferred) and register @naxodev/nx-cloudflare/plugin in nx.json.",
-      "implementation": "./src/migrations/update-7-0-0/move-to-inference"
+      "implementation": "./src/migrations/update-7-0-0/move-to-inference",
+      "documentation": "./src/migrations/update-7-0-0/move-to-inference.md"
     }
   },
   "packageJsonUpdates": {
     "7.0.0": {
       "version": "7.0.0",
       "packages": {
+        "nx": {
+          "version": "^23.0.0",
+          "alwaysAddToPackageJson": false
+        },
+        "@nx/devkit": {
+          "version": "^23.0.0",
+          "alwaysAddToPackageJson": false
+        },
+        "@nx/js": {
+          "version": "^23.0.0",
+          "alwaysAddToPackageJson": false
+        },
         "wrangler": {
           "version": "^4.98.0",
           "alwaysAddToPackageJson": false

@@ -1,4 +1,4 @@
-import { CreateNodesV2, createNodesFromFiles } from '@nx/devkit';
+import { CreateNodes, createNodesFromFiles } from '@nx/devkit';
 import { GoPluginOptions } from './types/go-plugin-options';
 import { createNodesInternal } from './utils/create-nodes-internal';
 
@@ -10,7 +10,7 @@ import { createNodesInternal } from './utils/create-nodes-internal';
 const goModGlob = '**/go.mod';
 
 // Entry function that Nx calls to modify the graph
-export const createNodesV2: CreateNodesV2<GoPluginOptions> = [
+export const createNodes: CreateNodes<GoPluginOptions> = [
   goModGlob,
   (configFiles, options, context) => {
     return createNodesFromFiles(

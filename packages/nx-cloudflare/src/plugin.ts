@@ -1,8 +1,8 @@
 import { dirname, join } from 'node:path';
 import { readdirSync, readFileSync } from 'node:fs';
 import {
-  type CreateNodesContextV2,
-  type CreateNodesV2,
+  type CreateNodesContext,
+  type CreateNodes,
   type TargetConfiguration,
   createNodesFromFiles,
   logger,
@@ -133,7 +133,7 @@ function readValidConfig(absConfigPath: string): string | null {
 function createNodesInternal(
   configFile: string,
   options: CloudflarePluginOptions | undefined,
-  context: CreateNodesContextV2
+  context: CreateNodesContext
 ) {
   const projectRoot = dirname(configFile);
 
@@ -171,14 +171,14 @@ function createNodesInternal(
  * `project.json`/`package.json` and parses, infers the Worker lifecycle targets
  * (serve, deploy, typegen, version-upload, tail). Inference is intentionally
  * uncached. Official Nx plugins (@nx/vite, @nx/eslint, @nx/jest) memoize their
- * createNodesV2 targets in a `workspaceDataDirectory` cache keyed by a project
+ * createNodes targets in a `workspaceDataDirectory` cache keyed by a project
  * file + lockfile hash, but the work here is trivial — per config a dir read,
  * one config read+parse, and building a small static targets object — so a
  * cache earns only marginal speed while adding staleness risk across plugin
  * upgrades (no key can capture a change in this code's target-construction
- * logic). `@naxodev/gonx`'s createNodesV2 is likewise uncached.
+ * logic). `@naxodev/gonx`'s createNodes is likewise uncached.
  */
-export const createNodesV2: CreateNodesV2<CloudflarePluginOptions> = [
+export const createNodes: CreateNodes<CloudflarePluginOptions> = [
   '**/wrangler.{toml,jsonc,json}',
   (configFiles, options, context) =>
     createNodesFromFiles(createNodesInternal, configFiles, options, context),

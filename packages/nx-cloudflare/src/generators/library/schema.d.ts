@@ -1,4 +1,4 @@
-import type { ProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils';
+import type { ProjectNameAndRootOptions } from '@nx/devkit';
 
 export type Bundler = 'swc' | 'tsc' | 'rollup' | 'vite' | 'esbuild' | 'none';
 

@@ -9,7 +9,7 @@ import { ensurePluginRegistered } from '../../utils/inference-plugin';
 
 // Executors deleted in the 7.0.0 cluster: serve/deploy (#137, with deploy's
 // `publish` alias) and next-build (#126). Targets that referenced them now come
-// from the createNodesV2 inference plugin (serve/deploy) or are gone entirely
+// from the createNodes inference plugin (serve/deploy) or are gone entirely
 // (next-build), so the hard-written project.json targets must be removed — left
 // in place they error with "Cannot find executor".
 const REMOVED_EXECUTORS = new Set([
@@ -52,7 +52,7 @@ export default async function update(tree: Tree): Promise<void> {
   }
 
   // Register the inference plugin once so the stripped serve/deploy targets are
-  // re-provided by createNodesV2.
+  // re-provided by createNodes.
   ensurePluginRegistered(tree);
 
   await formatFiles(tree);

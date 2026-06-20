@@ -104,7 +104,7 @@ describe('nx-release-publish executor', () => {
     // Arrange
     mockReadJsonFile.mockReturnValue({
       release: {
-        releaseTagPattern: 'v{version}',
+        releaseTag: { pattern: 'v{version}' },
       },
     });
 
@@ -128,7 +128,7 @@ describe('nx-release-publish executor', () => {
     // Arrange
     mockReadJsonFile.mockReturnValue({
       release: {
-        releaseTagPattern: 'v{version}',
+        releaseTag: { pattern: 'v{version}' },
       },
     });
     const dryRunOptions = { ...options, dryRun: true };
@@ -172,7 +172,7 @@ describe('nx-release-publish executor', () => {
 
     mockReadJsonFile.mockReturnValue({
       release: {
-        releaseTagPattern: 'v{version}',
+        releaseTag: { pattern: 'v{version}' },
       },
     });
 
@@ -197,7 +197,7 @@ describe('nx-release-publish executor', () => {
     // Arrange
     mockReadJsonFile.mockReturnValue({
       release: {
-        releaseTagPattern: '{projectName}-v{version}',
+        releaseTag: { pattern: '{projectName}-v{version}' },
       },
     });
 
@@ -320,7 +320,7 @@ describe('nx-release-publish executor', () => {
 
     mockReadJsonFile.mockReturnValue({
       release: {
-        releaseTagPattern: 'v{version}',
+        releaseTag: { pattern: 'v{version}' },
       },
     });
 
@@ -367,7 +367,7 @@ describe('nx-release-publish executor', () => {
     // Arrange
     mockReadJsonFile.mockReturnValue({
       release: {
-        releaseTagPattern: 'v{version}',
+        releaseTag: { pattern: 'v{version}' },
       },
     });
 

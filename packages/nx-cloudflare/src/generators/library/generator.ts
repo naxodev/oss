@@ -1,4 +1,4 @@
-import { Tree, formatFiles, names, updateJson } from '@nx/devkit';
+import { Tree, formatFiles, names, readNxJson, updateJson } from '@nx/devkit';
 import type {
   NormalizedSchema,
   NxCloudflareLibraryGeneratorSchema,
@@ -9,14 +9,27 @@ import initGenerator from '../init/generator';
 import {
   determineProjectNameAndRootOptions,
   ensureRootProjectName,
-} from '@nx/devkit/src/generators/project-name-and-root-utils';
-import { getImportPath } from '@nx/js/src/utils/get-import-path';
-import { normalizeLinterOption } from '@nx/js/src/utils/generator-prompts';
+  promptWhenInteractive,
+} from '@nx/devkit/internal';
 import {
+  getImportPath,
   isUsingTsSolutionSetup,
-  isUsingTypeScriptPlugin,
-} from '@nx/js/src/utils/typescript/ts-solution-setup';
-import { promptWhenInteractive } from '@nx/devkit/src/generators/prompt';
+  normalizeLinterOption,
+} from '@nx/js/internal';
+
+// `isUsingTypeScriptPlugin` is no longer exported by `@nx/js` as of Nx 23, so we
+// inline its (stable, trivial) check: is the `@nx/js/typescript` inference plugin
+// registered in nx.json?
+function isUsingTypeScriptPlugin(tree: Tree): boolean {
+  const nxJson = readNxJson(tree);
+  return (
+    nxJson?.plugins?.some((p) =>
+      typeof p === 'string'
+        ? p === '@nx/js/typescript'
+        : p.plugin === '@nx/js/typescript'
+    ) ?? false
+  );
+}
 
 export async function nxCloudflareWorkerLibraryGenerator(
   tree: Tree,

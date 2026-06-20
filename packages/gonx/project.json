@@ -40,6 +40,11 @@
             "input": "./packages/gonx",
             "glob": "executors.json",
             "output": "./"
+          },
+          {
+            "input": "./packages/gonx",
+            "glob": "migrations.json",
+            "output": "./"
           }
         ]
       }

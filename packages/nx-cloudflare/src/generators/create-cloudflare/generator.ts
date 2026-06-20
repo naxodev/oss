@@ -17,7 +17,7 @@ import {
 import {
   determineProjectNameAndRootOptions,
   ensureRootProjectName,
-} from '@nx/devkit/src/generators/project-name-and-root-utils';
+} from '@nx/devkit/internal';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -92,7 +92,7 @@ function pruneScaffoldExtras(tree: Tree, projectRoot: string): void {
   }
 }
 
-// Targets are always inferred from the Wrangler config (createNodesV2), so a
+// Targets are always inferred from the Wrangler config (createNodes), so a
 // written project.json carries metadata only. Skipped by default in the TS
 // solution setup, where the package.json is the project's source of truth.
 function maybeWriteProjectJson(tree: Tree, options: NormalizedSchema): void {
@@ -111,7 +111,7 @@ function maybeWriteProjectJson(tree: Tree, options: NormalizedSchema): void {
   });
 }
 
-// Wrangler commands the createNodesV2 plugin already exposes as inferred
+// Wrangler commands the createNodes plugin already exposes as inferred
 // targets. C3 also adds package.json scripts for them; dropping the scripts
 // leaves the inferred targets as the single source of truth. Matched by command
 // value so framework scripts (build/preview) — which have no inferred equivalent
@@ -158,7 +158,7 @@ function updateProjectPackageJson(tree: Tree, options: NormalizedSchema): void {
 
 const INFERENCE_PLUGIN = '@naxodev/nx-cloudflare/plugin';
 
-// A createNodesV2 plugin only contributes targets if it's listed in nx.json;
+// A createNodes plugin only contributes targets if it's listed in nx.json;
 // installing the package doesn't register it. Add it (idempotently, matching
 // both the string and object plugin forms) or the inferred targets never appear.
 function ensurePluginRegistered(tree: Tree, plugin: string): void {
@@ -180,10 +180,10 @@ const VITEST_PLUGIN = '@nx/vitest';
 
 // C3's Worker templates ship a vitest setup (vitest.config.mts + a spec), but
 // nothing in the workspace turns it into an Nx `test` target. @nx/vitest's
-// createNodesV2 infers `test` from a vitest config — so when the scaffold has
+// createNodes infers `test` from a vitest config — so when the scaffold has
 // one, register the plugin and add it as a devDependency. Skipped otherwise to
 // avoid foisting an unused plugin + dependency on workspaces whose template has
-// no vitest config. Note: @nx/vitest exposes createNodesV2 from its package
+// no vitest config. Note: @nx/vitest exposes createNodes from its package
 // root (no `/plugin` subpath in Nx 22).
 const VITEST_CONFIG_FILES = [
   'vitest.config.ts',
@@ -257,7 +257,7 @@ function retargetWranglerSchema(tree: Tree, projectRoot: string): void {
   }
 }
 
-// Targets are inferred from the Wrangler config by the createNodesV2 plugin, so
+// Targets are inferred from the Wrangler config by the createNodes plugin, so
 // a scaffold without one (e.g. a legacy Pages-only template) silently yields a
 // project with no Nx targets. Surface that loudly rather than hand back a
 // target-less project that looks fine.
@@ -301,7 +301,7 @@ async function normalizeOptions(
     lang: options.lang ?? 'ts',
     c3Version: options.c3Version ?? createCloudflareVersion,
     packageManager: detectPackageManager(tree.root),
-    // Default to no project.json: the createNodesV2 plugin registers the worker
+    // Default to no project.json: the createNodes plugin registers the worker
     // from its wrangler config + package.json (verified in both the TS solution
     // and legacy setups), so a project.json is redundant. Opt-in for users who
     // still want an explicit one.

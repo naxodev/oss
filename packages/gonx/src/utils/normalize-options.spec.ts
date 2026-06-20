@@ -10,7 +10,7 @@ mock.module('@nx/devkit', () => ({
   }),
   readJson: mock().mockReturnValue({ name: '@naxodev/backend' }),
 }));
-mock.module('@nx/devkit/src/generators/project-name-and-root-utils', () => ({
+mock.module('@nx/devkit/internal', () => ({
   determineProjectNameAndRootOptions: mock().mockReturnValue({
     projectName: 'backend',
     projectRoot: '/tmp',
