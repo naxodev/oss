@@ -1,3 +1,132 @@
+@layer base, starlight, theme, components, utilities;
+
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@import './theme-vars.css';
+@import './code-blocks.css';
+@import './sidebar.css';
+@import './layout.css';
+@import './toc.css';
+@import './components.css';
+
+@theme {
+  /* ── Breakpoint: matches Starlight's mobile/desktop split ────────── */
+  --breakpoint-desktop: 50rem;
+
+  /* ── Typography (matching apps/www) ──────────────────────────────── */
+  /* Body shares the heading face (Inter); aliased here so Astro registers Inter once */
+  --font-body: var(--font-heading);
+  --font-sans: var(--font-body, 'Inter'), 'SF Pro Display', -apple-system,
+    BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: var(--font-code, 'JetBrains Mono'), 'SF Mono', 'Geist Mono',
+    ui-monospace, Menlo, monospace;
+  --font-display: var(--font-heading, 'Inter'), 'SF Pro Display', -apple-system,
+    system-ui, sans-serif;
+
+  /* ── Accent: Brand purple ─────────────────────────────────────────── */
+  --color-accent-50: #eef2ff;
+  --color-accent-100: #e0e7ff;
+  --color-accent-200: #c7d2fe;
+  --color-accent-300: #a5b4fc;
+  --color-accent-400: #818cf8;
+  --color-accent-500: #667eea;
+  --color-accent-600: #5a67d8;
+  --color-accent-700: #4f46e5;
+  --color-accent-800: #4338ca;
+  --color-accent-900: #3730a3;
+  --color-accent-950: #1e1b4b;
+
+  /* ── Gray: Ocean-tinted navy scale (anchored to www text hierarchy) */
+  --color-gray-50: #e7ecf3;
+  --color-gray-100: #c4d4e4;
+  --color-gray-200: #a8bbd0;
+  --color-gray-300: #9aa3b2;
+  --color-gray-400: #7a8a9c;
+  --color-gray-500: #5e6675;
+  --color-gray-600: #1a3a55;
+  --color-gray-700: #0f2b4a;
+  --color-gray-800: #0b0e16;
+  --color-gray-900: #07090f;
+  --color-gray-950: #04060b;
+
+  /* ── Border radius tokens (matching www) ───────────────────────── */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 28px;
+}
+
+/* ── Base content styling ──────────────────────────────────────────── */
+
+/* Headings use Inter (matching www) */
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
+starlight-toc h2 {
+  font-family: var(--font-display);
+}
+
+/* Content width and spacing */
+:root {
+  --sl-content-width: 52rem;
+  --sl-content-pad-x: 2rem;
+}
+
+/* Thin scrollbar on content area */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-idle) transparent;
+  font-feature-settings: 'ss01', 'ss02', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html:hover {
+  scrollbar-color: var(--scrollbar-hover) transparent;
+}
+
+/* ── Noise texture overlay (matching www) ───────────────────────── */
+.main-frame::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
+}
+
+:root[data-theme='light'] .main-frame::before {
+  opacity: 0.02;
+}
+
+/* h2 gradient bottom border */
+.sl-markdown-content h2 {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-accent-500) 30%, transparent),
+      rgba(102, 126, 234, 0.15),
+      transparent
+    )
+    1;
+  padding-bottom: 0.5rem;
+}
+
+:root[data-theme='light'] .sl-markdown-content h2 {
+  border-image: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-accent-500) 20%, transparent),
+      rgba(102, 126, 234, 0.08),
+      transparent
+    )
+    1;
+}
+
+/* ── Landing page components ───────────────────────────────────────── */
+
 .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -5,17 +134,32 @@
   margin: 3rem 0;
 }
 
-.feature-item {
+:root[data-theme='dark'] .feature-item {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme='light'] .feature-item {
+  background: rgba(30, 27, 46, 0.03);
+  border: 1px solid rgba(30, 27, 46, 0.08);
+}
+
+.feature-item {
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
   text-align: center;
 }
 
-.feature-item:hover {
+:root[data-theme='dark'] .feature-item:hover {
   background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='light'] .feature-item:hover {
+  background: rgba(30, 27, 46, 0.06);
+}
+
+.feature-item:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
@@ -44,62 +188,42 @@
   font-size: 0.95rem;
 }
 
-.stats-container {
+:root[data-theme='dark'] .stats-container {
   background: linear-gradient(
     135deg,
-    rgba(103, 126, 234, 0.1) 0%,
+    rgba(102, 126, 234, 0.1) 0%,
     rgba(118, 75, 162, 0.1) 100%
   );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme='light'] .stats-container {
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.08) 0%,
+    rgba(118, 75, 162, 0.08) 100%
+  );
+  border: 1px solid rgba(30, 27, 46, 0.08);
+}
+
+.stats-container {
   border-radius: 16px;
   padding: 3rem;
   margin: 4rem 0;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stats-container h2 {
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-500) 0%,
+    var(--color-accent-700) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 700;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.stat-item {
-  padding: 1rem;
-  transition: transform 0.3s ease;
-}
-
-.stat-item:hover {
-  transform: translateY(-4px);
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--sl-color-text);
-  display: block;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.stat-label {
-  color: var(--sl-color-text-accent);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
 }
 
 .action-buttons {
@@ -126,14 +250,24 @@
 }
 
 .action-button.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-500) 0%,
+    var(--color-accent-700) 100%
+  );
   color: white;
 }
 
-.action-button.secondary {
+:root[data-theme='dark'] .action-button.secondary {
   background: rgba(255, 255, 255, 0.1);
   color: var(--sl-color-text);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+:root[data-theme='light'] .action-button.secondary {
+  background: rgba(30, 27, 46, 0.05);
+  color: var(--sl-color-text);
+  border: 1px solid rgba(30, 27, 46, 0.12);
 }
 
 .action-button:hover {
@@ -142,10 +276,14 @@
 }
 
 .action-button.primary:hover {
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-600) 0%,
+    var(--color-accent-800) 100%
+  );
 }
 
-@media (max-width: 768px) {
+@media (max-width: 49.9999rem) {
   .stats-container {
     padding: 2rem;
   }
@@ -170,20 +308,5 @@
 
   .feature-icon {
     font-size: 2rem;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .feature-item {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
-  .feature-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-  }
-
-  .stats-container {
-    border-color: rgba(255, 255, 255, 0.08);
   }
 }

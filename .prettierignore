@@ -15,3 +15,7 @@ bun.lock
 
 /.nx/workspace-data
 .nx/self-healing
+
+# Astro generated + TypeDoc auto-generated reference
+.astro
+**/src/content/docs/reference/

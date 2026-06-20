@@ -31,6 +31,10 @@ function isUsingTypeScriptPlugin(tree: Tree): boolean {
   );
 }
 
+/**
+ * Generates a Cloudflare Workers library project, building on the `@nx/js`
+ * library generator and registering the plugin's required dependencies.
+ */
 export async function nxCloudflareWorkerLibraryGenerator(
   tree: Tree,
   schema: NxCloudflareLibraryGeneratorSchema

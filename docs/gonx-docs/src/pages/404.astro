@@ -20,9 +20,9 @@ import { Icon } from '@astrojs/starlight/components';
 					<span class="floating-element">⚡</span>
 				</div>
 			</div>
-			
+
 			<h1 class="error-title">Oops! Page Not Found</h1>
-			
+
 			<div class="suggestions">
 				<h2>Here's what you can do:</h2>
 				<div class="suggestion-grid">
@@ -32,14 +32,14 @@ import { Icon } from '@astrojs/starlight/components';
 						<p>Start fresh from our homepage</p>
 						<a href="/" class="suggestion-link">Take me home</a>
 					</div>
-					
+
 					<div class="suggestion-item">
 						<Icon name="document" size="1.5rem" />
 						<h3>Browse Docs</h3>
 						<p>Explore GoNx documentation</p>
-						<a href="/quick-start" class="suggestion-link">View docs</a>
+						<a href="/getting-started/quick-start" class="suggestion-link">View docs</a>
 					</div>
-					
+
 					<div class="suggestion-item">
 						<Icon name="github" size="1.5rem" />
 						<h3>Report Issue</h3>
@@ -47,7 +47,7 @@ import { Icon } from '@astrojs/starlight/components';
 						<a href="https://github.com/naxodev/oss/issues" class="suggestion-link" target="_blank" rel="noopener">Report bug</a>
 					</div>
 				</div>
-			</div>		
+			</div>
 		</div>
 	</div>
 
@@ -75,12 +75,11 @@ import { Icon } from '@astrojs/starlight/components';
 		.error-code {
 			font-size: clamp(4rem, 12vw, 8rem);
 			font-weight: 900;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, var(--color-accent-500) 0%, var(--color-accent-700) 100%);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
 			margin-bottom: 1rem;
-			text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 			animation: pulse 2s ease-in-out infinite alternate;
 		}
 
@@ -134,16 +133,6 @@ import { Icon } from '@astrojs/starlight/components';
 			font-weight: 700;
 		}
 
-		.error-description {
-			font-size: 1.2rem;
-			color: var(--sl-color-text-accent);
-			margin-bottom: 3rem;
-			line-height: 1.6;
-			max-width: 600px;
-			margin-left: auto;
-			margin-right: auto;
-		}
-
 		.suggestions {
 			margin-bottom: 3rem;
 		}
@@ -161,16 +150,31 @@ import { Icon } from '@astrojs/starlight/components';
 			margin-bottom: 2rem;
 		}
 
-		.suggestion-item {
+		:root[data-theme='dark'] .suggestion-item {
 			background: rgba(255, 255, 255, 0.05);
 			border: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		:root[data-theme='light'] .suggestion-item {
+			background: rgba(30, 27, 46, 0.03);
+			border: 1px solid rgba(30, 27, 46, 0.08);
+		}
+
+		.suggestion-item {
 			border-radius: 12px;
 			padding: 1.5rem;
 			transition: all 0.3s ease;
 		}
 
-		.suggestion-item:hover {
+		:root[data-theme='dark'] .suggestion-item:hover {
 			background: rgba(255, 255, 255, 0.08);
+		}
+
+		:root[data-theme='light'] .suggestion-item:hover {
+			background: rgba(30, 27, 46, 0.06);
+		}
+
+		.suggestion-item:hover {
 			transform: translateY(-4px);
 			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 		}
@@ -189,7 +193,7 @@ import { Icon } from '@astrojs/starlight/components';
 
 		.suggestion-link {
 			display: inline-block;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, var(--color-accent-500) 0%, var(--color-accent-700) 100%);
 			color: white;
 			padding: 0.5rem 1rem;
 			border-radius: 6px;
@@ -201,56 +205,27 @@ import { Icon } from '@astrojs/starlight/components';
 
 		.suggestion-link:hover {
 			transform: translateY(-2px);
-			box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+			box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent-500) 40%, transparent);
 			text-decoration: none;
-		}
-
-		.popular-pages h2 {
-			font-size: 1.3rem;
-			margin-bottom: 1.5rem;
-			color: var(--sl-color-text);
-		}
-
-		.popular-links {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 1rem;
-			justify-content: center;
-		}
-
-		.popular-link {
-			display: flex;
-			align-items: center;
-			gap: 0.5rem;
-			background: rgba(255, 255, 255, 0.05);
-			border: 1px solid rgba(255, 255, 255, 0.1);
-			padding: 0.75rem 1rem;
-			border-radius: 8px;
-			text-decoration: none;
-			color: var(--sl-color-text-accent);
-			transition: all 0.3s ease;
-			font-size: 0.9rem;
-		}
-
-		.popular-link:hover {
-			background: rgba(255, 255, 255, 0.08);
-			color: var(--sl-color-text);
-			text-decoration: none;
-			transform: translateY(-2px);
 		}
 
 		@media (max-width: 600px) {
 			.suggestion-grid {
 				grid-template-columns: 1fr;
 			}
-			
-			.popular-links {
-				flex-direction: column;
-				align-items: center;
-			}
-			
+
 			.floating-element {
 				font-size: 1.5rem;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.error-code,
+			.floating-element,
+			.suggestion-item,
+			.suggestion-link {
+				animation-duration: 0s !important;
+				transition-duration: 0s !important;
 			}
 		}
 	</style>

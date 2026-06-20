@@ -62,3 +62,6 @@ vitest.config.*.timestamp*
 .nx/polygraph
 .nx/self-healing
 .nx/migrate-runs
+
+# TypeDoc auto-generated API reference
+**/src/content/docs/reference/

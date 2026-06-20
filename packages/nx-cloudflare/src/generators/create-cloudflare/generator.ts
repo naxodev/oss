@@ -26,6 +26,11 @@ import { createCloudflareVersion, nxVitestVersion } from '../../utils/versions';
 import { runC3 } from '../../utils/run-c3';
 import { importDirectoryToTree } from '../../utils/import-tree';
 
+/**
+ * Scaffolds a Cloudflare Worker application by delegating to Cloudflare's
+ * create-cloudflare (C3) CLI, then imports the result into the Nx workspace and
+ * wires it up (Wrangler target inference, workspace-managed dependencies).
+ */
 export async function createCloudflareGenerator(
   tree: Tree,
   schema: Schema

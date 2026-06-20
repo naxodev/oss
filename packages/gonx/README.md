@@ -11,7 +11,7 @@
 [![commitizen](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat-square)]()
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)]()
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 
 </div>
 
@@ -24,7 +24,7 @@
   - Well-structured Go code scaffolding
 - Generate Go Libraries
 - Full Nx integration
-  - Inferred Tasks: Build, Generate, Tidy, Test, Run, and Lint
+  - Inferred Tasks: Build, Generate, Tidy, Test, Serve, and Lint
   - Cacheable Tasks: Build, Generate, Tidy, Test, and Lint
   - GraphV2 Support
   - Version Actions for Go release
@@ -49,28 +49,6 @@ npx create-nx-workspace go-workspace --preset=@naxodev/gonx
 ```shell
 nx add @naxodev/gonx
 ```
-
-## Plugin Options
-
-Configure the plugin in your `nx.json`:
-
-```json
-{
-  "plugins": [
-    {
-      "plugin": "@naxodev/gonx",
-      "options": {}
-    }
-  ]
-}
-```
-
-| Option                  | Type    | Default | Description                           |
-| ----------------------- | ------- | ------- | ------------------------------------- |
-| `skipGoDependencyCheck` | boolean | `false` | Disable dependency detection entirely |
-
-See [Dependency Detection](./docs/static-analysis.md) for details on
-how dependencies between Go projects are resolved.
 
 ## Docs
 

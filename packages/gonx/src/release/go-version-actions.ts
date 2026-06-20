@@ -75,8 +75,12 @@ export default class GoVersionActions extends VersionActions {
     }
   }
 
-  // For local dependencies, Go ignores the version specified in the module and always uses the one in the local path.
-  readCurrentVersionOfDependency(
+  // For local dependencies, Go resolves the module from the local path (via a
+  // go.work workspace or a `replace` directive), never from a version spec in
+  // go.mod. There is therefore no dependency version to read, so we report null
+  // — signalling nx release that there is no dependency version spec to update,
+  // which lets release groups of interdependent Go projects version cleanly.
+  async readCurrentVersionOfDependency(
     tree: Tree,
     projectGraph: ProjectGraph,
     dependencyProjectName: string
@@ -84,7 +88,10 @@ export default class GoVersionActions extends VersionActions {
     currentVersion: string | null;
     dependencyCollection: string | null;
   }> {
-    throw new Error('Method not implemented.');
+    return {
+      currentVersion: null,
+      dependencyCollection: null,
+    };
   }
 
   // Since go.mod does not contain the version, we cannot update it.
