@@ -54,6 +54,7 @@ export async function createCloudflareGenerator(
   }
 
   pruneScaffoldExtras(tree, options.projectRoot);
+  handleGeneratedTypes(tree, options.projectRoot);
   updateProjectPackageJson(tree, options);
   retargetWranglerSchema(tree, options.projectRoot);
   ensurePluginRegistered(tree, INFERENCE_PLUGIN);
@@ -90,6 +91,39 @@ function pruneScaffoldExtras(tree: Tree, projectRoot: string): void {
       tree.delete(path);
     }
   }
+}
+
+// `wrangler types` output that C3 typically emits during scaffolding. It is the
+// `typegen` target's declared Nx output (see plugin.ts), so it is a build
+// artifact — never committed, regenerated on demand via `nx typegen`. Prune any
+// scaffolded copy (a no-op when the template ships none) and keep it out of
+// version control.
+const GENERATED_TYPES_FILE = 'worker-configuration.d.ts';
+
+function handleGeneratedTypes(tree: Tree, projectRoot: string): void {
+  const path = joinPathFragments(projectRoot, GENERATED_TYPES_FILE);
+  if (tree.exists(path)) {
+    tree.delete(path);
+  }
+  ensureGitignored(tree, projectRoot, GENERATED_TYPES_FILE);
+}
+
+// Append an entry to the project's `.gitignore` if absent (matching whole
+// lines so a substring never masks a real entry). Creates the file when a
+// template ships without one. C3 keeps its own ignores; this only adds.
+function ensureGitignored(
+  tree: Tree,
+  projectRoot: string,
+  entry: string
+): void {
+  const path = joinPathFragments(projectRoot, '.gitignore');
+  const existing = tree.exists(path) ? tree.read(path, 'utf-8') ?? '' : '';
+  const lines = existing.split('\n').map((line) => line.trim());
+  if (lines.includes(entry)) {
+    return;
+  }
+  const prefix = existing.length === 0 || existing.endsWith('\n') ? '' : '\n';
+  tree.write(path, `${existing}${prefix}${entry}\n`);
 }
 
 // Targets are always inferred from the Wrangler config (createNodes), so a

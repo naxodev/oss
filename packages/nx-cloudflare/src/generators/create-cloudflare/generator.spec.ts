@@ -81,6 +81,13 @@ mock.module('../../utils/run-c3', () => ({
       join(options.directory, 'vitest.config.mts'),
       'export default {};'
     );
+    // C3 typically runs `wrangler types` during scaffolding, leaving a generated
+    // worker-configuration.d.ts behind. It is the `typegen` target's declared
+    // output, so the generator must treat it as a build artifact.
+    writeFileSync(
+      join(options.directory, 'worker-configuration.d.ts'),
+      'interface Env {}'
+    );
   }),
 }));
 
@@ -141,6 +148,98 @@ describe('create-cloudflare generator', () => {
 
     expect(tree.exists('apps/my-worker/node_modules/dep/index.js')).toBe(false);
     expect(tree.exists('apps/my-worker/pnpm-lock.yaml')).toBe(false);
+  });
+
+  it('does not commit the generated worker-configuration.d.ts (it is the typegen output)', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+    });
+
+    expect(tree.exists('apps/my-worker/worker-configuration.d.ts')).toBe(false);
+  });
+
+  it('gitignores worker-configuration.d.ts, preserving C3 ignores', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+    });
+
+    const gitignore = tree.read('apps/my-worker/.gitignore', 'utf-8') ?? '';
+    const lines = gitignore.split('\n').map((line) => line.trim());
+    // Line-exact, not substring: a regression that fused the entry onto C3's
+    // last line (`.dev.vars*worker-configuration.d.ts`) must fail here.
+    expect(lines).toContain('worker-configuration.d.ts');
+    expect(gitignore).not.toContain('.dev.vars*worker-configuration.d.ts');
+    // C3's own ignores are kept.
+    expect(lines).toContain('.wrangler/');
+    expect(lines).toContain('.dev.vars*');
+  });
+
+  it('does not duplicate the gitignore entry when C3 already ignores it', async () => {
+    runC3Mock.mockImplementationOnce((options) => {
+      mkdirSync(join(options.directory, 'src'), { recursive: true });
+      writeFileSync(
+        join(options.directory, 'src/index.ts'),
+        'export default {};'
+      );
+      writeFileSync(
+        join(options.directory, 'wrangler.jsonc'),
+        '{ "name": "scaffold", "main": "src/index.ts" }'
+      );
+      writeFileSync(
+        join(options.directory, 'package.json'),
+        '{"name":"scaffold"}'
+      );
+      // A newer C3 template that already ignores the generated types file.
+      writeFileSync(
+        join(options.directory, '.gitignore'),
+        '.wrangler/\nworker-configuration.d.ts\n'
+      );
+    });
+
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+    });
+
+    const gitignore = tree.read('apps/my-worker/.gitignore', 'utf-8') ?? '';
+    const occurrences = gitignore
+      .split('\n')
+      .filter((line) => line.trim() === 'worker-configuration.d.ts').length;
+    expect(occurrences).toBe(1);
+  });
+
+  it('creates a .gitignore with the entry when the scaffold ships none', async () => {
+    runC3Mock.mockImplementationOnce((options) => {
+      mkdirSync(join(options.directory, 'src'), { recursive: true });
+      writeFileSync(
+        join(options.directory, 'src/index.ts'),
+        'export default {};'
+      );
+      writeFileSync(
+        join(options.directory, 'wrangler.jsonc'),
+        '{ "name": "scaffold", "main": "src/index.ts" }'
+      );
+      writeFileSync(
+        join(options.directory, 'package.json'),
+        '{"name":"scaffold"}'
+      );
+      // deliberately no .gitignore
+    });
+
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+    });
+
+    expect(tree.exists('apps/my-worker/.gitignore')).toBe(true);
+    const gitignore = tree.read('apps/my-worker/.gitignore', 'utf-8') ?? '';
+    // No stray leading newline when starting from an empty/absent file.
+    expect(gitignore.startsWith('\n')).toBe(false);
+    expect(gitignore.split('\n').map((line) => line.trim())).toContain(
+      'worker-configuration.d.ts'
+    );
   });
 
   it('prunes C3 editor/agent config that clashes with the workspace, keeping .gitignore', async () => {

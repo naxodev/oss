@@ -123,6 +123,8 @@ nx deploy <my-app> -- --dry-run
 
 See the [`wrangler dev`](https://developers.cloudflare.com/workers/wrangler/commands/#dev) and [`wrangler deploy`](https://developers.cloudflare.com/workers/wrangler/commands/#deploy) docs for the full flag list. The dev-server port is set via `dev.port` in the generated `wrangler` config (defaults to `8787`).
 
+`worker-configuration.d.ts` (your typed `Env` and runtime types) is the `typegen` target's declared output, so it is treated as a generated build artifact — the generator git-ignores it instead of committing it. Run `nx typegen <my-app>` to (re)generate it, and re-run after changing bindings or `compatibility_date` in your `wrangler` config.
+
 ### Cloudflare Worker Library
 
 #### Generating a new Cloudflare Worker Library
@@ -149,6 +151,8 @@ Available options:
 | bundler                  | swc, tsc, vite, esbuild, none | tsc         | Which bundler would you like to use to build the library? Choose 'none' to skip build setup.                                                                                           |
 | minimal                  | boolean                       | false       | Generate a library with a minimal setup. No README.md generated.                                                                                                                       |
 | simpleName               | boolean                       | false       | Don't include the directory in the generated file name.                                                                                                                                |
+
+Worker libraries pull in Workers runtime types from `@cloudflare/workers-types` rather than a generated `worker-configuration.d.ts`. A library has no `wrangler` config of its own, so there are no bindings to type and nothing for `wrangler types` to generate — the `typegen` target is inferred only for Worker applications.
 
 ## Acknowledgement
 
