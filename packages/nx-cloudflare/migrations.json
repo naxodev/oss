@@ -5,6 +5,11 @@
       "description": "Remove hard-written serve/deploy/next-build executor targets (now inferred) and register @naxodev/nx-cloudflare/plugin in nx.json.",
       "implementation": "./src/migrations/update-7-0-0/move-to-inference",
       "documentation": "./src/migrations/update-7-0-0/move-to-inference.md"
+    },
+    "update-7-0-0-drop-nextjs": {
+      "version": "7.0.0",
+      "description": "Guide removal of the dropped Next.js + webpack integration (next-build executor, with-nx/compose-plugins) for projects that still reference it.",
+      "prompt": "./src/migrations/update-7-0-0/drop-nextjs.md"
     }
   },
   "packageJsonUpdates": {
