@@ -6,7 +6,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
-import { createServer } from 'node:net';
+import { check, waitUntilFree } from 'tcp-port-used';
 
 const REGISTRY_PORT = 4873;
 const LOCK_DIR = './tmp/local-registry/locks';
@@ -47,36 +47,28 @@ function cleanStaleLocks(): void {
 }
 
 /**
- * Detect whether the registry port is already accepting connections —
- * i.e. some other e2e setup beat us to startLocalRegistry.
+ * Detect whether the registry port is already accepting connections — i.e. some
+ * other e2e setup beat us to startLocalRegistry.
  */
 function isRegistryPortInUse(port: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const tester = createServer()
-      .once('error', () => resolve(true))
-      .once('listening', () => {
-        tester.close(() => resolve(false));
-      })
-      .listen(port);
-  });
+  return check(port, '127.0.0.1');
 }
 
 /**
  * Poll until the registry port is free, returning whether it freed within the
- * timeout. Used to (a) let an owner's teardown fully release the port before
- * its process exits and (b) let a serial successor tell a peer's port still
- * draining apart from a genuinely live peer.
+ * timeout. `tcp-port-used` rejects on timeout; we map that back to the boolean
+ * contract the callers (owner drain + serial-successor handoff) rely on.
  */
 async function waitForPortFree(
   port: number,
   timeoutMs: number
 ): Promise<boolean> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (!(await isRegistryPortInUse(port))) return true;
-    await new Promise((r) => setTimeout(r, PORT_POLL_MS));
+  try {
+    await waitUntilFree(port, PORT_POLL_MS, timeoutMs);
+    return true;
+  } catch {
+    return false;
   }
-  return !(await isRegistryPortInUse(port));
 }
 
 /**

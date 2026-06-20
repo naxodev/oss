@@ -97,6 +97,9 @@
     "packages/e2e-utils": {
       "name": "@naxodev/e2e-utils",
       "version": "0.0.0",
+      "dependencies": {
+        "tcp-port-used": "catalog:",
+      },
     },
     "packages/gonx": {
       "name": "@naxodev/gonx",
