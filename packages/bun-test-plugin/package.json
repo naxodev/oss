@@ -1,0 +1,16 @@
+{
+  "name": "@naxodev/bun-test",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "@naxodev/source": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@nx/devkit": "^23.0.0"
+  }
+}

@@ -17,6 +17,9 @@
     },
     {
       "path": "./packages/nx-cloudflare-e2e"
+    },
+    {
+      "path": "./packages/bun-test-plugin"
     }
   ]
 }
