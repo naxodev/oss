@@ -16,6 +16,11 @@
       "schema": "./src/generators/library/schema.json",
       "description": "library generator",
       "aliases": ["lib"]
+    },
+    "binding": {
+      "factory": "./src/generators/binding/generator",
+      "schema": "./src/generators/binding/schema.json",
+      "description": "Add a binding (KV, R2, D1, Durable Object, Queue, Workflow, Service) to a Worker — edits wrangler.jsonc, stubs code + migrations, emits a test, and refreshes wrangler types"
     }
   }
 }

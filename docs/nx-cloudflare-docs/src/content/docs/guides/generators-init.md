@@ -37,6 +37,10 @@ It also registers `@naxodev/nx-cloudflare/plugin` in `nx.json` so that Worker li
 
 The `init` generator does not re-add `@naxodev/nx-cloudflare` itself to `package.json` — the plugin invoking the generator is already installed.
 
+## Verify
+
+`@naxodev/nx-cloudflare/plugin` appears under `plugins` in `nx.json`, and `wrangler` is listed in your root `package.json` devDependencies.
+
 ## Next steps
 
 - [application generator](/guides/generators-application) — scaffold a Worker application

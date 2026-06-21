@@ -33,8 +33,17 @@ bunx nx g @naxodev/nx-cloudflare:application my-worker
 
 Provide exactly one of `type`, `framework`, or `template` to control the C3 scaffold non-interactively. If none are provided, C3's interactive prompts guide selection.
 
+## Verify
+
+```bash
+bunx nx show project my-worker
+```
+
+The project appears in the graph with inferred `serve`, `deploy`, and `typegen` targets — no `project.json` required.
+
 ## Next steps
 
+- [binding generator](/guides/generators-binding) — add KV, R2, D1, Durable Object, Queue, Workflow, or Service bindings
 - [Inferred targets](/inferred-targets) — `serve`, `deploy`, `typegen`, `version-upload`, `tail`
 - [Plugin options](/understanding/plugin-options) — customizing inferred target names
 - [Wrangler config](/understanding/wrangler) — config formats and inference

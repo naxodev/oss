@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "NxCloudflareBinding",
+  "title": "Add a Cloudflare binding to a Worker",
+  "description": "Wires a binding (KV, R2, D1, Durable Object, Queue, Workflow, or Service/RPC) into a Worker's wrangler.jsonc, stubs the required code (DO/Workflow classes, queue consumer) and migrations, emits a matching test, and refreshes `wrangler types`.",
+  "type": "object",
+  "properties": {
+    "project": {
+      "description": "The target Worker project to add the binding to.",
+      "type": "string",
+      "$default": {
+        "$source": "projectName",
+        "index": 0
+      },
+      "x-prompt": "Which project would you like to add the binding to?",
+      "x-priority": "important"
+    },
+    "type": {
+      "description": "The kind of binding to add.",
+      "type": "string",
+      "enum": ["kv", "r2", "d1", "do", "queue", "workflow", "service"],
+      "x-prompt": "What type of binding do you want to add? (kv, r2, d1, do, queue, workflow, service)",
+      "x-priority": "important"
+    },
+    "binding": {
+      "description": "The Env key name (SCREAMING_SNAKE_CASE) the Worker uses to access the binding, e.g. MY_KV.",
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$",
+      "x-prompt": "What name should the binding have in `env`? (SCREAMING_SNAKE_CASE, e.g. MY_KV)",
+      "x-priority": "important"
+    },
+    "name": {
+      "description": "Required for `do`/`workflow` (the exported class name, PascalCase), `queue` (the queue name), and `service` (the target service name). Not used for `kv`/`r2`/`d1`.",
+      "type": "string",
+      "x-prompt": "What is the class name (do/workflow), queue name (queue), or service name (service)?",
+      "x-priority": "important"
+    },
+    "id": {
+      "description": "Existing KV namespace id or D1 database id. Skipped if `--create` is set (the provisioned id is captured automatically).",
+      "type": "string"
+    },
+    "databaseName": {
+      "description": "D1 database name. Required when `--type=d1` and `--create` is not set.",
+      "type": "string"
+    },
+    "bucketName": {
+      "description": "R2 bucket name. Required when `--type=r2` and `--create` is not set.",
+      "type": "string"
+    },
+    "create": {
+      "description": "Provision the remote resource via the Wrangler CLI (KV/R2/D1/Queue only). Fills the id/name automatically. On provision failure, leaves a placeholder in the config for manual fill-in.",
+      "type": "boolean",
+      "default": false
+    },
+    "skipTests": {
+      "description": "Skip generating a Vitest spec for the binding stub.",
+      "type": "boolean",
+      "default": false,
+      "x-priority": "internal"
+    },
+    "skipFormat": {
+      "description": "Skip formatting files.",
+      "type": "boolean",
+      "default": false,
+      "x-priority": "internal"
+    },
+    "skipTypegen": {
+      "description": "Skip auto-running `wrangler types` after writing the binding. The generated `Env` interface will not be refreshed.",
+      "type": "boolean",
+      "default": false,
+      "x-priority": "internal"
+    }
+  },
+  "required": ["project", "type", "binding"]
+}

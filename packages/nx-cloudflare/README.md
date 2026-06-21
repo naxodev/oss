@@ -23,6 +23,7 @@ Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). 
 
 - Scaffold Cloudflare Worker applications via create-cloudflare (C3) — Worker templates, web frameworks, or remote git templates.
 - Generate Cloudflare Worker libraries (publishable, with bundler/linter/test options).
+- Add bindings to an existing Worker (KV, R2, D1, Durable Objects, Queues, Workflows, Service/RPC) — edits `wrangler.jsonc`, stubs code + migrations, and refreshes `wrangler types`.
 - Inferred `serve`, `deploy`, `typegen`, `version-upload`, and `tail` targets via the `@naxodev/nx-cloudflare/plugin` inference plugin — no hand-written `project.json` targets.
 - Customizable inferred target names via `CloudflarePluginOptions`.
 - Vitest wired automatically when the C3 template ships a Vitest config.
@@ -39,6 +40,12 @@ nx add @naxodev/nx-cloudflare
 
 ```shell
 nx g @naxodev/nx-cloudflare:application my-worker
+```
+
+### Add a binding to a Worker
+
+```shell
+nx g @naxodev/nx-cloudflare:binding --project=my-worker --type=kv --binding=MY_KV --id=<namespace-id>
 ```
 
 ## Compatibility
