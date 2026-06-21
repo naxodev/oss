@@ -1,12 +1,3 @@
-import { existsSync } from 'fs-extra';
-import { execSync } from 'node:child_process';
-import { join } from 'path';
-import { gte } from 'semver';
-
-import { PackageManager } from 'nx/src/utils/package-manager';
-import { e2eConsoleLogger } from './log-utils';
-import { tmpProjPath } from '@nx/plugin/testing';
-
 /**
  * The public npm registry.
  *
@@ -43,29 +34,6 @@ export function npmRegistryEnv(): Record<string, string | undefined> {
   };
 }
 
-export function getPublishedVersion(): string {
-  process.env.PUBLISHED_VERSION =
-    process.env.PUBLISHED_VERSION ||
-    // fallback to latest if built nx package is missing
-    'latest';
-  return process.env.PUBLISHED_VERSION as string;
-}
-
-export function detectPackageManager(dir = ''): PackageManager {
-  return existsSync(join(dir, 'bun.lockb')) || existsSync(join(dir, 'bun.lock'))
-    ? 'bun'
-    : existsSync(join(dir, 'yarn.lock'))
-    ? 'yarn'
-    : existsSync(join(dir, 'pnpm-lock.yaml')) ||
-      existsSync(join(dir, 'pnpm-workspace.yaml'))
-    ? 'pnpm'
-    : 'npm';
-}
-
-export function isOSX() {
-  return process.platform === 'darwin';
-}
-
 export function isVerbose() {
   return (
     process.env.NX_VERBOSE_LOGGING === 'true' ||
@@ -77,95 +45,24 @@ export function isVerboseE2ERun() {
   return process.env.NX_E2E_VERBOSE_LOGGING === 'true' || isVerbose();
 }
 
-export function getSelectedPackageManager(): 'npm' | 'yarn' | 'pnpm' | 'bun' {
-  return (process.env.SELECTED_PM as 'npm' | 'yarn' | 'pnpm' | 'bun') || 'npm';
-}
-
-export function getLatestLernaVersion(): string {
-  const lernaVersion = execSync(`npm view lerna version`, {
-    encoding: 'utf-8',
-  }).trim();
-  return lernaVersion;
-}
-
-export const packageManagerLockFile = {
-  npm: 'package-lock.json',
-  yarn: 'yarn.lock',
-  pnpm: 'pnpm-lock.yaml',
-  bun: (() => {
-    try {
-      // In version 1.2.0, bun switched to a text based lockfile format by default
-      return gte(execSync('bun --version').toString().trim(), '1.2.0')
-        ? 'bun.lock'
-        : 'bun.lockb';
-    } catch {
-      return 'bun.lockb';
-    }
-  })(),
-};
-
-export function ensureCypressInstallation() {
-  let cypressVerified = true;
-  try {
-    const r = execSync('npx cypress verify', {
-      stdio: isVerbose() ? 'inherit' : 'pipe',
-      encoding: 'utf-8',
-      cwd: tmpProjPath(),
-    });
-    if (r.indexOf('Verified Cypress!') === -1) {
-      cypressVerified = false;
-    }
-  } catch {
-    cypressVerified = false;
-  } finally {
-    if (!cypressVerified) {
-      e2eConsoleLogger('Cypress was not verified. Installing Cypress now.');
-      execSync('npx cypress install', {
-        stdio: isVerbose() ? 'inherit' : 'pipe',
-        encoding: 'utf-8',
-        cwd: tmpProjPath(),
-      });
-    }
-  }
-}
-
-export function ensurePlaywrightBrowsersInstallation() {
-  const playwrightInstallArgs =
-    process.env.PLAYWRIGHT_INSTALL_ARGS || '--with-deps';
-  execSync(`npx playwright install ${playwrightInstallArgs}`, {
-    stdio: isVerbose() ? 'inherit' : 'pipe',
-    encoding: 'utf-8',
-    cwd: tmpProjPath(),
-  });
-  e2eConsoleLogger(
-    `Playwright browsers ${execSync('npx playwright --version')
-      .toString()
-      .trim()} installed.`
-  );
-}
-
 export function getStrippedEnvironmentVariables() {
   return Object.fromEntries(
-    Object.entries(process.env).filter(([key, value]) => {
+    Object.entries(process.env).filter(([key]) => {
       if (key.startsWith('NX_E2E_')) {
         return true;
       }
-
       const allowedKeys = [
         'NX_ADD_PLUGINS',
         'NX_ISOLATE_PLUGINS',
         'NX_VERBOSE_LOGGING',
         'NX_NATIVE_LOGGING',
       ];
-
       if (key.startsWith('NX_') && !allowedKeys.includes(key)) {
         return false;
       }
-
       if (key === 'JEST_WORKER_ID') {
         return false;
       }
-
       return true;
     })
   );

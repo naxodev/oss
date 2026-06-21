@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc/bun-test-plugin/spec",
+    "tsBuildInfoFile": "../../dist/out-tsc/bun-test-plugin/spec/tsconfig.spec.tsbuildinfo",
+    "types": ["bun", "node"]
+  },
+  "references": [{ "path": "./tsconfig.lib.json" }],
+  "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
+}

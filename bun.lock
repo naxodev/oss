@@ -87,6 +87,13 @@
         "wrangler": "catalog:",
       },
     },
+    "packages/bun-test-plugin": {
+      "name": "@naxodev/bun-test",
+      "version": "0.0.0",
+      "dependencies": {
+        "@nx/devkit": "^23.0.0",
+      },
+    },
     "packages/e2e-utils": {
       "name": "@naxodev/e2e-utils",
       "version": "0.0.0",
@@ -815,6 +822,8 @@
     "@napi-rs/nice-win32-x64-msvc": ["@napi-rs/nice-win32-x64-msvc@1.1.1", "", { "os": "win32", "cpu": "x64" }, "sha512-vB+4G/jBQCAh0jelMTY3+kgFy00Hlx2f2/1zjMoH821IbplbWZOkLiTYXQkygNTzQJTq5cvwBDgn2ppHD+bglQ=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@0.2.4", "", { "dependencies": { "@emnapi/core": "^1.1.0", "@emnapi/runtime": "^1.1.0", "@tybys/wasm-util": "^0.9.0" } }, "sha512-9zESzOO5aDByvhIAsOy9TbpZ0Ur2AJbUI7UT73kcUTS2mxAMHOBaa1st/jAymNoCtvrit99kkzT1FZuXVcgfIQ=="],
+
+    "@naxodev/bun-test": ["@naxodev/bun-test@workspace:packages/bun-test-plugin"],
 
     "@naxodev/e2e-utils": ["@naxodev/e2e-utils@workspace:packages/e2e-utils"],
 
