@@ -15,6 +15,10 @@ import {
 } from '../../utils/versions';
 import { ensurePluginRegistered } from '../../utils/inference-plugin';
 
+/**
+ * Initializes the @naxodev/nx-cloudflare plugin in a workspace: installs the
+ * required runtime dependencies and registers the inference plugin in nx.json.
+ */
 export async function initGenerator(tree: Tree, schema: InitGeneratorSchema) {
   const initTask = await nodeInitGenerator(tree, {
     ...schema,

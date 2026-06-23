@@ -1,10 +1,19 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "gonx-docs",
-  // Update to today's date
-  "compatibility_date": "2025-03-25",
+  "compatibility_date": "2025-06-21",
   "assets": {
     "directory": "../../dist/docs/gonx-docs/",
-    "not_found_handling": "404-page" // If you have a custom `src/pages/404.astro` page
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    }
   }
 }

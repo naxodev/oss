@@ -1,0 +1,35 @@
+---
+import PluginLogo from './PluginLogo.astro';
+---
+
+<div class="header">
+  <PluginLogo height={18} />
+</div>
+
+<style>
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    gap: 0.5rem;
+  }
+
+  :global(:root[data-theme='dark']) .header {
+    color: white;
+  }
+
+  :global(:root[data-theme='light']) .header {
+    color: #1e1b2e;
+  }
+
+  .header:hover {
+    opacity: 0.8;
+  }
+
+  @media (min-width: 50rem) {
+    .header {
+      display: none;
+    }
+  }
+</style>

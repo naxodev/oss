@@ -1,7 +1,9 @@
 {
-  "$schema": "http://json-schema.org/schema",
+  "$schema": "https://json-schema.org/schema",
+  "cli": "nx",
   "$id": "Init",
   "title": "Init Nx Cloudflare Plugin",
+  "description": "Initialize the @naxodev/nx-cloudflare plugin in a workspace.",
   "type": "object",
   "properties": {
     "unitTestRunner": {
@@ -10,16 +12,17 @@
       "description": "Test runner to use for unit tests.",
       "default": "vitest"
     },
-    "skipFormat": {
-      "description": "Skip formatting files.",
-      "type": "boolean",
-      "default": false
-    },
     "js": {
       "type": "boolean",
       "default": false,
-      "description": "Use JavaScript instead of TypeScript"
+      "description": "Use JavaScript instead of TypeScript."
+    },
+    "skipFormat": {
+      "type": "boolean",
+      "default": false,
+      "description": "Skip formatting files.",
+      "x-priority": "internal"
     }
   },
-  "required": ["name"]
+  "required": []
 }

@@ -11,36 +11,37 @@
 [![commitizen](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat-square)]()
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)]()
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 
 </div>
 
 <hr>
 
-Nx plugin for Cloudflare.
+Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). It wraps the [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) for target inference and uses [create-cloudflare (C3)](https://developers.cloudflare.com/workers/get-started/create-worker/) for project scaffolding.
 
 ## Features
 
-- ✅ Generate Cloudflare Worker Application
-  - ✅ Include Fetch Handler template
-  - ✅ Include Scheduled Handler template
-  - ✅ Vitest tests support
-  - ✅ Inferred `serve`, `deploy`, `typegen`, `version-upload`, and `tail` targets (via the `@naxodev/nx-cloudflare/plugin` Crystal plugin).
-- ✅ Generate Cloudflare Worker Library
+- Scaffold Cloudflare Worker applications via create-cloudflare (C3) — Worker templates, web frameworks, or remote git templates.
+- Generate Cloudflare Worker libraries (publishable, with bundler/linter/test options).
+- Inferred `serve`, `deploy`, `typegen`, `version-upload`, and `tail` targets via the `@naxodev/nx-cloudflare/plugin` inference plugin — no hand-written `project.json` targets.
+- Customizable inferred target names via `CloudflarePluginOptions`.
+- Vitest wired automatically when the C3 template ships a Vitest config.
 
-## Installation
+## Getting started
 
-Nx Cloudflare is published as the `@naxodev/nx-cloudflare` package.
+### Add to an existing workspace
 
-| Toolchain | Command                              |
-| --------- | ------------------------------------ |
-| NPM CLI   | `npm install @naxodev/nx-cloudflare` |
-| PNPM CLI  | `pnpm add @naxodev/nx-cloudflare`    |
-| Yarn CLI  | `yarn add @naxodev/nx-cloudflare`    |
+```shell
+nx add @naxodev/nx-cloudflare
+```
+
+### Generate a Cloudflare Worker
+
+```shell
+nx g @naxodev/nx-cloudflare:application my-worker
+```
 
 ## Compatibility
-
-Nx Cloudflare is compatible with the following versions of Nx:
 
 | Nx Version | Nx Cloudflare Version |
 | ---------- | --------------------- |
@@ -49,110 +50,14 @@ Nx Cloudflare is compatible with the following versions of Nx:
 | 19.x       | 3.x                   |
 | 20.x       | 4.x                   |
 | 21.x       | 5.x                   |
+| 22–23.x    | 6.x                   |
 
-## Usage
+Wrangler v4 is a required peer dependency.
 
-### Cloudflare Worker Application
+## Docs
 
-#### Generating a new Cloudflare Worker Application
-
-```bash
-nx g @naxodev/nx-cloudflare:application my-worker-app
-```
-
-Available options:
-
-| Option                   | Type                                         | Default       | Description                                                                                                                                                                            |
-| ------------------------ | -------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name                     | string                                       | \*required    | What name would you like to use?                                                                                                                                                       |
-| template                 | fetch-handler, scheduled-handler, hono, none | fetch-handler | Which worker template do you want to use?                                                                                                                                              |
-| projectNameAndRootFormat | as-provided, derived                         | as-provided   | Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`). |
-| port                     | number                                       | 8787          | The port in which the worker will be run on development mode                                                                                                                           |
-| accountId                | string                                       | null          | The Cloudflare account identifier where the worker will be deployed                                                                                                                    |
-| configFormat             | jsonc, toml                                  | jsonc         | Format of the generated Wrangler configuration file (`wrangler.jsonc` or `wrangler.toml`).                                                                                             |
-| js                       | boolean                                      | false         | Use JavaScript instead of TypeScript                                                                                                                                                   |
-| tags                     | string                                       | null          | Add tags to the application (used for linting).                                                                                                                                        |
-| unitTestRunner           | vitest, none                                 | vitest        | Test runner to use for unit tests.                                                                                                                                                     |
-| directory                | string                                       | null          | The directory of the new application.                                                                                                                                                  |
-| rootProject              | boolean                                      | false         | Create worker application at the root of the workspace                                                                                                                                 |
-| skipFormat               | boolean                                      | false         | Skip formatting files.                                                                                                                                                                 |
-
-##### Wrangler configuration format
-
-The generator emits a [`wrangler.jsonc`](https://developers.cloudflare.com/workers/wrangler/configuration/) by default — Cloudflare's recommended format, and the only one that some newer Wrangler features support. The generated file includes a `$schema` reference (resolved relative to the workspace-root `node_modules`) so editors validate and autocomplete the config:
-
-```jsonc
-{
-  "$schema": "../node_modules/wrangler/config-schema.json",
-  "name": "my-worker-app",
-  "compatibility_date": "2026-06-05",
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "src/index.ts"
-}
-```
-
-To generate a `wrangler.toml` instead, pass `--configFormat=toml`:
-
-```bash
-nx g @naxodev/nx-cloudflare:application my-worker-app --configFormat=toml
-```
-
-#### Inferred targets
-
-Generated Worker projects get their targets from the `@naxodev/nx-cloudflare/plugin` inference plugin (registered in `nx.json` by the generator). Any project with a `wrangler.{jsonc,toml,json}` beside a `project.json`/`package.json` gets:
-
-| Target           | Runs                       | Notes                                  |
-| ---------------- | -------------------------- | -------------------------------------- |
-| `serve`          | `wrangler dev`             | Continuous local dev server.           |
-| `deploy`         | `wrangler deploy`          | Deploys the Worker.                    |
-| `typegen`        | `wrangler types`           | Generates `worker-configuration.d.ts`. |
-| `version-upload` | `wrangler versions upload` | Uploads a version (gradual deploys).   |
-| `tail`           | `wrangler tail`            | Streams live logs.                     |
-
-```bash
-nx serve <my-app>
-nx deploy <my-app>
-```
-
-These targets wrap the Wrangler CLI, so any Wrangler flag passes straight through after `--`:
-
-```bash
-nx serve <my-app> -- --remote
-nx deploy <my-app> -- --dry-run
-```
-
-See the [`wrangler dev`](https://developers.cloudflare.com/workers/wrangler/commands/#dev) and [`wrangler deploy`](https://developers.cloudflare.com/workers/wrangler/commands/#deploy) docs for the full flag list. The dev-server port is set via `dev.port` in the generated `wrangler` config (defaults to `8787`).
-
-`worker-configuration.d.ts` (your typed `Env` and runtime types) is the `typegen` target's declared output, so it is treated as a generated build artifact — the generator git-ignores it instead of committing it. Run `nx typegen <my-app>` to (re)generate it, and re-run after changing bindings or `compatibility_date` in your `wrangler` config.
-
-### Cloudflare Worker Library
-
-#### Generating a new Cloudflare Worker Library
-
-```bash
-nx g @naxodev/nx-cloudflare:library my-worker-lib
-```
-
-Available options:
-
-| Option                   | Type                          | Default     | Description                                                                                                                                                                            |
-| ------------------------ | ----------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name                     | string                        | \*required  | What name would you like to use?                                                                                                                                                       |
-| directory                | string                        | null        | The directory of the new application.                                                                                                                                                  |
-| projectNameAndRootFormat | as-provided, derived          | as-provided | Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`). |
-| linter                   | eslint, none                  | eslint      | The tool to use for running lint checks.                                                                                                                                               |
-| unitTestRunner           | vitest, none                  | vitest      | Test runner to use for unit tests.                                                                                                                                                     |
-| tags                     | string                        | null        | Add tags to the application (used for linting).                                                                                                                                        |
-| skipFormat               | boolean                       | false       | Skip formatting files.                                                                                                                                                                 |
-| js                       | boolean                       | false       | Use JavaScript instead of TypeScript                                                                                                                                                   |
-| strict                   | boolean                       | true        | Whether to enable tsconfig strict mode or not.                                                                                                                                         |
-| publishable              | boolean                       | false       | Generate a publishable library.                                                                                                                                                        |
-| importPath               | string                        | null        | The library name used to import it, like @myorg/my-awesome-lib. Required for publishable library.                                                                                      |
-| bundler                  | swc, tsc, vite, esbuild, none | tsc         | Which bundler would you like to use to build the library? Choose 'none' to skip build setup.                                                                                           |
-| minimal                  | boolean                       | false       | Generate a library with a minimal setup. No README.md generated.                                                                                                                       |
-| simpleName               | boolean                       | false       | Don't include the directory in the generated file name.                                                                                                                                |
-
-Worker libraries pull in Workers runtime types from `@cloudflare/workers-types` rather than a generated `worker-configuration.d.ts`. A library has no `wrangler` config of its own, so there are no bindings to type and nothing for `wrangler types` to generate — the `typegen` target is inferred only for Worker applications.
+To read the full documentation, check out the
+[docs](https://nx-cloudflare.naxo.dev/) site.
 
 ## Acknowledgement
 

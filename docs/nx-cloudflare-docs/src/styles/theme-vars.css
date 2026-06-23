@@ -1,0 +1,49 @@
+/* ── Theme custom properties ─────────────────────────────────────── */
+/* Dark/light Starlight overrides + pagefind + scrollbar colors      */
+
+:root[data-theme='dark'] {
+  --sl-color-bg: #04060b;
+  --sl-color-text-accent: var(--color-accent-500);
+  --sl-color-bg-sidebar: #07090f;
+  --sl-color-backdrop-overlay: rgba(4, 6, 11, 0.8);
+  --sl-color-bg-nav: #07090f;
+  --pagefind-ui-primary: var(--color-accent-500);
+  --pagefind-ui-text: #e0f0ff;
+  --pagefind-ui-background: #0b0e16;
+  --pagefind-ui-border: rgba(255, 255, 255, 0.1);
+  --pagefind-ui-tag: color-mix(
+    in srgb,
+    var(--color-accent-500) 10%,
+    transparent
+  );
+  --scrollbar-idle: rgba(255, 255, 255, 0.08);
+  --scrollbar-hover: rgba(255, 255, 255, 0.15);
+}
+
+:root[data-theme='light'] {
+  --sl-color-bg: #fefaf5;
+  --sl-color-text-accent: var(--color-accent-500);
+  --sl-color-bg-sidebar: #f5f0eb;
+  --sl-color-bg-nav: #f5f0eb;
+  --sl-color-hairline-shade: rgba(10, 30, 53, 0.08);
+  --sl-color-white: #0a1e35;
+  --sl-color-black: #fefaf5;
+  --sl-color-text: #1a3a55;
+  --sl-color-gray-1: #2a4a65;
+  --sl-color-gray-2: #3a5a75;
+  --sl-color-gray-3: #5a7a95;
+  --sl-color-gray-4: #9ab4cc;
+  --sl-color-gray-5: #d4dce4;
+  --sl-color-gray-6: #eae4dc;
+  --pagefind-ui-primary: var(--color-accent-500);
+  --pagefind-ui-text: #0a1e35;
+  --pagefind-ui-background: #fefcf8;
+  --pagefind-ui-border: rgba(10, 30, 53, 0.1);
+  --pagefind-ui-tag: color-mix(
+    in srgb,
+    var(--color-accent-500) 8%,
+    transparent
+  );
+  --scrollbar-idle: rgba(10, 30, 53, 0.08);
+  --scrollbar-hover: rgba(10, 30, 53, 0.15);
+}

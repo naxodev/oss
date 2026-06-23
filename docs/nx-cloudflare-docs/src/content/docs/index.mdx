@@ -1,0 +1,86 @@
+---
+title: Nx Cloudflare documentation
+description: Nx plugin for Cloudflare Workers
+template: splash
+hero:
+  tagline: An Nx plugin for Cloudflare Workers
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="Nx Cloudflare" icon="rocket">
+    <div style="text-align: center; margin-bottom: 1rem;">
+      <picture>
+        <source
+          media="(prefers-color-scheme: dark)"
+          srcset="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg"
+        />
+        <img
+          alt="nx-cloudflare - Nx plugin for Cloudflare Workers"
+          src="https://pub-2030b241eb284b5291e3e59724e55a66.r2.dev/nx-cloudflare.svg"
+          width="80%"
+        />
+      </picture>
+    </div>
+    An Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/)
+    with inferred targets, C3-powered scaffolding, and Wrangler v4 support. Available
+    on [npm](https://www.npmjs.com/package/@naxodev/nx-cloudflare).
+  </Card>
+  <Card title="Open Source" icon="github">
+    The plugin is open source. See the [GitHub
+    repository](https://github.com/naxodev/oss/tree/main/packages/nx-cloudflare).
+  </Card>
+  <Card title="Community" icon="open-book">
+    Join the [Discord server](https://discord.gg/zjDCGpKP2S) for discussion and
+    support.
+  </Card>
+</CardGrid>
+
+---
+
+## Key Features
+
+<div class="features-grid">
+  <div class="feature-item">
+    <h3 class="feature-title">Inferred Worker Targets</h3>
+    <p class="feature-description">
+      Serve, deploy, typegen, version-upload, and tail targets are inferred from
+      your Wrangler config — no hand-written project.json targets needed.
+    </p>
+  </div>
+
+{' '}
+
+<div class="feature-item">
+  <h3 class="feature-title">C3-Powered Scaffolding</h3>
+  <p class="feature-description">
+    The application generator wraps Cloudflare's create-cloudflare (C3) CLI,
+    then makes the scaffolded project Nx-ready.
+  </p>
+</div>
+
+{' '}
+
+<div class="feature-item">
+  <h3 class="feature-title">Wrangler v4 + JSONC</h3>
+  <p class="feature-description">
+    Generates wrangler.jsonc by default with $schema validation. Supports
+    jsonc, toml, and json config formats.
+  </p>
+</div>
+</div>
+
+---
+
+<div style="text-align: center; margin: 4rem 0; padding: 2rem; background: linear-gradient(135deg, rgba(243, 128, 32, 0.1) 0%, rgba(250, 174, 64, 0.1) 100%); border-radius: 16px;">
+  <h2 style="margin-bottom: 1rem;">Ready to Get Started?</h2>
+  <p style="margin-bottom: 2rem; color: var(--sl-color-text-accent);">
+    Start building Cloudflare Workers with Nx
+  </p>
+  <div class="action-buttons">
+    <a href="/getting-started/quick-start" class="action-button primary">
+      Create your first Worker
+    </a>
+  </div>
+</div>
