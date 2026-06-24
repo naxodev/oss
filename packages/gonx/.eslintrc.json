@@ -22,7 +22,12 @@
       }
     },
     {
-      "files": ["./package.json", "./executors.json", "./generators.json"],
+      "files": [
+        "./package.json",
+        "./executors.json",
+        "./generators.json",
+        "./migrations.json"
+      ],
       "parser": "jsonc-eslint-parser",
       "rules": {
         "@nx/nx-plugin-checks": "error"
