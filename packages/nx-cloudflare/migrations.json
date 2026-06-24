@@ -10,6 +10,11 @@
       "version": "7.0.0",
       "description": "Guide removal of the dropped Next.js + webpack integration (next-build executor, with-nx/compose-plugins) for projects that still reference it.",
       "prompt": "./src/migrations/update-7-0-0/drop-nextjs.md"
+    },
+    "update-7-0-0-application-aliases": {
+      "version": "7.0.0",
+      "description": "Note that the application generator now aliases create-cloudflare (C3); existing projects are unaffected, but scripted invocations should move to the new schema.",
+      "prompt": "./src/migrations/update-7-0-0/application-aliases.md"
     }
   },
   "packageJsonUpdates": {
