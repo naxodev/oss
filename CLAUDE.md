@@ -11,6 +11,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Supporting (non-published) projects: `e2e-utils` (shared e2e helpers), `nx-cloudflare-e2e` / `gonx-e2e` (e2e suites), and two Astro Starlight docs sites (`docs/nx-cloudflare-docs`, `docs/gonx-docs`).
 
+Issues for this project live on **GitHub** (use the `gh` CLI / the repo's GitHub Issues to find, reference, and triage them).
+
 **Workspace structure:** a **bun workspace** (`workspaces: ["packages/*"]`) using **TypeScript project linking** — a composite `tsconfig.base.json` (`module/moduleResolution: nodenext`, `customConditions: ["@naxodev/source"]`), a root solution `tsconfig.json` with project `references`, and the `@nx/js/typescript` inference plugin (managed by `nx sync`); there are no `tsconfig` `paths`. Shared dependency versions live in a single root `catalog` (referenced as `"catalog:"`); the two plugins' **published** runtime deps stay explicit (loose ranges). Tests run on `bun test` (see below).
 
 ## Commands
