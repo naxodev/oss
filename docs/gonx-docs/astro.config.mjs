@@ -88,6 +88,11 @@ export default defineConfig({
               paths: ['reference/**'],
               description: 'API documentation for @naxodev/gonx',
             },
+            {
+              label: "What's New",
+              paths: ['whats-new/**'],
+              description: 'Release announcements and highlights',
+            },
           ],
           promote: ['getting-started/quick-start'],
         }),
@@ -155,12 +160,12 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Reference',
-          items: [gonxTypeDocSidebarGroup],
-        },
-        {
           label: 'Understanding',
           items: [{ slug: 'understanding/static-analysis' }],
+        },
+        {
+          label: "What's New",
+          items: [{ slug: 'whats-new/gonx-4-0-0' }],
         },
         {
           label: 'Community',
@@ -168,6 +173,10 @@ export default defineConfig({
             { slug: 'community/migration' },
             { slug: 'community/contributing' },
           ],
+        },
+        {
+          label: 'Reference',
+          items: [gonxTypeDocSidebarGroup],
         },
       ],
       lastUpdated: true,

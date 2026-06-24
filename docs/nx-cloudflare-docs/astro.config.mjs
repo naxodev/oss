@@ -104,6 +104,11 @@ export default defineConfig({
               paths: ['reference/**'],
               description: 'API documentation for @naxodev/nx-cloudflare',
             },
+            {
+              label: "What's New",
+              paths: ['whats-new/**'],
+              description: 'Release announcements and highlights',
+            },
           ],
           promote: ['getting-started/quick-start'],
         }),
@@ -148,13 +153,6 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Reference',
-          items: [
-            { slug: 'inferred-targets' },
-            nxCloudflareTypeDocSidebarGroup,
-          ],
-        },
-        {
           label: 'Understanding',
           items: [
             { slug: 'understanding/wrangler' },
@@ -162,8 +160,19 @@ export default defineConfig({
           ],
         },
         {
+          label: "What's New",
+          items: [{ slug: 'whats-new/nx-cloudflare-7-0-0' }],
+        },
+        {
           label: 'Community',
           items: [{ slug: 'community/migration' }],
+        },
+        {
+          label: 'Reference',
+          items: [
+            { slug: 'inferred-targets' },
+            nxCloudflareTypeDocSidebarGroup,
+          ],
         },
       ],
       lastUpdated: true,
