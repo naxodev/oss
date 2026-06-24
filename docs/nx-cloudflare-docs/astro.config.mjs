@@ -144,6 +144,7 @@ export default defineConfig({
             { slug: 'guides/generators-application' },
             { slug: 'guides/generators-init' },
             { slug: 'guides/generators-library' },
+            { slug: 'guides/generators-binding' },
           ],
         },
         {

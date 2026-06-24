@@ -42,6 +42,14 @@ Publishable libraries require `importPath` and cannot use `bundler=none`. Non-pu
 
 Worker libraries have no Wrangler config, so no inferred targets are generated (`serve`, `deploy`, `typegen`, etc. are not available). Workers runtime types come from `@cloudflare/workers-types` via `tsconfig.lib.json`, not a generated `worker-configuration.d.ts`.
 
+## Verify
+
+```bash
+bunx nx show project my-worker-lib
+```
+
+The library appears in the graph at the directory you generated it in.
+
 ## Next steps
 
 - [application generator](/guides/generators-application) — scaffold a Worker application

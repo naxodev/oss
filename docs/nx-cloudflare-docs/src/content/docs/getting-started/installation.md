@@ -72,5 +72,7 @@ import { Steps } from '@astrojs/starlight/components';
   first Worker.
 - [application generator](/guides/generators-application) — scaffold a Worker
   application with C3.
+- [binding generator](/guides/generators-binding) — add a KV, R2, D1, Durable
+  Object, Queue, Workflow, or Service binding to a Worker.
 - [Plugin options](/understanding/plugin-options) — customize inferred target
   names.
