@@ -80,6 +80,16 @@ Releases are **independent per project** (`nx.json` → `release.projects: ["gon
 
 Because releases are conventional-commit driven, commit messages and **PR titles matter** — squash-merge lands the PR title as the commit subject. Use Conventional Commits with the package scope, e.g. `feat(nx-cloudflare): ...`, `fix(gonx): ...`, `feat(nx-cloudflare)!: ...` for breaking changes.
 
+#### Breaking changes ship a migration
+
+Every consumer-affecting breaking change (any `!` commit, i.e. anything that bumps a plugin's major) **must** ship with — or be explicitly exempted from — an `nx migrate` path. When opening a `feat(...)!` / `fix(...)!` PR, add the corresponding entry to that plugin's `migrations.json` and decide its shape:
+
+- **`packageJsonUpdates`** — for peer/dependency version bumps (e.g. `nx`/`@nx/devkit` → next major).
+- **generator migration** (`implementation` + `documentation` `.md`) — for changes Nx can rewrite deterministically in a consumer's tree (e.g. removing dead `project.json` targets).
+- **prompt migration** (`prompt` `.md`, Nx 23 "Migrations 2.0") — for changes that depend on unpredictable consumer state and need human/agent judgment (e.g. removed generators, source-file wiring).
+
+Key each entry at the **version where the break lands** (the upcoming major), except backfills for an already-released break, which are keyed at the version that shipped it — `nx migrate` runs everything in `(installed, target]`, so a correctly-keyed backfill still fires for consumers leaping the range. If a breaking change genuinely needs **no** migration (e.g. scaffold-only output changes that don't touch existing projects), say so explicitly in the PR description and release notes rather than leaving it silent. See `packages/*/src/migrations/` for examples.
+
 ### e2e tests
 
 e2e suites (`*-e2e`) install the **published tarball** from a local Verdaccio registry into a freshly generated Nx workspace (`packages/e2e-utils/src/lib/create-test-project.ts` → real `create-nx-workspace` + install), so they exercise peerDependencies, the `exports` map, and migrations the way real consumers do — not a copied `dist` fixture.
