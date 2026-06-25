@@ -2,7 +2,7 @@
   "name": "@naxodev/nx-cloudflare",
   "version": "6.0.0",
   "description": "Nx plugin for Cloudflare",
-  "homepage": "https://github.com/naxodev/oss/tree/main/packages/nx-cloudflare",
+  "homepage": "https://nx-cloudflare.naxo.dev/",
   "repository": {
     "type": "git",
     "url": "git@github.com:naxodev/oss.git",
