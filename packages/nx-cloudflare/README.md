@@ -19,6 +19,8 @@
 
 Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). It wraps the [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) for target inference and uses [create-cloudflare (C3)](https://developers.cloudflare.com/workers/get-started/create-worker/) for project scaffolding.
 
+📚 **Full documentation:** <https://nx-cloudflare.naxo.dev/>
+
 ## Features
 
 - Scaffold Cloudflare Worker applications via create-cloudflare (C3) — Worker templates, web frameworks, or remote git templates.
@@ -70,12 +72,7 @@ Run `nx migrate @naxodev/nx-cloudflare@latest`; the bundled migrations convert y
 
 See the [migration guide](https://nx-cloudflare.naxo.dev/community/migration/) for the full walkthrough.
 
-## Docs
-
-To read the full documentation, check out the
-[docs](https://nx-cloudflare.naxo.dev/) site.
-
-## Acknowledgement
+## Acknowledgements
 
 This project is heavily inspired in the work done by other Nx Champions, check out their projects.
 
