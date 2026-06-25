@@ -17,6 +17,10 @@
 
 <hr>
 
+Nx plugin for using [Go](https://go.dev/) in an Nx workspace — generators, inferred targets, and a tree-sitter–based dependency graph. A modernized fork of [nx-go](https://github.com/nx-go/nx-go).
+
+📚 **Full documentation:** <https://gonx.naxo.dev/>
+
 ## Features
 
 - Generate Go Applications
@@ -50,10 +54,13 @@ npx create-nx-workspace go-workspace --preset=@naxodev/gonx
 nx add @naxodev/gonx
 ```
 
-## Docs
+## Acknowledgements
 
-To read the full documentation, check out the
-[docs](https://gonx.naxo.dev/) site.
+This project is a fork of [nx-go](https://github.com/nx-go/nx-go), a
+plugin for Nx that provides tools for building Go applications. Most
+credit goes to the original maintainers of nx-go - we've built upon
+their excellent foundation to modernize the plugin for the latest Nx
+features.
 
 ## Contributors
 
@@ -106,11 +113,3 @@ Thanks goes to these wonderful people
     </tr>
   </tbody>
 </table>
-
-## Acknowledgements
-
-This project is a fork of [nx-go](https://github.com/nx-go/nx-go), a
-plugin for Nx that provides tools for building Go applications. Most
-credit goes to the original maintainers of nx-go - we've built upon
-their excellent foundation to modernize the plugin for the latest Nx
-features.

@@ -19,6 +19,8 @@
 
 Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). It wraps the [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) for target inference and uses [create-cloudflare (C3)](https://developers.cloudflare.com/workers/get-started/create-worker/) for project scaffolding.
 
+📚 **Full documentation:** <https://nx-cloudflare.naxo.dev/>
+
 ## Features
 
 - Scaffold Cloudflare Worker applications via create-cloudflare (C3) — Worker templates, web frameworks, or remote git templates.
@@ -57,16 +59,20 @@ nx g @naxodev/nx-cloudflare:binding --project=my-worker --type=kv --binding=MY_K
 | 19.x       | 3.x                   |
 | 20.x       | 4.x                   |
 | 21.x       | 5.x                   |
-| 22–23.x    | 6.x                   |
+| 22.x       | 6.x                   |
+| 23.x       | 7.x                   |
 
 Wrangler v4 is a required peer dependency.
 
-## Docs
+## Migrating to 7.0.0
 
-To read the full documentation, check out the
-[docs](https://nx-cloudflare.naxo.dev/) site.
+7.0.0 is a breaking release. The old `serve`/`deploy`/`publish`/`next-build` executors are replaced by targets inferred from your Wrangler config, and **Next.js support is removed entirely** — the `next-build` executor and the vendored webpack subsystem (`next`, `webpack`, `@svgr/webpack`, `url-loader`, `copy-webpack-plugin`) are gone, so the install footprint is much smaller.
 
-## Acknowledgement
+Run `nx migrate @naxodev/nx-cloudflare@latest`; the bundled migrations convert your existing targets and guide the non-deterministic parts. If you ran Next.js on Cloudflare through the dropped `@cloudflare/next-on-pages` path, move to [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare) (OpenNext) — the plugin no longer wraps Next.js.
+
+See the [migration guide](https://nx-cloudflare.naxo.dev/community/migration/) for the full walkthrough.
+
+## Acknowledgements
 
 This project is heavily inspired in the work done by other Nx Champions, check out their projects.
 
