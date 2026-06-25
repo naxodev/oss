@@ -34,7 +34,11 @@ describe('buildD1Args', () => {
 
   it('builds create with the message and no local/remote flag', () => {
     expect(
-      buildD1Args({ command: 'create', database: 'my-db', message: 'add_users' })
+      buildD1Args({
+        command: 'create',
+        database: 'my-db',
+        message: 'add_users',
+      })
     ).toEqual(['d1', 'migrations', 'create', 'my-db', 'add_users']);
   });
 

@@ -347,9 +347,7 @@ describe('nx-cloudflare createNodes', () => {
     const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
     const targets = result.projects['apps/worker'].targets;
 
-    expect(
-      Object.keys(targets).filter((k) => k.startsWith('d1-'))
-    ).toEqual([]);
+    expect(Object.keys(targets).filter((k) => k.startsWith('d1-'))).toEqual([]);
   });
 
   it('honors custom target-name overrides', async () => {

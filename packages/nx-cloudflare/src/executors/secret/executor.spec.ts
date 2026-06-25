@@ -17,9 +17,11 @@ describe('buildSecretArgs', () => {
   });
 
   it('builds bulk with the file path', () => {
-    expect(
-      buildSecretArgs({ command: 'bulk', file: 'secrets.json' })
-    ).toEqual(['secret', 'bulk', 'secrets.json']);
+    expect(buildSecretArgs({ command: 'bulk', file: 'secrets.json' })).toEqual([
+      'secret',
+      'bulk',
+      'secrets.json',
+    ]);
   });
 
   it('builds list with no positional arg', () => {

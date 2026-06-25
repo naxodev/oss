@@ -36,12 +36,14 @@
 ### Task 1: D1 executor (`buildD1Args` + executor + shared runner)
 
 **Files:**
+
 - Create: `packages/nx-cloudflare/src/utils/run-wrangler.ts`
 - Create: `packages/nx-cloudflare/src/executors/d1/schema.d.ts`
 - Create: `packages/nx-cloudflare/src/executors/d1/executor.ts`
 - Test: `packages/nx-cloudflare/src/executors/d1/executor.spec.ts`
 
 **Interfaces:**
+
 - Produces: `runWrangler(args: string[], cwd: string): boolean` (in `utils/run-wrangler.ts`)
 - Produces: `type D1Command = 'apply' | 'create' | 'list'`; `interface D1ExecutorSchema { command: D1Command; database: string; remote?: boolean; env?: string; message?: string }`
 - Produces: `buildD1Args(options: D1ExecutorSchema): string[]` (named export from `executor.ts`)
@@ -97,45 +99,23 @@ import { buildD1Args } from './executor';
 
 describe('buildD1Args', () => {
   it('builds a local apply by default', () => {
-    expect(buildD1Args({ command: 'apply', database: 'my-db' })).toEqual([
-      'd1',
-      'migrations',
-      'apply',
-      'my-db',
-      '--local',
-    ]);
+    expect(buildD1Args({ command: 'apply', database: 'my-db' })).toEqual(['d1', 'migrations', 'apply', 'my-db', '--local']);
   });
 
   it('builds a remote apply when remote is true', () => {
-    expect(
-      buildD1Args({ command: 'apply', database: 'my-db', remote: true })
-    ).toEqual(['d1', 'migrations', 'apply', 'my-db', '--remote']);
+    expect(buildD1Args({ command: 'apply', database: 'my-db', remote: true })).toEqual(['d1', 'migrations', 'apply', 'my-db', '--remote']);
   });
 
   it('threads --env for apply/list', () => {
-    expect(
-      buildD1Args({ command: 'list', database: 'my-db', env: 'staging' })
-    ).toEqual([
-      'd1',
-      'migrations',
-      'list',
-      'my-db',
-      '--local',
-      '--env',
-      'staging',
-    ]);
+    expect(buildD1Args({ command: 'list', database: 'my-db', env: 'staging' })).toEqual(['d1', 'migrations', 'list', 'my-db', '--local', '--env', 'staging']);
   });
 
   it('builds create with the message and no local/remote flag', () => {
-    expect(
-      buildD1Args({ command: 'create', database: 'my-db', message: 'add_users' })
-    ).toEqual(['d1', 'migrations', 'create', 'my-db', 'add_users']);
+    expect(buildD1Args({ command: 'create', database: 'my-db', message: 'add_users' })).toEqual(['d1', 'migrations', 'create', 'my-db', 'add_users']);
   });
 
   it('throws when create has no message', () => {
-    expect(() => buildD1Args({ command: 'create', database: 'my-db' })).toThrow(
-      'The `message` option is required'
-    );
+    expect(() => buildD1Args({ command: 'create', database: 'my-db' })).toThrow('The `message` option is required');
   });
 });
 ```
@@ -162,35 +142,23 @@ export function buildD1Args(options: D1ExecutorSchema): string[] {
   const { command, database, remote, env, message } = options;
   if (command === 'create') {
     if (!message) {
-      throw new Error(
-        'The `message` option is required for `d1 migrations create`.'
-      );
+      throw new Error('The `message` option is required for `d1 migrations create`.');
     }
     return ['d1', 'migrations', 'create', database, message];
   }
-  const args = [
-    'd1',
-    'migrations',
-    command,
-    database,
-    remote ? '--remote' : '--local',
-  ];
+  const args = ['d1', 'migrations', command, database, remote ? '--remote' : '--local'];
   if (env) {
     args.push('--env', env);
   }
   return args;
 }
 
-export default async function d1Executor(
-  options: D1ExecutorSchema,
-  context: ExecutorContext
-): Promise<{ success: boolean }> {
+export default async function d1Executor(options: D1ExecutorSchema, context: ExecutorContext): Promise<{ success: boolean }> {
   if (!context.projectName) {
     logger.error('d1 executor: no project in context.');
     return { success: false };
   }
-  const projectRoot =
-    context.projectsConfigurations.projects[context.projectName].root;
+  const projectRoot = context.projectsConfigurations.projects[context.projectName].root;
   try {
     return { success: runWrangler(buildD1Args(options), join(context.root, projectRoot)) };
   } catch (e) {
@@ -216,11 +184,13 @@ jj commit -m "feat(nx-cloudflare): add d1 migrations executor"
 ### Task 2: Secret executor (`buildSecretArgs` + executor)
 
 **Files:**
+
 - Create: `packages/nx-cloudflare/src/executors/secret/schema.d.ts`
 - Create: `packages/nx-cloudflare/src/executors/secret/executor.ts`
 - Test: `packages/nx-cloudflare/src/executors/secret/executor.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `runWrangler` from `utils/run-wrangler.ts` (Task 1)
 - Produces: `type SecretCommand = 'put' | 'bulk' | 'list' | 'delete'`; `interface SecretExecutorSchema { command: SecretCommand; name?: string; file?: string; env?: string }`
 - Produces: `buildSecretArgs(options: SecretExecutorSchema): string[]` (named export)
@@ -253,23 +223,15 @@ import { buildSecretArgs } from './executor';
 
 describe('buildSecretArgs', () => {
   it('builds put with the key name', () => {
-    expect(buildSecretArgs({ command: 'put', name: 'API_KEY' })).toEqual([
-      'secret',
-      'put',
-      'API_KEY',
-    ]);
+    expect(buildSecretArgs({ command: 'put', name: 'API_KEY' })).toEqual(['secret', 'put', 'API_KEY']);
   });
 
   it('builds delete with the key name and --env', () => {
-    expect(
-      buildSecretArgs({ command: 'delete', name: 'API_KEY', env: 'production' })
-    ).toEqual(['secret', 'delete', 'API_KEY', '--env', 'production']);
+    expect(buildSecretArgs({ command: 'delete', name: 'API_KEY', env: 'production' })).toEqual(['secret', 'delete', 'API_KEY', '--env', 'production']);
   });
 
   it('builds bulk with the file path', () => {
-    expect(
-      buildSecretArgs({ command: 'bulk', file: 'secrets.json' })
-    ).toEqual(['secret', 'bulk', 'secrets.json']);
+    expect(buildSecretArgs({ command: 'bulk', file: 'secrets.json' })).toEqual(['secret', 'bulk', 'secrets.json']);
   });
 
   it('builds list with no positional arg', () => {
@@ -277,15 +239,11 @@ describe('buildSecretArgs', () => {
   });
 
   it('throws when put has no name', () => {
-    expect(() => buildSecretArgs({ command: 'put' })).toThrow(
-      'The `name` option is required'
-    );
+    expect(() => buildSecretArgs({ command: 'put' })).toThrow('The `name` option is required');
   });
 
   it('throws when bulk has no file', () => {
-    expect(() => buildSecretArgs({ command: 'bulk' })).toThrow(
-      'The `file` option is required'
-    );
+    expect(() => buildSecretArgs({ command: 'bulk' })).toThrow('The `file` option is required');
   });
 });
 ```
@@ -314,9 +272,7 @@ export function buildSecretArgs(options: SecretExecutorSchema): string[] {
     case 'put':
     case 'delete':
       if (!name) {
-        throw new Error(
-          `The \`name\` option is required for \`secret ${command}\`.`
-        );
+        throw new Error(`The \`name\` option is required for \`secret ${command}\`.`);
       }
       args.push(name);
       break;
@@ -335,16 +291,12 @@ export function buildSecretArgs(options: SecretExecutorSchema): string[] {
   return args;
 }
 
-export default async function secretExecutor(
-  options: SecretExecutorSchema,
-  context: ExecutorContext
-): Promise<{ success: boolean }> {
+export default async function secretExecutor(options: SecretExecutorSchema, context: ExecutorContext): Promise<{ success: boolean }> {
   if (!context.projectName) {
     logger.error('secret executor: no project in context.');
     return { success: false };
   }
-  const projectRoot =
-    context.projectsConfigurations.projects[context.projectName].root;
+  const projectRoot = context.projectsConfigurations.projects[context.projectName].root;
   try {
     return { success: runWrangler(buildSecretArgs(options), join(context.root, projectRoot)) };
   } catch (e) {
@@ -370,6 +322,7 @@ jj commit -m "feat(nx-cloudflare): add secrets executor"
 ### Task 3: Register executors (manifest, schemas, exports, build assets)
 
 **Files:**
+
 - Create: `packages/nx-cloudflare/src/executors/d1/schema.json`
 - Create: `packages/nx-cloudflare/src/executors/secret/schema.json`
 - Create: `packages/nx-cloudflare/executors.json`
@@ -377,6 +330,7 @@ jj commit -m "feat(nx-cloudflare): add secrets executor"
 - Modify: `packages/nx-cloudflare/project.json` (`build.options.assets`)
 
 **Interfaces:**
+
 - Consumes: executor files from Tasks 1–2.
 - Produces: resolvable executors `@naxodev/nx-cloudflare:d1` and `@naxodev/nx-cloudflare:secret`.
 
@@ -487,11 +441,11 @@ Add these keys to the existing `exports` object (after the `./src/generators/*/s
 In `packages/nx-cloudflare/project.json`, add an entry to `build.options.assets` (next to the existing `generators.json`/`migrations.json` globs):
 
 ```json
-          {
-            "input": "./packages/nx-cloudflare",
-            "glob": "executors.json",
-            "output": "./"
-          }
+{
+  "input": "./packages/nx-cloudflare",
+  "glob": "executors.json",
+  "output": "./"
+}
 ```
 
 - [ ] **Step 6: Verify lint (nx-plugin-checks) and build pass**
@@ -513,10 +467,12 @@ jj commit -m "feat(nx-cloudflare): register d1 and secret executors"
 ### Task 4: Inference — emit D1 + secret targets
 
 **Files:**
+
 - Modify: `packages/nx-cloudflare/src/plugin.ts`
 - Modify: `packages/nx-cloudflare/src/plugin.spec.ts`
 
 **Interfaces:**
+
 - Consumes: executors `@naxodev/nx-cloudflare:d1` / `:secret` (Tasks 1–3).
 - Produces: targets `d1-apply`/`d1-create`/`d1-list` (suffixed by binding when >1 D1 db) and `secret-put`/`secret-bulk`/`secret-list`/`secret-delete`, all override-able via new `CloudflarePluginOptions` fields.
 
@@ -525,19 +481,7 @@ jj commit -m "feat(nx-cloudflare): register d1 and secret executors"
 In `packages/nx-cloudflare/src/plugin.spec.ts`, the test `'infers the five Worker targets for a valid jsonc config'` asserts the target keys equal exactly the five Worker targets. Secret targets are now always emitted, so update that assertion (the config in that test has no `d1_databases`, so no D1 targets appear):
 
 ```typescript
-    expect(Object.keys(targets).sort()).toEqual(
-      [
-        'deploy',
-        'serve',
-        'tail',
-        'typegen',
-        'version-upload',
-        'secret-put',
-        'secret-bulk',
-        'secret-list',
-        'secret-delete',
-      ].sort()
-    );
+expect(Object.keys(targets).sort()).toEqual(['deploy', 'serve', 'tail', 'typegen', 'version-upload', 'secret-put', 'secret-bulk', 'secret-list', 'secret-delete'].sort());
 ```
 
 - [ ] **Step 2: Write the failing inference tests**
@@ -545,107 +489,83 @@ In `packages/nx-cloudflare/src/plugin.spec.ts`, the test `'infers the five Worke
 Add to `packages/nx-cloudflare/src/plugin.spec.ts`, inside the top-level `describe`:
 
 ```typescript
-  it('emits secret targets pointing at the secret executor for every worker', async () => {
-    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
-    writeFile(
-      workspaceRoot,
-      'apps/worker/wrangler.jsonc',
-      '{"name":"worker","main":"src/index.ts"}'
-    );
+it('emits secret targets pointing at the secret executor for every worker', async () => {
+  writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+  writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker","main":"src/index.ts"}');
 
-    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
-    const targets = result.projects['apps/worker'].targets;
+  const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+  const targets = result.projects['apps/worker'].targets;
 
-    expect(targets['secret-put']).toEqual({
-      executor: '@naxodev/nx-cloudflare:secret',
-      options: { command: 'put' },
-    });
-    expect(targets['secret-bulk'].options).toEqual({ command: 'bulk' });
+  expect(targets['secret-put']).toEqual({
+    executor: '@naxodev/nx-cloudflare:secret',
+    options: { command: 'put' },
   });
+  expect(targets['secret-bulk'].options).toEqual({ command: 'bulk' });
+});
 
-  it('emits bare d1 targets when there is exactly one D1 binding', async () => {
-    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
-    writeFile(
-      workspaceRoot,
-      'apps/worker/wrangler.jsonc',
-      '{"name":"worker","d1_databases":[{"binding":"DB","database_name":"my-db"}]}'
-    );
+it('emits bare d1 targets when there is exactly one D1 binding', async () => {
+  writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+  writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker","d1_databases":[{"binding":"DB","database_name":"my-db"}]}');
 
-    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
-    const targets = result.projects['apps/worker'].targets;
+  const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+  const targets = result.projects['apps/worker'].targets;
 
-    expect(targets['d1-apply']).toEqual({
-      executor: '@naxodev/nx-cloudflare:d1',
-      options: { command: 'apply', database: 'my-db' },
-    });
-    expect(targets['d1-create'].options).toEqual({
-      command: 'create',
-      database: 'my-db',
-    });
-    expect(targets['d1-list']).toBeDefined();
-    expect(targets['d1-apply-DB']).toBeUndefined();
+  expect(targets['d1-apply']).toEqual({
+    executor: '@naxodev/nx-cloudflare:d1',
+    options: { command: 'apply', database: 'my-db' },
   });
-
-  it('suffixes d1 targets by binding when there are multiple D1 bindings', async () => {
-    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
-    writeFile(
-      workspaceRoot,
-      'apps/worker/wrangler.jsonc',
-      '{"name":"worker","d1_databases":[' +
-        '{"binding":"DB","database_name":"main"},' +
-        '{"binding":"ANALYTICS","database_name":"events"}]}'
-    );
-
-    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
-    const targets = result.projects['apps/worker'].targets;
-
-    expect(targets['d1-apply-DB'].options).toEqual({
-      command: 'apply',
-      database: 'main',
-    });
-    expect(targets['d1-apply-ANALYTICS'].options).toEqual({
-      command: 'apply',
-      database: 'events',
-    });
-    expect(targets['d1-apply']).toBeUndefined();
+  expect(targets['d1-create'].options).toEqual({
+    command: 'create',
+    database: 'my-db',
   });
+  expect(targets['d1-list']).toBeDefined();
+  expect(targets['d1-apply-DB']).toBeUndefined();
+});
 
-  it('emits no d1 targets when there is no D1 binding', async () => {
-    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
-    writeFile(
-      workspaceRoot,
-      'apps/worker/wrangler.jsonc',
-      '{"name":"worker","main":"src/index.ts"}'
-    );
+it('suffixes d1 targets by binding when there are multiple D1 bindings', async () => {
+  writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+  writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker","d1_databases":[' + '{"binding":"DB","database_name":"main"},' + '{"binding":"ANALYTICS","database_name":"events"}]}');
 
-    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
-    const targets = result.projects['apps/worker'].targets;
+  const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+  const targets = result.projects['apps/worker'].targets;
 
-    expect(
-      Object.keys(targets).filter((k) => k.startsWith('d1-'))
-    ).toEqual([]);
+  expect(targets['d1-apply-DB'].options).toEqual({
+    command: 'apply',
+    database: 'main',
   });
-
-  it('honors custom target-name overrides', async () => {
-    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
-    writeFile(
-      workspaceRoot,
-      'apps/worker/wrangler.jsonc',
-      '{"name":"worker","d1_databases":[{"binding":"DB","database_name":"my-db"}]}'
-    );
-
-    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc', {
-      d1ApplyTargetName: 'migrate',
-      secretPutTargetName: 'add-secret',
-    });
-    const targets = result.projects['apps/worker'].targets;
-
-    expect(targets['migrate'].options).toEqual({
-      command: 'apply',
-      database: 'my-db',
-    });
-    expect(targets['add-secret'].options).toEqual({ command: 'put' });
+  expect(targets['d1-apply-ANALYTICS'].options).toEqual({
+    command: 'apply',
+    database: 'events',
   });
+  expect(targets['d1-apply']).toBeUndefined();
+});
+
+it('emits no d1 targets when there is no D1 binding', async () => {
+  writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+  writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker","main":"src/index.ts"}');
+
+  const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+  const targets = result.projects['apps/worker'].targets;
+
+  expect(Object.keys(targets).filter((k) => k.startsWith('d1-'))).toEqual([]);
+});
+
+it('honors custom target-name overrides', async () => {
+  writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+  writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker","d1_databases":[{"binding":"DB","database_name":"my-db"}]}');
+
+  const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc', {
+    d1ApplyTargetName: 'migrate',
+    secretPutTargetName: 'add-secret',
+  });
+  const targets = result.projects['apps/worker'].targets;
+
+  expect(targets['migrate'].options).toEqual({
+    command: 'apply',
+    database: 'my-db',
+  });
+  expect(targets['add-secret'].options).toEqual({ command: 'put' });
+});
 ```
 
 - [ ] **Step 3: Run the new tests to verify they fail**
@@ -701,10 +621,7 @@ interface D1Database {
  * Returns [] for TOML (no parser here) or any parse/shape failure — inference
  * must never throw, and D1 targets are jsonc/json-only by design.
  */
-function readD1Databases(
-  absConfigPath: string,
-  content: string
-): D1Database[] {
+function readD1Databases(absConfigPath: string, content: string): D1Database[] {
   if (absConfigPath.endsWith('.toml')) {
     return [];
   }
@@ -723,9 +640,7 @@ function readD1Databases(
       return [];
     }
     const { binding, database_name } = entry as Record<string, unknown>;
-    return typeof binding === 'string' && typeof database_name === 'string'
-      ? [{ binding, database_name }]
-      : [];
+    return typeof binding === 'string' && typeof database_name === 'string' ? [{ binding, database_name }] : [];
   });
 }
 ```
@@ -734,10 +649,7 @@ Add the two target builders (place after `buildWorkerTargets`):
 
 ```typescript
 /** D1 migration targets, one trio per database. Suffixed by binding when >1. */
-function buildD1Targets(
-  options: NormalizedOptions,
-  databases: D1Database[]
-): Record<string, TargetConfiguration> {
+function buildD1Targets(options: NormalizedOptions, databases: D1Database[]): Record<string, TargetConfiguration> {
   const single = databases.length === 1;
   const targets: Record<string, TargetConfiguration> = {};
   for (const db of databases) {
@@ -754,9 +666,7 @@ function buildD1Targets(
 }
 
 /** Secret targets — always emitted (secrets never appear in the config). */
-function buildSecretTargets(
-  options: NormalizedOptions
-): Record<string, TargetConfiguration> {
+function buildSecretTargets(options: NormalizedOptions): Record<string, TargetConfiguration> {
   const secret = (command: string): TargetConfiguration => ({
     executor: '@naxodev/nx-cloudflare:secret',
     options: { command },
@@ -775,31 +685,31 @@ function buildSecretTargets(
 In `createNodesInternal`, replace the config-validity check and target construction. Currently:
 
 ```typescript
-  const absConfigPath = join(context.workspaceRoot, configFile);
-  if (readValidConfig(absConfigPath) === null) {
-    return {};
-  }
+const absConfigPath = join(context.workspaceRoot, configFile);
+if (readValidConfig(absConfigPath) === null) {
+  return {};
+}
 
-  const targets = buildWorkerTargets(projectRoot, normalizeOptions(options));
-  return { projects: { [projectRoot]: { targets } } };
+const targets = buildWorkerTargets(projectRoot, normalizeOptions(options));
+return { projects: { [projectRoot]: { targets } } };
 ```
 
 Replace with (capture the validated content so it can be parsed for D1):
 
 ```typescript
-  const absConfigPath = join(context.workspaceRoot, configFile);
-  const content = readValidConfig(absConfigPath);
-  if (content === null) {
-    return {};
-  }
+const absConfigPath = join(context.workspaceRoot, configFile);
+const content = readValidConfig(absConfigPath);
+if (content === null) {
+  return {};
+}
 
-  const normalized = normalizeOptions(options);
-  const targets = {
-    ...buildWorkerTargets(projectRoot, normalized),
-    ...buildD1Targets(normalized, readD1Databases(absConfigPath, content)),
-    ...buildSecretTargets(normalized),
-  };
-  return { projects: { [projectRoot]: { targets } } };
+const normalized = normalizeOptions(options);
+const targets = {
+  ...buildWorkerTargets(projectRoot, normalized),
+  ...buildD1Targets(normalized, readD1Databases(absConfigPath, content)),
+  ...buildSecretTargets(normalized),
+};
+return { projects: { [projectRoot]: { targets } } };
 ```
 
 - [ ] **Step 7: Run the full plugin spec to verify it passes**
@@ -823,9 +733,11 @@ jj commit -m "feat(nx-cloudflare): infer d1 migration and secret targets"
 ### Task 5: Documentation
 
 **Files:**
+
 - Modify: `packages/nx-cloudflare/README.md`
 
 **Interfaces:**
+
 - Consumes: the target names/behaviors finalized in Task 4.
 
 - [ ] **Step 1: Add the targets to the README Features list**
@@ -846,10 +758,10 @@ After the `### Add a binding to a Worker` section in `README.md`, add:
 For each D1 binding in `wrangler.jsonc`, the plugin infers `d1-apply`, `d1-create`, and `d1-list` targets (suffixed by binding name when a Worker has multiple D1 databases, e.g. `d1-apply-DB`). D1 inference is **jsonc/json only**.
 
 \`\`\`sh
-nx d1-create my-worker --message=add_users   # scaffold a migration
-nx d1-apply my-worker                         # apply locally (default)
-nx d1-apply my-worker --remote                # apply to the remote database
-nx d1-list my-worker --remote                 # list pending migrations
+nx d1-create my-worker --message=add_users # scaffold a migration
+nx d1-apply my-worker # apply locally (default)
+nx d1-apply my-worker --remote # apply to the remote database
+nx d1-list my-worker --remote # list pending migrations
 \`\`\`
 
 ### Manage secrets
@@ -857,8 +769,8 @@ nx d1-list my-worker --remote                 # list pending migrations
 Every Worker gets `secret-put`, `secret-bulk`, `secret-list`, and `secret-delete`.
 
 \`\`\`sh
-nx secret-put my-worker --name=API_KEY        # interactive prompt for the value
-nx secret-bulk my-worker --file=secrets.json  # upload many from a JSON file
+nx secret-put my-worker --name=API_KEY # interactive prompt for the value
+nx secret-bulk my-worker --file=secrets.json # upload many from a JSON file
 nx secret-list my-worker
 nx secret-delete my-worker --name=API_KEY
 \`\`\`

@@ -6,7 +6,7 @@
 
 ## Problem
 
-The `binding` generator (#185) made it trivial to *wire* a D1/KV/R2/Queue/DO/Workflow/Service
+The `binding` generator (#185) made it trivial to _wire_ a D1/KV/R2/Queue/DO/Workflow/Service
 binding into a Worker's `wrangler.jsonc`. But once a user adds a **D1** binding there is no
 plugin-supported way to **operate** it: D1 schema migrations (`create`/`apply`/`list`) and
 **secrets** (`put`/`bulk`/`list`/`delete`) are entirely manual `wrangler` invocations. This is the
@@ -47,19 +47,19 @@ positional argument (e.g. `wrangler d1 migrations apply my-database --remote`).
 
 Schema options:
 
-| Option | Type | Notes |
-|---|---|---|
-| `command` | `'apply' \| 'create' \| 'list'` | Baked in by inference. |
-| `database` | `string` | The D1 `database_name`. Baked in by inference. |
-| `remote` | `boolean` (default `false`) | `false` → `--local`, `true` → `--remote`. The executor **always passes one explicitly** (wrangler requires it). Ignored for `create`. |
-| `env` | `string` (optional) | `--env <env>` for Cloudflare environments. |
-| `message` | `string` | **Required when `command: 'create'`** (the migration message). Fail loud if missing. |
+| Option     | Type                            | Notes                                                                                                                                 |
+| ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `command`  | `'apply' \| 'create' \| 'list'` | Baked in by inference.                                                                                                                |
+| `database` | `string`                        | The D1 `database_name`. Baked in by inference.                                                                                        |
+| `remote`   | `boolean` (default `false`)     | `false` → `--local`, `true` → `--remote`. The executor **always passes one explicitly** (wrangler requires it). Ignored for `create`. |
+| `env`      | `string` (optional)             | `--env <env>` for Cloudflare environments.                                                                                            |
+| `message`  | `string`                        | **Required when `command: 'create'`** (the migration message). Fail loud if missing.                                                  |
 
 Built commands:
 
-- `apply`  → `wrangler d1 migrations apply <database> (--local|--remote) [--env <env>]`
+- `apply` → `wrangler d1 migrations apply <database> (--local|--remote) [--env <env>]`
 - `create` → `wrangler d1 migrations create <database> <message>`
-- `list`   → `wrangler d1 migrations list <database> (--local|--remote) [--env <env>]`
+- `list` → `wrangler d1 migrations list <database> (--local|--remote) [--env <env>]`
 
 #### `@naxodev/nx-cloudflare:secret` (`src/executors/secret`)
 
@@ -67,18 +67,18 @@ Wraps `wrangler secret <command>`.
 
 Schema options:
 
-| Option | Type | Notes |
-|---|---|---|
-| `command` | `'put' \| 'bulk' \| 'list' \| 'delete'` | Baked in by inference. |
-| `name` | `string` | **Required for `put`/`delete`** (the secret KEY). Fail loud if missing. |
-| `file` | `string` | **Required for `bulk`** (JSON file path). Fail loud if missing. |
-| `env` | `string` (optional) | `--env <env>`. |
+| Option    | Type                                    | Notes                                                                   |
+| --------- | --------------------------------------- | ----------------------------------------------------------------------- |
+| `command` | `'put' \| 'bulk' \| 'list' \| 'delete'` | Baked in by inference.                                                  |
+| `name`    | `string`                                | **Required for `put`/`delete`** (the secret KEY). Fail loud if missing. |
+| `file`    | `string`                                | **Required for `bulk`** (JSON file path). Fail loud if missing.         |
+| `env`     | `string` (optional)                     | `--env <env>`.                                                          |
 
 Built commands:
 
-- `put`    → `wrangler secret put <name> [--env <env>]`
-- `bulk`   → `wrangler secret bulk <file> [--env <env>]`
-- `list`   → `wrangler secret list [--env <env>]`
+- `put` → `wrangler secret put <name> [--env <env>]`
+- `bulk` → `wrangler secret bulk <file> [--env <env>]`
+- `list` → `wrangler secret list [--env <env>]`
 - `delete` → `wrangler secret delete <name> [--env <env>]`
 
 **`secret put` is interactive** — wrangler prompts for the value on stdin and never accepts it as

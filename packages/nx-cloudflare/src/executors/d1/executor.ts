@@ -41,7 +41,12 @@ export default async function d1Executor(
   const projectRoot =
     context.projectsConfigurations.projects[context.projectName].root;
   try {
-    return { success: runWrangler(buildD1Args(options), join(context.root, projectRoot)) };
+    return {
+      success: runWrangler(
+        buildD1Args(options),
+        join(context.root, projectRoot)
+      ),
+    };
   } catch (e) {
     logger.error(e instanceof Error ? e.message : String(e));
     return { success: false };

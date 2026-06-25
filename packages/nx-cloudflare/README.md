@@ -27,6 +27,7 @@ Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). 
 - Generate Cloudflare Worker libraries (publishable, with bundler/linter/test options).
 - Add bindings to an existing Worker (KV, R2, D1, Durable Objects, Queues, Workflows, Service/RPC) — edits `wrangler.jsonc`, stubs code + migrations, and refreshes `wrangler types`.
 - Inferred `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, and `tail` targets via the `@naxodev/nx-cloudflare/plugin` inference plugin — no hand-written `project.json` targets.
+- Inferred D1 migration targets (`d1-apply`, `d1-create`, `d1-list`) for each D1 binding, and secret targets (`secret-put`, `secret-bulk`, `secret-list`, `secret-delete`) for every Worker — backed by the `:d1` and `:secret` executors.
 - Customizable inferred target names via `CloudflarePluginOptions`.
 - Vitest wired automatically when the C3 template ships a Vitest config.
 
@@ -67,6 +68,30 @@ nx run my-worker:version-deploy -- <version-id>@100% # full rollout
 
 Arguments after `--` are forwarded to `wrangler versions deploy`. Run
 `version-deploy` with no extra args for Wrangler's interactive promotion prompt.
+
+### Run D1 migrations
+
+For each D1 binding in `wrangler.jsonc`, the plugin infers `d1-apply`, `d1-create`, and `d1-list` targets (suffixed by binding name when a Worker has multiple D1 databases, e.g. `d1-apply-DB`). D1 inference is **jsonc/json only**.
+
+```sh
+nx d1-create my-worker --message=add_users   # scaffold a migration
+nx d1-apply my-worker                         # apply locally (default)
+nx d1-apply my-worker --remote                # apply to the remote database
+nx d1-list my-worker --remote                 # list pending migrations
+```
+
+### Manage secrets
+
+Every Worker gets `secret-put`, `secret-bulk`, `secret-list`, and `secret-delete`.
+
+```sh
+nx secret-put my-worker --name=API_KEY        # interactive prompt for the value
+nx secret-bulk my-worker --file=secrets.json  # upload many from a JSON file
+nx secret-list my-worker
+nx secret-delete my-worker --name=API_KEY
+```
+
+Secret values are never passed as arguments — `secret-put` prompts interactively, `secret-bulk` reads a JSON file (do not commit it). All targets accept `--env <environment>`.
 
 ## Compatibility
 

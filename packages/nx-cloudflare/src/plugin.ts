@@ -169,10 +169,7 @@ interface D1Database {
  * Returns [] for TOML (no parser here) or any parse/shape failure — inference
  * must never throw, and D1 targets are jsonc/json-only by design.
  */
-function readD1Databases(
-  absConfigPath: string,
-  content: string
-): D1Database[] {
+function readD1Databases(absConfigPath: string, content: string): D1Database[] {
   if (absConfigPath.endsWith('.toml')) {
     return [];
   }
