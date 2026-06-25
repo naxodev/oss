@@ -286,7 +286,10 @@ describe('nx-cloudflare createNodes', () => {
       executor: '@naxodev/nx-cloudflare:secret',
       options: { command: 'put' },
     });
-    expect(targets['secret-bulk'].options).toEqual({ command: 'bulk' });
+    expect(targets['secret-bulk']).toEqual({
+      executor: '@naxodev/nx-cloudflare:secret',
+      options: { command: 'bulk' },
+    });
   });
 
   it('emits bare d1 targets when there is exactly one D1 binding', async () => {
@@ -308,7 +311,10 @@ describe('nx-cloudflare createNodes', () => {
       command: 'create',
       database: 'my-db',
     });
-    expect(targets['d1-list']).toBeDefined();
+    expect(targets['d1-list']).toEqual({
+      executor: '@naxodev/nx-cloudflare:d1',
+      options: { command: 'list', database: 'my-db' },
+    });
     expect(targets['d1-apply-DB']).toBeUndefined();
   });
 

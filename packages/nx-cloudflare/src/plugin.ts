@@ -275,12 +275,15 @@ function createNodesInternal(
 /**
  * Nx inference plugin. For every `wrangler.{toml,jsonc,json}` that sits beside a
  * `project.json`/`package.json` and parses, infers the Worker lifecycle targets
- * (serve, deploy, typegen, version-upload, version-deploy, tail). Inference is
- * intentionally uncached. Official Nx plugins (@nx/vite, @nx/eslint, @nx/jest)
- * memoize their createNodes targets in a `workspaceDataDirectory` cache keyed by
- * a project file + lockfile hash, but the work here is trivial — per config a
- * dir read, one config read+parse, and building a small static targets object —
- * so a cache earns only marginal speed while adding staleness risk across plugin
+ * (serve, deploy, typegen, version-upload, version-deploy, tail), secret
+ * management targets (secret-put, secret-bulk, secret-list, secret-delete) for
+ * every Worker, and D1 migration targets (d1-apply, d1-create, d1-list — one
+ * set per `d1_databases` binding, jsonc/json only). Inference is intentionally
+ * uncached. Official Nx plugins (@nx/vite, @nx/eslint, @nx/jest) memoize their
+ * createNodes targets in a `workspaceDataDirectory` cache keyed by a project
+ * file + lockfile hash, but the work here is trivial — per config a dir read,
+ * one config read+parse, and building a small static targets object — so a
+ * cache earns only marginal speed while adding staleness risk across plugin
  * upgrades (no key can capture a change in this code's target-construction
  * logic). `@naxodev/gonx`'s createNodes is likewise uncached.
  */
