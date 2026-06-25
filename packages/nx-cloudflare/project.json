@@ -33,6 +33,11 @@
             "input": "./packages/nx-cloudflare",
             "glob": "migrations.json",
             "output": "./"
+          },
+          {
+            "input": "./packages/nx-cloudflare",
+            "glob": "executors.json",
+            "output": "./"
           }
         ]
       }
