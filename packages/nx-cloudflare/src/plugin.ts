@@ -29,6 +29,20 @@ export interface CloudflarePluginOptions {
   versionDeployTargetName?: string;
   /** Name for the inferred `wrangler tail` target. @default 'tail' */
   tailTargetName?: string;
+  /** Name for the inferred `d1 migrations apply` target. @default 'd1-apply' */
+  d1ApplyTargetName?: string;
+  /** Name for the inferred `d1 migrations create` target. @default 'd1-create' */
+  d1CreateTargetName?: string;
+  /** Name for the inferred `d1 migrations list` target. @default 'd1-list' */
+  d1ListTargetName?: string;
+  /** Name for the inferred `secret put` target. @default 'secret-put' */
+  secretPutTargetName?: string;
+  /** Name for the inferred `secret bulk` target. @default 'secret-bulk' */
+  secretBulkTargetName?: string;
+  /** Name for the inferred `secret list` target. @default 'secret-list' */
+  secretListTargetName?: string;
+  /** Name for the inferred `secret delete` target. @default 'secret-delete' */
+  secretDeleteTargetName?: string;
 }
 
 /** {@link CloudflarePluginOptions} with every default applied. */
@@ -51,6 +65,13 @@ function normalizeOptions(
     versionDeployTargetName:
       options?.versionDeployTargetName ?? 'version-deploy',
     tailTargetName: options?.tailTargetName ?? 'tail',
+    d1ApplyTargetName: options?.d1ApplyTargetName ?? 'd1-apply',
+    d1CreateTargetName: options?.d1CreateTargetName ?? 'd1-create',
+    d1ListTargetName: options?.d1ListTargetName ?? 'd1-list',
+    secretPutTargetName: options?.secretPutTargetName ?? 'secret-put',
+    secretBulkTargetName: options?.secretBulkTargetName ?? 'secret-bulk',
+    secretListTargetName: options?.secretListTargetName ?? 'secret-list',
+    secretDeleteTargetName: options?.secretDeleteTargetName ?? 'secret-delete',
   };
 }
 
@@ -138,6 +159,80 @@ function readValidConfig(absConfigPath: string): string | null {
   }
 }
 
+interface D1Database {
+  binding: string;
+  database_name: string;
+}
+
+/**
+ * Extract `d1_databases` entries with both a `binding` and `database_name`.
+ * Returns [] for TOML (no parser here) or any parse/shape failure — inference
+ * must never throw, and D1 targets are jsonc/json-only by design.
+ */
+function readD1Databases(
+  absConfigPath: string,
+  content: string
+): D1Database[] {
+  if (absConfigPath.endsWith('.toml')) {
+    return [];
+  }
+  let parsed: unknown;
+  try {
+    parsed = parseJson(content);
+  } catch {
+    return [];
+  }
+  const list = (parsed as Record<string, unknown> | null)?.['d1_databases'];
+  if (!Array.isArray(list)) {
+    return [];
+  }
+  return list.flatMap((entry) => {
+    if (typeof entry !== 'object' || entry === null) {
+      return [];
+    }
+    const { binding, database_name } = entry as Record<string, unknown>;
+    return typeof binding === 'string' && typeof database_name === 'string'
+      ? [{ binding, database_name }]
+      : [];
+  });
+}
+
+/** D1 migration targets, one trio per database. Suffixed by binding when >1. */
+function buildD1Targets(
+  options: NormalizedOptions,
+  databases: D1Database[]
+): Record<string, TargetConfiguration> {
+  const single = databases.length === 1;
+  const targets: Record<string, TargetConfiguration> = {};
+  for (const db of databases) {
+    const suffix = single ? '' : `-${db.binding}`;
+    const d1 = (command: string): TargetConfiguration => ({
+      executor: '@naxodev/nx-cloudflare:d1',
+      options: { command, database: db.database_name },
+    });
+    targets[`${options.d1ApplyTargetName}${suffix}`] = d1('apply');
+    targets[`${options.d1CreateTargetName}${suffix}`] = d1('create');
+    targets[`${options.d1ListTargetName}${suffix}`] = d1('list');
+  }
+  return targets;
+}
+
+/** Secret targets — always emitted (secrets never appear in the config). */
+function buildSecretTargets(
+  options: NormalizedOptions
+): Record<string, TargetConfiguration> {
+  const secret = (command: string): TargetConfiguration => ({
+    executor: '@naxodev/nx-cloudflare:secret',
+    options: { command },
+  });
+  return {
+    [options.secretPutTargetName]: secret('put'),
+    [options.secretBulkTargetName]: secret('bulk'),
+    [options.secretListTargetName]: secret('list'),
+    [options.secretDeleteTargetName]: secret('delete'),
+  };
+}
+
 function createNodesInternal(
   configFile: string,
   options: CloudflarePluginOptions | undefined,
@@ -166,11 +261,17 @@ function createNodesInternal(
   }
 
   const absConfigPath = join(context.workspaceRoot, configFile);
-  if (readValidConfig(absConfigPath) === null) {
+  const content = readValidConfig(absConfigPath);
+  if (content === null) {
     return {};
   }
 
-  const targets = buildWorkerTargets(projectRoot, normalizeOptions(options));
+  const normalized = normalizeOptions(options);
+  const targets = {
+    ...buildWorkerTargets(projectRoot, normalized),
+    ...buildD1Targets(normalized, readD1Databases(absConfigPath, content)),
+    ...buildSecretTargets(normalized),
+  };
   return { projects: { [projectRoot]: { targets } } };
 }
 

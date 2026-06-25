@@ -76,6 +76,10 @@ describe('nx-cloudflare createNodes', () => {
         'typegen',
         'version-upload',
         'version-deploy',
+        'secret-put',
+        'secret-bulk',
+        'secret-list',
+        'secret-delete',
       ].sort()
     );
 
@@ -130,7 +134,18 @@ describe('nx-cloudflare createNodes', () => {
     const targets = result.projects['apps/worker'].targets;
 
     expect(Object.keys(targets).sort()).toEqual(
-      ['dev', 'logs', 'promote', 'publish', 'types', 'upload'].sort()
+      [
+        'dev',
+        'logs',
+        'promote',
+        'publish',
+        'types',
+        'upload',
+        'secret-put',
+        'secret-bulk',
+        'secret-list',
+        'secret-delete',
+      ].sort()
     );
     expect(targets.dev).toMatchObject({
       command: 'wrangler dev',
@@ -254,6 +269,108 @@ describe('nx-cloudflare createNodes', () => {
     const customTargets = custom.projects['apps/worker'].targets;
     expect(Object.keys(customTargets)).toContain('dev');
     expect(Object.keys(customTargets)).not.toContain('serve');
+  });
+
+  it('emits secret targets pointing at the secret executor for every worker', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(
+      workspaceRoot,
+      'apps/worker/wrangler.jsonc',
+      '{"name":"worker","main":"src/index.ts"}'
+    );
+
+    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+    const targets = result.projects['apps/worker'].targets;
+
+    expect(targets['secret-put']).toEqual({
+      executor: '@naxodev/nx-cloudflare:secret',
+      options: { command: 'put' },
+    });
+    expect(targets['secret-bulk'].options).toEqual({ command: 'bulk' });
+  });
+
+  it('emits bare d1 targets when there is exactly one D1 binding', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(
+      workspaceRoot,
+      'apps/worker/wrangler.jsonc',
+      '{"name":"worker","d1_databases":[{"binding":"DB","database_name":"my-db"}]}'
+    );
+
+    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+    const targets = result.projects['apps/worker'].targets;
+
+    expect(targets['d1-apply']).toEqual({
+      executor: '@naxodev/nx-cloudflare:d1',
+      options: { command: 'apply', database: 'my-db' },
+    });
+    expect(targets['d1-create'].options).toEqual({
+      command: 'create',
+      database: 'my-db',
+    });
+    expect(targets['d1-list']).toBeDefined();
+    expect(targets['d1-apply-DB']).toBeUndefined();
+  });
+
+  it('suffixes d1 targets by binding when there are multiple D1 bindings', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(
+      workspaceRoot,
+      'apps/worker/wrangler.jsonc',
+      '{"name":"worker","d1_databases":[' +
+        '{"binding":"DB","database_name":"main"},' +
+        '{"binding":"ANALYTICS","database_name":"events"}]}'
+    );
+
+    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+    const targets = result.projects['apps/worker'].targets;
+
+    expect(targets['d1-apply-DB'].options).toEqual({
+      command: 'apply',
+      database: 'main',
+    });
+    expect(targets['d1-apply-ANALYTICS'].options).toEqual({
+      command: 'apply',
+      database: 'events',
+    });
+    expect(targets['d1-apply']).toBeUndefined();
+  });
+
+  it('emits no d1 targets when there is no D1 binding', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(
+      workspaceRoot,
+      'apps/worker/wrangler.jsonc',
+      '{"name":"worker","main":"src/index.ts"}'
+    );
+
+    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+    const targets = result.projects['apps/worker'].targets;
+
+    expect(
+      Object.keys(targets).filter((k) => k.startsWith('d1-'))
+    ).toEqual([]);
+  });
+
+  it('honors custom target-name overrides', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(
+      workspaceRoot,
+      'apps/worker/wrangler.jsonc',
+      '{"name":"worker","d1_databases":[{"binding":"DB","database_name":"my-db"}]}'
+    );
+
+    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc', {
+      d1ApplyTargetName: 'migrate',
+      secretPutTargetName: 'add-secret',
+    });
+    const targets = result.projects['apps/worker'].targets;
+
+    expect(targets['migrate'].options).toEqual({
+      command: 'apply',
+      database: 'my-db',
+    });
+    expect(targets['add-secret'].options).toEqual({ command: 'put' });
   });
 
   it('handles multiple configs in one invocation, isolating failures', async () => {
