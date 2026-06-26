@@ -26,7 +26,7 @@ Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). 
 - Scaffold Cloudflare Worker applications via create-cloudflare (C3) — Worker templates, web frameworks, or remote git templates.
 - Generate Cloudflare Worker libraries (publishable, with bundler/linter/test options).
 - Add bindings to an existing Worker (KV, R2, D1, Durable Objects, Queues, Workflows, Service/RPC) — edits `wrangler.jsonc`, stubs code + migrations, and refreshes `wrangler types`.
-- Inferred `serve`, `deploy`, `typegen`, `version-upload`, and `tail` targets via the `@naxodev/nx-cloudflare/plugin` inference plugin — no hand-written `project.json` targets.
+- Inferred `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, and `tail` targets via the `@naxodev/nx-cloudflare/plugin` inference plugin — no hand-written `project.json` targets.
 - Customizable inferred target names via `CloudflarePluginOptions`.
 - Vitest wired automatically when the C3 template ships a Vitest config.
 
@@ -49,6 +49,24 @@ nx g @naxodev/nx-cloudflare:application my-worker
 ```shell
 nx g @naxodev/nx-cloudflare:binding --project=my-worker --type=kv --binding=MY_KV --id=<namespace-id>
 ```
+
+### Gradual deployments
+
+`version-upload` and `version-deploy` are independent targets that map to
+[Cloudflare's gradual deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/gradual-deployments/).
+Upload a version once (it is created but receives no traffic until deployed),
+then promote it in steps — each promotion is a separate `version-deploy` run, so
+you can ramp while watching metrics:
+
+```shell
+nx run my-worker:version-upload                     # stage a version (no traffic yet)
+nx run my-worker:version-deploy -- <version-id>@10%  # canary
+nx run my-worker:version-deploy -- <version-id>@50%  # ramp
+nx run my-worker:version-deploy -- <version-id>@100% # full rollout
+```
+
+Arguments after `--` are forwarded to `wrangler versions deploy`. Run
+`version-deploy` with no extra args for Wrangler's interactive promotion prompt.
 
 ## Compatibility
 

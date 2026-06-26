@@ -54,7 +54,7 @@ describe('nx-cloudflare createNodes', () => {
     rmSync(workspaceRoot, { recursive: true, force: true });
   });
 
-  it('infers the five Worker targets for a valid jsonc config', async () => {
+  it('infers the six Worker targets for a valid jsonc config', async () => {
     // The exported glob is the contract Nx uses to discover configs.
     expect(configGlob).toBe('**/wrangler.{toml,jsonc,json}');
 
@@ -69,7 +69,14 @@ describe('nx-cloudflare createNodes', () => {
     const targets = result.projects['apps/worker'].targets;
 
     expect(Object.keys(targets).sort()).toEqual(
-      ['deploy', 'serve', 'tail', 'typegen', 'version-upload'].sort()
+      [
+        'deploy',
+        'serve',
+        'tail',
+        'typegen',
+        'version-upload',
+        'version-deploy',
+      ].sort()
     );
 
     // Why: serve is the local dev server, must stay alive across the run, and
@@ -93,6 +100,12 @@ describe('nx-cloudflare createNodes', () => {
       command: 'wrangler versions upload',
     });
     expect(targets['version-upload'].cache).toBeUndefined();
+    // Why: version-deploy promotes an uploaded version to live traffic
+    // (gradual rollout) -> remote side effect, never cached.
+    expect(targets['version-deploy']).toMatchObject({
+      command: 'wrangler versions deploy',
+    });
+    expect(targets['version-deploy'].cache).toBeUndefined();
     // Why: typegen is deterministic -> cacheable, invalidated on wrangler bumps.
     expect(targets.typegen).toMatchObject({
       command: 'wrangler types',
@@ -111,12 +124,13 @@ describe('nx-cloudflare createNodes', () => {
       deployTargetName: 'publish',
       typegenTargetName: 'types',
       versionUploadTargetName: 'upload',
+      versionDeployTargetName: 'promote',
       tailTargetName: 'logs',
     });
     const targets = result.projects['apps/worker'].targets;
 
     expect(Object.keys(targets).sort()).toEqual(
-      ['dev', 'logs', 'publish', 'types', 'upload'].sort()
+      ['dev', 'logs', 'promote', 'publish', 'types', 'upload'].sort()
     );
     expect(targets.dev).toMatchObject({
       command: 'wrangler dev',
