@@ -18,7 +18,7 @@ describe('buildD1Args', () => {
     ).toEqual(['d1', 'migrations', 'apply', 'my-db', '--remote']);
   });
 
-  it('threads --env for apply/list', () => {
+  it('threads --env for list', () => {
     expect(
       buildD1Args({ command: 'list', database: 'my-db', env: 'staging' })
     ).toEqual([
@@ -29,6 +29,25 @@ describe('buildD1Args', () => {
       '--local',
       '--env',
       'staging',
+    ]);
+  });
+
+  it('threads --env for apply', () => {
+    expect(
+      buildD1Args({
+        command: 'apply',
+        database: 'my-db',
+        remote: true,
+        env: 'production',
+      })
+    ).toEqual([
+      'd1',
+      'migrations',
+      'apply',
+      'my-db',
+      '--remote',
+      '--env',
+      'production',
     ]);
   });
 

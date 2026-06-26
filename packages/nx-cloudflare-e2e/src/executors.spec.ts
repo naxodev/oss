@@ -11,9 +11,11 @@ import { join } from 'path';
 //   2. Running a target resolves the executor, builds the right `wrangler`
 //      argv, and invokes the binary — the ExecutorContext + run-wrangler path.
 //
-// `wrangler` is stubbed on PATH (see the second test) so nothing reaches
-// Cloudflare. The scaffolded Worker is inference-only (no project.json); the
-// nx-cloudflare plugin is registered via NX_ADD_PLUGINS during create-cloudflare.
+// `wrangler` is stubbed by overwriting the resolved `node_modules/.bin/wrangler`
+// binary (PATH-based stubbing is ineffective — the package manager prepends
+// node_modules/.bin, shadowing PATH additions; see the second test) so nothing
+// reaches Cloudflare. The scaffolded Worker is inference-only (no project.json);
+// the nx-cloudflare plugin is registered via NX_ADD_PLUGINS during create-cloudflare.
 describe('d1 + secret executors', () => {
   let priorFlatConfig: string | undefined;
   const app = uniq('execworker');
@@ -43,9 +45,10 @@ describe('d1 + secret executors', () => {
 
   it('infers d1 and secret targets pointing at the executors', () => {
     const output = runCLI(`show project ${app} --json`);
-    const project = JSON.parse(
-      output.slice(output.indexOf('{'), output.lastIndexOf('}') + 1)
-    );
+    // `--json` prints the project config as the only thing on stdout; slice from
+    // the first `{` to drop any leading nx prefix (trailing whitespace is fine
+    // for JSON.parse).
+    const project = JSON.parse(output.slice(output.indexOf('{')));
     const targets = project.targets;
 
     // One D1 binding -> bare d1-* names, with the database_name baked in.

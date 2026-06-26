@@ -29,19 +29,19 @@ export interface CloudflarePluginOptions {
   versionDeployTargetName?: string;
   /** Name for the inferred `wrangler tail` target. @default 'tail' */
   tailTargetName?: string;
-  /** Name for the inferred `d1 migrations apply` target. @default 'd1-apply' */
+  /** Name for the inferred `wrangler d1 migrations apply` target. @default 'd1-apply' */
   d1ApplyTargetName?: string;
-  /** Name for the inferred `d1 migrations create` target. @default 'd1-create' */
+  /** Name for the inferred `wrangler d1 migrations create` target. @default 'd1-create' */
   d1CreateTargetName?: string;
-  /** Name for the inferred `d1 migrations list` target. @default 'd1-list' */
+  /** Name for the inferred `wrangler d1 migrations list` target. @default 'd1-list' */
   d1ListTargetName?: string;
-  /** Name for the inferred `secret put` target. @default 'secret-put' */
+  /** Name for the inferred `wrangler secret put` target. @default 'secret-put' */
   secretPutTargetName?: string;
-  /** Name for the inferred `secret bulk` target. @default 'secret-bulk' */
+  /** Name for the inferred `wrangler secret bulk` target. @default 'secret-bulk' */
   secretBulkTargetName?: string;
-  /** Name for the inferred `secret list` target. @default 'secret-list' */
+  /** Name for the inferred `wrangler secret list` target. @default 'secret-list' */
   secretListTargetName?: string;
-  /** Name for the inferred `secret delete` target. @default 'secret-delete' */
+  /** Name for the inferred `wrangler secret delete` target. @default 'secret-delete' */
   secretDeleteTargetName?: string;
 }
 
@@ -117,15 +117,18 @@ function buildWorkerTargets(
 }
 
 /**
- * Read and validate a wrangler config. Returns its raw content when valid, or
- * null (after warning) when the file is unreadable, an empty `.toml`, or
- * json/jsonc that fails to parse. The gate is structural, not semantic: a
- * parseable but minimal config (e.g. `{}`) is accepted, since Wrangler
- * validates its own contents at runtime. `.toml` has no parser here, so
- * non-empty is the only available proxy for "usable". The validated content is
- * returned (callers treat it as a truthy validity signal).
+ * Read and validate a wrangler config. Returns `{ parsed }` when valid, or null
+ * (after warning) when the file is unreadable, an empty `.toml`, or json/jsonc
+ * that fails to parse. The gate is structural, not semantic: a parseable but
+ * minimal config (e.g. `{}`) is accepted, since Wrangler validates its own
+ * contents at runtime. `.toml` has no parser here, so non-empty is the only
+ * available proxy for "usable" and `parsed` is null for it. The parsed object is
+ * returned so callers can gate on validity (`=== null` means skip) and reuse it
+ * for D1 extraction without a second read + parse.
  */
-function readValidConfig(absConfigPath: string): string | null {
+function readValidConfig(
+  absConfigPath: string
+): { parsed: Record<string, unknown> | null } | null {
   let content: string;
   try {
     content = readFileSync(absConfigPath, 'utf-8');
@@ -143,12 +146,13 @@ function readValidConfig(absConfigPath: string): string | null {
       );
       return null;
     }
-    return content;
+    // No TOML parser here — valid (non-empty) but unparsed. D1 inference needs
+    // the parsed object, so it is jsonc/json only.
+    return { parsed: null };
   }
 
   try {
-    parseJson(content);
-    return content;
+    return { parsed: parseJson(content) as Record<string, unknown> };
   } catch (e) {
     logger.warn(
       `[nx-cloudflare] Skipping unparseable wrangler config ${absConfigPath}: ${errorReason(
@@ -165,32 +169,40 @@ interface D1Database {
 }
 
 /**
- * Extract `d1_databases` entries with both a `binding` and `database_name`.
- * Returns [] for TOML (no parser here) or any parse/shape failure — inference
- * must never throw, and D1 targets are jsonc/json-only by design.
+ * Extract `d1_databases` entries that carry a non-empty `binding` and
+ * `database_name`. `parsed` is null for TOML/unparsed configs (D1 targets are
+ * jsonc/json-only by design), which yield no D1 targets. A malformed entry is
+ * warned about and skipped rather than dropped silently: inference must never
+ * throw, but it should still tell the user why a declared database produced no
+ * targets (matching `readValidConfig`'s warn-and-skip convention).
  */
-function readD1Databases(absConfigPath: string, content: string): D1Database[] {
-  if (absConfigPath.endsWith('.toml')) {
+function readD1Databases(
+  absConfigPath: string,
+  parsed: Record<string, unknown> | null
+): D1Database[] {
+  if (parsed === null) {
     return [];
   }
-  let parsed: unknown;
-  try {
-    parsed = parseJson(content);
-  } catch {
-    return [];
-  }
-  const list = (parsed as Record<string, unknown> | null)?.['d1_databases'];
+  const list = parsed['d1_databases'];
   if (!Array.isArray(list)) {
     return [];
   }
   return list.flatMap((entry) => {
-    if (typeof entry !== 'object' || entry === null) {
-      return [];
+    if (typeof entry === 'object' && entry !== null) {
+      const { binding, database_name } = entry as Record<string, unknown>;
+      if (
+        typeof binding === 'string' &&
+        binding.length > 0 &&
+        typeof database_name === 'string' &&
+        database_name.length > 0
+      ) {
+        return [{ binding, database_name }];
+      }
     }
-    const { binding, database_name } = entry as Record<string, unknown>;
-    return typeof binding === 'string' && typeof database_name === 'string'
-      ? [{ binding, database_name }]
-      : [];
+    logger.warn(
+      `[nx-cloudflare] Skipping a d1_databases entry in ${absConfigPath} that lacks a non-empty string \`binding\`/\`database_name\`.`
+    );
+    return [];
   });
 }
 
@@ -258,15 +270,18 @@ function createNodesInternal(
   }
 
   const absConfigPath = join(context.workspaceRoot, configFile);
-  const content = readValidConfig(absConfigPath);
-  if (content === null) {
+  const config = readValidConfig(absConfigPath);
+  if (config === null) {
     return {};
   }
 
   const normalized = normalizeOptions(options);
   const targets = {
     ...buildWorkerTargets(projectRoot, normalized),
-    ...buildD1Targets(normalized, readD1Databases(absConfigPath, content)),
+    ...buildD1Targets(
+      normalized,
+      readD1Databases(absConfigPath, config.parsed)
+    ),
     ...buildSecretTargets(normalized),
   };
   return { projects: { [projectRoot]: { targets } } };

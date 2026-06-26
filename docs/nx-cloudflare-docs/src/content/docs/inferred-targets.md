@@ -91,6 +91,8 @@ See the [`wrangler tail` CLI docs](https://developers.cloudflare.com/workers/wra
 
 D1 migration targets are inferred **only for jsonc/json Wrangler configs** (not TOML — there is no TOML parser in the plugin). One set of targets is emitted **per `d1_databases` binding**. With a single binding the targets use bare names (`d1-apply`, `d1-create`, `d1-list`); when a Worker has multiple D1 bindings the binding name is appended as a suffix (`d1-apply-DB`, `d1-apply-ANALYTICS`, etc.).
 
+Unlike the Worker lifecycle targets above, the D1 and secret targets are backed by a dedicated executor and accept **only the typed options documented below** (`--remote`, `--env`, `--message`, `--name`, `--file`). Arbitrary `-- <wrangler flag>` passthrough does **not** apply to them.
+
 ### d1-apply
 
 Runs `wrangler d1 migrations apply <database>`. Applies pending migrations to the **local** database by default; pass `--remote` for production. Accepts `--env <environment>`.
@@ -114,7 +116,7 @@ See the [`wrangler d1 migrations create` CLI docs](https://developers.cloudflare
 
 ### d1-list
 
-Runs `wrangler d1 migrations list <database>`. Lists applied and pending migrations. Uses the **local** database by default; pass `--remote` for production. Accepts `--env <environment>`.
+Runs `wrangler d1 migrations list <database>`. Lists **unapplied** (pending) migration files — those not yet applied to the target database. Uses the **local** database by default; pass `--remote` for production. Accepts `--env <environment>`.
 
 ```bash
 bunx nx d1-list <my-worker>            # list local migrations

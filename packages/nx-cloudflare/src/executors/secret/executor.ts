@@ -42,9 +42,9 @@ export default async function secretExecutor(
     logger.error('secret executor: no project in context.');
     return { success: false };
   }
-  const projectRoot =
-    context.projectsConfigurations.projects[context.projectName].root;
   try {
+    const projectRoot =
+      context.projectsConfigurations.projects[context.projectName].root;
     return {
       success: runWrangler(
         buildSecretArgs(options),

@@ -54,7 +54,7 @@ describe('nx-cloudflare createNodes', () => {
     rmSync(workspaceRoot, { recursive: true, force: true });
   });
 
-  it('infers the six Worker targets for a valid jsonc config', async () => {
+  it('infers the Worker lifecycle and secret targets for a valid jsonc config', async () => {
     // The exported glob is the contract Nx uses to discover configs.
     expect(configGlob).toBe('**/wrangler.{toml,jsonc,json}');
 
@@ -307,9 +307,9 @@ describe('nx-cloudflare createNodes', () => {
       executor: '@naxodev/nx-cloudflare:d1',
       options: { command: 'apply', database: 'my-db' },
     });
-    expect(targets['d1-create'].options).toEqual({
-      command: 'create',
-      database: 'my-db',
+    expect(targets['d1-create']).toEqual({
+      executor: '@naxodev/nx-cloudflare:d1',
+      options: { command: 'create', database: 'my-db' },
     });
     expect(targets['d1-list']).toEqual({
       executor: '@naxodev/nx-cloudflare:d1',

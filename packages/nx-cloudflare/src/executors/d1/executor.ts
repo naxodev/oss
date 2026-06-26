@@ -4,9 +4,10 @@ import { runWrangler } from '../../utils/run-wrangler';
 import type { D1ExecutorSchema } from './schema';
 
 // Pure: build the `wrangler d1 migrations <command>` argv. `apply`/`list`
-// require an explicit local/remote target (wrangler errors without one); the
-// repo defaults to local. `create` writes a local file only, so it takes the
-// message and neither a local/remote nor an --env flag.
+// always pass an explicit `--local`/`--remote` (defaulting to local) so the
+// target is unambiguous regardless of wrangler's evolving default. `create`
+// writes a migration file locally only, so `--remote`/`--local` do not apply
+// and `--env` is omitted — migration files are environment-agnostic.
 export function buildD1Args(options: D1ExecutorSchema): string[] {
   const { command, database, remote, env, message } = options;
   if (command === 'create') {
@@ -38,9 +39,9 @@ export default async function d1Executor(
     logger.error('d1 executor: no project in context.');
     return { success: false };
   }
-  const projectRoot =
-    context.projectsConfigurations.projects[context.projectName].root;
   try {
+    const projectRoot =
+      context.projectsConfigurations.projects[context.projectName].root;
     return {
       success: runWrangler(
         buildD1Args(options),

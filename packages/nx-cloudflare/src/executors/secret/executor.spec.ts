@@ -28,8 +28,20 @@ describe('buildSecretArgs', () => {
     expect(buildSecretArgs({ command: 'list' })).toEqual(['secret', 'list']);
   });
 
+  it('threads --env for put', () => {
+    expect(
+      buildSecretArgs({ command: 'put', name: 'API_KEY', env: 'staging' })
+    ).toEqual(['secret', 'put', 'API_KEY', '--env', 'staging']);
+  });
+
   it('throws when put has no name', () => {
     expect(() => buildSecretArgs({ command: 'put' })).toThrow(
+      'The `name` option is required'
+    );
+  });
+
+  it('throws when delete has no name', () => {
+    expect(() => buildSecretArgs({ command: 'delete' })).toThrow(
       'The `name` option is required'
     );
   });
