@@ -15,9 +15,9 @@ This registers `@naxodev/gonx` under `plugins` in `nx.json`. Once registered, th
 
 ### Options
 
-| Option         | Type    | Default | Description                                                  |
-| -------------- | ------- | ------- | ------------------------------------------------------------ |
-| `addGoDotWork` | boolean | `false` | Create a `go.work` file and register all Go modules in it.   |
+| Option         | Type    | Default | Description                                                |
+| -------------- | ------- | ------- | ---------------------------------------------------------- |
+| `addGoDotWork` | boolean | `false` | Create a `go.work` file and register all Go modules in it. |
 
 Pass `--addGoDotWork` if you want a Go workspace (`go.work`) at the repo root:
 
@@ -42,15 +42,15 @@ nx g @naxodev/gonx:library libs/my-lib
 
 Once a `go.mod` is present in a directory, the plugin infers the following targets:
 
-| Target             | Available on          | Description                         |
-| ------------------ | --------------------- | ----------------------------------- |
-| `build`            | Applications only     | Compile the Go binary.              |
-| `serve`            | Applications only     | Run the application locally.        |
-| `test`             | Applications and libs | Run `go test`.                      |
-| `tidy`             | Applications and libs | Run `go mod tidy`.                  |
-| `lint`             | Applications and libs | Run the configured Go linter.       |
-| `generate`         | Applications and libs | Run `go generate`.                  |
-| `nx-release-publish` | Applications and libs | Publish via `nx release`.          |
+| Target               | Available on          | Description                   |
+| -------------------- | --------------------- | ----------------------------- |
+| `build`              | Applications only     | Compile the Go binary.        |
+| `serve`              | Applications only     | Run the application locally.  |
+| `test`               | Applications and libs | Run `go test`.                |
+| `tidy`               | Applications and libs | Run `go mod tidy`.            |
+| `lint`               | Applications and libs | Run the configured Go linter. |
+| `generate`           | Applications and libs | Run `go generate`.            |
+| `nx-release-publish` | Applications and libs | Publish via `nx release`.     |
 
 Applications are detected by the presence of a `main.go` containing `package main` and `func main(`, or a `cmd/` directory.
 

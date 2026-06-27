@@ -21,9 +21,15 @@
         "message": "What kind of Cloudflare setup?",
         "type": "list",
         "items": [
-          { "value": "worker", "label": "Worker — a plain Worker (your own entry)" },
+          {
+            "value": "worker",
+            "label": "Worker — a plain Worker (your own entry)"
+          },
           { "value": "spa", "label": "SPA — static assets only" },
-          { "value": "fullstack", "label": "Full-stack — static assets + an API Worker" }
+          {
+            "value": "fullstack",
+            "label": "Full-stack — static assets + an API Worker"
+          }
         ]
       }
     },
