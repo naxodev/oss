@@ -70,7 +70,7 @@ See [install gonx](/getting-started/installation) for details.
    Let's run it:
 
    ```bash
-   npx nx serve my-go-app
+   npx nx run my-go-app:serve
    ```
 
    The `serve` target runs `go run` from the project root. It's a continuous
@@ -82,7 +82,7 @@ See [install gonx](/getting-started/installation) for details.
    We can run the project's tests with:
 
    ```bash
-   npx nx test my-go-app
+   npx nx run my-go-app:test
    ```
 
    The `test` target runs `go test ./...`. Because the target is cached, running
@@ -94,7 +94,7 @@ See [install gonx](/getting-started/installation) for details.
    Finally, let's build an executable:
 
    ```bash
-   npx nx build my-go-app
+   npx nx run my-go-app:build
    ```
 
    The `build` target compiles a binary and outputs it to
@@ -113,7 +113,7 @@ npx nx show project my-go-app
 
 `nx show project` lists the `build`, `serve`, `test`, `lint`, `tidy`, and
 `generate` targets — all inferred, with no `project.json` file. Run
-`npx nx build my-go-app` a second time to see Nx caching in action: the second
+`npx nx run my-go-app:build` a second time to see Nx caching in action: the second
 run is served from the cache and completes almost instantly.
 
 ## Explore the project graph

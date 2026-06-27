@@ -21,12 +21,12 @@ All Nx invocations use `bunx nx ...`. The package manager is **bun** (not npm/ya
 
 ```bash
 # Build a single plugin (outputs to dist/packages/<name>)
-bunx nx build nx-cloudflare
-bunx nx build gonx
+bunx nx run nx-cloudflare:build
+bunx nx run gonx:build
 
 # Lint / test a project
-bunx nx lint gonx
-bunx nx test nx-cloudflare
+bunx nx run gonx:lint
+bunx nx run nx-cloudflare:test
 
 # Run only what's affected (this is what CI runs)
 bunx nx affected -t lint test build
@@ -36,8 +36,8 @@ bunx nx format:check      # verify
 bunx nx format:write      # fix
 
 # e2e (spins up a local Verdaccio registry — see note below)
-bunx nx e2e nx-cloudflare-e2e
-bunx nx e2e gonx-e2e
+bunx nx run nx-cloudflare-e2e:e2e
+bunx nx run gonx-e2e:e2e
 ```
 
 ### Running a single unit test
@@ -50,7 +50,7 @@ cd packages/gonx && bun test src/graph/static-analysis/parse-go-mod.spec.ts
 # By test name
 cd packages/nx-cloudflare && bun test src/plugin.spec.ts -t "infers"
 # Whole project via Nx (uses the per-file isolation runner)
-bunx nx test gonx
+bunx nx run gonx:test
 ```
 
 Note: the `@naxodev/nx-cloudflare` package scaffolds **Vitest** configs into _generated_ user projects — don't confuse the scaffolded test setup with this repo's own `bun test` setup. The e2e suites also run via `bun test`, with a bun preload (`tools/scripts/e2e-bun-setup.ts`) replacing jest's globalSetup/teardown to manage the local Verdaccio registry.

@@ -54,7 +54,7 @@ gonx 3.x targets Nx 23.x:
 3. **Run the application**
 
    ```bash
-   npx nx serve my-go-app
+   npx nx run my-go-app:serve
    ```
 
    The `serve` target runs `go run` from the project root. See the
@@ -63,7 +63,7 @@ gonx 3.x targets Nx 23.x:
 4. **Test the project**
 
    ```bash
-   npx nx test my-go-app
+   npx nx run my-go-app:test
    ```
 
    The `test` target runs `go test`. See the
@@ -71,7 +71,7 @@ gonx 3.x targets Nx 23.x:
 
 5. **Build the project**
    ```bash
-   npx nx build my-go-app
+   npx nx run my-go-app:build
    ```
    The `build` target compiles an executable. See the
    [build executor guide](/guides/executors/build).
@@ -87,7 +87,7 @@ npx nx show project my-go-app
 ```
 
 `nx show project` lists the `build`, `serve`, `test`, `lint`, `tidy`, and
-`generate` targets with no `project.json` file. Run `npx nx build my-go-app` a
+`generate` targets with no `project.json` file. Run `npx nx run my-go-app:build` a
 second time to confirm caching — the second run is served from the Nx cache.
 
 ## Next steps

@@ -105,7 +105,7 @@ npx nx show project apps/my-go-app
 Then build a project to confirm it works without `go.work`:
 
 ```bash
-npx nx build apps/my-go-app
+npx nx run apps/my-go-app:build
 ```
 
 ## Next steps
