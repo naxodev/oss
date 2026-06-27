@@ -26,7 +26,7 @@ bunx nx serve <my-worker> -- --remote
 bunx nx serve <my-worker> -- --ip 0.0.0.0
 ```
 
-See the [`wrangler dev` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#dev).
+See the [`wrangler dev` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#dev).
 
 ## deploy
 
@@ -40,7 +40,7 @@ bunx nx deploy <my-worker> -- --dry-run
 bunx nx deploy <my-worker> -- --name my-custom-worker
 ```
 
-See the [`wrangler deploy` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#deploy).
+See the [`wrangler deploy` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#deploy).
 
 ## typegen
 
@@ -58,7 +58,7 @@ Runs `wrangler types` from the project root, generating `worker-configuration.d.
 bunx nx typegen <my-worker> -- --name MyEnv
 ```
 
-See the [`wrangler types` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#types).
+See the [`wrangler types` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#types).
 
 ## version-upload
 
@@ -71,7 +71,7 @@ Runs `wrangler versions upload` from the project root, uploading a new version o
 bunx nx version-upload <my-worker> -- --message "fix: update handler"
 ```
 
-See the [Wrangler versions docs](https://developers.cloudflare.com/workers/wrangler/commands/#versions).
+See the [Wrangler versions docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#versions-upload).
 
 ## tail
 
@@ -85,7 +85,7 @@ bunx nx tail <my-worker> -- --status error
 bunx nx tail <my-worker> -- --format json
 ```
 
-See the [`wrangler tail` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#tail).
+See the [`wrangler tail` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#tail).
 
 ## D1 migration targets
 
@@ -102,7 +102,7 @@ bunx nx d1-apply <my-worker>           # apply locally (default)
 bunx nx d1-apply <my-worker> --remote  # apply to the remote database
 ```
 
-See the [`wrangler d1 migrations apply` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#d1-migrations-apply).
+See the [`wrangler d1 migrations apply` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/d1/#d1-migrations-apply).
 
 ### d1-create
 
@@ -112,7 +112,7 @@ Runs `wrangler d1 migrations create <database> <message>`. Scaffolds a new migra
 bunx nx d1-create <my-worker> --message=add_users
 ```
 
-See the [`wrangler d1 migrations create` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#d1-migrations-create).
+See the [`wrangler d1 migrations create` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/d1/#d1-migrations-create).
 
 ### d1-list
 
@@ -123,7 +123,7 @@ bunx nx d1-list <my-worker>            # list local migrations
 bunx nx d1-list <my-worker> --remote   # list remote migrations
 ```
 
-See the [`wrangler d1 migrations list` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#d1-migrations-list).
+See the [`wrangler d1 migrations list` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/d1/#d1-migrations-list).
 
 ## Secret targets
 
@@ -137,7 +137,7 @@ Runs `wrangler secret put <name>`. Prompts interactively for the secret value; r
 bunx nx secret-put <my-worker> --name=API_KEY
 ```
 
-See the [`wrangler secret put` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#secret-put).
+See the [`wrangler secret put` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-put).
 
 ### secret-bulk
 
@@ -147,7 +147,7 @@ Runs `wrangler secret bulk <file>`. Uploads multiple secrets from a JSON file; r
 bunx nx secret-bulk <my-worker> --file=secrets.json
 ```
 
-See the [`wrangler secret bulk` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#secret-bulk).
+See the [`wrangler secret bulk` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-bulk).
 
 ### secret-list
 
@@ -157,7 +157,7 @@ Runs `wrangler secret list`. Lists all secrets bound to the Worker.
 bunx nx secret-list <my-worker>
 ```
 
-See the [`wrangler secret list` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#secret-list).
+See the [`wrangler secret list` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-list).
 
 ### secret-delete
 
@@ -167,7 +167,7 @@ Runs `wrangler secret delete <name>`. Deletes a secret; requires `--name`.
 bunx nx secret-delete <my-worker> --name=API_KEY
 ```
 
-See the [`wrangler secret delete` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/#secret-delete).
+See the [`wrangler secret delete` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-delete).
 
 ## Related
 
