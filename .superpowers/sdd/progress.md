@@ -10,3 +10,9 @@ Bookmark: feat/issue-135-configuration-generator
 - [ ] Task 5: full verification + PR
 
 ## Minor findings (for final review triage)
+
+Task 1: implemented (commit 74f56e00, 6/6 tests pass, lint clean). SPEC ✅.
+  - IMPORTANT (cross-task): schema offers spa/fullstack but those template dirs land in Task 2 → ENOENT if picked before Task 2. Resolved-by: Task 2 (its tests assert spa/fullstack generate). Verify after Task 2.
+  - MINOR: NormalizedSchema.assetsDir unused until Task 2 consumes it (worker template ignores it).
+  - MINOR: tests assert dep presence (toBeTruthy), not == versions.ts values.
+  - MINOR: no test for addToGitignore idempotency (re-run / pre-populated .gitignore).

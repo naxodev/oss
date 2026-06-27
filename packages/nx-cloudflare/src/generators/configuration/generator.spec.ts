@@ -92,4 +92,33 @@ describe('configuration generator', () => {
       configurationGenerator(tree, { project: 'nope' })
     ).rejects.toThrow(/not found/);
   });
+
+  it('authors an spa wrangler.jsonc with assets and no main', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      template: 'spa',
+      assetsDir: 'dist/web',
+    });
+    const config = readConfig(tree);
+    expect(config['main']).toBeUndefined();
+    expect(config['assets']).toEqual({
+      directory: 'dist/web',
+      not_found_handling: 'single-page-application',
+    });
+  });
+
+  it('authors a fullstack wrangler.jsonc with assets binding and main', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      template: 'fullstack',
+      assetsDir: 'dist/web/client',
+      main: 'src/worker.ts',
+    });
+    const config = readConfig(tree);
+    expect(config['main']).toBe('src/worker.ts');
+    expect(config['assets']).toEqual({
+      directory: 'dist/web/client',
+      binding: 'ASSETS',
+    });
+  });
 });
