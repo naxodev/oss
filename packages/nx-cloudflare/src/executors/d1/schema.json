@@ -6,15 +6,20 @@
   "type": "object",
   "properties": {
     "command": {
-      "description": "The D1 migrations subcommand. Baked in by inference.",
+      "description": "The D1 migrations subcommand. Supplied by the target's configuration.",
       "type": "string",
       "enum": ["apply", "create", "list"],
       "x-priority": "internal"
     },
-    "database": {
-      "description": "The D1 database name. Baked in by inference.",
-      "type": "string",
+    "databases": {
+      "description": "Map of D1 binding name to database_name. Baked in by inference.",
+      "type": "object",
+      "additionalProperties": { "type": "string" },
       "x-priority": "internal"
+    },
+    "db": {
+      "description": "Which D1 binding to target. Required when the Worker has multiple D1 databases.",
+      "type": "string"
     },
     "remote": {
       "description": "Apply/list against the remote database (`--remote`) instead of local (`--local`).",
@@ -30,5 +35,5 @@
       "type": "string"
     }
   },
-  "required": ["command", "database"]
+  "required": ["command", "databases"]
 }
