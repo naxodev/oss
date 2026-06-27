@@ -16,3 +16,7 @@ Task 1: implemented (commit 74f56e00, 6/6 tests pass, lint clean). SPEC ✅.
   - MINOR: NormalizedSchema.assetsDir unused until Task 2 consumes it (worker template ignores it).
   - MINOR: tests assert dep presence (toBeTruthy), not == versions.ts values.
   - MINOR: no test for addToGitignore idempotency (re-run / pre-populated .gitignore).
+
+Task 2: complete (commit vqnnxskz, 8/8 tests pass, lint clean, SPEC ✅ QUALITY approved).
+  - Closes Task 1 IMPORTANT: spa/fullstack templates exist & generate (tests prove it).
+  - MINOR: new spa/fullstack tests only cover nodejsCompat:false (comma-validity for true verified by reviewer reasoning; worker template tests cover the flag path).
