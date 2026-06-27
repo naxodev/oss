@@ -14,7 +14,7 @@ Every Worker gets `secret-put`, `secret-bulk`, `secret-list`, and `secret-delete
 
 ## Local development secrets
 
-`nx serve` (`wrangler dev`) reads local secrets from a `.dev.vars` file at the Worker root — no target needed. The file stays on your machine; it is never uploaded.
+`nx run my-worker:serve` (`wrangler dev`) reads local secrets from a `.dev.vars` file at the Worker root — no target needed. The file stays on your machine; it is never uploaded.
 
 ```ini title=".dev.vars"
 API_KEY=local-dev-key
@@ -31,7 +31,7 @@ These targets act on the deployed Worker.
 1. **Set one secret**
 
    ```bash
-   bunx nx secret-put my-worker --name=API_KEY
+   bunx nx run my-worker:secret-put --name=API_KEY
    ```
 
    `secret-put` prompts for the value, then uploads it to the deployed Worker.
@@ -48,7 +48,7 @@ These targets act on the deployed Worker.
    ```
 
    ```bash
-   bunx nx secret-bulk my-worker --file=secrets.json
+   bunx nx run my-worker:secret-bulk --file=secrets.json
    ```
 
    Each key becomes a secret on the Worker. Do not commit this file.
@@ -56,7 +56,7 @@ These targets act on the deployed Worker.
 3. **List the Worker's secrets**
 
    ```bash
-   bunx nx secret-list my-worker
+   bunx nx run my-worker:secret-list
    ```
 
    Only the names are returned — values are never exposed.
@@ -64,7 +64,7 @@ These targets act on the deployed Worker.
 4. **Delete a secret**
 
    ```bash
-   bunx nx secret-delete my-worker --name=API_KEY
+   bunx nx run my-worker:secret-delete --name=API_KEY
    ```
 
    This removes the secret from the deployed Worker.
@@ -78,7 +78,7 @@ These targets act on the deployed Worker.
 Every secret target accepts `--env` for a [Wrangler environment](https://developers.cloudflare.com/workers/wrangler/environments/):
 
 ```bash
-bunx nx secret-put my-worker --name=API_KEY --env=production
+bunx nx run my-worker:secret-put --name=API_KEY --env=production
 ```
 
 ## Verify
@@ -86,7 +86,7 @@ bunx nx secret-put my-worker --name=API_KEY --env=production
 `secret-list` shows the secret you set:
 
 ```bash
-bunx nx secret-list my-worker
+bunx nx run my-worker:secret-list
 ```
 
 ## Next steps

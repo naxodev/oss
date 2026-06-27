@@ -106,8 +106,8 @@ describe('d1 + secret executors', () => {
     const env = { WRANGLER_E2E_LOG: logFile };
 
     // `--remote` is a typed executor option, so nx threads it into the argv.
-    runCLI(`d1-list ${app} --remote`, { env });
-    runCLI(`secret-list ${app}`, { env });
+    runCLI(`run ${app}:d1-list --remote`, { env });
+    runCLI(`run ${app}:secret-list`, { env });
 
     const calls = readFileSync(logFile, 'utf-8');
     expect(calls).toContain('d1 migrations list my-db --remote');

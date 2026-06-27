@@ -68,7 +68,7 @@ automatically; if you add the plugin manually, install it with
    Now we can run the Worker in a local dev server:
 
    ```bash
-   bunx nx serve my-worker
+   bunx nx run my-worker:serve
    ```
 
    This runs `wrangler dev` from the project root. The server is ready when
@@ -80,7 +80,7 @@ automatically; if you add the plugin manually, install it with
    When we're ready to deploy, we run:
 
    ```bash
-   bunx nx deploy my-worker
+   bunx nx run my-worker:deploy
    ```
 
    This runs `wrangler deploy`, which uploads the Worker to Cloudflare's edge
@@ -88,7 +88,7 @@ automatically; if you add the plugin manually, install it with
    Cloudflare account. Pass Wrangler flags through after `--`:
 
    ```bash
-   bunx nx deploy my-worker -- --dry-run
+   bunx nx run my-worker:deploy -- --dry-run
    ```
 
    The `--dry-run` flag validates the deployment without publishing.

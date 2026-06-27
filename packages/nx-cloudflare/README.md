@@ -74,10 +74,10 @@ Arguments after `--` are forwarded to `wrangler versions deploy`. Run
 For each D1 binding in `wrangler.jsonc`, the plugin infers `d1-apply`, `d1-create`, and `d1-list` targets (suffixed by binding name when a Worker has multiple D1 databases, e.g. `d1-apply-DB`). D1 inference is **jsonc/json only**.
 
 ```sh
-nx d1-create my-worker --message=add_users   # scaffold a migration
-nx d1-apply my-worker                         # apply locally (default)
-nx d1-apply my-worker --remote                # apply to the remote database
-nx d1-list my-worker --remote                 # list pending migrations
+nx run my-worker:d1-create --message=add_users   # scaffold a migration
+nx run my-worker:d1-apply                        # apply locally (default)
+nx run my-worker:d1-apply --remote               # apply to the remote database
+nx run my-worker:d1-list --remote                # list pending migrations
 ```
 
 ### Manage secrets
@@ -85,10 +85,10 @@ nx d1-list my-worker --remote                 # list pending migrations
 Every Worker gets `secret-put`, `secret-bulk`, `secret-list`, and `secret-delete`.
 
 ```sh
-nx secret-put my-worker --name=API_KEY        # interactive prompt for the value
-nx secret-bulk my-worker --file=secrets.json  # upload many from a JSON file
-nx secret-list my-worker
-nx secret-delete my-worker --name=API_KEY
+nx run my-worker:secret-put --name=API_KEY        # interactive prompt for the value
+nx run my-worker:secret-bulk --file=secrets.json  # upload many from a JSON file
+nx run my-worker:secret-list
+nx run my-worker:secret-delete --name=API_KEY
 ```
 
 Secret values are never passed as arguments — `secret-put` prompts interactively, `secret-bulk` reads a JSON file (do not commit it). All targets accept `--env <environment>`.

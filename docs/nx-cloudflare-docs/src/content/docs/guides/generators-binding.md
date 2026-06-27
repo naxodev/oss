@@ -89,7 +89,7 @@ bunx nx g @naxodev/nx-cloudflare:binding --project=my-worker --type=service --bi
 ## Notes
 
 - **JSONC only.** The generator edits `wrangler.jsonc`/`wrangler.json` while preserving comments and formatting. `wrangler.toml` is rejected with a pointer to convert first.
-- **`wrangler types` runs automatically** after the binding is written so `Env` picks up the new binding. Pass `--skipTypegen` to opt out (run `nx typegen <project>` yourself later).
+- **`wrangler types` runs automatically** after the binding is written so `Env` picks up the new binding. Pass `--skipTypegen` to opt out (run `nx run <project>:typegen` yourself later).
 - **`--create`** is only valid for KV/R2/D1/Queue — Durable Objects and Workflows are code in your Worker, and a Service binding references another Worker, so none of them are provisioned resources. On a provisioning failure the generator fails loudly and leaves a placeholder in the config.
 - **Duplicate bindings are rejected**, never overwritten. The generator also rejects a Durable Object whose class name is already defined by an existing binding or migration.
 

@@ -19,7 +19,7 @@ For each D1 binding in a Worker's `wrangler.jsonc`, the plugin infers `d1-create
 1. **Create a migration**
 
    ```bash
-   bunx nx d1-create my-worker --message=create_users
+   bunx nx run my-worker:d1-create --message=create_users
    ```
 
    This writes a timestamped `.sql` file in the database's migrations directory (`migrations/` by default).
@@ -38,15 +38,15 @@ For each D1 binding in a Worker's `wrangler.jsonc`, the plugin infers `d1-create
 3. **Apply locally**
 
    ```bash
-   bunx nx d1-apply my-worker
+   bunx nx run my-worker:d1-apply
    ```
 
-   `d1-apply` defaults to `--local`, so this runs against the local database used by `nx serve` (`wrangler dev`).
+   `d1-apply` defaults to `--local`, so this runs against the local database used by `nx run my-worker:serve` (`wrangler dev`).
 
 4. **Apply to production**
 
    ```bash
-   bunx nx d1-apply my-worker --remote
+   bunx nx run my-worker:d1-apply --remote
    ```
 
    The `--remote` flag runs the pending migrations against the live D1 database.
@@ -58,8 +58,8 @@ For each D1 binding in a Worker's `wrangler.jsonc`, the plugin infers `d1-create
 ### List pending migrations
 
 ```bash
-bunx nx d1-list my-worker            # local
-bunx nx d1-list my-worker --remote   # remote
+bunx nx run my-worker:d1-list            # local
+bunx nx run my-worker:d1-list --remote   # remote
 ```
 
 ### Multiple D1 databases
@@ -67,7 +67,7 @@ bunx nx d1-list my-worker --remote   # remote
 When a Worker has more than one `d1_databases` binding, the targets are suffixed by the binding name so each database has its own set:
 
 ```bash
-bunx nx d1-apply-ANALYTICS my-worker --remote
+bunx nx run my-worker:d1-apply-ANALYTICS --remote
 ```
 
 ### Target an environment
@@ -75,7 +75,7 @@ bunx nx d1-apply-ANALYTICS my-worker --remote
 Any `d1-apply`/`d1-list` invocation accepts `--env` for a [Wrangler environment](https://developers.cloudflare.com/workers/wrangler/environments/):
 
 ```bash
-bunx nx d1-apply my-worker --remote --env=production
+bunx nx run my-worker:d1-apply --remote --env=production
 ```
 
 ### Apply migrations during deploy
@@ -83,7 +83,7 @@ bunx nx d1-apply my-worker --remote --env=production
 The plugin does not chain migrations into `deploy` automatically. To apply before deploying in CI, run them in sequence:
 
 ```bash
-bunx nx d1-apply my-worker --remote && bunx nx deploy my-worker
+bunx nx run my-worker:d1-apply --remote && bunx nx run my-worker:deploy
 ```
 
 ## Verify
@@ -91,7 +91,7 @@ bunx nx d1-apply my-worker --remote && bunx nx deploy my-worker
 After applying, `d1-list` reports no pending migrations:
 
 ```bash
-bunx nx d1-list my-worker --remote
+bunx nx run my-worker:d1-list --remote
 ```
 
 ## Next steps
