@@ -21,6 +21,12 @@
       "factory": "./src/generators/binding/generator",
       "schema": "./src/generators/binding/schema.json",
       "description": "Add a binding (KV, R2, D1, Durable Object, Queue, Workflow, Service) to a Worker — edits wrangler.jsonc, stubs code + migrations, emits a test, and refreshes wrangler types"
+    },
+    "configuration": {
+      "factory": "./src/generators/configuration/generator",
+      "schema": "./src/generators/configuration/schema.json",
+      "description": "Add Cloudflare configuration (wrangler.jsonc + inferred serve/deploy/typegen targets) to an existing Nx project",
+      "aliases": ["config"]
     }
   }
 }
