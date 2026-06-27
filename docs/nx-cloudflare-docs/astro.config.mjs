@@ -116,7 +116,7 @@ export default defineConfig({
           entryPoints: ['../../packages/nx-cloudflare/src/index.ts'],
           tsconfig: '../../packages/nx-cloudflare/tsconfig.lib.json',
           output: 'reference',
-          sidebar: { label: '@naxodev/nx-cloudflare', collapsed: true },
+          sidebar: { label: 'API reference', collapsed: true },
           typeDoc: {
             excludeInternal: true,
             disableGit: true,
