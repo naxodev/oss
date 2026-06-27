@@ -146,10 +146,22 @@ export default defineConfig({
         {
           label: 'Guides',
           items: [
-            { slug: 'guides/generators-application' },
-            { slug: 'guides/generators-init' },
-            { slug: 'guides/generators-library' },
-            { slug: 'guides/generators-binding' },
+            {
+              label: 'Generators',
+              items: [
+                { slug: 'guides/generators-application' },
+                { slug: 'guides/generators-init' },
+                { slug: 'guides/generators-library' },
+                { slug: 'guides/generators-binding' },
+              ],
+            },
+            {
+              label: 'Targets',
+              items: [
+                { slug: 'guides/d1-migrations' },
+                { slug: 'guides/secrets' },
+              ],
+            },
           ],
         },
         {
