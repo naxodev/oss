@@ -137,6 +137,7 @@ export default defineConfig({
             {
               label: 'Generators',
               items: [
+                { slug: 'guides/generators/add-go-to-existing-workspace' },
                 { slug: 'guides/generators/application' },
                 { slug: 'guides/generators/library' },
                 { slug: 'guides/generators/init' },
