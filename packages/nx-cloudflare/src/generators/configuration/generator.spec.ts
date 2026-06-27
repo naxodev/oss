@@ -121,4 +121,45 @@ describe('configuration generator', () => {
       binding: 'ASSETS',
     });
   });
+
+  it('authors a valid spa wrangler.jsonc with compatibility_flags when nodejsCompat is true', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      template: 'spa',
+      nodejsCompat: true,
+    });
+    const config = readConfig(tree);
+    expect(config['compatibility_flags']).toEqual(['nodejs_compat']);
+    expect(config['assets']).toEqual({
+      directory: 'dist',
+      not_found_handling: 'single-page-application',
+    });
+  });
+
+  it('authors a valid fullstack wrangler.jsonc with compatibility_flags when nodejsCompat is true', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      template: 'fullstack',
+      nodejsCompat: true,
+    });
+    const config = readConfig(tree);
+    expect(config['compatibility_flags']).toEqual(['nodejs_compat']);
+    expect(config['main']).toBeTruthy();
+    expect((config['assets'] as Record<string, unknown>)['binding']).toBe(
+      'ASSETS'
+    );
+  });
+
+  it('does not duplicate worker-configuration.d.ts when .gitignore already contains it', async () => {
+    tree.write(
+      `${ROOT}/.gitignore`,
+      'node_modules\nworker-configuration.d.ts\n'
+    );
+    await configurationGenerator(tree, { project: PROJECT });
+    const gitignore = tree.read(`${ROOT}/.gitignore`, 'utf-8') as string;
+    const occurrences = gitignore
+      .split('\n')
+      .filter((line) => line === 'worker-configuration.d.ts');
+    expect(occurrences).toHaveLength(1);
+  });
 });

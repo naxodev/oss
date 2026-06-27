@@ -5,6 +5,8 @@ description: Wire Cloudflare configuration onto an existing Nx project without c
 
 The `configuration` generator adds a `wrangler.jsonc` and Cloudflare deploy/serve/types targets to an **existing** Nx project. It is framework-agnostic — bring your own framework's Cloudflare adapter; this generator only wires the deploy, serve, and types layer.
 
+**Alias:** `config`
+
 ## Usage
 
 ```bash
