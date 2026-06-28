@@ -29,20 +29,16 @@ export interface CloudflarePluginOptions {
   versionDeployTargetName?: string;
   /** Name for the inferred `wrangler tail` target. @default 'tail' */
   tailTargetName?: string;
-  /** Name for the inferred `wrangler d1 migrations apply` target. @default 'd1-apply' */
-  d1ApplyTargetName?: string;
-  /** Name for the inferred `wrangler d1 migrations create` target. @default 'd1-create' */
-  d1CreateTargetName?: string;
-  /** Name for the inferred `wrangler d1 migrations list` target. @default 'd1-list' */
-  d1ListTargetName?: string;
-  /** Name for the inferred `wrangler secret put` target. @default 'secret-put' */
-  secretPutTargetName?: string;
-  /** Name for the inferred `wrangler secret bulk` target. @default 'secret-bulk' */
-  secretBulkTargetName?: string;
-  /** Name for the inferred `wrangler secret list` target. @default 'secret-list' */
-  secretListTargetName?: string;
-  /** Name for the inferred `wrangler secret delete` target. @default 'secret-delete' */
-  secretDeleteTargetName?: string;
+  /**
+   * Name for the inferred D1 migrations target (configurations: apply, create,
+   * list). @default 'd1'
+   */
+  d1TargetName?: string;
+  /**
+   * Name for the inferred secret-management target (configurations: put, bulk,
+   * list, delete). @default 'secret'
+   */
+  secretTargetName?: string;
 }
 
 /** {@link CloudflarePluginOptions} with every default applied. */
@@ -65,13 +61,8 @@ function normalizeOptions(
     versionDeployTargetName:
       options?.versionDeployTargetName ?? 'version-deploy',
     tailTargetName: options?.tailTargetName ?? 'tail',
-    d1ApplyTargetName: options?.d1ApplyTargetName ?? 'd1-apply',
-    d1CreateTargetName: options?.d1CreateTargetName ?? 'd1-create',
-    d1ListTargetName: options?.d1ListTargetName ?? 'd1-list',
-    secretPutTargetName: options?.secretPutTargetName ?? 'secret-put',
-    secretBulkTargetName: options?.secretBulkTargetName ?? 'secret-bulk',
-    secretListTargetName: options?.secretListTargetName ?? 'secret-list',
-    secretDeleteTargetName: options?.secretDeleteTargetName ?? 'secret-delete',
+    d1TargetName: options?.d1TargetName ?? 'd1',
+    secretTargetName: options?.secretTargetName ?? 'secret',
   };
 }
 
@@ -206,39 +197,54 @@ function readD1Databases(
   });
 }
 
-/** D1 migration targets, one trio per database. Suffixed by binding when >1. */
+/**
+ * D1 migrations target. Emitted only when the config declares ≥1 `d1_databases`
+ * binding. A single `d1` target carries the binding → database_name map in its
+ * options and exposes the subcommands as configurations (`d1:apply`,
+ * `d1:create`, `d1:list`); the database is selected at run time via `--db`.
+ */
 function buildD1Targets(
   options: NormalizedOptions,
   databases: D1Database[]
 ): Record<string, TargetConfiguration> {
-  const single = databases.length === 1;
-  const targets: Record<string, TargetConfiguration> = {};
-  for (const db of databases) {
-    const suffix = single ? '' : `-${db.binding}`;
-    const d1 = (command: string): TargetConfiguration => ({
-      executor: '@naxodev/nx-cloudflare:d1',
-      options: { command, database: db.database_name },
-    });
-    targets[`${options.d1ApplyTargetName}${suffix}`] = d1('apply');
-    targets[`${options.d1CreateTargetName}${suffix}`] = d1('create');
-    targets[`${options.d1ListTargetName}${suffix}`] = d1('list');
+  if (databases.length === 0) {
+    return {};
   }
-  return targets;
+  const databaseMap: Record<string, string> = {};
+  for (const db of databases) {
+    databaseMap[db.binding] = db.database_name;
+  }
+  return {
+    [options.d1TargetName]: {
+      executor: '@naxodev/nx-cloudflare:d1',
+      options: { databases: databaseMap },
+      configurations: {
+        apply: { command: 'apply' },
+        create: { command: 'create' },
+        list: { command: 'list' },
+      },
+    },
+  };
 }
 
-/** Secret targets — always emitted (secrets never appear in the config). */
+/**
+ * Secret-management target — always emitted (secrets never appear in the
+ * config). A single `secret` target exposes the subcommands as configurations
+ * (`secret:put`, `secret:bulk`, `secret:list`, `secret:delete`).
+ */
 function buildSecretTargets(
   options: NormalizedOptions
 ): Record<string, TargetConfiguration> {
-  const secret = (command: string): TargetConfiguration => ({
-    executor: '@naxodev/nx-cloudflare:secret',
-    options: { command },
-  });
   return {
-    [options.secretPutTargetName]: secret('put'),
-    [options.secretBulkTargetName]: secret('bulk'),
-    [options.secretListTargetName]: secret('list'),
-    [options.secretDeleteTargetName]: secret('delete'),
+    [options.secretTargetName]: {
+      executor: '@naxodev/nx-cloudflare:secret',
+      configurations: {
+        put: { command: 'put' },
+        bulk: { command: 'bulk' },
+        list: { command: 'list' },
+        delete: { command: 'delete' },
+      },
+    },
   };
 }
 
@@ -290,10 +296,11 @@ function createNodesInternal(
 /**
  * Nx inference plugin. For every `wrangler.{toml,jsonc,json}` that sits beside a
  * `project.json`/`package.json` and parses, infers the Worker lifecycle targets
- * (serve, deploy, typegen, version-upload, version-deploy, tail), secret
- * management targets (secret-put, secret-bulk, secret-list, secret-delete) for
- * every Worker, and D1 migration targets (d1-apply, d1-create, d1-list — one
- * set per `d1_databases` binding, jsonc/json only). Inference is intentionally
+ * (serve, deploy, typegen, version-upload, version-deploy, tail), a secret
+ * target with put/bulk/list/delete configurations for every Worker, and a d1
+ * target with apply/create/list configurations when the config declares
+ * `d1_databases` (jsonc/json only; the database is chosen with `--db`).
+ * Inference is intentionally
  * uncached. Official Nx plugins (@nx/vite, @nx/eslint, @nx/jest) memoize their
  * createNodes targets in a `workspaceDataDirectory` cache keyed by a project
  * file + lockfile hash, but the work here is trivial — per config a dir read,

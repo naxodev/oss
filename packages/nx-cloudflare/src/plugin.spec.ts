@@ -76,10 +76,7 @@ describe('nx-cloudflare createNodes', () => {
         'typegen',
         'version-upload',
         'version-deploy',
-        'secret-put',
-        'secret-bulk',
-        'secret-list',
-        'secret-delete',
+        'secret',
       ].sort()
     );
 
@@ -134,18 +131,7 @@ describe('nx-cloudflare createNodes', () => {
     const targets = result.projects['apps/worker'].targets;
 
     expect(Object.keys(targets).sort()).toEqual(
-      [
-        'dev',
-        'logs',
-        'promote',
-        'publish',
-        'types',
-        'upload',
-        'secret-put',
-        'secret-bulk',
-        'secret-list',
-        'secret-delete',
-      ].sort()
+      ['dev', 'logs', 'promote', 'publish', 'types', 'upload', 'secret'].sort()
     );
     expect(targets.dev).toMatchObject({
       command: 'wrangler dev',
@@ -271,7 +257,7 @@ describe('nx-cloudflare createNodes', () => {
     expect(Object.keys(customTargets)).not.toContain('serve');
   });
 
-  it('emits secret targets pointing at the secret executor for every worker', async () => {
+  it('emits a single secret target with one configuration per subcommand', async () => {
     writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
     writeFile(
       workspaceRoot,
@@ -282,17 +268,18 @@ describe('nx-cloudflare createNodes', () => {
     const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
     const targets = result.projects['apps/worker'].targets;
 
-    expect(targets['secret-put']).toEqual({
+    expect(targets['secret']).toEqual({
       executor: '@naxodev/nx-cloudflare:secret',
-      options: { command: 'put' },
-    });
-    expect(targets['secret-bulk']).toEqual({
-      executor: '@naxodev/nx-cloudflare:secret',
-      options: { command: 'bulk' },
+      configurations: {
+        put: { command: 'put' },
+        bulk: { command: 'bulk' },
+        list: { command: 'list' },
+        delete: { command: 'delete' },
+      },
     });
   });
 
-  it('emits bare d1 targets when there is exactly one D1 binding', async () => {
+  it('emits a single d1 target with the database map when there is one D1 binding', async () => {
     writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
     writeFile(
       workspaceRoot,
@@ -303,22 +290,18 @@ describe('nx-cloudflare createNodes', () => {
     const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
     const targets = result.projects['apps/worker'].targets;
 
-    expect(targets['d1-apply']).toEqual({
+    expect(targets['d1']).toEqual({
       executor: '@naxodev/nx-cloudflare:d1',
-      options: { command: 'apply', database: 'my-db' },
+      options: { databases: { DB: 'my-db' } },
+      configurations: {
+        apply: { command: 'apply' },
+        create: { command: 'create' },
+        list: { command: 'list' },
+      },
     });
-    expect(targets['d1-create']).toEqual({
-      executor: '@naxodev/nx-cloudflare:d1',
-      options: { command: 'create', database: 'my-db' },
-    });
-    expect(targets['d1-list']).toEqual({
-      executor: '@naxodev/nx-cloudflare:d1',
-      options: { command: 'list', database: 'my-db' },
-    });
-    expect(targets['d1-apply-DB']).toBeUndefined();
   });
 
-  it('suffixes d1 targets by binding when there are multiple D1 bindings', async () => {
+  it('bakes every binding into the one d1 target when there are multiple D1 bindings', async () => {
     writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
     writeFile(
       workspaceRoot,
@@ -331,18 +314,14 @@ describe('nx-cloudflare createNodes', () => {
     const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
     const targets = result.projects['apps/worker'].targets;
 
-    expect(targets['d1-apply-DB'].options).toEqual({
-      command: 'apply',
-      database: 'main',
-    });
-    expect(targets['d1-apply-ANALYTICS'].options).toEqual({
-      command: 'apply',
-      database: 'events',
+    expect(targets['d1'].options).toEqual({
+      databases: { DB: 'main', ANALYTICS: 'events' },
     });
     expect(targets['d1-apply']).toBeUndefined();
+    expect(targets['d1-apply-ANALYTICS']).toBeUndefined();
   });
 
-  it('emits no d1 targets when there is no D1 binding', async () => {
+  it('emits no d1 target when there is no D1 binding', async () => {
     writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
     writeFile(
       workspaceRoot,
@@ -353,10 +332,10 @@ describe('nx-cloudflare createNodes', () => {
     const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
     const targets = result.projects['apps/worker'].targets;
 
-    expect(Object.keys(targets).filter((k) => k.startsWith('d1-'))).toEqual([]);
+    expect(targets['d1']).toBeUndefined();
   });
 
-  it('honors custom target-name overrides', async () => {
+  it('honors custom d1/secret target-name overrides', async () => {
     writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
     writeFile(
       workspaceRoot,
@@ -365,16 +344,14 @@ describe('nx-cloudflare createNodes', () => {
     );
 
     const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc', {
-      d1ApplyTargetName: 'migrate',
-      secretPutTargetName: 'add-secret',
+      d1TargetName: 'migrate',
+      secretTargetName: 'env-secret',
     });
     const targets = result.projects['apps/worker'].targets;
 
-    expect(targets['migrate'].options).toEqual({
-      command: 'apply',
-      database: 'my-db',
-    });
-    expect(targets['add-secret'].options).toEqual({ command: 'put' });
+    expect(targets['migrate'].executor).toBe('@naxodev/nx-cloudflare:d1');
+    expect(targets['migrate'].options).toEqual({ databases: { DB: 'my-db' } });
+    expect(targets['env-secret'].executor).toBe('@naxodev/nx-cloudflare:secret');
   });
 
   it('handles multiple configs in one invocation, isolating failures', async () => {

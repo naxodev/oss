@@ -1,7 +1,7 @@
 export type SecretCommand = 'put' | 'bulk' | 'list' | 'delete';
 
 export interface SecretExecutorSchema {
-  /** Baked in by inference. */
+  /** The secret subcommand. Supplied by the target's configuration. */
   command: SecretCommand;
   /** The secret KEY. Required for `put`/`delete`; ignored for `bulk`/`list`. */
   name?: string;
