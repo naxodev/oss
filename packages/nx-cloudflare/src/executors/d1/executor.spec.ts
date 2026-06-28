@@ -74,4 +74,19 @@ describe('buildD1Args', () => {
       buildD1Args({ command: 'create', databases: { DB: 'my-db' } }, 'my-db')
     ).toThrow('The `message` option is required');
   });
+
+  it('ignores remote and env for create', () => {
+    expect(
+      buildD1Args(
+        {
+          command: 'create',
+          databases: { DB: 'my-db' },
+          remote: true,
+          env: 'production',
+          message: 'add_users',
+        },
+        'my-db'
+      )
+    ).toEqual(['d1', 'migrations', 'create', 'my-db', 'add_users']);
+  });
 });
