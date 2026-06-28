@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "NxCloudflareD1",
+  "title": "Run Cloudflare D1 migrations",
+  "description": "Runs `wrangler d1 migrations <command>` for a Worker's D1 database.",
+  "type": "object",
+  "properties": {
+    "command": {
+      "description": "The D1 migrations subcommand. Supplied by the target's configuration.",
+      "type": "string",
+      "enum": ["apply", "create", "list"],
+      "x-priority": "internal"
+    },
+    "databases": {
+      "description": "Map of D1 binding name to database_name. Baked in by inference.",
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "x-priority": "internal"
+    },
+    "db": {
+      "description": "Which D1 binding to target. Required when the Worker has multiple D1 databases.",
+      "type": "string"
+    },
+    "remote": {
+      "description": "Apply/list against the remote database (`--remote`) instead of local (`--local`).",
+      "type": "boolean",
+      "default": false
+    },
+    "env": {
+      "description": "Cloudflare environment (`--env`).",
+      "type": "string"
+    },
+    "message": {
+      "description": "Migration message. Required for `create`.",
+      "type": "string"
+    }
+  },
+  "required": ["command", "databases"]
+}

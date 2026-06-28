@@ -29,6 +29,16 @@ export interface CloudflarePluginOptions {
   versionDeployTargetName?: string;
   /** Name for the inferred `wrangler tail` target. @default 'tail' */
   tailTargetName?: string;
+  /**
+   * Name for the inferred D1 migrations target (configurations: apply, create,
+   * list). @default 'd1'
+   */
+  d1TargetName?: string;
+  /**
+   * Name for the inferred secret-management target (configurations: put, bulk,
+   * list, delete). @default 'secret'
+   */
+  secretTargetName?: string;
 }
 
 /** {@link CloudflarePluginOptions} with every default applied. */
@@ -51,6 +61,8 @@ function normalizeOptions(
     versionDeployTargetName:
       options?.versionDeployTargetName ?? 'version-deploy',
     tailTargetName: options?.tailTargetName ?? 'tail',
+    d1TargetName: options?.d1TargetName ?? 'd1',
+    secretTargetName: options?.secretTargetName ?? 'secret',
   };
 }
 
@@ -96,15 +108,18 @@ function buildWorkerTargets(
 }
 
 /**
- * Read and validate a wrangler config. Returns its raw content when valid, or
- * null (after warning) when the file is unreadable, an empty `.toml`, or
- * json/jsonc that fails to parse. The gate is structural, not semantic: a
- * parseable but minimal config (e.g. `{}`) is accepted, since Wrangler
- * validates its own contents at runtime. `.toml` has no parser here, so
- * non-empty is the only available proxy for "usable". The validated content is
- * returned (callers treat it as a truthy validity signal).
+ * Read and validate a wrangler config. Returns `{ parsed }` when valid, or null
+ * (after warning) when the file is unreadable, an empty `.toml`, or json/jsonc
+ * that fails to parse. The gate is structural, not semantic: a parseable but
+ * minimal config (e.g. `{}`) is accepted, since Wrangler validates its own
+ * contents at runtime. `.toml` has no parser here, so non-empty is the only
+ * available proxy for "usable" and `parsed` is null for it. The parsed object is
+ * returned so callers can gate on validity (`=== null` means skip) and reuse it
+ * for D1 extraction without a second read + parse.
  */
-function readValidConfig(absConfigPath: string): string | null {
+function readValidConfig(
+  absConfigPath: string
+): { parsed: Record<string, unknown> | null } | null {
   let content: string;
   try {
     content = readFileSync(absConfigPath, 'utf-8');
@@ -122,12 +137,13 @@ function readValidConfig(absConfigPath: string): string | null {
       );
       return null;
     }
-    return content;
+    // No TOML parser here — valid (non-empty) but unparsed. D1 inference needs
+    // the parsed object, so it is jsonc/json only.
+    return { parsed: null };
   }
 
   try {
-    parseJson(content);
-    return content;
+    return { parsed: parseJson(content) as Record<string, unknown> };
   } catch (e) {
     logger.warn(
       `[nx-cloudflare] Skipping unparseable wrangler config ${absConfigPath}: ${errorReason(
@@ -136,6 +152,100 @@ function readValidConfig(absConfigPath: string): string | null {
     );
     return null;
   }
+}
+
+interface D1Database {
+  binding: string;
+  database_name: string;
+}
+
+/**
+ * Extract `d1_databases` entries that carry a non-empty `binding` and
+ * `database_name`. `parsed` is null for TOML/unparsed configs (D1 targets are
+ * jsonc/json-only by design), which yield no D1 targets. A malformed entry is
+ * warned about and skipped rather than dropped silently: inference must never
+ * throw, but it should still tell the user why a declared database produced no
+ * targets (matching `readValidConfig`'s warn-and-skip convention).
+ */
+function readD1Databases(
+  absConfigPath: string,
+  parsed: Record<string, unknown> | null
+): D1Database[] {
+  if (parsed === null) {
+    return [];
+  }
+  const list = parsed['d1_databases'];
+  if (!Array.isArray(list)) {
+    return [];
+  }
+  return list.flatMap((entry) => {
+    if (typeof entry === 'object' && entry !== null) {
+      const { binding, database_name } = entry as Record<string, unknown>;
+      if (
+        typeof binding === 'string' &&
+        binding.length > 0 &&
+        typeof database_name === 'string' &&
+        database_name.length > 0
+      ) {
+        return [{ binding, database_name }];
+      }
+    }
+    logger.warn(
+      `[nx-cloudflare] Skipping a d1_databases entry in ${absConfigPath} that lacks a non-empty string \`binding\`/\`database_name\`.`
+    );
+    return [];
+  });
+}
+
+/**
+ * D1 migrations target. Emitted only when the config declares ≥1 `d1_databases`
+ * binding. A single `d1` target carries the binding → database_name map in its
+ * options and exposes the subcommands as configurations (`d1:apply`,
+ * `d1:create`, `d1:list`); the database is selected at run time via `--db`.
+ */
+function buildD1Targets(
+  options: NormalizedOptions,
+  databases: D1Database[]
+): Record<string, TargetConfiguration> {
+  if (databases.length === 0) {
+    return {};
+  }
+  const databaseMap: Record<string, string> = {};
+  for (const db of databases) {
+    databaseMap[db.binding] = db.database_name;
+  }
+  return {
+    [options.d1TargetName]: {
+      executor: '@naxodev/nx-cloudflare:d1',
+      options: { databases: databaseMap },
+      configurations: {
+        apply: { command: 'apply' },
+        create: { command: 'create' },
+        list: { command: 'list' },
+      },
+    },
+  };
+}
+
+/**
+ * Secret-management target — always emitted (secrets never appear in the
+ * config). A single `secret` target exposes the subcommands as configurations
+ * (`secret:put`, `secret:bulk`, `secret:list`, `secret:delete`).
+ */
+function buildSecretTargets(
+  options: NormalizedOptions
+): Record<string, TargetConfiguration> {
+  return {
+    [options.secretTargetName]: {
+      executor: '@naxodev/nx-cloudflare:secret',
+      configurations: {
+        put: { command: 'put' },
+        bulk: { command: 'bulk' },
+        list: { command: 'list' },
+        delete: { command: 'delete' },
+      },
+    },
+  };
 }
 
 function createNodesInternal(
@@ -166,23 +276,36 @@ function createNodesInternal(
   }
 
   const absConfigPath = join(context.workspaceRoot, configFile);
-  if (readValidConfig(absConfigPath) === null) {
+  const config = readValidConfig(absConfigPath);
+  if (config === null) {
     return {};
   }
 
-  const targets = buildWorkerTargets(projectRoot, normalizeOptions(options));
+  const normalized = normalizeOptions(options);
+  const targets = {
+    ...buildWorkerTargets(projectRoot, normalized),
+    ...buildD1Targets(
+      normalized,
+      readD1Databases(absConfigPath, config.parsed)
+    ),
+    ...buildSecretTargets(normalized),
+  };
   return { projects: { [projectRoot]: { targets } } };
 }
 
 /**
  * Nx inference plugin. For every `wrangler.{toml,jsonc,json}` that sits beside a
  * `project.json`/`package.json` and parses, infers the Worker lifecycle targets
- * (serve, deploy, typegen, version-upload, version-deploy, tail). Inference is
- * intentionally uncached. Official Nx plugins (@nx/vite, @nx/eslint, @nx/jest)
- * memoize their createNodes targets in a `workspaceDataDirectory` cache keyed by
- * a project file + lockfile hash, but the work here is trivial — per config a
- * dir read, one config read+parse, and building a small static targets object —
- * so a cache earns only marginal speed while adding staleness risk across plugin
+ * (serve, deploy, typegen, version-upload, version-deploy, tail), a secret
+ * target with put/bulk/list/delete configurations for every Worker, and a d1
+ * target with apply/create/list configurations when the config declares
+ * `d1_databases` (jsonc/json only; the database is chosen with `--db`).
+ * Inference is intentionally
+ * uncached. Official Nx plugins (@nx/vite, @nx/eslint, @nx/jest) memoize their
+ * createNodes targets in a `workspaceDataDirectory` cache keyed by a project
+ * file + lockfile hash, but the work here is trivial — per config a dir read,
+ * one config read+parse, and building a small static targets object — so a
+ * cache earns only marginal speed while adding staleness risk across plugin
  * upgrades (no key can capture a change in this code's target-construction
  * logic). `@naxodev/gonx`'s createNodes is likewise uncached.
  */

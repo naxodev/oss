@@ -1,0 +1,14 @@
+{
+  "executors": {
+    "d1": {
+      "implementation": "./src/executors/d1/executor",
+      "schema": "./src/executors/d1/schema.json",
+      "description": "Run Cloudflare D1 migrations (apply/create/list)."
+    },
+    "secret": {
+      "implementation": "./src/executors/secret/executor",
+      "schema": "./src/executors/secret/schema.json",
+      "description": "Manage Cloudflare Worker secrets (put/bulk/list/delete)."
+    }
+  }
+}

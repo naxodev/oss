@@ -1,0 +1,110 @@
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
+import { uniq, tmpProjPath } from '@nx/plugin/testing';
+import { createTestProject, cleanup, runCLI } from '@naxodev/e2e-utils';
+import { chmodSync, existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { join } from 'path';
+
+// Exercises the d1 and secret executors end-to-end against the published
+// tarball. Two things the unit tests can't cover:
+//   1. Inference resolves through the real `exports` map + `executors.json`, so
+//      a consumer's project actually gets the executor-backed targets.
+//   2. Running a target resolves the executor, builds the right `wrangler`
+//      argv, and invokes the binary — the ExecutorContext + run-wrangler path.
+//
+// `wrangler` is stubbed by overwriting the resolved `node_modules/.bin/wrangler`
+// binary (PATH-based stubbing is ineffective — the package manager prepends
+// node_modules/.bin, shadowing PATH additions; see the second test) so nothing
+// reaches Cloudflare. The scaffolded Worker is inference-only (no project.json);
+// the nx-cloudflare plugin is registered via NX_ADD_PLUGINS during create-cloudflare.
+describe('d1 + secret executors', () => {
+  let priorFlatConfig: string | undefined;
+  const app = uniq('execworker');
+
+  beforeAll(() => {
+    priorFlatConfig = process.env.ESLINT_USE_FLAT_CONFIG;
+    process.env.ESLINT_USE_FLAT_CONFIG = 'false';
+    createTestProject('nx-cloudflare');
+
+    runCLI(
+      `generate @naxodev/nx-cloudflare:create-cloudflare --directory="apps/${app}" --type=hello-world --lang=ts --no-interactive`,
+      { env: { NX_ADD_PLUGINS: 'true' } }
+    );
+    runCLI(
+      `generate @naxodev/nx-cloudflare:binding --project="${app}" --type=d1 --binding=DB --databaseName=my-db --id=test-db-id --skipTypegen --no-interactive`
+    );
+  }, 600_000);
+
+  afterAll(() => {
+    if (priorFlatConfig === undefined) {
+      delete process.env.ESLINT_USE_FLAT_CONFIG;
+    } else {
+      process.env.ESLINT_USE_FLAT_CONFIG = priorFlatConfig;
+    }
+    cleanup();
+  });
+
+  it('infers d1 and secret targets pointing at the executors', () => {
+    const output = runCLI(`show project ${app} --json`);
+    // `--json` prints the project config as the only thing on stdout; slice from
+    // the first `{` to drop any leading nx prefix (trailing whitespace is fine
+    // for JSON.parse).
+    const project = JSON.parse(output.slice(output.indexOf('{')));
+    const targets = project.targets;
+
+    // One d1 target: binding -> database_name map baked in, subcommands as
+    // configurations.
+    expect(targets['d1'].executor).toBe('@naxodev/nx-cloudflare:d1');
+    expect(targets['d1'].options).toMatchObject({ databases: { DB: 'my-db' } });
+    expect(Object.keys(targets['d1'].configurations).sort()).toEqual([
+      'apply',
+      'create',
+      'list',
+    ]);
+    expect(targets['d1'].configurations.apply).toEqual({ command: 'apply' });
+
+    // One secret target, subcommands as configurations.
+    expect(targets['secret'].executor).toBe('@naxodev/nx-cloudflare:secret');
+    expect(Object.keys(targets['secret'].configurations).sort()).toEqual([
+      'bulk',
+      'delete',
+      'list',
+      'put',
+    ]);
+    expect(targets['secret'].configurations.put).toEqual({ command: 'put' });
+  }, 120_000);
+
+  it('runs the executors and invokes wrangler with the built argv', () => {
+    // Stub `wrangler` so nothing reaches Cloudflare; the stub appends its argv
+    // (one line per call) to a log the test reads back. The package manager
+    // prepends the workspace's node_modules/.bin to PATH when nx runs a target,
+    // so the real wrangler shadows anything we add to PATH — replace the
+    // resolved binary directly instead. The throwaway workspace is discarded in
+    // cleanup, so overwriting it is safe.
+    const logFile = join(tmpProjPath(), 'wrangler-calls.log');
+    const stub = `#!/bin/sh\necho "$@" >> "$WRANGLER_E2E_LOG"\n`;
+    const binCandidates = [
+      join(tmpProjPath(), 'node_modules', '.bin', 'wrangler'),
+      join(tmpProjPath(), 'apps', app, 'node_modules', '.bin', 'wrangler'),
+    ];
+    let stubbed = 0;
+    for (const bin of binCandidates) {
+      if (existsSync(bin)) {
+        rmSync(bin, { force: true });
+        writeFileSync(bin, stub);
+        chmodSync(bin, 0o755);
+        stubbed++;
+      }
+    }
+    expect(stubbed).toBeGreaterThan(0);
+
+    const env = { WRANGLER_E2E_LOG: logFile };
+
+    // `--remote` is a typed executor option, so nx threads it into the argv.
+    runCLI(`run ${app}:d1:list --remote`, { env });
+    runCLI(`run ${app}:secret:list`, { env });
+
+    const calls = readFileSync(logFile, 'utf-8');
+    expect(calls).toContain('d1 migrations list my-db --remote');
+    expect(calls).toContain('secret list');
+  }, 240_000);
+});

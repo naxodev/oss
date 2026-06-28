@@ -116,7 +116,7 @@ export default defineConfig({
           entryPoints: ['../../packages/nx-cloudflare/src/index.ts'],
           tsconfig: '../../packages/nx-cloudflare/tsconfig.lib.json',
           output: 'reference',
-          sidebar: { label: '@naxodev/nx-cloudflare', collapsed: true },
+          sidebar: { label: 'API reference', collapsed: true },
           typeDoc: {
             excludeInternal: true,
             disableGit: true,
@@ -146,10 +146,22 @@ export default defineConfig({
         {
           label: 'Guides',
           items: [
-            { slug: 'guides/generators-application' },
-            { slug: 'guides/generators-init' },
-            { slug: 'guides/generators-library' },
-            { slug: 'guides/generators-binding' },
+            {
+              label: 'Generators',
+              items: [
+                { slug: 'guides/generators-application' },
+                { slug: 'guides/generators-init' },
+                { slug: 'guides/generators-library' },
+                { slug: 'guides/generators-binding' },
+              ],
+            },
+            {
+              label: 'Targets',
+              items: [
+                { slug: 'guides/d1-migrations' },
+                { slug: 'guides/secrets' },
+              ],
+            },
           ],
         },
         {

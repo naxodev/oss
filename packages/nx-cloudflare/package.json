@@ -38,6 +38,7 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "generators": "./generators.json",
+  "executors": "./executors.json",
   "nx-migrations": "./migrations.json",
   "exports": {
     ".": {
@@ -53,6 +54,10 @@
     "./migrations.json": "./migrations.json",
     "./src/generators/*/generator": "./src/generators/*/generator.js",
     "./src/generators/*/schema.json": "./src/generators/*/schema.json",
-    "./src/generators/*/schema": "./src/generators/*/schema.d.ts"
+    "./src/generators/*/schema": "./src/generators/*/schema.d.ts",
+    "./executors.json": "./executors.json",
+    "./src/executors/*/executor": "./src/executors/*/executor.js",
+    "./src/executors/*/schema.json": "./src/executors/*/schema.json",
+    "./src/executors/*/schema": "./src/executors/*/schema.d.ts"
   }
 }
