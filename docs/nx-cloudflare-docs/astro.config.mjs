@@ -150,6 +150,7 @@ export default defineConfig({
               label: 'Generators',
               items: [
                 { slug: 'guides/generators-application' },
+                { slug: 'guides/generators-configuration' },
                 { slug: 'guides/generators-init' },
                 { slug: 'guides/generators-library' },
                 { slug: 'guides/generators-binding' },

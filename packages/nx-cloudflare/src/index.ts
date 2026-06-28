@@ -14,3 +14,5 @@ export type { Schema as CloudflareApplicationGeneratorSchema } from './generator
 export type { NxCloudflareLibraryGeneratorSchema } from './generators/library/schema';
 export type { InitGeneratorSchema } from './generators/init/schema';
 export type { Schema as BindingGeneratorSchema } from './generators/binding/schema';
+export { configurationGenerator } from './generators/configuration/generator';
+export type { ConfigurationGeneratorSchema } from './generators/configuration/schema';
