@@ -51,32 +51,26 @@ describe('d1 + secret executors', () => {
     const project = JSON.parse(output.slice(output.indexOf('{')));
     const targets = project.targets;
 
-    // One D1 binding -> bare d1-* names, with the database_name baked in.
-    expect(targets['d1-apply'].executor).toBe('@naxodev/nx-cloudflare:d1');
-    expect(targets['d1-apply'].options).toMatchObject({
-      command: 'apply',
-      database: 'my-db',
-    });
-    expect(targets['d1-create'].options).toMatchObject({
-      command: 'create',
-      database: 'my-db',
-    });
-    expect(targets['d1-list'].options).toMatchObject({
-      command: 'list',
-      database: 'my-db',
-    });
+    // One d1 target: binding -> database_name map baked in, subcommands as
+    // configurations.
+    expect(targets['d1'].executor).toBe('@naxodev/nx-cloudflare:d1');
+    expect(targets['d1'].options).toMatchObject({ databases: { DB: 'my-db' } });
+    expect(Object.keys(targets['d1'].configurations).sort()).toEqual([
+      'apply',
+      'create',
+      'list',
+    ]);
+    expect(targets['d1'].configurations.apply).toEqual({ command: 'apply' });
 
-    // Secret targets are emitted for every Worker (no config signal to gate on).
-    const secretCommands = {
-      'secret-put': 'put',
-      'secret-bulk': 'bulk',
-      'secret-list': 'list',
-      'secret-delete': 'delete',
-    } as const;
-    for (const [name, command] of Object.entries(secretCommands)) {
-      expect(targets[name].executor).toBe('@naxodev/nx-cloudflare:secret');
-      expect(targets[name].options).toMatchObject({ command });
-    }
+    // One secret target, subcommands as configurations.
+    expect(targets['secret'].executor).toBe('@naxodev/nx-cloudflare:secret');
+    expect(Object.keys(targets['secret'].configurations).sort()).toEqual([
+      'bulk',
+      'delete',
+      'list',
+      'put',
+    ]);
+    expect(targets['secret'].configurations.put).toEqual({ command: 'put' });
   }, 120_000);
 
   it('runs the executors and invokes wrangler with the built argv', () => {
@@ -106,8 +100,8 @@ describe('d1 + secret executors', () => {
     const env = { WRANGLER_E2E_LOG: logFile };
 
     // `--remote` is a typed executor option, so nx threads it into the argv.
-    runCLI(`run ${app}:d1-list --remote`, { env });
-    runCLI(`run ${app}:secret-list`, { env });
+    runCLI(`run ${app}:d1:list --remote`, { env });
+    runCLI(`run ${app}:secret:list`, { env });
 
     const calls = readFileSync(logFile, 'utf-8');
     expect(calls).toContain('d1 migrations list my-db --remote');
