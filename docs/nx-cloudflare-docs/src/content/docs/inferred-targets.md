@@ -131,6 +131,7 @@ When a Worker declares more than one `d1_databases` binding, pass `--db=<binding
 
 ```bash
 bunx nx run <my-worker>:d1:apply --db=ANALYTICS --remote
+bunx nx run <my-worker>:d1:create --db=ANALYTICS --message=add_users
 ```
 
 With a single D1 database, `--db` is optional. With multiple, omitting it errors and lists the valid bindings.

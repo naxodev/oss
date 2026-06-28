@@ -99,7 +99,7 @@ nx run my-worker:secret:list
 nx run my-worker:secret:delete --name=API_KEY
 ```
 
-Secret values are never passed as arguments — `secret:put` prompts interactively, `secret:bulk` reads a JSON file (do not commit it). All targets accept `--env <environment>`.
+Secret values are never passed as arguments — `secret:put` prompts interactively, `secret:bulk` reads a JSON file (do not commit it). All configurations accept `--env <environment>`.
 
 ## Compatibility
 

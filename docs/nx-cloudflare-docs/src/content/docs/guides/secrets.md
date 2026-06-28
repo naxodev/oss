@@ -75,7 +75,7 @@ These targets act on the deployed Worker.
 
 ### Target an environment
 
-Every secret target accepts `--env` for a [Wrangler environment](https://developers.cloudflare.com/workers/wrangler/environments/):
+Every secret configuration accepts `--env` for a [Wrangler environment](https://developers.cloudflare.com/workers/wrangler/environments/):
 
 ```bash
 bunx nx run my-worker:secret:put --name=API_KEY --env=production
