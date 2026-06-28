@@ -5,7 +5,7 @@ description: Set, list, and remove a deployed Worker's secrets with the inferred
 
 import { Steps, Aside } from '@astrojs/starlight/components';
 
-Every Worker gets `secret-put`, `secret-bulk`, `secret-list`, and `secret-delete` targets that wrap `wrangler secret`. They manage the secrets bound to your **deployed** Worker. Secret values are never passed as command arguments — `secret-put` prompts for them, and `secret-bulk` reads them from a file.
+Every Worker gets a `secret` target with `put`, `bulk`, `list`, and `delete` configurations that wrap `wrangler secret`. They manage the secrets bound to your **deployed** Worker. Secret values are never passed as command arguments — `secret:put` prompts for them, and `secret:bulk` reads them from a file.
 
 ## Before you start
 
@@ -31,10 +31,10 @@ These targets act on the deployed Worker.
 1. **Set one secret**
 
    ```bash
-   bunx nx run my-worker:secret-put --name=API_KEY
+   bunx nx run my-worker:secret:put --name=API_KEY
    ```
 
-   `secret-put` prompts for the value, then uploads it to the deployed Worker.
+   `secret:put` prompts for the value, then uploads it to the deployed Worker.
 
 2. **Set many at once**
 
@@ -48,7 +48,7 @@ These targets act on the deployed Worker.
    ```
 
    ```bash
-   bunx nx run my-worker:secret-bulk --file=secrets.json
+   bunx nx run my-worker:secret:bulk --file=secrets.json
    ```
 
    Each key becomes a secret on the Worker. Do not commit this file.
@@ -56,7 +56,7 @@ These targets act on the deployed Worker.
 3. **List the Worker's secrets**
 
    ```bash
-   bunx nx run my-worker:secret-list
+   bunx nx run my-worker:secret:list
    ```
 
    Only the names are returned — values are never exposed.
@@ -64,7 +64,7 @@ These targets act on the deployed Worker.
 4. **Delete a secret**
 
    ```bash
-   bunx nx run my-worker:secret-delete --name=API_KEY
+   bunx nx run my-worker:secret:delete --name=API_KEY
    ```
 
    This removes the secret from the deployed Worker.
@@ -78,19 +78,19 @@ These targets act on the deployed Worker.
 Every secret target accepts `--env` for a [Wrangler environment](https://developers.cloudflare.com/workers/wrangler/environments/):
 
 ```bash
-bunx nx run my-worker:secret-put --name=API_KEY --env=production
+bunx nx run my-worker:secret:put --name=API_KEY --env=production
 ```
 
 ## Verify
 
-`secret-list` shows the secret you set:
+`secret:list` shows the secret you set:
 
 ```bash
-bunx nx run my-worker:secret-list
+bunx nx run my-worker:secret:list
 ```
 
 ## Next steps
 
 - [Run D1 migrations](/guides/d1-migrations) — the other Day-2 workflow
-- [Inferred targets](/inferred-targets) — the full `secret-*` target and option reference
+- [Inferred targets](/inferred-targets) — the full `secret` target and option reference
 - [application generator](/guides/generators-application) — scaffold a Worker

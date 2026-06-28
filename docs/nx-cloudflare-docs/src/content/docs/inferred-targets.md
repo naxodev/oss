@@ -89,82 +89,92 @@ See the [`wrangler tail` CLI docs](https://developers.cloudflare.com/workers/wra
 
 ## D1 migration targets
 
-D1 migration targets are inferred **only for jsonc/json Wrangler configs** (not TOML — there is no TOML parser in the plugin). One set of targets is emitted **per `d1_databases` binding**. With a single binding the targets use bare names (`d1-apply`, `d1-create`, `d1-list`); when a Worker has multiple D1 bindings the binding name is appended as a suffix (`d1-apply-DB`, `d1-apply-ANALYTICS`, etc.).
+The plugin infers a `d1` target for each `d1_databases` binding in the Wrangler config. D1 inference is **only for jsonc/json Wrangler configs** (not TOML — there is no TOML parser in the plugin). The `d1` target exposes three Nx configurations: `apply`, `create`, and `list`.
 
-Unlike the Worker lifecycle targets above, the D1 and secret targets are backed by a dedicated executor and accept **only the typed options documented below** (`--remote`, `--env`, `--message`, `--name`, `--file`). Arbitrary `-- <wrangler flag>` passthrough does **not** apply to them.
+Unlike the Worker lifecycle targets above, the D1 and secret targets are backed by a dedicated executor and accept **only the typed options documented below** (`--remote`, `--env`, `--message`, `--name`, `--file`, `--db`). Arbitrary `-- <wrangler flag>` passthrough does **not** apply to them.
 
-### d1-apply
+### d1:apply
 
 Runs `wrangler d1 migrations apply <database>`. Applies pending migrations to the **local** database by default; pass `--remote` for production. Accepts `--env <environment>`.
 
 ```bash
-bunx nx run <my-worker>:d1-apply           # apply locally (default)
-bunx nx run <my-worker>:d1-apply --remote  # apply to the remote database
+bunx nx run <my-worker>:d1:apply           # apply locally (default)
+bunx nx run <my-worker>:d1:apply --remote  # apply to the remote database
 ```
 
 See the [`wrangler d1 migrations apply` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/d1/#d1-migrations-apply).
 
-### d1-create
+### d1:create
 
 Runs `wrangler d1 migrations create <database> <message>`. Scaffolds a new migration file. Requires `--message`.
 
 ```bash
-bunx nx run <my-worker>:d1-create --message=add_users
+bunx nx run <my-worker>:d1:create --message=add_users
 ```
 
 See the [`wrangler d1 migrations create` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/d1/#d1-migrations-create).
 
-### d1-list
+### d1:list
 
 Runs `wrangler d1 migrations list <database>`. Lists **unapplied** (pending) migration files — those not yet applied to the target database. Uses the **local** database by default; pass `--remote` for production. Accepts `--env <environment>`.
 
 ```bash
-bunx nx run <my-worker>:d1-list            # list local migrations
-bunx nx run <my-worker>:d1-list --remote   # list remote migrations
+bunx nx run <my-worker>:d1:list            # list local migrations
+bunx nx run <my-worker>:d1:list --remote   # list remote migrations
 ```
 
 See the [`wrangler d1 migrations list` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/d1/#d1-migrations-list).
 
+### Selecting a database with `--db`
+
+When a Worker declares more than one `d1_databases` binding, pass `--db=<binding>` to select which database a command targets:
+
+```bash
+bunx nx run <my-worker>:d1:apply --db=ANALYTICS --remote
+```
+
+With a single D1 database, `--db` is optional. With multiple, omitting it errors and lists the valid bindings.
+
 ## Secret targets
 
-Secret targets are emitted for **every Worker** — secrets are not declared in the Wrangler config so no config parsing is needed. Secret values are **never passed as arguments**. All targets accept `--env <environment>`.
+The plugin infers a `secret` target for **every Worker** — secrets are not declared in the Wrangler config so no config parsing is needed. Secret values are **never passed as arguments**. All configurations accept `--env <environment>`. The `secret` target exposes four Nx configurations: `put`, `bulk`, `list`, and `delete`.
 
-### secret-put
+### secret:put
 
 Runs `wrangler secret put <name>`. Prompts interactively for the secret value; requires `--name`.
 
 ```bash
-bunx nx run <my-worker>:secret-put --name=API_KEY
+bunx nx run <my-worker>:secret:put --name=API_KEY
 ```
 
 See the [`wrangler secret put` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-put).
 
-### secret-bulk
+### secret:bulk
 
 Runs `wrangler secret bulk <file>`. Uploads multiple secrets from a JSON file; requires `--file=<path>`. Do not commit that file to source control.
 
 ```bash
-bunx nx run <my-worker>:secret-bulk --file=secrets.json
+bunx nx run <my-worker>:secret:bulk --file=secrets.json
 ```
 
 See the [`wrangler secret bulk` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-bulk).
 
-### secret-list
+### secret:list
 
 Runs `wrangler secret list`. Lists all secrets bound to the Worker.
 
 ```bash
-bunx nx run <my-worker>:secret-list
+bunx nx run <my-worker>:secret:list
 ```
 
 See the [`wrangler secret list` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-list).
 
-### secret-delete
+### secret:delete
 
 Runs `wrangler secret delete <name>`. Deletes a secret; requires `--name`.
 
 ```bash
-bunx nx run <my-worker>:secret-delete --name=API_KEY
+bunx nx run <my-worker>:secret:delete --name=API_KEY
 ```
 
 See the [`wrangler secret delete` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-delete).

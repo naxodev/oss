@@ -27,7 +27,7 @@ Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). 
 - Generate Cloudflare Worker libraries (publishable, with bundler/linter/test options).
 - Add bindings to an existing Worker (KV, R2, D1, Durable Objects, Queues, Workflows, Service/RPC) — edits `wrangler.jsonc`, stubs code + migrations, and refreshes `wrangler types`.
 - Inferred `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, and `tail` targets via the `@naxodev/nx-cloudflare/plugin` inference plugin — no hand-written `project.json` targets.
-- Inferred D1 migration targets (`d1-apply`, `d1-create`, `d1-list`) for each D1 binding, and secret targets (`secret-put`, `secret-bulk`, `secret-list`, `secret-delete`) for every Worker — backed by the `:d1` and `:secret` executors.
+- Inferred `d1` target (configurations `apply`/`create`/`list`) for each D1 binding, and a `secret` target (configurations `put`/`bulk`/`list`/`delete`) for every Worker — backed by the `:d1` and `:secret` executors.
 - Customizable inferred target names via `CloudflarePluginOptions`.
 - Vitest wired automatically when the C3 template ships a Vitest config.
 
@@ -71,27 +71,35 @@ Arguments after `--` are forwarded to `wrangler versions deploy`. Run
 
 ### Run D1 migrations
 
-For each D1 binding in `wrangler.jsonc`, the plugin infers `d1-apply`, `d1-create`, and `d1-list` targets (suffixed by binding name when a Worker has multiple D1 databases, e.g. `d1-apply-DB`). D1 inference is **jsonc/json only**.
+For each D1 binding in `wrangler.jsonc`, the plugin infers a `d1` target with `apply`, `create`, and `list` configurations. D1 inference is **jsonc/json only**.
 
 ```sh
-nx run my-worker:d1-create --message=add_users   # scaffold a migration
-nx run my-worker:d1-apply                        # apply locally (default)
-nx run my-worker:d1-apply --remote               # apply to the remote database
-nx run my-worker:d1-list --remote                # list pending migrations
+nx run my-worker:d1:create --message=add_users   # scaffold a migration
+nx run my-worker:d1:apply                        # apply locally (default)
+nx run my-worker:d1:apply --remote               # apply to the remote database
+nx run my-worker:d1:list --remote                # list pending migrations
 ```
+
+When a Worker declares more than one `d1_databases` binding, select which one a command targets with `--db=<binding>`:
+
+```bash
+nx run my-worker:d1:apply --db=ANALYTICS --remote
+```
+
+With a single D1 database, `--db` is optional. With multiple, omitting it errors and lists the valid bindings.
 
 ### Manage secrets
 
-Every Worker gets `secret-put`, `secret-bulk`, `secret-list`, and `secret-delete`.
+Every Worker gets a `secret` target with `put`, `bulk`, `list`, and `delete` configurations.
 
 ```sh
-nx run my-worker:secret-put --name=API_KEY        # interactive prompt for the value
-nx run my-worker:secret-bulk --file=secrets.json  # upload many from a JSON file
-nx run my-worker:secret-list
-nx run my-worker:secret-delete --name=API_KEY
+nx run my-worker:secret:put --name=API_KEY        # interactive prompt for the value
+nx run my-worker:secret:bulk --file=secrets.json  # upload many from a JSON file
+nx run my-worker:secret:list
+nx run my-worker:secret:delete --name=API_KEY
 ```
 
-Secret values are never passed as arguments — `secret-put` prompts interactively, `secret-bulk` reads a JSON file (do not commit it). All targets accept `--env <environment>`.
+Secret values are never passed as arguments — `secret:put` prompts interactively, `secret:bulk` reads a JSON file (do not commit it). All targets accept `--env <environment>`.
 
 ## Compatibility
 

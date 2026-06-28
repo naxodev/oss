@@ -351,7 +351,9 @@ describe('nx-cloudflare createNodes', () => {
 
     expect(targets['migrate'].executor).toBe('@naxodev/nx-cloudflare:d1');
     expect(targets['migrate'].options).toEqual({ databases: { DB: 'my-db' } });
-    expect(targets['env-secret'].executor).toBe('@naxodev/nx-cloudflare:secret');
+    expect(targets['env-secret'].executor).toBe(
+      '@naxodev/nx-cloudflare:secret'
+    );
   });
 
   it('handles multiple configs in one invocation, isolating failures', async () => {

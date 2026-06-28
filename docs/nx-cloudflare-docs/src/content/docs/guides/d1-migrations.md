@@ -1,11 +1,11 @@
 ---
 title: Run D1 migrations
-description: Create and apply D1 database migrations for a Worker with the inferred d1-create, d1-apply, and d1-list targets.
+description: Create and apply D1 database migrations for a Worker with the inferred d1 target's create, apply, and list configurations.
 ---
 
 import { Steps, Aside } from '@astrojs/starlight/components';
 
-For each D1 binding in a Worker's `wrangler.jsonc`, the plugin infers `d1-create`, `d1-apply`, and `d1-list` targets that wrap `wrangler d1 migrations`. Use them to evolve your D1 schema from local development through to production — you never pass the database name, since each target bakes in the one from your config.
+For each D1 binding in a Worker's `wrangler.jsonc`, the plugin infers a `d1` target with `create`, `apply`, and `list` configurations that wrap `wrangler d1 migrations`. Use them to evolve your D1 schema from local development through to production.
 
 ## Before you start
 
@@ -19,7 +19,7 @@ For each D1 binding in a Worker's `wrangler.jsonc`, the plugin infers `d1-create
 1. **Create a migration**
 
    ```bash
-   bunx nx run my-worker:d1-create --message=create_users
+   bunx nx run my-worker:d1:create --message=create_users
    ```
 
    This writes a timestamped `.sql` file in the database's migrations directory (`migrations/` by default).
@@ -38,15 +38,15 @@ For each D1 binding in a Worker's `wrangler.jsonc`, the plugin infers `d1-create
 3. **Apply locally**
 
    ```bash
-   bunx nx run my-worker:d1-apply
+   bunx nx run my-worker:d1:apply
    ```
 
-   `d1-apply` defaults to `--local`, so this runs against the local database used by `nx run my-worker:serve` (`wrangler dev`).
+   `d1:apply` defaults to `--local`, so this runs against the local database used by `nx run my-worker:serve` (`wrangler dev`).
 
 4. **Apply to production**
 
    ```bash
-   bunx nx run my-worker:d1-apply --remote
+   bunx nx run my-worker:d1:apply --remote
    ```
 
    The `--remote` flag runs the pending migrations against the live D1 database.
@@ -58,24 +58,26 @@ For each D1 binding in a Worker's `wrangler.jsonc`, the plugin infers `d1-create
 ### List pending migrations
 
 ```bash
-bunx nx run my-worker:d1-list            # local
-bunx nx run my-worker:d1-list --remote   # remote
+bunx nx run my-worker:d1:list            # local
+bunx nx run my-worker:d1:list --remote   # remote
 ```
 
 ### Multiple D1 databases
 
-When a Worker has more than one `d1_databases` binding, the targets are suffixed by the binding name so each database has its own set:
+When a Worker declares more than one `d1_databases` binding, select which one a command targets with `--db=<binding>`:
 
 ```bash
-bunx nx run my-worker:d1-apply-ANALYTICS --remote
+bunx nx run my-worker:d1:apply --db=ANALYTICS --remote
 ```
+
+With a single D1 database, `--db` is optional. With multiple, omitting it errors and lists the valid bindings.
 
 ### Target an environment
 
-Any `d1-apply`/`d1-list` invocation accepts `--env` for a [Wrangler environment](https://developers.cloudflare.com/workers/wrangler/environments/):
+Any `d1:apply`/`d1:list` invocation accepts `--env` for a [Wrangler environment](https://developers.cloudflare.com/workers/wrangler/environments/):
 
 ```bash
-bunx nx run my-worker:d1-apply --remote --env=production
+bunx nx run my-worker:d1:apply --remote --env=production
 ```
 
 ### Apply migrations during deploy
@@ -83,19 +85,19 @@ bunx nx run my-worker:d1-apply --remote --env=production
 The plugin does not chain migrations into `deploy` automatically. To apply before deploying in CI, run them in sequence:
 
 ```bash
-bunx nx run my-worker:d1-apply --remote && bunx nx run my-worker:deploy
+bunx nx run my-worker:d1:apply --remote && bunx nx run my-worker:deploy
 ```
 
 ## Verify
 
-After applying, `d1-list` reports no pending migrations:
+After applying, `d1:list` reports no pending migrations:
 
 ```bash
-bunx nx run my-worker:d1-list --remote
+bunx nx run my-worker:d1:list --remote
 ```
 
 ## Next steps
 
 - [Manage Worker secrets](/guides/secrets) — the other Day-2 workflow
 - [binding generator](/guides/generators-binding) — add the D1 binding these targets operate on
-- [Inferred targets](/inferred-targets) — the full `d1-*` target and option reference
+- [Inferred targets](/inferred-targets) — the full `d1` target and option reference
