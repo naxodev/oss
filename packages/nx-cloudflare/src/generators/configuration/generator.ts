@@ -1,19 +1,25 @@
 import {
   addDependenciesToPackageJson,
-  createProjectGraphAsync,
   formatFiles,
   generateFiles,
   GeneratorCallback,
-  getProjects,
   installPackagesTask,
   joinPathFragments,
-  offsetFromRoot,
+  logger,
   Tree,
 } from '@nx/devkit';
 import { join } from 'node:path';
 import type { ConfigurationGeneratorSchema } from './schema';
-import { findWranglerConfig } from '../../utils/wrangler-config';
+import {
+  findWranglerConfig,
+  wranglerSchemaPath,
+} from '../../utils/wrangler-config';
 import { ensurePluginRegistered } from '../../utils/inference-plugin';
+import { resolveProjectRootOrThrow } from '../../utils/project';
+import {
+  ensureGitignored,
+  WORKER_CONFIGURATION_DTS,
+} from '../../utils/gitignore';
 import {
   cloudflareWorkersTypeVersions,
   wranglerVersion,
@@ -66,7 +72,9 @@ export async function configurationGenerator(
     options
   );
 
-  addToGitignore(tree, options.projectRoot, 'worker-configuration.d.ts');
+  ensureGitignored(tree, options.projectRoot, WORKER_CONFIGURATION_DTS);
+
+  warnOnLikelyMisconfiguration(tree, options);
 
   if (!options.skipFormat) {
     await formatFiles(tree);
@@ -79,60 +87,66 @@ async function normalizeOptions(
   tree: Tree,
   schema: ConfigurationGeneratorSchema
 ): Promise<NormalizedSchema> {
-  const projectRoot = await resolveProjectRoot(tree, schema.project);
-  if (!projectRoot) {
-    const available = [...getProjects(tree).keys()];
-    throw new Error(
-      `Project "${schema.project}" not found.` +
-        (available.length ? ` Available projects: ${available.join(', ')}` : '')
-    );
-  }
+  const projectRoot = await resolveProjectRootOrThrow(tree, schema.project);
 
   const template = schema.template ?? 'worker';
   return {
     projectRoot,
     template,
-    name: schema.name ?? schema.project,
+    name: schema.name ?? toWorkerName(schema.project),
     main: schema.main ?? 'src/index.ts',
     assetsDir: schema.assetsDir ?? 'dist',
     compatibilityDate: schema.compatibilityDate ?? today(),
     nodejsCompat: schema.nodejsCompat ?? false,
     skipFormat: schema.skipFormat ?? false,
-    schemaPath: `${offsetFromRoot(
-      projectRoot
-    )}node_modules/wrangler/config-schema.json`,
+    schemaPath: wranglerSchemaPath(projectRoot),
   };
 }
 
-// Resolve a project's root, preferring the Tree (which sees project.json /
-// package.json projects — all that's available in unit tests) and falling back
-// to the project graph so inference-only Workers resolve too. Mirrors the
-// binding generator's resolveProjectRoot.
-async function resolveProjectRoot(
+// Surface the two ways an authored config can be technically valid yet not work,
+// rather than handing back a green run that fails on the first serve/deploy.
+function warnOnLikelyMisconfiguration(
   tree: Tree,
-  name: string
-): Promise<string | null> {
-  const fromTree = getProjects(tree).get(name);
-  if (fromTree) {
-    return fromTree.root;
+  options: NormalizedSchema
+): void {
+  // Targets are inferred from the wrangler config only when the project root has
+  // a project.json or package.json sibling (see plugin.ts) — otherwise this
+  // generator wires nothing reachable.
+  const hasManifest =
+    tree.exists(joinPathFragments(options.projectRoot, 'project.json')) ||
+    tree.exists(joinPathFragments(options.projectRoot, 'package.json'));
+  if (!hasManifest) {
+    logger.warn(
+      `${options.projectRoot} has no project.json or package.json — Cloudflare ` +
+        `targets won't be inferred until one exists at the project root.`
+    );
   }
-  try {
-    const graph = await createProjectGraphAsync({ exitOnError: false });
-    return graph.nodes[name]?.data.root ?? null;
-  } catch {
-    return null;
+
+  // The generator points `main` at the app's own entry (it never scaffolds one);
+  // warn when that entry is missing so the user isn't surprised at deploy time.
+  if (options.template !== 'spa') {
+    const mainPath = joinPathFragments(options.projectRoot, options.main);
+    if (!tree.exists(mainPath)) {
+      logger.warn(
+        `Worker entry "${options.main}" does not exist in ${options.projectRoot}. ` +
+          `wrangler.jsonc points "main" at it — create it (or pass --main) before \`nx serve\`/\`nx deploy\`.`
+      );
+    }
   }
 }
 
-function addToGitignore(tree: Tree, projectRoot: string, entry: string): void {
-  const path = joinPathFragments(projectRoot, '.gitignore');
-  const existing = tree.exists(path) ? tree.read(path, 'utf-8') ?? '' : '';
-  const lines = existing.split('\n').map((line) => line.trim());
-  if (lines.includes(entry)) {
-    return;
-  }
-  const prefix = existing.length === 0 || existing.endsWith('\n') ? '' : '\n';
-  tree.write(path, `${existing}${prefix}${entry}\n`);
+// Cloudflare Worker names must be lowercase alphanumeric + hyphens. Derive a
+// valid default from a possibly scoped/cased Nx project name (e.g. "@org/My_App"
+// → "org-my-app"). An explicit --name is the user's responsibility.
+//
+// Implemented with split/filter (not an anchored `/^-+|-+$/` trim) so it stays
+// linear-time — the trim regex backtracks polynomially on hyphen-heavy input.
+function toWorkerName(raw: string): string {
+  return raw
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+    .join('-');
 }
 
 function today(): string {

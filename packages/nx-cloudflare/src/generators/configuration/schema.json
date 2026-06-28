@@ -35,7 +35,7 @@
     },
     "name": {
       "type": "string",
-      "description": "The Worker name written to wrangler.jsonc. Defaults to the project name."
+      "description": "The Worker name written to wrangler.jsonc. Defaults to a sanitized form of the project name (lowercase alphanumeric + hyphens, as Cloudflare requires)."
     },
     "main": {
       "type": "string",
@@ -45,7 +45,7 @@
     "assetsDir": {
       "type": "string",
       "default": "dist",
-      "description": "Static assets directory (project-relative). Used by 'spa' and 'fullstack'."
+      "description": "Static assets directory wrangler serves, relative to the project root. Must point at your build output — Nx's default output lives at the workspace root (e.g. '../../dist/apps/web'), so override this unless your framework builds into the project. Used by 'spa' and 'fullstack'."
     },
     "compatibilityDate": {
       "type": "string",

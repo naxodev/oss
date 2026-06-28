@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { describe, it, expect, beforeEach, spyOn } from 'bun:test';
 import {
   addProjectConfiguration,
+  logger,
   readJson,
   readNxJson,
   Tree,
@@ -148,6 +149,44 @@ describe('configuration generator', () => {
     expect((config['assets'] as Record<string, unknown>)['binding']).toBe(
       'ASSETS'
     );
+  });
+
+  it('sanitizes the default Worker name from a scoped/cased project name', async () => {
+    addProjectConfiguration(tree, '@acme/My_App', {
+      root: 'apps/my-app',
+      projectType: 'application',
+      sourceRoot: 'apps/my-app/src',
+      targets: {},
+    });
+    await configurationGenerator(tree, { project: '@acme/My_App' });
+    const text = tree.read('apps/my-app/wrangler.jsonc', 'utf-8') as string;
+    const config = parse(text) as Record<string, unknown>;
+    expect(config['name']).toBe('acme-my-app');
+  });
+
+  it('warns when the Worker entry file does not exist', async () => {
+    const warn = spyOn(logger, 'warn');
+    try {
+      // Seeded project has no src/index.ts, the default `main`.
+      await configurationGenerator(tree, { project: PROJECT });
+      expect(
+        warn.mock.calls.some(([msg]) => String(msg).includes('src/index.ts'))
+      ).toBe(true);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('does not warn about a missing entry for the spa template', async () => {
+    const warn = spyOn(logger, 'warn');
+    try {
+      await configurationGenerator(tree, { project: PROJECT, template: 'spa' });
+      expect(
+        warn.mock.calls.some(([msg]) => String(msg).includes('Worker entry'))
+      ).toBe(false);
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   it('does not duplicate worker-configuration.d.ts when .gitignore already contains it', async () => {

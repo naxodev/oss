@@ -1,4 +1,4 @@
-import { joinPathFragments, Tree } from '@nx/devkit';
+import { joinPathFragments, offsetFromRoot, Tree } from '@nx/devkit';
 import {
   applyEdits,
   modify,
@@ -6,6 +6,17 @@ import {
   type FormattingOptions,
   type JSONPath,
 } from 'jsonc-parser';
+
+/**
+ * The wrangler config `$schema`, pointed at a workspace-root-relative path. In a
+ * hoisted monorepo `wrangler` lives in the root `node_modules`, not the project's,
+ * so an `offsetFromRoot`-relative path is what lets editors validate the config.
+ */
+export function wranglerSchemaPath(projectRoot: string): string {
+  return `${offsetFromRoot(
+    projectRoot
+  )}node_modules/wrangler/config-schema.json`;
+}
 
 export const WRANGLER_CONFIG_FILES = [
   'wrangler.jsonc',

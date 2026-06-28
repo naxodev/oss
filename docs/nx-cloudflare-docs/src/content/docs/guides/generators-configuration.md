@@ -32,15 +32,15 @@ Running the generator:
 
 ## Options
 
-| Option              | Type    | Default        | Description                                                                   |
-| ------------------- | ------- | -------------- | ----------------------------------------------------------------------------- |
-| `project`           | string  | _(required)_   | The existing Nx project to add Cloudflare configuration to.                   |
-| `template`          | string  | `worker`       | Shape of the generated `wrangler.jsonc`. One of `worker`, `spa`, `fullstack`. |
-| `name`              | string  |                | Worker name written to `wrangler.jsonc`. Defaults to the project name.        |
-| `main`              | string  | `src/index.ts` | Worker entry point (project-relative). Ignored for the `spa` template.        |
-| `assetsDir`         | string  | `dist`         | Static assets directory (project-relative). Used by `spa` and `fullstack`.    |
-| `compatibilityDate` | string  |                | `compatibility_date` in `wrangler.jsonc` (YYYY-MM-DD). Defaults to today.     |
-| `nodejsCompat`      | boolean | `false`        | Add `compatibility_flags: ["nodejs_compat"]` to `wrangler.jsonc`.             |
+| Option              | Type    | Default        | Description                                                                                                                                                                                                                                                                           |
+| ------------------- | ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `project`           | string  | _(required)_   | The existing Nx project to add Cloudflare configuration to.                                                                                                                                                                                                                           |
+| `template`          | string  | `worker`       | Shape of the generated `wrangler.jsonc`. One of `worker`, `spa`, `fullstack`.                                                                                                                                                                                                         |
+| `name`              | string  |                | Worker name written to `wrangler.jsonc`. Defaults to a sanitized form of the project name (lowercase + hyphens, as Cloudflare requires).                                                                                                                                              |
+| `main`              | string  | `src/index.ts` | Worker entry point (project-relative). The generator does not create it — point it at your app's entry. Ignored for the `spa` template.                                                                                                                                               |
+| `assetsDir`         | string  | `dist`         | Static assets directory wrangler serves, relative to the project root. Must point at your build output — Nx's default output lives at the workspace root (e.g. `../../dist/apps/web`), so override this unless your framework builds into the project. Used by `spa` and `fullstack`. |
+| `compatibilityDate` | string  |                | `compatibility_date` in `wrangler.jsonc` (YYYY-MM-DD). Defaults to today.                                                                                                                                                                                                             |
+| `nodejsCompat`      | boolean | `false`        | Add `compatibility_flags: ["nodejs_compat"]` to `wrangler.jsonc`.                                                                                                                                                                                                                     |
 
 ## Framework-agnostic note
 
