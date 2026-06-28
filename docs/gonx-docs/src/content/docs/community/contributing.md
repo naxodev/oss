@@ -36,20 +36,20 @@ Or run the whole project through Nx (each spec runs in its own bun process for
 mock isolation):
 
 ```bash
-bunx nx test gonx
+bunx nx run gonx:test
 ```
 
 End-to-end tests spin up a local Verdaccio registry and install the published
 tarball into a generated workspace:
 
 ```bash
-bunx nx e2e gonx-e2e
+bunx nx run gonx-e2e:e2e
 ```
 
 ## Linting and formatting
 
 ```bash
-bunx nx lint gonx
+bunx nx run gonx:lint
 bunx nx format:check
 bunx nx format:write
 ```
