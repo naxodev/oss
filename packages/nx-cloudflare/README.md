@@ -52,7 +52,7 @@ Wire `wrangler.jsonc` and the deploy/serve/types targets onto an app you already
 have (choose `worker`, `spa`, or `fullstack`):
 
 ```shell
-nx g @naxodev/nx-cloudflare:configuration my-app --template=spa
+nx g @naxodev/nx-cloudflare:configuration --project=my-app --template=spa
 ```
 
 ### Add a binding to a Worker

@@ -19,7 +19,7 @@ Adopting Cloudflare in an existing workspace has two layers:
 ## Usage
 
 ```bash
-bunx nx g @naxodev/nx-cloudflare:configuration <project>
+bunx nx g @naxodev/nx-cloudflare:configuration --project=<project>
 ```
 
 ## What it does
@@ -60,7 +60,7 @@ The `configuration` generator does **not** install or configure a framework. If 
 Add SPA (static-only) Cloudflare deployment to an existing `web` project whose build output lands in `dist/web`:
 
 ```bash
-bunx nx g @naxodev/nx-cloudflare:configuration web --template=spa --assetsDir=dist/web
+bunx nx g @naxodev/nx-cloudflare:configuration --project=web --template=spa --assetsDir=dist/web
 ```
 
 After the generator runs:
