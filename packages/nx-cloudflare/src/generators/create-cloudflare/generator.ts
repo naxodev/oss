@@ -25,6 +25,11 @@ import type { NormalizedSchema, Schema } from './schema';
 import { createCloudflareVersion, nxVitestVersion } from '../../utils/versions';
 import { runC3 } from '../../utils/run-c3';
 import { importDirectoryToTree } from '../../utils/import-tree';
+import {
+  ensureGitignored,
+  WORKER_CONFIGURATION_DTS,
+} from '../../utils/gitignore';
+import { wranglerSchemaPath } from '../../utils/wrangler-config';
 
 /**
  * Scaffolds a Cloudflare Worker application by delegating to Cloudflare's
@@ -98,37 +103,15 @@ function pruneScaffoldExtras(tree: Tree, projectRoot: string): void {
   }
 }
 
-// `wrangler types` output that C3 typically emits during scaffolding. It is the
-// `typegen` target's declared Nx output (see plugin.ts), so it is a build
-// artifact — never committed, regenerated on demand via `nx typegen`. Prune any
-// scaffolded copy (a no-op when the template ships none) and keep it out of
-// version control.
-const GENERATED_TYPES_FILE = 'worker-configuration.d.ts';
-
 function handleGeneratedTypes(tree: Tree, projectRoot: string): void {
-  const path = joinPathFragments(projectRoot, GENERATED_TYPES_FILE);
+  // `wrangler types` output C3 typically emits during scaffolding — a build
+  // artifact (the typegen target's Nx output), so prune any scaffolded copy and
+  // keep it out of version control.
+  const path = joinPathFragments(projectRoot, WORKER_CONFIGURATION_DTS);
   if (tree.exists(path)) {
     tree.delete(path);
   }
-  ensureGitignored(tree, projectRoot, GENERATED_TYPES_FILE);
-}
-
-// Append an entry to the project's `.gitignore` if absent (matching whole
-// lines so a substring never masks a real entry). Creates the file when a
-// template ships without one. C3 keeps its own ignores; this only adds.
-function ensureGitignored(
-  tree: Tree,
-  projectRoot: string,
-  entry: string
-): void {
-  const path = joinPathFragments(projectRoot, '.gitignore');
-  const existing = tree.exists(path) ? tree.read(path, 'utf-8') ?? '' : '';
-  const lines = existing.split('\n').map((line) => line.trim());
-  if (lines.includes(entry)) {
-    return;
-  }
-  const prefix = existing.length === 0 || existing.endsWith('\n') ? '' : '\n';
-  tree.write(path, `${existing}${prefix}${entry}\n`);
+  ensureGitignored(tree, projectRoot, WORKER_CONFIGURATION_DTS);
 }
 
 // Targets are always inferred from the Wrangler config (createNodes), so a
@@ -279,7 +262,6 @@ const WRANGLER_CONFIG_FILES = [
 // Retarget it via offsetFromRoot so editors still validate the config. Done as a
 // string replace to preserve JSONC comments. No-op for non-relative schemas.
 function retargetWranglerSchema(tree: Tree, projectRoot: string): void {
-  const offset = offsetFromRoot(projectRoot);
   for (const file of WRANGLER_CONFIG_FILES) {
     const path = joinPathFragments(projectRoot, file);
     const content = tree.exists(path) ? tree.read(path, 'utf-8') : null;
@@ -288,7 +270,7 @@ function retargetWranglerSchema(tree: Tree, projectRoot: string): void {
     }
     const retargeted = content.replace(
       /(\$schema["']?\s*[:=]\s*["'])(?:\.\/)?node_modules\/wrangler\/config-schema\.json/,
-      `$1${offset}node_modules/wrangler/config-schema.json`
+      `$1${wranglerSchemaPath(projectRoot)}`
     );
     if (retargeted !== content) {
       tree.write(path, retargeted);

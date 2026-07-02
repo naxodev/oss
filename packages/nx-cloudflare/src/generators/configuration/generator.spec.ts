@@ -1,0 +1,204 @@
+import { describe, it, expect, beforeEach, spyOn } from 'bun:test';
+import {
+  addProjectConfiguration,
+  logger,
+  readJson,
+  readNxJson,
+  Tree,
+} from '@nx/devkit';
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
+import { parse } from 'jsonc-parser';
+import { configurationGenerator } from './generator';
+
+const PROJECT = 'web';
+const ROOT = 'apps/web';
+
+function seedProject(tree: Tree): void {
+  addProjectConfiguration(tree, PROJECT, {
+    root: ROOT,
+    projectType: 'application',
+    sourceRoot: `${ROOT}/src`,
+    targets: {},
+  });
+}
+
+function readConfig(tree: Tree): Record<string, unknown> {
+  const text = tree.read(`${ROOT}/wrangler.jsonc`, 'utf-8');
+  expect(text).toBeTruthy();
+  return parse(text as string) as Record<string, unknown>;
+}
+
+describe('configuration generator', () => {
+  let tree: Tree;
+
+  beforeEach(() => {
+    tree = createTreeWithEmptyWorkspace();
+    seedProject(tree);
+  });
+
+  it('authors a worker wrangler.jsonc with the offset $schema', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      compatibilityDate: '2026-01-01',
+    });
+
+    const config = readConfig(tree);
+    expect(config['name']).toBe('web');
+    expect(config['main']).toBe('src/index.ts');
+    expect(config['compatibility_date']).toBe('2026-01-01');
+    expect(config['$schema']).toBe(
+      '../../node_modules/wrangler/config-schema.json'
+    );
+    expect(config['assets']).toBeUndefined();
+  });
+
+  it('registers the inference plugin and installs the runtime deps', async () => {
+    await configurationGenerator(tree, { project: PROJECT });
+
+    const nxJson = readNxJson(tree);
+    const ids = (nxJson?.plugins ?? []).map((p) =>
+      typeof p === 'string' ? p : p.plugin
+    );
+    expect(ids).toContain('@naxodev/nx-cloudflare/plugin');
+
+    const pkg = readJson(tree, 'package.json');
+    expect(pkg.devDependencies['wrangler']).toBeTruthy();
+    expect(pkg.devDependencies['@cloudflare/workers-types']).toBeTruthy();
+  });
+
+  it('gitignores the typegen output', async () => {
+    await configurationGenerator(tree, { project: PROJECT });
+    const gitignore = tree.read(`${ROOT}/.gitignore`, 'utf-8');
+    expect(gitignore).toContain('worker-configuration.d.ts');
+  });
+
+  it('adds compatibility_flags when nodejsCompat is set', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      nodejsCompat: true,
+    });
+    const config = readConfig(tree);
+    expect(config['compatibility_flags']).toEqual(['nodejs_compat']);
+  });
+
+  it('throws when the project already has a wrangler config', async () => {
+    tree.write(`${ROOT}/wrangler.jsonc`, '{}');
+    await expect(
+      configurationGenerator(tree, { project: PROJECT })
+    ).rejects.toThrow(/already has a Cloudflare config/);
+  });
+
+  it('throws a helpful error for an unknown project', async () => {
+    await expect(
+      configurationGenerator(tree, { project: 'nope' })
+    ).rejects.toThrow(/not found/);
+  });
+
+  it('authors an spa wrangler.jsonc with assets and no main', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      template: 'spa',
+      assetsDir: 'dist/web',
+    });
+    const config = readConfig(tree);
+    expect(config['main']).toBeUndefined();
+    expect(config['assets']).toEqual({
+      directory: 'dist/web',
+      not_found_handling: 'single-page-application',
+    });
+  });
+
+  it('authors a fullstack wrangler.jsonc with assets binding and main', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      template: 'fullstack',
+      assetsDir: 'dist/web/client',
+      main: 'src/worker.ts',
+    });
+    const config = readConfig(tree);
+    expect(config['main']).toBe('src/worker.ts');
+    expect(config['assets']).toEqual({
+      directory: 'dist/web/client',
+      binding: 'ASSETS',
+    });
+  });
+
+  it('authors a valid spa wrangler.jsonc with compatibility_flags when nodejsCompat is true', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      template: 'spa',
+      nodejsCompat: true,
+    });
+    const config = readConfig(tree);
+    expect(config['compatibility_flags']).toEqual(['nodejs_compat']);
+    expect(config['assets']).toEqual({
+      directory: 'dist',
+      not_found_handling: 'single-page-application',
+    });
+  });
+
+  it('authors a valid fullstack wrangler.jsonc with compatibility_flags when nodejsCompat is true', async () => {
+    await configurationGenerator(tree, {
+      project: PROJECT,
+      template: 'fullstack',
+      nodejsCompat: true,
+    });
+    const config = readConfig(tree);
+    expect(config['compatibility_flags']).toEqual(['nodejs_compat']);
+    expect(config['main']).toBeTruthy();
+    expect((config['assets'] as Record<string, unknown>)['binding']).toBe(
+      'ASSETS'
+    );
+  });
+
+  it('sanitizes the default Worker name from a scoped/cased project name', async () => {
+    addProjectConfiguration(tree, '@acme/My_App', {
+      root: 'apps/my-app',
+      projectType: 'application',
+      sourceRoot: 'apps/my-app/src',
+      targets: {},
+    });
+    await configurationGenerator(tree, { project: '@acme/My_App' });
+    const text = tree.read('apps/my-app/wrangler.jsonc', 'utf-8') as string;
+    const config = parse(text) as Record<string, unknown>;
+    expect(config['name']).toBe('acme-my-app');
+  });
+
+  it('warns when the Worker entry file does not exist', async () => {
+    const warn = spyOn(logger, 'warn');
+    try {
+      // Seeded project has no src/index.ts, the default `main`.
+      await configurationGenerator(tree, { project: PROJECT });
+      expect(
+        warn.mock.calls.some(([msg]) => String(msg).includes('src/index.ts'))
+      ).toBe(true);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('does not warn about a missing entry for the spa template', async () => {
+    const warn = spyOn(logger, 'warn');
+    try {
+      await configurationGenerator(tree, { project: PROJECT, template: 'spa' });
+      expect(
+        warn.mock.calls.some(([msg]) => String(msg).includes('Worker entry'))
+      ).toBe(false);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('does not duplicate worker-configuration.d.ts when .gitignore already contains it', async () => {
+    tree.write(
+      `${ROOT}/.gitignore`,
+      'node_modules\nworker-configuration.d.ts\n'
+    );
+    await configurationGenerator(tree, { project: PROJECT });
+    const gitignore = tree.read(`${ROOT}/.gitignore`, 'utf-8') as string;
+    const occurrences = gitignore
+      .split('\n')
+      .filter((line) => line === 'worker-configuration.d.ts');
+    expect(occurrences).toHaveLength(1);
+  });
+});

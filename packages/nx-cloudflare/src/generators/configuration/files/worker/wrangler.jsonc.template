@@ -1,0 +1,7 @@
+{
+  "$schema": "<%= schemaPath %>",
+  "name": "<%= name %>",
+  "main": "<%= main %>",
+  "compatibility_date": "<%= compatibilityDate %>"<% if (nodejsCompat) { %>,
+  "compatibility_flags": ["nodejs_compat"]<% } %>
+}

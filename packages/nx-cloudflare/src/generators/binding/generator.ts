@@ -1,8 +1,6 @@
 import {
-  createProjectGraphAsync,
   formatFiles,
   GeneratorCallback,
-  getProjects,
   joinPathFragments,
   logger,
   names,
@@ -25,6 +23,7 @@ import {
   provisionResource,
   type ProvisionableType,
 } from '../../utils/provision';
+import { resolveProjectRootOrThrow } from '../../utils/project';
 
 const FORMATTING = {
   tabSize: 2,
@@ -89,14 +88,7 @@ async function normalizeOptions(
   tree: Tree,
   schema: Schema
 ): Promise<NormalizedSchema> {
-  const projectRoot = await resolveProjectRoot(tree, schema.project);
-  if (!projectRoot) {
-    const available = [...getProjects(tree).keys()];
-    throw new Error(
-      `Project "${schema.project}" not found.` +
-        (available.length ? ` Available projects: ${available.join(', ')}` : '')
-    );
-  }
+  const projectRoot = await resolveProjectRootOrThrow(tree, schema.project);
 
   const configPath = findWranglerConfig(tree, projectRoot);
   if (!configPath) {
@@ -128,29 +120,6 @@ async function normalizeOptions(
     queueName: schema.type === 'queue' ? schema.name ?? '' : '',
     serviceName: schema.type === 'service' ? schema.name ?? '' : '',
   };
-}
-
-// Resolve a project's root, preferring the Tree (which sees project.json and
-// package.json projects under the workspace's package-manager globs — and is
-// all that's available in generator unit tests). Falls back to the project
-// graph, which is the only source that sees an inference-only Worker: one with
-// no project.json that the createNodes plugin registers from its wrangler
-// config. `getProjects` deliberately skips inference, so without this fallback
-// such Workers are invisible to the generator.
-async function resolveProjectRoot(
-  tree: Tree,
-  name: string
-): Promise<string | null> {
-  const fromTree = getProjects(tree).get(name);
-  if (fromTree) {
-    return fromTree.root;
-  }
-  try {
-    const graph = await createProjectGraphAsync({ exitOnError: false });
-    return graph.nodes[name]?.data.root ?? null;
-  } catch {
-    return null;
-  }
 }
 
 function validateTypeSpecificOptions(schema: Schema): void {

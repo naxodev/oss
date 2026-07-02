@@ -24,6 +24,7 @@ Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). 
 ## Features
 
 - Scaffold Cloudflare Worker applications via create-cloudflare (C3) — Worker templates, web frameworks, or remote git templates.
+- Add Cloudflare to an **existing** Nx app (`configuration` generator) — authors `wrangler.jsonc` (Worker / SPA / full-stack) and wires the deploy/serve/types layer, without scaffolding a new project. Framework-agnostic: bring your own framework's Cloudflare adapter.
 - Generate Cloudflare Worker libraries (publishable, with bundler/linter/test options).
 - Add bindings to an existing Worker (KV, R2, D1, Durable Objects, Queues, Workflows, Service/RPC) — edits `wrangler.jsonc`, stubs code + migrations, and refreshes `wrangler types`.
 - Inferred `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, and `tail` targets via the `@naxodev/nx-cloudflare/plugin` inference plugin — no hand-written `project.json` targets.
@@ -43,6 +44,15 @@ nx add @naxodev/nx-cloudflare
 
 ```shell
 nx g @naxodev/nx-cloudflare:application my-worker
+```
+
+### Add Cloudflare to an existing app
+
+Wire `wrangler.jsonc` and the deploy/serve/types targets onto an app you already
+have (choose `worker`, `spa`, or `fullstack`):
+
+```shell
+nx g @naxodev/nx-cloudflare:configuration --project=my-app --template=spa
 ```
 
 ### Add a binding to a Worker

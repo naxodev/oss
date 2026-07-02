@@ -8,6 +8,7 @@ title: "@naxodev/nx-cloudflare"
 ## Interfaces
 
 - [BindingGeneratorSchema](/reference/interfaces/bindinggeneratorschema/)
+- [ConfigurationGeneratorSchema](/reference/interfaces/configurationgeneratorschema/)
 - [CreateCloudflareGeneratorSchema](/reference/interfaces/createcloudflaregeneratorschema/)
 - [InitGeneratorSchema](/reference/interfaces/initgeneratorschema/)
 - [NxCloudflareLibraryGeneratorSchema](/reference/interfaces/nxcloudflarelibrarygeneratorschema/)
@@ -15,6 +16,7 @@ title: "@naxodev/nx-cloudflare"
 ## Functions
 
 - [bindingGenerator](/reference/functions/bindinggenerator/)
+- [configurationGenerator](/reference/functions/configurationgenerator/)
 - [createCloudflareGenerator](/reference/functions/createcloudflaregenerator/)
 - [initGenerator](/reference/functions/initgenerator/)
 - [libraryGenerator](/reference/functions/librarygenerator/)
