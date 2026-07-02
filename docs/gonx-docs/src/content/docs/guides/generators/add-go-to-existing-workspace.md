@@ -3,15 +3,23 @@ title: Add Go to an existing workspace
 description: Register the gonx inference plugin in an existing Nx workspace and start adding Go projects.
 ---
 
-Use the `init` generator to wire up the gonx inference plugin in an existing Nx workspace that was not created with the gonx preset.
+Wire up the gonx inference plugin in an existing Nx workspace that was not created with the gonx preset.
 
 ## Step 1: Register the plugin
+
+The idiomatic way is `nx add`, which installs the package and runs the `init` generator to register the plugin:
+
+```bash
+nx add @naxodev/gonx
+```
+
+This registers `@naxodev/gonx` under `plugins` in `nx.json`. Once registered, the plugin scans your workspace for `go.mod` files and infers Nx targets from them automatically.
+
+If the package is already installed, run the `init` generator directly instead — it does the same registration:
 
 ```bash
 nx g @naxodev/gonx:init
 ```
-
-This registers `@naxodev/gonx` under `plugins` in `nx.json`. Once registered, the plugin scans your workspace for `go.mod` files and infers Nx targets from them automatically.
 
 ### Options
 
@@ -19,7 +27,7 @@ This registers `@naxodev/gonx` under `plugins` in `nx.json`. Once registered, th
 | -------------- | ------- | ------- | ---------------------------------------------------------- |
 | `addGoDotWork` | boolean | `false` | Create a `go.work` file and register all Go modules in it. |
 
-Pass `--addGoDotWork` if you want a Go workspace (`go.work`) at the repo root:
+Pass `--addGoDotWork` (to `init`) if you want a Go workspace (`go.work`) at the repo root:
 
 ```bash
 nx g @naxodev/gonx:init --addGoDotWork

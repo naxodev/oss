@@ -9,7 +9,7 @@
     "init": {
       "factory": "./src/generators/init/generator",
       "schema": "./src/generators/init/schema.json",
-      "description": "init generator"
+      "description": "Add Cloudflare (@naxodev/nx-cloudflare) support to an existing Nx workspace — install Wrangler + Workers types and register the inference plugin. Runs via `nx add @naxodev/nx-cloudflare`."
     },
     "library": {
       "factory": "./src/generators/library/generator",

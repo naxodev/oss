@@ -7,6 +7,15 @@ The `configuration` generator adds a `wrangler.jsonc` and Cloudflare deploy/serv
 
 **Alias:** `config`
 
+## Where this fits
+
+Adopting Cloudflare in an existing workspace has two layers:
+
+1. **Onboard the workspace** — `nx add @naxodev/nx-cloudflare` installs Wrangler + Workers types and registers the inference plugin (see [Installation](/getting-started/installation)). This runs once per workspace.
+2. **Wire an app** — this `configuration` generator writes the `wrangler.jsonc` and inferred targets onto **one** project. Run it per app you want to deploy.
+
+`nx add` can't do step 2 for you: it runs the workspace-level `init` generator, which has no notion of a target project. This generator is also self-bootstrapping — it installs the deps and registers the plugin itself — so you can run it directly without `nx add` first.
+
 ## Usage
 
 ```bash
