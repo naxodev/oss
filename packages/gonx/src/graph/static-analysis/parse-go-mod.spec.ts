@@ -1,6 +1,7 @@
 import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import stripIndent from 'strip-indent';
 import { readFile } from 'fs/promises';
+import { logger } from '@nx/devkit';
 import { parseGoMod } from './parse-go-mod';
 
 mock.module('fs/promises', () => ({
@@ -9,10 +10,19 @@ mock.module('fs/promises', () => ({
 mock.module('@nx/devkit', () => ({ logger: { warn: mock() } }));
 
 const mockReadFile = readFile as unknown as Mock<typeof readFile>;
+const mockWarn = logger.warn as unknown as Mock<typeof logger.warn>;
+
+/** A realistic Node fs rejection carrying an errno `code`. */
+function fsError(code: string, message: string): NodeJS.ErrnoException {
+  const error = new Error(message) as NodeJS.ErrnoException;
+  error.code = code;
+  return error;
+}
 
 describe('parseGoMod', () => {
   beforeEach(() => {
     mockReadFile.mockClear();
+    mockWarn.mockClear();
   });
 
   describe('module declaration parsing', () => {
@@ -77,14 +87,31 @@ describe('parseGoMod', () => {
       expect(result).toBeNull();
     });
 
-    it('should return null for non-existent file', async () => {
+    it('should return null for a non-existent file without warning', async () => {
+      // The common case for non-Go projects in a mixed workspace — buildImportMap
+      // probes every project root, so an absent go.mod must stay silent.
       mockReadFile.mockRejectedValue(
-        new Error('ENOENT: no such file or directory')
+        fsError('ENOENT', 'ENOENT: no such file or directory')
       );
 
       const result = await parseGoMod('/nonexistent/go.mod');
 
       expect(result).toBeNull();
+      expect(mockWarn).not.toHaveBeenCalled();
+    });
+
+    it('should return null and warn on a genuine read failure', async () => {
+      mockReadFile.mockRejectedValue(
+        fsError('EACCES', 'EACCES: permission denied')
+      );
+
+      const result = await parseGoMod('/project/go.mod');
+
+      expect(result).toBeNull();
+      expect(mockWarn).toHaveBeenCalledTimes(1);
+      expect(mockWarn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to read go.mod file /project/go.mod')
+      );
     });
 
     it('should return null for empty module path in quotes', async () => {

@@ -41,7 +41,13 @@ export async function parseGoMod(filePath: string): Promise<GoModInfo | null> {
   try {
     content = await readFile(filePath, 'utf-8');
   } catch (error) {
-    logger.warn(`Failed to read go.mod file ${filePath}: ${error}`);
+    // A missing go.mod is the common case, not an error: buildImportMap probes
+    // every project root, so non-Go projects in a mixed workspace hit this on
+    // every graph build. Warn only on a genuine read failure (permissions, a
+    // directory in the way, etc.), never on an absent file.
+    if ((error as NodeJS.ErrnoException)?.code !== 'ENOENT') {
+      logger.warn(`Failed to read go.mod file ${filePath}: ${error}`);
+    }
     return null;
   }
 
