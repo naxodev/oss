@@ -27,6 +27,11 @@
       "schema": "./src/generators/configuration/schema.json",
       "description": "Add Cloudflare configuration (wrangler.jsonc + inferred serve/deploy/typegen targets) to an existing Nx project",
       "aliases": ["config"]
+    },
+    "worker-config": {
+      "factory": "./src/generators/worker-config/generator",
+      "schema": "./src/generators/worker-config/schema.json",
+      "description": "Toggle opt-in production defaults (observability, Smart Placement) on an existing Worker's wrangler.jsonc"
     }
   }
 }

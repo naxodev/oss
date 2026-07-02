@@ -7,8 +7,10 @@ import type { SecretExecutorSchema } from './schema';
 // the KEY (never the value — wrangler prompts for it); `bulk` takes a JSON
 // file; `list` takes no positional. Secret values are never passed as args.
 export function buildSecretArgs(options: SecretExecutorSchema): string[] {
-  const { command, name, file, env } = options;
-  const args = ['secret', command];
+  const { command, name, file, env, versioned } = options;
+  const args = versioned
+    ? ['versions', 'secret', command]
+    : ['secret', command];
   switch (command) {
     case 'put':
     case 'delete':

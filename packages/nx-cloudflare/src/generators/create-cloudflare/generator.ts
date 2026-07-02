@@ -29,7 +29,11 @@ import {
   ensureGitignored,
   WORKER_CONFIGURATION_DTS,
 } from '../../utils/gitignore';
-import { wranglerSchemaPath } from '../../utils/wrangler-config';
+import {
+  applyProductionTogglesToProject,
+  WRANGLER_CONFIG_FILES,
+  wranglerSchemaPath,
+} from '../../utils/wrangler-config';
 
 /**
  * Scaffolds a Cloudflare Worker application by delegating to Cloudflare's
@@ -67,6 +71,7 @@ export async function createCloudflareGenerator(
   handleGeneratedTypes(tree, options.projectRoot);
   updateProjectPackageJson(tree, options);
   retargetWranglerSchema(tree, options.projectRoot);
+  applyProductionConfig(tree, options);
   ensurePluginRegistered(tree, INFERENCE_PLUGIN);
   ensureVitestTestTarget(tree, options.projectRoot);
   maybeWriteProjectJson(tree, options);
@@ -251,12 +256,6 @@ function dropVitestScript(tree: Tree, projectRoot: string): void {
   });
 }
 
-const WRANGLER_CONFIG_FILES = [
-  'wrangler.toml',
-  'wrangler.jsonc',
-  'wrangler.json',
-];
-
 // C3 points the Wrangler config $schema at the project-local `node_modules`,
 // which doesn't exist in a monorepo (wrangler is hoisted to the workspace root).
 // Retarget it via offsetFromRoot so editors still validate the config. Done as a
@@ -276,6 +275,26 @@ function retargetWranglerSchema(tree: Tree, projectRoot: string): void {
       tree.write(path, retargeted);
     }
   }
+}
+
+// Apply the opt-in production-readiness toggles to the imported wrangler config.
+// jsonc/json only — C3 emits wrangler.jsonc, but a template that emits a
+// non-jsonc config the flags were explicitly requested for fails loud (via
+// assertJsoncConfig) rather than silently dropping them. A missing config is
+// left to warnIfNoWranglerConfig (e.g. a Pages-only template).
+function applyProductionConfig(tree: Tree, options: NormalizedSchema): void {
+  if (!options.observability && !options.smartPlacement) {
+    return;
+  }
+  applyProductionTogglesToProject(
+    tree,
+    options.projectRoot,
+    {
+      observability: options.observability,
+      smartPlacement: options.smartPlacement,
+    },
+    'create-cloudflare (--observability/--smartPlacement)'
+  );
 }
 
 // Targets are inferred from the Wrangler config by the createNodes plugin, so

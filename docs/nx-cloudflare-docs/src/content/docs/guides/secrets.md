@@ -81,6 +81,22 @@ Every secret configuration accepts `--env` for a [Wrangler environment](https://
 bunx nx run my-worker:secret:put --name=API_KEY --env=production
 ```
 
+## Staged secrets for gradual deployments
+
+`secret:put` uploads a secret and deploys it immediately. For [gradual deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/), stage the secret on a **new version** without shifting traffic using the `version-secret` target (which wraps `wrangler versions secret`):
+
+```bash
+bunx nx run my-worker:version-secret:put --name=API_KEY
+```
+
+This creates a new Worker version carrying the secret. Promote it to live traffic when ready:
+
+```bash
+bunx nx run my-worker:version-deploy
+```
+
+`version-secret` exposes the same `put`, `bulk`, `list`, and `delete` configurations as `secret`, and also accepts `--env`.
+
 ## Verify
 
 `secret:list` shows the secret you set:

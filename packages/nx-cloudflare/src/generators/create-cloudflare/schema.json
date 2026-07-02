@@ -59,6 +59,16 @@
       "type": "boolean",
       "default": false
     },
+    "observability": {
+      "description": "Enable Workers observability (`observability.enabled = true`) in the generated wrangler.jsonc so logs are retained. Opt-in.",
+      "type": "boolean",
+      "default": false
+    },
+    "smartPlacement": {
+      "description": "Enable Smart Placement (`placement.mode = \"smart\"`) in the generated wrangler.jsonc so Cloudflare runs the Worker closest to your backend. Opt-in.",
+      "type": "boolean",
+      "default": false
+    },
     "skipFormat": {
       "description": "Skip formatting files.",
       "type": "boolean",

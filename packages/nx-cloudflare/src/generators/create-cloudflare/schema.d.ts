@@ -24,6 +24,10 @@ export interface Schema {
   skipFormat?: boolean;
   /** Write an explicit project.json instead of relying on target inference. */
   useProjectJson?: boolean;
+  /** Enable Workers observability (`observability.enabled = true`). */
+  observability?: boolean;
+  /** Enable Smart Placement (`placement.mode = "smart"`). */
+  smartPlacement?: boolean;
 }
 
 export interface NormalizedSchema extends Schema {

@@ -77,6 +77,7 @@ describe('nx-cloudflare createNodes', () => {
         'version-upload',
         'version-deploy',
         'secret',
+        'version-secret',
       ].sort()
     );
 
@@ -131,7 +132,16 @@ describe('nx-cloudflare createNodes', () => {
     const targets = result.projects['apps/worker'].targets;
 
     expect(Object.keys(targets).sort()).toEqual(
-      ['dev', 'logs', 'promote', 'publish', 'types', 'upload', 'secret'].sort()
+      [
+        'dev',
+        'logs',
+        'promote',
+        'publish',
+        'types',
+        'upload',
+        'secret',
+        'version-secret',
+      ].sort()
     );
     expect(targets.dev).toMatchObject({
       command: 'wrangler dev',
@@ -277,6 +287,69 @@ describe('nx-cloudflare createNodes', () => {
         delete: { command: 'delete' },
       },
     });
+  });
+
+  it('emits a single version-secret target for staged secrets', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(
+      workspaceRoot,
+      'apps/worker/wrangler.jsonc',
+      '{"name":"worker","main":"src/index.ts"}'
+    );
+
+    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc');
+    const targets = result.projects['apps/worker'].targets;
+
+    expect(targets['version-secret']).toEqual({
+      executor: '@naxodev/nx-cloudflare:secret',
+      options: { versioned: true },
+      configurations: {
+        put: { command: 'put' },
+        bulk: { command: 'bulk' },
+        list: { command: 'list' },
+        delete: { command: 'delete' },
+      },
+    });
+  });
+
+  it('renames the version-secret target via plugin options', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker"}');
+
+    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc', {
+      versionSecretTargetName: 'staged-secret',
+    });
+    const targets = result.projects['apps/worker'].targets;
+
+    expect(targets['staged-secret'].options).toEqual({ versioned: true });
+    expect(targets['version-secret']).toBeUndefined();
+  });
+
+  it('keeps the immediate secret target (and warns) when both secret names collide', async () => {
+    writeFile(workspaceRoot, 'apps/worker/project.json', '{"name":"worker"}');
+    writeFile(workspaceRoot, 'apps/worker/wrangler.jsonc', '{"name":"worker"}');
+    const warn = spyOn(logger, 'warn').mockImplementation(() => undefined);
+
+    const result = await run(workspaceRoot, 'apps/worker/wrangler.jsonc', {
+      versionSecretTargetName: 'secret',
+    });
+    const targets = result.projects['apps/worker'].targets;
+
+    // The immediate secret target survives with no `versioned` option — it is
+    // NOT overwritten by the versioned spread.
+    expect(targets['secret'].options).toBeUndefined();
+    expect(Object.keys(targets.secret.configurations)).toEqual([
+      'put',
+      'bulk',
+      'list',
+      'delete',
+    ]);
+    expect(warn).toHaveBeenCalled();
+    expect(warn.mock.calls[0][0]).toContain(
+      'skipping the version-secret target'
+    );
+
+    warn.mockRestore();
   });
 
   it('emits a single d1 target with the database map when there is one D1 binding', async () => {

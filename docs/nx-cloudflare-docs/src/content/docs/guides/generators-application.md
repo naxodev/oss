@@ -27,11 +27,15 @@ bunx nx g @naxodev/nx-cloudflare:application my-worker
 | `c3Args`         | string[]                 |              | Additional raw flags forwarded to C3. Generator-controlled flags (`git`, `deploy`, `open`, `auto-update`) cannot be overridden.               |
 | `tags`           | string                   |              | Comma-separated tags added to the application (used for linting).                                                                             |
 | `useProjectJson` | boolean                  | `false`      | Write an explicit `project.json`. Off by default — the worker is registered from its `package.json` and Wrangler config via target inference. |
+| `observability`  | boolean                  | `false`      | Enable Workers observability (`observability.enabled = true`) in the generated `wrangler.jsonc`.                                              |
+| `smartPlacement` | boolean                  | `false`      | Enable Smart Placement (`placement.mode = "smart"`).                                                                                          |
 | `skipFormat`     | boolean                  | `false`      | Skip formatting files.                                                                                                                        |
 
 ## Notes
 
 Provide exactly one of `type`, `framework`, or `template` to control the C3 scaffold non-interactively. If none are provided, C3's interactive prompts guide selection.
+
+See [Enable observability and Smart Placement](/guides/observability-and-placement) for details on the `observability` and `smartPlacement` flags.
 
 ## Verify
 

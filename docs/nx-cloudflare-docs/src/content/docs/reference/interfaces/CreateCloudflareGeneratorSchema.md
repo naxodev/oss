@@ -69,6 +69,16 @@ The name of the application.
 
 ***
 
+### observability?
+
+> `optional` **observability?**: `boolean`
+
+Defined in: [packages/nx-cloudflare/src/generators/create-cloudflare/schema.d.ts:28](https://github.com/naxodev/oss/blob/main/packages/nx-cloudflare/src/generators/create-cloudflare/schema.d.ts#L28)
+
+Enable Workers observability (`observability.enabled = true`).
+
+***
+
 ### skipFormat?
 
 > `optional` **skipFormat?**: `boolean`
@@ -76,6 +86,16 @@ The name of the application.
 Defined in: [packages/nx-cloudflare/src/generators/create-cloudflare/schema.d.ts:24](https://github.com/naxodev/oss/blob/main/packages/nx-cloudflare/src/generators/create-cloudflare/schema.d.ts#L24)
 
 Skip formatting files.
+
+***
+
+### smartPlacement?
+
+> `optional` **smartPlacement?**: `boolean`
+
+Defined in: [packages/nx-cloudflare/src/generators/create-cloudflare/schema.d.ts:30](https://github.com/naxodev/oss/blob/main/packages/nx-cloudflare/src/generators/create-cloudflare/schema.d.ts#L30)
+
+Enable Smart Placement (`placement.mode = "smart"`).
 
 ***
 
