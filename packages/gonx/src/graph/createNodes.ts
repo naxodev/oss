@@ -1,4 +1,4 @@
-import { CreateNodes, createNodesFromFiles } from '@nx/devkit';
+import { CreateNodes, CreateNodesV2, createNodesFromFiles } from '@nx/devkit';
 import { GoPluginOptions } from './types/go-plugin-options';
 import { createNodesInternal } from './utils/create-nodes-internal';
 
@@ -9,7 +9,9 @@ import { createNodesInternal } from './utils/create-nodes-internal';
 // File glob to find all Go projects
 const goModGlob = '**/go.mod';
 
-// Entry function that Nx calls to modify the graph
+// Entry function that Nx calls to modify the graph. In Nx 23 `CreateNodes`
+// itself carries the files-array signature (the former v2 shape) and plugin
+// loaders prefer the `createNodes` field, so this is the primary export.
 export const createNodes: CreateNodes<GoPluginOptions> = [
   goModGlob,
   (configFiles, options, context) => {
@@ -22,3 +24,10 @@ export const createNodes: CreateNodes<GoPluginOptions> = [
     );
   },
 ];
+
+/**
+ * @deprecated `CreateNodesV2` is Nx 23's back-compat alias of {@link CreateNodes};
+ * this export exists only for plugin loaders that still look up the
+ * `createNodesV2` field. Prefer {@link createNodes}.
+ */
+export const createNodesV2: CreateNodesV2<GoPluginOptions> = createNodes;

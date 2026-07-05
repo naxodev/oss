@@ -3,7 +3,8 @@ import {
   buildStringFlagIfValid,
   executeCommand,
   extractCWD,
-  extractProjectRoot,
+  getProjectRoot,
+  getRunPath,
 } from '../../utils';
 import { BuildExecutorSchema } from './schema';
 import { join } from 'node:path';
@@ -29,32 +30,15 @@ const buildParams = (
   options: BuildExecutorSchema,
   context: ExecutorContext
 ): string[] => {
-  const projectName = context.projectName;
-
-  if (!projectName) {
-    throw new Error('Project name is not provided');
-  }
-
-  const projectRoot =
-    context.projectsConfigurations.projects[context.projectName]?.root;
-
-  if (!projectRoot) {
-    throw new Error(`Cannot find project root for ${context.projectName}`);
-  }
-
-  const runPath = options.main ? '.' : './...';
+  const projectRoot = getProjectRoot(context);
 
   return [
     'build',
     '-o',
-    buildOutputPath(
-      context.root,
-      extractProjectRoot(context),
-      options.outputPath
-    ),
+    buildOutputPath(context.root, projectRoot, options.outputPath),
     ...buildStringFlagIfValid('-buildmode', options.buildMode),
     ...(options.flags ?? []),
-    runPath,
+    getRunPath(options),
   ];
 };
 

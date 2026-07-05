@@ -13,7 +13,7 @@ mock.module('../../utils', () => {
     buildFlagIfEnabled,
     buildStringFlagIfValid,
     executeCommand: mock().mockResolvedValue({ success: true }),
-    extractProjectRoot: mock(() => 'apps/project'),
+    getProjectRoot: mock(() => 'apps/project'),
   };
 });
 

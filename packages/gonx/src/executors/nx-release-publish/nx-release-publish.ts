@@ -6,10 +6,10 @@ import {
   readJsonFile,
 } from '@nx/devkit';
 import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { env as appendLocalEnv } from 'npm-run-path';
 import { NxReleasePublishExecutorSchema } from './schema';
+import { parseGoMod } from '../../graph/static-analysis/parse-go-mod';
 import chalk = require('chalk');
 
 const LARGE_BUFFER = 1024 * 1000000;
@@ -132,15 +132,14 @@ export default async function runExecutor(
   );
 
   const goModPath = joinPathFragments(moduleRoot, 'go.mod');
-  const goModContents = readFileSync(goModPath, 'utf-8');
-  const moduleMatch = goModContents.match(/module\s+([^\s]+)/);
+  const goModInfo = await parseGoMod(goModPath);
 
-  if (!moduleMatch) {
+  if (!goModInfo) {
     output.error({ title: `Could not find module name in ${goModPath}` });
     return { success: false };
   }
 
-  const moduleName = moduleMatch[1];
+  const moduleName = goModInfo.modulePath;
 
   try {
     // Get the release tag pattern from nx.json
