@@ -12,6 +12,7 @@ title: "@naxodev/nx-cloudflare"
 - [CreateCloudflareGeneratorSchema](/reference/interfaces/createcloudflaregeneratorschema/)
 - [InitGeneratorSchema](/reference/interfaces/initgeneratorschema/)
 - [NxCloudflareLibraryGeneratorSchema](/reference/interfaces/nxcloudflarelibrarygeneratorschema/)
+- [WorkerConfigGeneratorSchema](/reference/interfaces/workerconfiggeneratorschema/)
 
 ## Functions
 
@@ -20,6 +21,7 @@ title: "@naxodev/nx-cloudflare"
 - [createCloudflareGenerator](/reference/functions/createcloudflaregenerator/)
 - [initGenerator](/reference/functions/initgenerator/)
 - [libraryGenerator](/reference/functions/librarygenerator/)
+- [workerConfigGenerator](/reference/functions/workerconfiggenerator/)
 
 ## References
 
