@@ -136,13 +136,19 @@ describe('persistProvisionedId', () => {
 
     persistProvisionedId(configRel, 'd1', 'DB', 'real-d1-id');
 
-    expect((readConfig().d1_databases as { database_id: string }[])[0]).toEqual(
-      {
-        binding: 'DB',
-        database_name: 'app',
-        database_id: 'real-d1-id',
-      }
-    );
+    expect(
+      (
+        readConfig().d1_databases as {
+          binding: string;
+          database_name: string;
+          database_id: string;
+        }[]
+      )[0]
+    ).toEqual({
+      binding: 'DB',
+      database_name: 'app',
+      database_id: 'real-d1-id',
+    });
   });
 
   it('only touches the matching binding, leaving an unrelated sentinel intact', () => {

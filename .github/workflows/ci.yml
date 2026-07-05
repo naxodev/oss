@@ -68,7 +68,7 @@ jobs:
       - uses: nrwl/nx-set-shas@v4
 
       - run: bunx nx-cloud record -- nx format:check
-      - run: bunx nx affected -t lint test
+      - run: bunx nx affected -t lint test typecheck
 
       - run: bunx nx affected -t build --yes
 
