@@ -77,7 +77,7 @@ export default async function d1Executor(
       success: runWrangler(
         buildD1Args(options, database),
         join(context.root, projectRoot)
-      ),
+      ).success,
     };
   } catch (e) {
     logger.error(e instanceof Error ? e.message : String(e));

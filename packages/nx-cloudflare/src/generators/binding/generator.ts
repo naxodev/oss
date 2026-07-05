@@ -5,8 +5,10 @@ import {
   logger,
   names,
   Tree,
+  workspaceRoot,
 } from '@nx/devkit';
-import { applyEdits, modify, parse, type JSONPath } from 'jsonc-parser';
+import { join } from 'node:path';
+import type { JSONPath } from 'jsonc-parser';
 import type { NormalizedSchema, Schema } from './schema';
 import {
   appendToArray,
@@ -17,19 +19,14 @@ import {
   migrationDefinesClass,
   readWranglerConfig,
 } from '../../utils/wrangler-config';
-import { runWranglerTypes } from '../../utils/run-wrangler-types';
+import { runWrangler } from '../../utils/run-wrangler';
 import {
   PROVISION_SENTINEL,
   provisionResource,
   type ProvisionableType,
 } from '../../utils/provision';
 import { resolveProjectRootOrThrow } from '../../utils/project';
-
-const FORMATTING = {
-  tabSize: 2,
-  insertSpaces: true,
-  insertFinalNewline: true,
-} as const;
+import { addQueueHandler } from './entrypoint-editor';
 
 const PROVISIONABLE_TYPES: ReadonlySet<ProvisionableType> = new Set([
   'kv',
@@ -72,12 +69,14 @@ export async function bindingGenerator(
       });
     }
     if (!options.skipTypegen) {
-      try {
-        runWranglerTypes(options.projectRoot);
-      } catch (e) {
+      const result = runWrangler(
+        ['types'],
+        join(workspaceRoot, options.projectRoot)
+      );
+      if (!result.success) {
         logger.warn(
           `binding: \`wrangler types\` failed — run \`nx typegen ${options.project}\` manually. ` +
-            `Reason: ${e instanceof Error ? e.message : String(e)}`
+            `Reason: ${result.reason}`
         );
       }
     }
@@ -190,20 +189,8 @@ function assertNoDuplicateBinding(
       checks.push({ path: ['services'], field: 'binding', value: binding });
       break;
     case 'do': {
-      const existing = config['durable_objects'];
-      const bindings =
-        existing &&
-        typeof existing === 'object' &&
-        Array.isArray((existing as Record<string, unknown>)['bindings'])
-          ? ((existing as Record<string, unknown>)['bindings'] as unknown[])
-          : [];
-      const nameClash = bindings.some(
-        (b) =>
-          typeof b === 'object' &&
-          b !== null &&
-          (b as Record<string, unknown>)['name'] === binding
-      );
-      if (nameClash) {
+      const doBindingsPath: JSONPath = ['durable_objects', 'bindings'];
+      if (findInArray(config, doBindingsPath, 'name', binding)) {
         throw new Error(
           `A Durable Object binding named "${binding}" already exists in wrangler.jsonc. ` +
             `Use a different --binding or remove the existing entry.`
@@ -213,12 +200,8 @@ function assertNoDuplicateBinding(
       // class_name that already exists (in a binding or a prior migration)
       // would emit a duplicate `new_sqlite_classes` entry that wrangler rejects.
       const classClash =
-        bindings.some(
-          (b) =>
-            typeof b === 'object' &&
-            b !== null &&
-            (b as Record<string, unknown>)['class_name'] === options.className
-        ) || migrationDefinesClass(config, options.className);
+        findInArray(config, doBindingsPath, 'class_name', options.className) ||
+        migrationDefinesClass(config, options.className);
       if (classClash) {
         throw new Error(
           `A Durable Object class "${options.className}" is already defined in wrangler.jsonc ` +
@@ -228,35 +211,15 @@ function assertNoDuplicateBinding(
       return;
     }
     case 'queue': {
-      const existing = config['queues'];
-      if (existing && typeof existing === 'object') {
-        const q = existing as Record<string, unknown>;
-        if (Array.isArray(q['producers'])) {
-          const clash = (q['producers'] as unknown[]).some(
-            (b) =>
-              typeof b === 'object' &&
-              b !== null &&
-              (b as Record<string, unknown>)['binding'] === binding
-          );
-          if (clash) {
-            throw new Error(
-              `A queue producer with binding "${binding}" already exists in wrangler.jsonc.`
-            );
-          }
-        }
-        if (Array.isArray(q['consumers'])) {
-          const clash = (q['consumers'] as unknown[]).some(
-            (b) =>
-              typeof b === 'object' &&
-              b !== null &&
-              (b as Record<string, unknown>)['queue'] === name
-          );
-          if (clash) {
-            throw new Error(
-              `A queue consumer for queue "${name}" already exists in wrangler.jsonc.`
-            );
-          }
-        }
+      if (findInArray(config, ['queues', 'producers'], 'binding', binding)) {
+        throw new Error(
+          `A queue producer with binding "${binding}" already exists in wrangler.jsonc.`
+        );
+      }
+      if (findInArray(config, ['queues', 'consumers'], 'queue', name)) {
+        throw new Error(
+          `A queue consumer for queue "${name}" already exists in wrangler.jsonc.`
+        );
       }
       return;
     }
@@ -296,11 +259,20 @@ function writeBindingConfig(tree: Tree, options: NormalizedSchema): void {
       });
       break;
     case 'do':
-      appendDurableObjectBinding(tree, options);
+      appendToArray(tree, configPath, ['durable_objects', 'bindings'], {
+        name: binding,
+        class_name: options.className,
+      });
       appendDurableObjectMigration(tree, options);
       break;
     case 'queue':
-      appendQueueBinding(tree, options);
+      appendToArray(tree, configPath, ['queues', 'producers'], {
+        binding,
+        queue: options.queueName,
+      });
+      appendToArray(tree, configPath, ['queues', 'consumers'], {
+        queue: options.queueName,
+      });
       break;
     case 'workflow':
       appendToArray(tree, configPath, ['workflows'], {
@@ -333,36 +305,6 @@ function nameOrPlaceholder(options: NormalizedSchema): string {
   return 'PLACEHOLDER_FILL_ME_IN';
 }
 
-// `durable_objects.bindings` is a nested array (object → array), so it needs
-// `modify` with the full path rather than the top-level `appendToArray`. When
-// the array doesn't exist yet, `modify` at index 0 with `isArrayInsertion`
-// creates both the `durable_objects` object and its `bindings` array.
-function appendDurableObjectBinding(
-  tree: Tree,
-  options: NormalizedSchema
-): void {
-  const text = tree.read(options.configPath, 'utf-8');
-  if (!text) {
-    throw new Error(`wrangler config not found: ${options.configPath}`);
-  }
-  const config = parse(text) as Record<string, unknown>;
-  const existing = config['durable_objects'];
-  const bindings =
-    existing &&
-    typeof existing === 'object' &&
-    Array.isArray((existing as Record<string, unknown>)['bindings'])
-      ? ((existing as Record<string, unknown>)['bindings'] as unknown[])
-      : null;
-
-  const index = bindings === null ? 0 : bindings.length;
-  const entry = { name: options.binding, class_name: options.className };
-  const edits = modify(text, ['durable_objects', 'bindings', index], entry, {
-    isArrayInsertion: true,
-    formattingOptions: FORMATTING,
-  });
-  tree.write(options.configPath, applyEdits(text, edits));
-}
-
 function appendDurableObjectMigration(
   tree: Tree,
   options: NormalizedSchema
@@ -373,48 +315,6 @@ function appendDurableObjectMigration(
     tag: `v${count + 1}`,
     new_sqlite_classes: [options.className],
   });
-}
-
-// `queues` is an object with `producers` and `consumers` arrays. Both are
-// appended in a single pass: `modify` creates the `queues` object and the
-// nested arrays when absent.
-function appendQueueBinding(tree: Tree, options: NormalizedSchema): void {
-  const text = tree.read(options.configPath, 'utf-8');
-  if (!text) {
-    throw new Error(`wrangler config not found: ${options.configPath}`);
-  }
-  const config = parse(text) as Record<string, unknown>;
-  const existing = config['queues'];
-  const producers =
-    existing &&
-    typeof existing === 'object' &&
-    Array.isArray((existing as Record<string, unknown>)['producers'])
-      ? ((existing as Record<string, unknown>)['producers'] as unknown[])
-      : null;
-  const consumers =
-    existing &&
-    typeof existing === 'object' &&
-    Array.isArray((existing as Record<string, unknown>)['consumers'])
-      ? ((existing as Record<string, unknown>)['consumers'] as unknown[])
-      : null;
-
-  const producerIndex = producers === null ? 0 : producers.length;
-  const consumerIndex = consumers === null ? 0 : consumers.length;
-
-  let edits = modify(
-    text,
-    ['queues', 'producers', producerIndex],
-    { binding: options.binding, queue: options.queueName },
-    { isArrayInsertion: true, formattingOptions: FORMATTING }
-  );
-  const updated = applyEdits(text, edits);
-  edits = modify(
-    updated,
-    ['queues', 'consumers', consumerIndex],
-    { queue: options.queueName },
-    { isArrayInsertion: true, formattingOptions: FORMATTING }
-  );
-  tree.write(options.configPath, applyEdits(updated, edits));
 }
 
 function writeCodeStubs(tree: Tree, options: NormalizedSchema): void {
@@ -478,25 +378,16 @@ export class ${options.className} extends WorkflowEntrypoint<Env, Params> {
 }
 
 // Insert the `queue(batch, env)` method into the existing default export
-// object in `src/index.ts`. C3-scaffolded workers ship `export default { async
-// fetch(...) {...} }`, so we find the matching closing brace by bracket-counting
-// and insert before it. If no default export object exists, warn. If a queue
-// handler already exists (from a prior binding), skip — a Worker has one
-// queue() handler that receives from all queue bindings.
+// object in `src/index.ts`. If no default export object exists, warn. If a
+// queue handler already exists (from a prior binding), skip — a Worker has
+// one queue() handler that receives from all queue bindings. The actual text
+// splice (finding the default export's closing brace, string/comment-aware)
+// lives in entrypoint-editor.ts, kept pure and unit-tested separately.
 function writeQueueHandler(tree: Tree, options: NormalizedSchema): void {
   const entryPath = joinPathFragments(options.projectRoot, 'src/index.ts');
   const existing = tree.exists(entryPath)
     ? tree.read(entryPath, 'utf-8') ?? ''
     : '';
-
-  if (/async\s+queue\s*\(/.test(existing)) {
-    logger.info(
-      `binding: a \`queue()\` handler already exists in ${entryPath} — leaving it untouched. ` +
-        `A Worker has a single queue() handler that receives batches from all queue ` +
-        `consumers; the new consumer is wired in wrangler.jsonc and will be delivered to it.`
-    );
-    return;
-  }
 
   const method = `  async queue(batch: MessageBatch<unknown>, env: Env, ctx: ExecutionContext): Promise<void> {
     for (const message of batch.messages) {
@@ -505,110 +396,31 @@ function writeQueueHandler(tree: Tree, options: NormalizedSchema): void {
     }
   },`;
 
-  if (existing.length === 0) {
-    tree.write(
-      entryPath,
-      `export default {
-${method}
-};
-`
-    );
-    return;
+  const outcome = addQueueHandler(existing, method);
+  switch (outcome.status) {
+    case 'already-present':
+      logger.info(
+        `binding: a \`queue()\` handler already exists in ${entryPath} — leaving it untouched. ` +
+          `A Worker has a single queue() handler that receives batches from all queue ` +
+          `consumers; the new consumer is wired in wrangler.jsonc and will be delivered to it.`
+      );
+      return;
+    case 'no-default-export':
+      logger.warn(
+        `binding: ${entryPath} has no \`export default { ... }\` object. ` +
+          `Add this method to your entrypoint manually:\n${method}\n`
+      );
+      return;
+    case 'no-closing-brace':
+      logger.warn(
+        `binding: could not find the closing \`}\` of the default export in ${entryPath}. ` +
+          `Add this method manually:\n${method}\n`
+      );
+      return;
+    case 'inserted':
+      tree.write(entryPath, outcome.source);
+      return;
   }
-
-  const match = existing.match(/export\s+default\s*\{/);
-  if (!match) {
-    logger.warn(
-      `binding: ${entryPath} has no \`export default { ... }\` object. ` +
-        `Add this method to your entrypoint manually:\n${method}\n`
-    );
-    return;
-  }
-
-  const matchStart = match.index ?? 0;
-  const openBraceIndex = existing.indexOf(
-    '{',
-    matchStart + match[0].length - 1
-  );
-  const closeBraceIndex = findMatchingBrace(existing, openBraceIndex);
-  if (closeBraceIndex === -1) {
-    logger.warn(
-      `binding: could not find the closing \`}\` of the default export in ${entryPath}. ` +
-        `Add this method manually:\n${method}\n`
-    );
-    return;
-  }
-
-  // Insert the method before the closing brace. Preserve whatever whitespace
-  // precedes the `}` — if the object is `export default {\n}` we insert on a
-  // new line; if it's `export default { ... }` we add a newline before the `}`.
-  const before = existing.slice(0, closeBraceIndex);
-  const after = existing.slice(closeBraceIndex);
-  const needsNewline = before.length > 0 && !before.endsWith('\n');
-  const insertion = `${needsNewline ? '\n' : ''}${method}\n`;
-  tree.write(entryPath, `${before}${insertion}${after}`);
-}
-
-// String/comment-aware bracket matcher. Skips braces inside string literals,
-// template literals, line comments, and block comments so a `}` in a string
-// like `"}}}";` doesn't short-circuit the depth counter and corrupt the file.
-function findMatchingBrace(text: string, openIndex: number): number {
-  let depth = 0;
-  let i = openIndex;
-  while (i < text.length) {
-    const ch = text[i];
-    const next = text[i + 1];
-
-    if (ch === '/' && next === '/') {
-      i = text.indexOf('\n', i);
-      if (i === -1) return -1;
-      continue;
-    }
-    if (ch === '/' && next === '*') {
-      const end = text.indexOf('*/', i + 2);
-      if (end === -1) return -1;
-      i = end + 2;
-      continue;
-    }
-    if (ch === "'" || ch === '"' || ch === '`') {
-      i = skipString(text, i, ch);
-      if (i === -1) return -1;
-      continue;
-    }
-    if (ch === '{') depth++;
-    else if (ch === '}') {
-      depth--;
-      if (depth === 0) return i;
-    }
-    i++;
-  }
-  return -1;
-}
-
-// Advance past a string/template literal starting at `start` (the opening
-// quote). Returns the index after the closing quote, or -1 if unterminated.
-function skipString(text: string, start: number, quote: string): number {
-  let i = start + 1;
-  while (i < text.length) {
-    if (text[i] === '\\') {
-      i += 2;
-      continue;
-    }
-    if (quote === '`' && text[i] === '$' && text[i + 1] === '{') {
-      // Template literal interpolation — skip to the matching `}`
-      let depth = 1;
-      i += 2;
-      while (i < text.length && depth > 0) {
-        if (text[i] === '{') depth++;
-        else if (text[i] === '}') depth--;
-        i++;
-      }
-      continue;
-    }
-    if (text[i] === quote) return i + 1;
-    i++;
-  }
-  return -1;
 }
 
 function appendReExport(
