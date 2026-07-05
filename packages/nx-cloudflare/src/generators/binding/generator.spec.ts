@@ -1,4 +1,13 @@
-import { describe, it, expect, beforeEach, mock, type Mock } from 'bun:test';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  mock,
+  spyOn,
+  type Mock,
+} from 'bun:test';
+import * as devkit from '@nx/devkit';
 import { Tree, joinPathFragments, updateJson } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { bindingGenerator } from './generator';
@@ -672,6 +681,13 @@ export default class extends WorkerEntrypoint<Env> {
     );
 
     it('errors when the project does not exist', async () => {
+      // Stub the graph fallback so it resolves to an empty graph instead of
+      // building the real Nx project graph (and daemon) against the /virtual
+      // test workspace — an unbounded call that otherwise times the spec out.
+      const graph = spyOn(devkit, 'createProjectGraphAsync').mockResolvedValue({
+        nodes: {},
+      } as unknown as Awaited<ReturnType<typeof devkit.createProjectGraphAsync>>);
+
       await expect(
         bindingGenerator(tree, {
           project: 'no-such-project',
@@ -680,6 +696,8 @@ export default class extends WorkerEntrypoint<Env> {
           skipTypegen: true,
         })
       ).rejects.toThrow('not found');
+
+      graph.mockRestore();
     });
 
     it('errors when wrangler.toml is used (jsonc/json only)', async () => {

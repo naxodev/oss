@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { describe, it, expect, beforeEach, spyOn } from 'bun:test';
+import * as devkit from '@nx/devkit';
 import { Tree, joinPathFragments, updateJson } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { workerConfigGenerator } from './generator';
@@ -80,8 +81,17 @@ describe('worker-config generator', () => {
   });
 
   it('throws when the project is not found', async () => {
+    // Stub the graph fallback so it resolves to an empty graph instead of
+    // building the real Nx project graph (and daemon) against the /virtual
+    // test workspace — an unbounded call that otherwise times the spec out.
+    const graph = spyOn(devkit, 'createProjectGraphAsync').mockResolvedValue({
+      nodes: {},
+    } as unknown as Awaited<ReturnType<typeof devkit.createProjectGraphAsync>>);
+
     await expect(
       workerConfigGenerator(tree, { project: 'nope', observability: true })
     ).rejects.toThrow('not found');
+
+    graph.mockRestore();
   });
 });
