@@ -39,6 +39,12 @@ export interface CloudflarePluginOptions {
    * list, delete). @default 'secret'
    */
   secretTargetName?: string;
+  /**
+   * Name for the inferred versioned-secret target (configurations: put, bulk,
+   * list, delete) wrapping `wrangler versions secret` for gradual deployments.
+   * @default 'version-secret'
+   */
+  versionSecretTargetName?: string;
 }
 
 /** {@link CloudflarePluginOptions} with every default applied. */
@@ -63,6 +69,8 @@ function normalizeOptions(
     tailTargetName: options?.tailTargetName ?? 'tail',
     d1TargetName: options?.d1TargetName ?? 'd1',
     secretTargetName: options?.secretTargetName ?? 'secret',
+    versionSecretTargetName:
+      options?.versionSecretTargetName ?? 'version-secret',
   };
 }
 
@@ -228,16 +236,19 @@ function buildD1Targets(
 }
 
 /**
- * Secret-management target — always emitted (secrets never appear in the
- * config). A single `secret` target exposes the subcommands as configurations
- * (`secret:put`, `secret:bulk`, `secret:list`, `secret:delete`).
+ * Build a secret-management target: the `@naxodev/nx-cloudflare:secret` executor
+ * exposing the subcommands as configurations (`put`/`bulk`/`list`/`delete`).
+ * `extraOptions`, when given, is set as the target's `options` — used to route
+ * the versioned variant (`{ versioned: true }` → `wrangler versions secret …`).
  */
-function buildSecretTargets(
-  options: NormalizedOptions
+function buildSecretTarget(
+  name: string,
+  extraOptions?: Record<string, unknown>
 ): Record<string, TargetConfiguration> {
   return {
-    [options.secretTargetName]: {
+    [name]: {
       executor: '@naxodev/nx-cloudflare:secret',
+      ...(extraOptions ? { options: extraOptions } : {}),
       configurations: {
         put: { command: 'put' },
         bulk: { command: 'bulk' },
@@ -245,6 +256,31 @@ function buildSecretTargets(
         delete: { command: 'delete' },
       },
     },
+  };
+}
+
+/**
+ * Emit the immediate `secret` target and the versioned `version-secret` target.
+ * If the two configured names collide, the versioned spread would silently
+ * overwrite the immediate one — turning `secret:put` into `versions secret put`
+ * (stages instead of deploys). Guard against that: keep the immediate target and
+ * skip the versioned one, warning so the misconfiguration is visible.
+ */
+function buildSecretTargets(
+  options: NormalizedOptions
+): Record<string, TargetConfiguration> {
+  const secret = buildSecretTarget(options.secretTargetName);
+  if (options.versionSecretTargetName === options.secretTargetName) {
+    logger.warn(
+      `[nx-cloudflare] secretTargetName and versionSecretTargetName are both ` +
+        `"${options.secretTargetName}"; skipping the version-secret target. ` +
+        `Give them distinct names to get both.`
+    );
+    return secret;
+  }
+  return {
+    ...secret,
+    ...buildSecretTarget(options.versionSecretTargetName, { versioned: true }),
   };
 }
 
@@ -288,6 +324,10 @@ function createNodesInternal(
       normalized,
       readD1Databases(absConfigPath, config.parsed)
     ),
+    // Secret targets are always emitted (secrets never appear in the config):
+    // an immediate `secret` target and a `version-secret` target that stages
+    // changes on a new Worker version (`wrangler versions secret …`), pairing
+    // with `version-deploy` for gradual rollouts.
     ...buildSecretTargets(normalized),
   };
   return { projects: { [projectRoot]: { targets } } };
@@ -296,8 +336,9 @@ function createNodesInternal(
 /**
  * Nx inference plugin. For every `wrangler.{toml,jsonc,json}` that sits beside a
  * `project.json`/`package.json` and parses, infers the Worker lifecycle targets
- * (serve, deploy, typegen, version-upload, version-deploy, tail), a secret
- * target with put/bulk/list/delete configurations for every Worker, and a d1
+ * (serve, deploy, typegen, version-upload, version-deploy, tail), a secret and
+ * a version-secret target (each with put/bulk/list/delete configurations) for
+ * every Worker, and a d1
  * target with apply/create/list configurations when the config declares
  * `d1_databases` (jsonc/json only; the database is chosen with `--db`).
  * Inference is intentionally

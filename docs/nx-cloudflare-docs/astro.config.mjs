@@ -161,6 +161,7 @@ export default defineConfig({
               items: [
                 { slug: 'guides/d1-migrations' },
                 { slug: 'guides/secrets' },
+                { slug: 'guides/observability-and-placement' },
               ],
             },
           ],

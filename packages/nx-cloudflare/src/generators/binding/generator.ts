@@ -98,7 +98,7 @@ async function normalizeOptions(
         `Run \`nx g @naxodev/nx-cloudflare:application\` first.`
     );
   }
-  assertJsoncConfig(configPath);
+  assertJsoncConfig(configPath, 'The binding generator');
 
   validateTypeSpecificOptions(schema);
 

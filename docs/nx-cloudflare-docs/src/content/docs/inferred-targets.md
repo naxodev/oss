@@ -180,6 +180,48 @@ bunx nx run <my-worker>:secret:delete --name=API_KEY
 
 See the [`wrangler secret delete` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#secret-delete).
 
+## Version-secret targets
+
+The plugin infers a `version-secret` target for every Worker alongside the `secret` target. Where `secret` operates on the currently deployed Worker, `version-secret` stages changes on a **new version** without shifting traffic — pair it with `version-deploy` for [gradual deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/). All configurations accept `--env <environment>`.
+
+### version-secret:put
+
+Runs `wrangler versions secret put <name>`. Stages a secret on a new Worker version without deploying it; requires `--name`. Prompts interactively for the value.
+
+```bash
+bunx nx run <my-worker>:version-secret:put --name=API_KEY
+```
+
+See the [`wrangler versions secret put` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#versions-secret-put).
+
+### version-secret:bulk
+
+Runs `wrangler versions secret bulk <file>`. Stages multiple secrets from a JSON file on a new version; requires `--file=<path>`. Do not commit that file to source control.
+
+```bash
+bunx nx run <my-worker>:version-secret:bulk --file=secrets.json
+```
+
+See the [`wrangler versions secret bulk` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#versions-secret-bulk).
+
+### version-secret:list
+
+Runs `wrangler versions secret list`. Lists the secrets on the latest version. (Cloudflare does not publish a dedicated docs anchor for this subcommand.)
+
+```bash
+bunx nx run <my-worker>:version-secret:list
+```
+
+### version-secret:delete
+
+Runs `wrangler versions secret delete <name>`. Stages a secret removal on a new version; requires `--name`.
+
+```bash
+bunx nx run <my-worker>:version-secret:delete --name=API_KEY
+```
+
+See the [`wrangler versions secret delete` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#versions-secret-delete).
+
 ## Related
 
 - [Wrangler config and target inference](/understanding/wrangler) — how the plugin detects Workers and where target options come from.

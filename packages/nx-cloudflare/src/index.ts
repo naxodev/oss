@@ -16,3 +16,5 @@ export type { InitGeneratorSchema } from './generators/init/schema';
 export type { Schema as BindingGeneratorSchema } from './generators/binding/schema';
 export { configurationGenerator } from './generators/configuration/generator';
 export type { ConfigurationGeneratorSchema } from './generators/configuration/schema';
+export { workerConfigGenerator } from './generators/worker-config/generator';
+export type { Schema as WorkerConfigGeneratorSchema } from './generators/worker-config/schema';

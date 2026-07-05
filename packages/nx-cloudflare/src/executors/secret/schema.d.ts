@@ -9,4 +9,6 @@ export interface SecretExecutorSchema {
   file?: string;
   /** Cloudflare environment -> `--env <env>`. */
   env?: string;
+  /** Prefix with `versions` -> `wrangler versions secret <command>`. Set by the version-secret target. */
+  versioned?: boolean;
 }

@@ -565,4 +565,36 @@ describe('create-cloudflare generator', () => {
     );
     warn.mockRestore();
   });
+
+  it('enables observability in wrangler.jsonc when --observability is set', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+      observability: true,
+    });
+    const config = tree.read('apps/my-worker/wrangler.jsonc', 'utf-8')!;
+    expect(config).toContain('"observability"');
+    expect(config).toContain('"enabled": true');
+  });
+
+  it('enables Smart Placement when --smartPlacement is set', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+      smartPlacement: true,
+    });
+    const config = tree.read('apps/my-worker/wrangler.jsonc', 'utf-8')!;
+    expect(config).toContain('"placement"');
+    expect(config).toContain('"mode": "smart"');
+  });
+
+  it('leaves the config untouched when neither flag is set', async () => {
+    await createCloudflareGenerator(tree, {
+      directory: 'apps/my-worker',
+      type: 'hello-world',
+    });
+    const config = tree.read('apps/my-worker/wrangler.jsonc', 'utf-8')!;
+    expect(config).not.toContain('observability');
+    expect(config).not.toContain('placement');
+  });
 });

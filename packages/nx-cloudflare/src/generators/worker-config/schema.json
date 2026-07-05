@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "NxCloudflareWorkerConfig",
+  "title": "Configure Cloudflare Worker production defaults",
+  "description": "Toggles opt-in production-readiness settings (observability logs, Smart Placement) in an existing Worker's wrangler.jsonc.",
+  "type": "object",
+  "properties": {
+    "project": {
+      "description": "The target Worker project to configure.",
+      "type": "string",
+      "$default": { "$source": "projectName", "index": 0 },
+      "x-prompt": "Which project would you like to configure?",
+      "x-priority": "important"
+    },
+    "observability": {
+      "description": "Enable Workers observability (`observability.enabled = true`) so logs are retained.",
+      "type": "boolean",
+      "default": false
+    },
+    "smartPlacement": {
+      "description": "Enable Smart Placement (`placement.mode = \"smart\"`) so Cloudflare runs the Worker closest to your backend.",
+      "type": "boolean",
+      "default": false
+    },
+    "skipFormat": {
+      "description": "Skip formatting files.",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": ["project"]
+}

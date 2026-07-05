@@ -49,25 +49,37 @@ export function isJsoncConfig(configPath: string): boolean {
   return JSONC_CONFIG_EXTENSIONS.some((ext) => configPath.endsWith(ext));
 }
 
-export function assertJsoncConfig(configPath: string): void {
+export function assertJsoncConfig(
+  configPath: string,
+  caller = 'This generator'
+): void {
   if (!isJsoncConfig(configPath)) {
     throw new Error(
-      `The binding generator only supports wrangler.jsonc and wrangler.json. ` +
+      `${caller} only supports wrangler.jsonc and wrangler.json. ` +
         `Your project uses ${configPath.split('/').pop()}. ` +
         `Convert it to wrangler.jsonc first, then re-run the generator.`
     );
   }
 }
 
-export function readWranglerConfig(
-  tree: Tree,
-  configPath: string
-): Record<string, unknown> {
+// Read a wrangler config's text, or throw a consistent error when it is
+// missing/empty. Single source of that guard for every reader below.
+function readConfigTextOrThrow(tree: Tree, configPath: string): string {
   const text = tree.read(configPath, 'utf-8');
   if (!text) {
     throw new Error(`wrangler config not found or empty: ${configPath}`);
   }
-  return parse(text) as Record<string, unknown>;
+  return text;
+}
+
+export function readWranglerConfig(
+  tree: Tree,
+  configPath: string
+): Record<string, unknown> {
+  return parse(readConfigTextOrThrow(tree, configPath)) as Record<
+    string,
+    unknown
+  >;
 }
 
 export function appendToArray(
@@ -76,10 +88,7 @@ export function appendToArray(
   arrayPath: JSONPath,
   entry: Record<string, unknown>
 ): void {
-  const text = tree.read(configPath, 'utf-8');
-  if (!text) {
-    throw new Error(`wrangler config not found or empty: ${configPath}`);
-  }
+  const text = readConfigTextOrThrow(tree, configPath);
   const config = parse(text) as Record<string, unknown>;
   const arr = getAtPath(config, arrayPath);
   const index = Array.isArray(arr) ? arr.length : 0;
@@ -135,6 +144,62 @@ export function migrationDefinesClass(
         (entry[key] as unknown[]).includes(className)
     );
   });
+}
+
+// The opt-in production-readiness toggles the application and worker-config
+// generators write. This is the single source of the flag -> config-key mapping.
+export interface ProductionToggles {
+  observability?: boolean;
+  smartPlacement?: boolean;
+}
+
+// Apply the requested production-readiness toggles to a jsonc/json wrangler
+// config in a single read/write: `observability.enabled = true` and/or
+// `placement.mode = "smart"`. jsonc-parser preserves comments and creates any
+// intermediate objects. Idempotent. Throws if the config is missing/empty.
+export function applyProductionToggles(
+  tree: Tree,
+  configPath: string,
+  toggles: ProductionToggles
+): void {
+  let text = readConfigTextOrThrow(tree, configPath);
+  if (toggles.observability) {
+    text = applyEdits(
+      text,
+      modify(text, ['observability', 'enabled'], true, {
+        formattingOptions: DEFAULT_FORMATTING,
+      })
+    );
+  }
+  if (toggles.smartPlacement) {
+    text = applyEdits(
+      text,
+      modify(text, ['placement', 'mode'], 'smart', {
+        formattingOptions: DEFAULT_FORMATTING,
+      })
+    );
+  }
+  tree.write(configPath, text);
+}
+
+// Locate a project's wrangler config and apply the production toggles to it.
+// Shared by the application and worker-config generators. Returns `false` when
+// the project has no wrangler config (the caller decides whether that is fatal);
+// throws via `assertJsoncConfig` when the config is a non-jsonc format that
+// can't be edited safely. `caller` labels that error for the invoking generator.
+export function applyProductionTogglesToProject(
+  tree: Tree,
+  projectRoot: string,
+  toggles: ProductionToggles,
+  caller: string
+): boolean {
+  const configPath = findWranglerConfig(tree, projectRoot);
+  if (!configPath) {
+    return false;
+  }
+  assertJsoncConfig(configPath, caller);
+  applyProductionToggles(tree, configPath, toggles);
+  return true;
 }
 
 function getAtPath(obj: unknown, path: JSONPath): unknown {
