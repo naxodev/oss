@@ -36,7 +36,17 @@ async function runOne(file: string): Promise<void> {
     cwd,
     stdout: 'pipe',
     stderr: 'pipe',
-    env: process.env,
+    // Run Nx plugins in-process and skip the daemon. Generator specs (e.g. the
+    // @nx/js library generator) compute the project graph, which otherwise
+    // spawns `dependencies-and-lockfile` worker subprocesses. Under this
+    // runner's 8-way concurrency those workers crash on loaded CI ("Plugin
+    // worker exited unexpectedly"), hanging the graph build until the test
+    // times out. In-process execution removes the subprocess entirely.
+    env: {
+      ...process.env,
+      NX_ISOLATE_PLUGINS: 'false',
+      NX_DAEMON: 'false',
+    },
   });
   const [code, stdout, stderr] = await Promise.all([
     proc.exited,

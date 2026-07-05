@@ -43,11 +43,13 @@ Each package (`gonx`, `nx-cloudflare`) is released independently and **published
 
    This bumps the version from your Conventional Commits, updates the changelog, commits, tags `<project>@vX.Y.Z`, pushes the commit and tag (`release.git.push` is enabled in `nx.json`), and creates the GitHub release. Use the top-level `nx release` — the `nx release version` subcommand is rejected by this repo's `release.git` config.
 
-3. Build so `dist/` carries the new version (publish packs `dist/`, and step 2 leaves it built at the previous version):
+3. Verify `dist/` carries the new version (publish packs `dist/`):
 
    ```bash
-   bunx nx build <project>
+   bunx nx build <project>   # optional safety net; step 2 already versioned dist/
    ```
+
+   Step 2 already leaves `dist/` at the new version: `release.version.preVersionCommand` builds every project first, then `release.version.manifestRootsToUpdate` (`["{projectRoot}", "dist/{projectRoot}"]`) writes the bumped version into **both** the source and `dist/` `package.json`. Without that `manifestRootsToUpdate`, versioning updated only the source manifest, so publish packed a **stale `dist/` at the old version** — `npm` silently re-tagged the already-published version instead of erroring, so the release looked successful while the new version never reached the registry.
 
 4. Publish, entering a fresh OTP from your authenticator:
 
