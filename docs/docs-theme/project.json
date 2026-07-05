@@ -1,0 +1,8 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "docs-theme",
+  "root": "docs/docs-theme",
+  "sourceRoot": "docs/docs-theme/src",
+  "projectType": "library",
+  "tags": ["scope:public", "type:docs"]
+}

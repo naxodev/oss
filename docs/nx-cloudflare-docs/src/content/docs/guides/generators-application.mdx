@@ -1,0 +1,45 @@
+---
+title: application generator
+description: Scaffold a Cloudflare Worker with create-cloudflare (C3) and make it Nx-ready.
+---
+
+import SchemaOptionsTable from '@naxodev/docs-theme/components/SchemaOptionsTable.astro';
+import schema from '@naxodev/nx-cloudflare/src/generators/create-cloudflare/schema.json';
+
+The `create-cloudflare` generator wraps Cloudflare's [create-cloudflare (C3)](https://developers.cloudflare.com/workers/get-started/create-worker/) CLI to scaffold a Worker project, then makes it Nx-ready with Wrangler target inference and workspace-managed dependencies.
+
+**Aliases:** `c3`, `application`, `app`
+
+## Usage
+
+```bash
+bunx nx g @naxodev/nx-cloudflare:application my-worker
+```
+
+## Options
+
+<SchemaOptionsTable schema={schema} />
+
+`c3Version` has no fixed default in the schema — when omitted, the generator invokes the version of create-cloudflare bundled with the plugin.
+
+## Notes
+
+Provide exactly one of `type`, `framework`, or `template` to control the C3 scaffold non-interactively. If none are provided, C3's interactive prompts guide selection.
+
+See [Enable observability and Smart Placement](/guides/observability-and-placement) for details on the `observability` and `smartPlacement` flags.
+
+## Verify
+
+```bash
+bunx nx show project my-worker
+```
+
+The project appears in the graph with inferred `serve`, `deploy`, and `typegen` targets — no `project.json` required.
+
+## Next steps
+
+- [binding generator](/guides/generators-binding) — add KV, R2, D1, Durable Object, Queue, Workflow, or Service bindings
+- [Inferred targets](/inferred-targets) — `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, `tail`
+- [Plugin options](/understanding/plugin-options) — customizing inferred target names
+- [Wrangler config](/understanding/wrangler) — config formats and inference
+- [library generator](/guides/generators-library) — scaffold a Worker library

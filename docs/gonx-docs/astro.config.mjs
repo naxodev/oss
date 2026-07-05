@@ -119,8 +119,8 @@ export default defineConfig({
         Header: './src/components/Header.astro',
         Sidebar: './src/components/Sidebar.astro',
         ThemeSelect: './src/components/ThemeSelect.astro',
-        Head: './src/components/Head.astro',
-        Pagination: './src/components/Pagination.astro',
+        Head: '@naxodev/docs-theme/components/Head.astro',
+        Pagination: '@naxodev/docs-theme/components/Pagination.astro',
       },
       sidebar: [
         {

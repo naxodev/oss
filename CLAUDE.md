@@ -72,7 +72,7 @@ Each plugin is an Nx `library` project built with `@nx/js:tsc`. The published sh
 Both plugins infer Nx targets from project files rather than requiring hand-written `project.json` targets:
 
 - **nx-cloudflare** (`src/plugin.ts`): detects Wrangler config and builds Worker lifecycle targets (`serve`/`deploy`/`typegen`/`version-upload`/`tail`) that shell out to the Wrangler CLI via `nx:run-commands`. Target names are configurable via `CloudflarePluginOptions`.
-- **gonx** (`src/graph/`): `createNodesV2.ts` infers targets from Go projects; `create-dependencies.ts` builds the project graph from Go imports. The `src/graph/static-analysis/` module parses `go.mod`/`go.work` and Go source with **tree-sitter** (`web-tree-sitter` + `tree-sitter-go`) to resolve the local import graph. See `packages/gonx/docs/static-analysis.md`.
+- **gonx** (`src/graph/`): `createNodesV2.ts` infers targets from Go projects; `create-dependencies.ts` builds the project graph from Go imports. The `src/graph/static-analysis/` module parses `go.mod`/`go.work` and Go source with **tree-sitter** (`web-tree-sitter` + `tree-sitter-go`) to resolve the local import graph. See `docs/gonx-docs/src/content/docs/understanding/static-analysis.md`.
 
 ### Releases
 

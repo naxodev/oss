@@ -7,12 +7,20 @@
     "default": ["{projectRoot}/**/*"],
     "production": ["!{projectRoot}/**/*.spec.tsx"]
   },
-  "implicitDependencies": ["gonx"],
+  "implicitDependencies": ["gonx", "docs-theme"],
   "targets": {
     "build": {
       "inputs": ["production", "^production"],
       "outputs": ["{workspaceRoot}/dist/docs/gonx-docs"],
       "command": "astro build",
+      "cache": true,
+      "options": {
+        "cwd": "docs/gonx-docs"
+      }
+    },
+    "typecheck": {
+      "inputs": ["production", "^production"],
+      "command": "astro check",
       "cache": true,
       "options": {
         "cwd": "docs/gonx-docs"

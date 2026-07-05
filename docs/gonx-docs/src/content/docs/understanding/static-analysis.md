@@ -48,24 +48,30 @@ Supported in the constraint expression:
 - `//go:build` modern boolean form: `&&`, `||`, `!`, parentheses
 - `// +build` legacy form (space-separated terms = OR, comma-separated within a
   term = AND, `!` per-term negation, multiple lines AND'd)
-- `unix` pseudo-tag (matches Linux, Darwin, the BSDs, Solaris, AIX, and the
-  full set Go ships in `internal/syslist.UnixOS`)
+- `unix` pseudo-tag (matches Linux, Darwin, the BSDs, Solaris, AIX, and —
+  note — Android, illumos, iOS, dragonfly, hurd; the full set Go ships in
+  `internal/syslist.UnixOS`)
 - `GOOS` values (`linux`, `darwin`, `windows`, …) and `GOARCH` values
   (`amd64`, `arm64`, `386`, …)
-- User-defined tags, plus `cgo` and `go1.N` policy
+- User-defined tags via the `BuildContext.tags` set, plus `cgo` and `go1.N`
+  policy via `BuildContext.cgoEnabled` / `BuildContext.goVersion` (internal
+  API, not a plugin option)
 
 Filename-based suffixes are also honored, matching Go's `go/build` algorithm:
-`name_<GOOS>.go`, `name_<GOARCH>.go`, `name_<GOOS>_<GOARCH>.go`, and any of
-those with a trailing `_test` before `.go`. Note that `unix` is recognized only
-as an in-source build tag, **not** as a filename suffix — Go itself doesn't
-treat `foo_unix.go` as unix-gated, and neither does gonx.
+`name_<GOOS>.go` (e.g. `signal_linux.go`), `name_<GOARCH>.go` (e.g.
+`sha1block_amd64.go`), `name_<GOOS>_<GOARCH>.go` (e.g.
+`zsyscall_darwin_arm64.go`), and any of those with a trailing `_test` before
+`.go`. Note that `unix` is recognized only as an in-source build tag, **not**
+as a filename suffix — Go itself doesn't treat `foo_unix.go` as unix-gated, and
+neither does gonx.
 
 ### Edge-case behavior
 
 - `go1.X` version tags evaluate to `true` by default (no Go compiler is handy to
   consult; over-including is safer than under-including for graph purposes).
+  Set `BuildContext.goVersion` to gate on `N >= M`.
 - The `cgo` pseudo-tag evaluates to `false` by default — static analysis never
-  invokes cgo.
+  invokes cgo. Set `BuildContext.cgoEnabled` to opt in.
 - A malformed constraint expression falls back to "include the file" rather than
   failing graph construction.
 

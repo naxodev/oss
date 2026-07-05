@@ -1,7 +1,3 @@
-import { defineCollection } from 'astro:content';
-import { docsLoader } from '@astrojs/starlight/loaders';
-import { docsSchema } from '@astrojs/starlight/schema';
-
-export const collections = {
-  docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
-};
+// Astro requires this file at a fixed path (src/content.config.ts), so it
+// can't live in the shared theme directly — re-export the shared definition.
+export { collections } from '@naxodev/docs-theme/content.config';

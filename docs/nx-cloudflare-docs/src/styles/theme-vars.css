@@ -1,6 +1,21 @@
 /* ── Theme custom properties ─────────────────────────────────────── */
 /* Dark/light Starlight overrides + pagefind + scrollbar colors      */
 
+@theme {
+  /* ── Accent: Cloudflare orange (#F38020) ────────────────────────── */
+  --color-accent-50: #fff4ed;
+  --color-accent-100: #ffe6d5;
+  --color-accent-200: #fecfa8;
+  --color-accent-300: #fdb573;
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f38020;
+  --color-accent-600: #d96d15;
+  --color-accent-700: #b35811;
+  --color-accent-800: #8f4815;
+  --color-accent-900: #723d18;
+  --color-accent-950: #42200b;
+}
+
 :root[data-theme='dark'] {
   --sl-color-bg: #04060b;
   --sl-color-text-accent: var(--color-accent-500);
@@ -46,4 +61,44 @@
   );
   --scrollbar-idle: rgba(10, 30, 53, 0.08);
   --scrollbar-hover: rgba(10, 30, 53, 0.15);
+}
+
+/* ── Shared-theme tokens ──────────────────────────────────────────── */
+/* Bespoke site-specific values referenced by the structural CSS in    */
+/* docs/docs-theme/src/styles/*.css. Extraction did not change any of  */
+/* these colors, only where they're declared — keep values in sync     */
+/* with docs/gonx-docs/src/styles/theme-vars.css's own set.            */
+:root {
+  /* rgb triples (no alpha) so shared CSS can compose rgba(var(...), a) */
+  --sl-color-white-rgb: 10, 30, 53;
+  --color-accent-500-rgb: 243, 128, 32;
+
+  /* Muted dark-mode text, reused between code-block headers and sidebar links */
+  --muted-text-dark: #7a9ab5;
+  --sidebar-link-hover-dark: #c4d4e4;
+  --sidebar-link-muted-light: #4a6a85;
+
+  /* Code block chrome */
+  --code-header-bg-dark: rgba(10, 25, 50, 0.5);
+  --code-header-fg-light: #5a7a95;
+  --code-header-bg-light: rgba(230, 225, 218, 0.6);
+  --code-block-bg-dark: rgba(15, 43, 74, 0.4);
+  --code-block-bg-light: rgba(240, 237, 232, 0.5);
+
+  /* Bespoke inline-code tint (brighter than accent-500) for legibility on the dark bg */
+  --code-inline-fg-dark: var(--color-accent-400);
+
+  /* Search dialog surfaces */
+  --search-dialog-bg-dark: rgba(10, 20, 40, 0.85);
+  --search-dialog-bg-light: rgba(254, 252, 248, 0.9);
+
+  /* One-off accent-adjacent glow/gradient colors that don't map onto the accent scale */
+  --h2-border-glow-rgb: 250, 174, 64;
+  --stats-gradient-stop2-rgb: 250, 174, 64;
+  --gradient-accent-to-1: var(--color-accent-400);
+  --gradient-accent-to-2: var(--color-accent-500);
+
+  /* Feature-card hover lift (this site has none — neutralize the shared rule) */
+  --feature-item-hover-transform: none;
+  --feature-item-hover-shadow: none;
 }

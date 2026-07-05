@@ -7,7 +7,7 @@ title: "createCloudflareGenerator"
 
 > **createCloudflareGenerator**(`tree`, `schema`): `Promise`\<`GeneratorCallback`\>
 
-Defined in: [packages/nx-cloudflare/src/generators/create-cloudflare/generator.ts:43](https://github.com/naxodev/oss/blob/main/packages/nx-cloudflare/src/generators/create-cloudflare/generator.ts#L43)
+Defined in: [packages/nx-cloudflare/src/generators/create-cloudflare/generator.ts:42](https://github.com/naxodev/oss/blob/main/packages/nx-cloudflare/src/generators/create-cloudflare/generator.ts#L42)
 
 Scaffolds a Cloudflare Worker application by delegating to Cloudflare's
 create-cloudflare (C3) CLI, then imports the result into the Nx workspace and

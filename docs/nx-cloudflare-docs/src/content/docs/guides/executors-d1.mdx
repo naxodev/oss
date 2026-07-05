@@ -1,0 +1,55 @@
+---
+title: d1 executor
+description: Option reference for the d1 executor and its apply, create, and list configurations.
+---
+
+import SchemaOptionsTable from '@naxodev/docs-theme/components/SchemaOptionsTable.astro';
+import schema from '@naxodev/nx-cloudflare/src/executors/d1/schema.json';
+
+The `@naxodev/nx-cloudflare:d1` executor runs `wrangler d1 migrations <command>` for a Worker's D1 database. The plugin infers a `d1` target for every `d1_databases` binding in a Worker's `wrangler.jsonc`, exposing three Nx configurations — `apply`, `create`, and `list` — that set `command` for you. See [Run D1 migrations](/guides/d1-migrations) for a task-oriented walkthrough.
+
+## Options
+
+<SchemaOptionsTable schema={schema} />
+
+`command` and `databases` are set by the inferred target's configuration — you don't pass them yourself.
+
+## Configurations
+
+### apply
+
+Runs `wrangler d1 migrations apply <database>`. Applies pending migrations to the **local** database by default; pass `--remote` for the production database.
+
+```bash
+bunx nx run my-worker:d1:apply
+bunx nx run my-worker:d1:apply --remote
+```
+
+### create
+
+Runs `wrangler d1 migrations create <database> <message>`. Scaffolds a new migration file. Requires `--message`.
+
+```bash
+bunx nx run my-worker:d1:create --message=add_users
+```
+
+### list
+
+Runs `wrangler d1 migrations list <database>`. Lists **unapplied** (pending) migrations. Uses the **local** database by default; pass `--remote` for production.
+
+```bash
+bunx nx run my-worker:d1:list
+bunx nx run my-worker:d1:list --remote
+```
+
+## Notes
+
+- D1 target inference is **jsonc/json only** — there is no TOML parser in the plugin, so `wrangler.toml` Workers do not get a `d1` target.
+- When a Worker declares more than one `d1_databases` binding, pass `--db=<binding>` to select which one a command targets. With a single database, `--db` is optional; with multiple, omitting it errors and lists the valid bindings.
+- Arbitrary `-- <wrangler flag>` passthrough does **not** apply to this executor — only the typed options above (`remote`, `env`, `message`, `db`) are accepted.
+
+## Next steps
+
+- [Run D1 migrations](/guides/d1-migrations) — step-by-step guide
+- [binding generator](/guides/generators-binding) — add the D1 binding this executor operates on
+- [Inferred targets](/inferred-targets) — the full target reference

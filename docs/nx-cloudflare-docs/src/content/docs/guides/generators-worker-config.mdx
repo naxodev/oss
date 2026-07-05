@@ -1,0 +1,42 @@
+---
+title: worker-config generator
+description: Toggle observability and Smart Placement on an existing Worker's wrangler.jsonc.
+---
+
+import SchemaOptionsTable from '@naxodev/docs-theme/components/SchemaOptionsTable.astro';
+import schema from '@naxodev/nx-cloudflare/src/generators/worker-config/schema.json';
+
+The `worker-config` generator toggles opt-in production-readiness settings — Workers observability and Smart Placement — in an existing Worker's `wrangler.jsonc`. It targets an **existing** Worker — scaffold one first with the [application generator](/guides/generators-application).
+
+## Usage
+
+```bash
+bunx nx g @naxodev/nx-cloudflare:worker-config --project=my-worker --observability
+```
+
+At least one of `--observability` or `--smartPlacement` is required.
+
+## Options
+
+<SchemaOptionsTable schema={schema} />
+
+## Notes
+
+- **JSONC only.** The generator edits `wrangler.jsonc`/`wrangler.json` while preserving comments and formatting. A Worker on `wrangler.toml` must be converted first.
+- Passing neither `--observability` nor `--smartPlacement` fails loudly — there is nothing for the generator to do.
+- The [application generator](/guides/generators-application) exposes the same two flags at scaffold time, so `worker-config` is only needed for Workers that already exist.
+
+## Verify
+
+```jsonc
+{
+  "observability": { "enabled": true },
+  "placement": { "mode": "smart" }
+}
+```
+
+## Next steps
+
+- [Enable observability and Smart Placement](/guides/observability-and-placement) — walkthrough of both flags
+- [application generator](/guides/generators-application) — scaffold a new Worker with these flags set from the start
+- [binding generator](/guides/generators-binding) — add KV, R2, D1, and other bindings
