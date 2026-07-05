@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, spyOn } from 'bun:test';
+import * as devkit from '@nx/devkit';
 import {
   addProjectConfiguration,
   logger,
@@ -89,9 +90,18 @@ describe('configuration generator', () => {
   });
 
   it('throws a helpful error for an unknown project', async () => {
+    // Stub the graph fallback so it resolves to an empty graph instead of
+    // building the real Nx project graph (and daemon) against the /virtual
+    // test workspace — an unbounded call that otherwise times the spec out.
+    const graph = spyOn(devkit, 'createProjectGraphAsync').mockResolvedValue({
+      nodes: {},
+    } as unknown as Awaited<ReturnType<typeof devkit.createProjectGraphAsync>>);
+
     await expect(
       configurationGenerator(tree, { project: 'nope' })
     ).rejects.toThrow(/not found/);
+
+    graph.mockRestore();
   });
 
   it('authors an spa wrangler.jsonc with assets and no main', async () => {
