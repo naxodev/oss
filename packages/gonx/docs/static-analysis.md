@@ -1,12 +1,12 @@
-# Dependency Detection
+# Dependency detection
 
-## Overview
+> The user-facing version of this doc lives on the docs site: [Static analysis](https://gonx.naxo.dev/understanding/static-analysis/). Keep the two in sync.
 
 gonx detects dependencies between Go projects using tree-sitter to
 parse Go source files directly. This approach does not require Go to
 be installed.
 
-## How It Works
+## How it works
 
 1. **Module Discovery**: Scans all Nx projects for `go.mod` files and
    extracts module paths and replace directives.
@@ -62,7 +62,7 @@ Supported in the constraint expression:
   (`amd64`, `arm64`, `386`, …)
 - User-defined tags via the `BuildContext.tags` set, plus `cgo` and `go1.N`
   policy via `BuildContext.cgoEnabled` / `BuildContext.goVersion` (internal
-  API; not yet exposed as a plugin option)
+  API, not a plugin option)
 
 Filename-based suffixes are also honored, matching Go's `go/build`
 algorithm:

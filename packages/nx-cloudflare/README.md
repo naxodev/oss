@@ -7,9 +7,9 @@
 
 <div style="text-align: center;">
 
-[![MIT](https://img.shields.io/packagist/l/doctrine/orm.svg?style=flat-square)]()
-[![commitizen](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat-square)]()
-[![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)]()
+[![MIT](https://img.shields.io/npm/l/@naxodev/nx-cloudflare.svg?style=flat-square)](https://github.com/naxodev/oss/blob/main/LICENSE)
+[![commitizen](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat-square)](https://github.com/commitizen/cz-cli)
+[![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 
@@ -26,9 +26,9 @@ Nx plugin for [Cloudflare Workers](https://developers.cloudflare.com/workers/). 
 - Scaffold Cloudflare Worker applications via create-cloudflare (C3) — Worker templates, web frameworks, or remote git templates.
 - Add Cloudflare to an **existing** Nx app (`configuration` generator) — authors `wrangler.jsonc` (Worker / SPA / full-stack) and wires the deploy/serve/types layer, without scaffolding a new project. Framework-agnostic: bring your own framework's Cloudflare adapter.
 - Generate Cloudflare Worker libraries (publishable, with bundler/linter/test options).
-- Add bindings to an existing Worker (KV, R2, D1, Durable Objects, Queues, Workflows, Service/RPC) — edits `wrangler.jsonc`, stubs code + migrations, and refreshes `wrangler types`.
+- Add bindings to an existing Worker (KV, R2, D1, Durable Objects, Queues, Workflows, service — with RPC support) — edits `wrangler.jsonc`, stubs code + migrations, and refreshes `wrangler types`.
 - Inferred `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, and `tail` targets via the `@naxodev/nx-cloudflare/plugin` inference plugin — no hand-written `project.json` targets.
-- Inferred `d1` target (configurations `apply`/`create`/`list`) for each D1 binding, and a `secret` target (configurations `put`/`bulk`/`list`/`delete`) for every Worker — backed by the `:d1` and `:secret` executors.
+- Inferred `d1` target (configurations `apply`/`create`/`list`) for each D1 binding, and `secret`/`version-secret` targets (configurations `put`/`bulk`/`list`/`delete`) for every Worker — backed by the `:d1` and `:secret` executors.
 - Customizable inferred target names via `CloudflarePluginOptions`.
 - Vitest wired automatically when the C3 template ships a Vitest config.
 
@@ -100,16 +100,18 @@ With a single D1 database, `--db` is optional. With multiple, omitting it errors
 
 ### Manage secrets
 
-Every Worker gets a `secret` target with `put`, `bulk`, `list`, and `delete` configurations.
+Every Worker gets a `secret` target and a `version-secret` target, each with `put`, `bulk`, `list`, and `delete` configurations. `secret` applies immediately; `version-secret` stages the change on a new Worker version (`wrangler versions secret …`), pairing with `version-deploy` for gradual rollouts.
 
 ```sh
 nx run my-worker:secret:put --name=API_KEY        # interactive prompt for the value
 nx run my-worker:secret:bulk --file=secrets.json  # upload many from a JSON file
 nx run my-worker:secret:list
 nx run my-worker:secret:delete --name=API_KEY
+
+nx run my-worker:version-secret:put --name=API_KEY   # stage on a new version instead
 ```
 
-Secret values are never passed as arguments — `secret:put` prompts interactively, `secret:bulk` reads a JSON file (do not commit it). All configurations accept `--env <environment>`.
+Secret values are never passed as arguments — `secret:put`/`version-secret:put` prompt interactively, `secret:bulk`/`version-secret:bulk` read a JSON file (do not commit it). All configurations accept `--env <environment>`.
 
 ## Compatibility
 

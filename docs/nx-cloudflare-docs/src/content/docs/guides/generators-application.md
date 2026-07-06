@@ -48,7 +48,7 @@ The project appears in the graph with inferred `serve`, `deploy`, and `typegen` 
 ## Next steps
 
 - [binding generator](/guides/generators-binding) — add KV, R2, D1, Durable Object, Queue, Workflow, or Service bindings
-- [Inferred targets](/inferred-targets) — `serve`, `deploy`, `typegen`, `version-upload`, `tail`
+- [Inferred targets](/inferred-targets) — `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, `tail`
 - [Plugin options](/understanding/plugin-options) — customizing inferred target names
 - [Wrangler config](/understanding/wrangler) — config formats and inference
 - [library generator](/guides/generators-library) — scaffold a Worker library

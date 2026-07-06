@@ -7,7 +7,7 @@ import { Steps } from '@astrojs/starlight/components';
 
 ## Prerequisites
 
-- **Node.js 22 or later** — an active LTS release (Node 24 is the latest). Required by Nx and Wrangler.
+- **Node.js 22 or later** — an active LTS release. Required by Nx and Wrangler.
 - An existing Nx workspace. If you don't have one, create it with
   `bunx create-nx-workspace@latest`.
 - A package manager: **bun**, npm, yarn, or pnpm. Examples below use `bunx`.
@@ -60,9 +60,11 @@ import { Steps } from '@astrojs/starlight/components';
    bunx nx show project <my-worker>
    ```
 
-   The output should list `serve`, `deploy`, `typegen`, `version-upload`, and
-   `tail` targets. If you don't have a Worker yet, the
-   [Quick start](/getting-started/quick-start) walks through generating one.
+   The output should list `serve`, `deploy`, `typegen`, `version-upload`,
+   `version-deploy`, `tail`, `secret`, and `version-secret` targets (plus a
+   `d1` target if the project's Wrangler config declares D1 databases). If you
+   don't have a Worker yet, the [Quick start](/getting-started/quick-start)
+   walks through generating one.
 
 </Steps>
 

@@ -17,20 +17,20 @@ Worker tasks are no longer scaffolded as `@naxodev/nx-cloudflare:serve` /
 [Wrangler config](/understanding/wrangler) automatically gets a set of targets
 that shell out to the Wrangler CLI:
 
-| Target           | Runs                | What it does                                            |
-| ---------------- | ------------------- | ------------------------------------------------------- |
-| `serve`          | `wrangler dev`      | Local dev server (continuous; waits for "Ready on …").  |
-| `deploy`         | `wrangler deploy`   | Publish the Worker to Cloudflare's edge.                |
-| `typegen`        | `wrangler types`    | Generate `worker-configuration.d.ts` (`Env` + runtime). |
-| `version-upload` | `wrangler versions` | Upload a new version without deploying it.              |
-| `tail`           | `wrangler tail`     | Stream live production logs.                            |
+| Target           | Runs                       | What it does                                            |
+| ---------------- | -------------------------- | ------------------------------------------------------- |
+| `serve`          | `wrangler dev`             | Local dev server (continuous; waits for "Ready on …").  |
+| `deploy`         | `wrangler deploy`          | Publish the Worker to Cloudflare's edge.                |
+| `typegen`        | `wrangler types`           | Generate `worker-configuration.d.ts` (`Env` + runtime). |
+| `version-upload` | `wrangler versions upload` | Upload a new version without deploying it.              |
+| `tail`           | `wrangler tail`            | Stream live production logs.                            |
 
 Target names are configurable via the plugin options, and you forward raw
 Wrangler flags after `--`:
 
 ```bash
-bunx nx serve my-worker -- --remote
-bunx nx deploy my-worker -- --dry-run
+bunx nx run my-worker:serve -- --remote
+bunx nx run my-worker:deploy -- --dry-run
 ```
 
 Because configuration now lives where Wrangler reads it natively, options that
@@ -77,7 +77,8 @@ Worker templates (`--type`), frameworks (`--framework`), and language
 ## Wrangler config quality-of-life
 
 - **`wrangler.jsonc` by default.** New Workers get a JSONC config (comments +
-  trailing commas), with a `configFormat` option to opt back into TOML.
+  trailing commas) from the C3 scaffold — there is no option to opt back into
+  TOML.
 - **`worker-configuration.d.ts` is a generated artifact.** It's produced by the
   cached `typegen` target and git-ignored, rather than checked in.
 - **Inferred Vitest test target.** Generated Workers get a `test` target via

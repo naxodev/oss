@@ -9,7 +9,7 @@ maintain Worker projects alongside the rest of your monorepo — with the cachin
 affected-detection, and project graph that Nx provides.
 
 The plugin infers Worker lifecycle targets (`serve`, `deploy`, `typegen`,
-`version-upload`, `tail`) directly from each project's Wrangler config, so there
+`version-upload`, `version-deploy`, `tail`) directly from each project's Wrangler config, so there
 are no hand-written `project.json` targets to maintain. Scaffolding is handled
 by generators that wrap Cloudflare's [create-cloudflare (C3)](https://developers.cloudflare.com/workers/get-started/create-worker/)
 CLI, producing Nx-ready projects with `wrangler.jsonc`, TypeScript, and Vitest

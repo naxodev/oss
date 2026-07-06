@@ -30,13 +30,13 @@ The `NX_DRY_RUN` environment variable also triggers a dry run when set to `true`
 
 ## Inferred target
 
-Inferred for all Go projects (applications and libraries):
+Inferred for all Go projects (applications and libraries), with `moduleRoot` resolved to the project's root path (e.g. `libs/my-go-lib`):
 
 ```json
 {
   "executor": "@naxodev/gonx:release-publish",
   "options": {
-    "moduleRoot": "{projectRoot}"
+    "moduleRoot": "libs/my-go-lib"
   },
   "configurations": {
     "development": {

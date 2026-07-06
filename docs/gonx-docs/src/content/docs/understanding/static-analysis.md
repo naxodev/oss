@@ -107,7 +107,7 @@ configuration options.
 ### Debugging
 
 ```bash
-NX_VERBOSE_LOGGING=true nx graph
+NX_VERBOSE_LOGGING=true npx nx graph
 ```
 
 ## Next steps

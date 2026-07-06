@@ -1,7 +1,5 @@
 # e2e-utils
 
-This library was generated with [Nx](https://nx.dev).
+Shared helpers for this workspace's e2e suites (`nx-cloudflare-e2e`, `gonx-e2e`). It provides utilities to create a fresh Nx workspace and install a plugin from the local Verdaccio registry (`createTestProject`), plus supporting helpers for running commands and reading environment info.
 
-## Running unit tests
-
-Run `nx test e2e-utils` to execute the unit tests via [Jest](https://jestjs.io).
+This library is internal to the workspace and is not published to npm.
