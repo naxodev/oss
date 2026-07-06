@@ -11,7 +11,7 @@ inference plugin.
 ## Before you start
 
 - An **Nx 23.x** workspace (or later)
-- **Node.js 22+** (an active LTS release; Node 24 is the latest)
+- **Node.js 22+** (an active LTS release)
 - **Go** — a [stable release](https://go.dev/dl/) (1.18+ for multi-module
   workspaces)
 
@@ -21,20 +21,31 @@ Don't have a workspace yet? Create one with the gonx preset and skip to step 3:
 npx create-nx-workspace my-org --preset=@naxodev/gonx
 ```
 
+## Version compatibility
+
+Each gonx major targets one Nx major:
+
+| Nx version | gonx version |
+| ---------- | ------------ |
+| 21.x       | 1.x, 2.x     |
+| 22.x       | 3.x          |
+| 23.x       | 4.x          |
+
 ## Steps
 
 <Steps>
+
 1. **Install the package**
 
-```bash
-npm install @naxodev/gonx --save-dev
-```
+   ```bash
+   npm install @naxodev/gonx --save-dev
+   ```
 
-Or with Nx's built-in installer, which also runs any migrations:
+   Or with Nx's built-in installer, which also runs any migrations:
 
-```bash
-npx nx add @naxodev/gonx
-```
+   ```bash
+   npx nx add @naxodev/gonx
+   ```
 
 2. **Register the inference plugin in `nx.json`**
 
@@ -57,7 +68,8 @@ npx nx add @naxodev/gonx
 
    Every directory containing a `go.mod` should appear as an Nx project. If you
    used the preset, your starter Go project will be listed.
-   </Steps>
+
+</Steps>
 
 ## Configuration
 
@@ -87,4 +99,4 @@ available option.
 - [Quick start](/getting-started/quick-start) — create, run, test, and build a Go app
 - [Create your first Go project](/tutorials/first-go-project) — a full tutorial walkthrough
 - [Application generator](/guides/generators/application) — scaffold a Go application
-- [Migrate to gonx 3.0.0](/community/migration) — coming from nx-go
+- [Migrate from nx-go to gonx](/community/migration) — coming from nx-go

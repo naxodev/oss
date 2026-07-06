@@ -10,8 +10,9 @@ visualization, and generators — to Go projects without requiring hand-written
 
 ## What gonx does
 
-gonx infers build, serve, test, lint, tidy, and generate targets automatically
-from every `go.mod` in your workspace. It builds the Nx project graph by
+gonx infers test, lint, tidy, and generate targets automatically from every
+`go.mod` in your workspace, plus build and serve for applications. It builds
+the Nx project graph by
 parsing Go source files with [tree-sitter](https://tree-sitter.github.io/) to
 extract import statements and resolve them to Nx projects — no Go toolchain
 required for graph computation. It also ships generators for scaffolding

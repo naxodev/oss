@@ -32,7 +32,8 @@ The plugin is registered in `nx.json`. Both forms are supported.
         "versionDeployTargetName": "promote",
         "tailTargetName": "logs",
         "d1TargetName": "migrate",
-        "secretTargetName": "env-secret"
+        "secretTargetName": "env-secret",
+        "versionSecretTargetName": "version-env-secret"
       }
     }
   ]
@@ -41,25 +42,26 @@ The plugin is registered in `nx.json`. Both forms are supported.
 
 ## Options
 
-| Option                    | Type   | Default          | Description                                                                                       |
-| ------------------------- | ------ | ---------------- | ------------------------------------------------------------------------------------------------- |
-| `serveTargetName`         | string | `serve`          | Name for the inferred `wrangler dev` target.                                                      |
-| `deployTargetName`        | string | `deploy`         | Name for the inferred `wrangler deploy` target.                                                   |
-| `typegenTargetName`       | string | `typegen`        | Name for the inferred `wrangler types` target.                                                    |
-| `versionUploadTargetName` | string | `version-upload` | Name for the inferred `wrangler versions upload` target.                                          |
-| `versionDeployTargetName` | string | `version-deploy` | Name for the inferred `wrangler versions deploy` target.                                          |
-| `tailTargetName`          | string | `tail`           | Name for the inferred `wrangler tail` target.                                                     |
-| `d1TargetName`            | string | `d1`             | Name for the inferred D1 migrations target (configurations: `apply`, `create`, `list`).           |
-| `secretTargetName`        | string | `secret`         | Name for the inferred secret-management target (configurations: `put`, `bulk`, `list`, `delete`). |
+| Option                    | Type   | Default          | Description                                                                                                                                                  |
+| ------------------------- | ------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `serveTargetName`         | string | `serve`          | Name for the inferred `wrangler dev` target.                                                                                                                 |
+| `deployTargetName`        | string | `deploy`         | Name for the inferred `wrangler deploy` target.                                                                                                              |
+| `typegenTargetName`       | string | `typegen`        | Name for the inferred `wrangler types` target.                                                                                                               |
+| `versionUploadTargetName` | string | `version-upload` | Name for the inferred `wrangler versions upload` target.                                                                                                     |
+| `versionDeployTargetName` | string | `version-deploy` | Name for the inferred `wrangler versions deploy` target.                                                                                                     |
+| `tailTargetName`          | string | `tail`           | Name for the inferred `wrangler tail` target.                                                                                                                |
+| `d1TargetName`            | string | `d1`             | Name for the inferred D1 migrations target (configurations: `apply`, `create`, `list`).                                                                      |
+| `secretTargetName`        | string | `secret`         | Name for the inferred secret-management target (configurations: `put`, `bulk`, `list`, `delete`).                                                            |
+| `versionSecretTargetName` | string | `version-secret` | Name for the inferred versioned-secret target (configurations: `put`, `bulk`, `list`, `delete`) wrapping `wrangler versions secret` for gradual deployments. |
 
 ## Notes
 
 The `application` and `init` generators register the plugin idempotently, matching either the string or object form. Changing target names after projects exist takes effect on the next Nx graph refresh — update any scripts, CI pipelines, or documentation that reference the old names.
 
-The `d1` and `secret` subcommands (`apply`, `create`, `list`, `put`, `bulk`, `delete`) are exposed as fixed Nx configurations and are not individually renamable — only the `d1` and `secret` target names themselves are configurable.
+The `d1`, `secret`, and `version-secret` subcommands (`apply`, `create`, `list`, `put`, `bulk`, `delete`) are exposed as fixed Nx configurations and are not individually renamable — only the `d1`, `secret`, and `version-secret` target names themselves are configurable.
 
 ## Next steps
 
-- [Inferred targets](/inferred-targets) — `serve`, `deploy`, `typegen`, `version-upload`, `tail`
+- [Inferred targets](/inferred-targets) — `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, `tail`
 - [Wrangler config](/understanding/wrangler) — config formats and inference
 - [application generator](/guides/generators-application) — scaffold a Worker application

@@ -3,7 +3,7 @@ title: Init generator
 description: Registers the gonx inference plugin in an Nx workspace and optionally creates a go.work file.
 ---
 
-Registers the gonx inference plugin in `nx.json` and optionally creates a `go.work` file. Hidden from `nx list` and invoked automatically by the other generators.
+Registers the gonx inference plugin in `nx.json` and optionally creates a `go.work` file. Invoked automatically by the other generators.
 
 ## Usage
 

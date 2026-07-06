@@ -13,14 +13,14 @@ npx create-nx-workspace <workspace> --preset=@naxodev/gonx
 
 ## Options
 
-| Option       | Type                                    | Default    | Description                                                             |
-| ------------ | --------------------------------------- | ---------- | ----------------------------------------------------------------------- |
-| type         | `binary` \| `library` \| `go-blueprint` | `binary`   | Template type to generate. Required.                                    |
-| directory    | string                                  | _required_ | Directory of the new project. Taken from the first positional argument. |
-| name         | string                                  | -          | Name of the project. Must match `^[a-zA-Z][^:]*$`.                      |
-| tags         | string                                  | -          | Tags to add to the project (used for linting).                          |
-| skipFormat   | boolean                                 | `false`    | Skip formatting files.                                                  |
-| addGoDotWork | boolean                                 | `false`    | Add a `go.work` file to the project.                                    |
+| Option       | Type                                    | Default    | Description                                                                  |
+| ------------ | --------------------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| type         | `binary` \| `library` \| `go-blueprint` | _required_ | Template type to generate. Defaults to `binary` when prompted interactively. |
+| directory    | string                                  | _required_ | Directory of the new project. Taken from the first positional argument.      |
+| name         | string                                  | -          | Name of the project. Must match `^[a-zA-Z][^:]*$`.                           |
+| tags         | string                                  | -          | Tags to add to the project (used for linting).                               |
+| skipFormat   | boolean                                 | `false`    | Skip formatting files.                                                       |
+| addGoDotWork | boolean                                 | `false`    | Add a `go.work` file to the project.                                         |
 
 ### go-blueprint options
 

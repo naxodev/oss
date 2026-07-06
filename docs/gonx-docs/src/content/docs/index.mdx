@@ -23,10 +23,10 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
         />
       </picture>
     </div>
-    An Nx plugin for [Go](https://go.dev/) development. gonx infers build, serve,
-    test, lint, tidy, and generate targets from each <code>go.mod</code>, builds
-    the project graph from Go imports, and ships generators for applications, libraries,
-    and Go Blueprint projects. Available on [npm](https://www.npmjs.com/package/@naxodev/gonx).
+    An Nx plugin for [Go](https://go.dev/) development. gonx infers test, lint, tidy,
+    and generate targets from each <code>go.mod</code> (plus build and serve for
+    applications), builds the project graph from Go imports, and ships generators
+    for applications, libraries, and Go Blueprint projects. Available on [npm](https://www.npmjs.com/package/@naxodev/gonx).
   </Card>
   <Card title="Open source" icon="github">
     gonx is MIT licensed and developed on
@@ -48,9 +48,9 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
   <div class="feature-item">
     <h3 class="feature-title">Inferred tasks</h3>
     <p class="feature-description">
-      gonx detects each <code>go.mod</code> and infers build, serve, test, lint,
-      tidy, and generate targets automatically — no hand-written project.json
-      files.
+      gonx detects each <code>go.mod</code> and infers test, lint, tidy, and
+      generate targets automatically — plus build and serve for applications —
+      no hand-written project.json files.
     </p>
   </div>
 

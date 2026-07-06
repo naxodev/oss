@@ -23,9 +23,9 @@ nx g @naxodev/gonx:init
 
 ### Options
 
-| Option         | Type    | Default | Description                                                |
-| -------------- | ------- | ------- | ---------------------------------------------------------- |
-| `addGoDotWork` | boolean | `false` | Create a `go.work` file and register all Go modules in it. |
+| Option       | Type    | Default | Description                                                |
+| ------------ | ------- | ------- | ---------------------------------------------------------- |
+| addGoDotWork | boolean | `false` | Create a `go.work` file and register all Go modules in it. |
 
 Pass `--addGoDotWork` (to `init`) if you want a Go workspace (`go.work`) at the repo root:
 

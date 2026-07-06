@@ -74,7 +74,7 @@ The project now has inferred `serve`, `deploy`, `typegen`, `version-upload`, `ve
 ## Next steps
 
 - [Inferred targets](/inferred-targets) — `serve`, `deploy`, `typegen`, `version-upload`, `version-deploy`, `tail`
-- [Plugin options](/understanding/plugin-options) — customising inferred target names
+- [Plugin options](/understanding/plugin-options) — customizing inferred target names
 - [Wrangler config](/understanding/wrangler) — config formats
 - [application generator](/guides/generators-application) — scaffold a new Cloudflare Worker from scratch
 - [binding generator](/guides/generators-binding) — add KV, R2, D1, and other bindings

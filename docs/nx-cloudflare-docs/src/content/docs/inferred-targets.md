@@ -1,6 +1,6 @@
 ---
 title: Inferred targets
-description: Reference for the Nx targets the plugin infers for each Worker — serve, deploy, typegen, version-upload, tail, D1 migrations, and secrets.
+description: Reference for the Nx targets the plugin infers for each Worker — serve, deploy, typegen, version-upload, version-deploy, tail, D1 migrations, and secrets.
 ---
 
 For every project with a [Wrangler config](/understanding/wrangler), the plugin infers a set of Nx targets that shell out to the Wrangler CLI. Target names are configurable — see [Plugin options](/understanding/plugin-options).
@@ -72,6 +72,19 @@ bunx nx run <my-worker>:version-upload -- --message "fix: update handler"
 ```
 
 See the [Wrangler versions docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#versions-upload).
+
+## version-deploy
+
+Runs `wrangler versions deploy` from the project root, shifting traffic to one or more previously uploaded Worker versions. Pair with `version-upload` for gradual deployments — upload a version, then deploy it once it has been verified.
+
+- **Command:** `wrangler versions deploy`
+- **Continuous:** no
+
+```bash
+bunx nx run <my-worker>:version-deploy -- --message "roll out fix"
+```
+
+See the [Wrangler versions docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#versions-deploy).
 
 ## tail
 

@@ -110,10 +110,12 @@ for the complete config schema.
 
 ## Why target names are configurable
 
-The plugin infers five targets with default names (`serve`, `deploy`, `typegen`,
-`version-upload`, `tail`). These names are configurable via
-`CloudflarePluginOptions` because workspaces may have existing targets with the
-same name (e.g. a `serve` target from `@nx/vite`), or may follow different
-naming conventions. The plugin accepts options in `nx.json` to rename any or
-all inferred targets. See the [plugin options reference](/understanding/plugin-options)
-for the exact shape and defaults.
+The plugin infers six lifecycle targets with default names (`serve`, `deploy`,
+`typegen`, `version-upload`, `version-deploy`, `tail`), plus always-on `secret`
+and `version-secret` targets and a conditional `d1` target. These names are
+configurable via `CloudflarePluginOptions` because workspaces may have
+existing targets with the same name (e.g. a `serve` target from `@nx/vite`),
+or may follow different naming conventions. The plugin accepts options in
+`nx.json` to rename any or all inferred targets. See the
+[plugin options reference](/understanding/plugin-options) for the exact shape
+and defaults.

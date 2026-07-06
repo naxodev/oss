@@ -3,7 +3,7 @@ title: init generator
 description: Initialize the Nx Cloudflare plugin in an existing workspace.
 ---
 
-The `init` generator sets up workspace-level dependencies and plugin registration for Cloudflare Workers development with Nx, running automatically via `nx add @naxodev/nx-cloudflare` and from the `application` and `library` generators.
+The `init` generator sets up workspace-level dependencies and plugin registration for Cloudflare Workers development with Nx, running automatically via `nx add @naxodev/nx-cloudflare` and from the `library` generator. The `application` generator does not run `init` — it registers the inference plugin itself and relies on a separate workspace-root install to reconcile its dependencies.
 
 ## Usage
 

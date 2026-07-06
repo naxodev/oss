@@ -24,6 +24,10 @@ export default defineConfig({
     '/': { destination: '/getting-started/introduction/', status: 301 },
   },
   markdown: {
+    // Explicit: Astro leaves this default unfilled in the config object
+    // integrations receive, so without it @astrojs/mdx skips remark-gfm and
+    // .mdx pages silently lose GFM tables.
+    gfm: true,
     shikiConfig: {
       themes: {
         light: 'github-light',
