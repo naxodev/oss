@@ -1,13 +1,18 @@
 import { dirname, join } from 'node:path';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import {
   type CreateNodesContext,
   type CreateNodes,
   type TargetConfiguration,
   createNodesFromFiles,
   logger,
-  parseJson,
 } from '@nx/devkit';
+import {
+  getD1Databases,
+  parseWranglerConfigStrict,
+  readWranglerConfigTextFromFile,
+  type D1DatabaseBinding,
+} from './utils/wrangler-config';
 
 /** Options to rename the inferred Cloudflare Worker targets. */
 export interface CloudflarePluginOptions {
@@ -130,7 +135,7 @@ function readValidConfig(
 ): { parsed: Record<string, unknown> | null } | null {
   let content: string;
   try {
-    content = readFileSync(absConfigPath, 'utf-8');
+    content = readWranglerConfigTextFromFile(absConfigPath);
   } catch (e) {
     logger.warn(
       `[nx-cloudflare] Could not read ${absConfigPath}: ${errorReason(e)}`
@@ -151,7 +156,7 @@ function readValidConfig(
   }
 
   try {
-    return { parsed: parseJson(content) as Record<string, unknown> };
+    return { parsed: parseWranglerConfigStrict(content) };
   } catch (e) {
     logger.warn(
       `[nx-cloudflare] Skipping unparseable wrangler config ${absConfigPath}: ${errorReason(
@@ -160,11 +165,6 @@ function readValidConfig(
     );
     return null;
   }
-}
-
-interface D1Database {
-  binding: string;
-  database_name: string;
 }
 
 /**
@@ -178,30 +178,14 @@ interface D1Database {
 function readD1Databases(
   absConfigPath: string,
   parsed: Record<string, unknown> | null
-): D1Database[] {
+): D1DatabaseBinding[] {
   if (parsed === null) {
     return [];
   }
-  const list = parsed['d1_databases'];
-  if (!Array.isArray(list)) {
-    return [];
-  }
-  return list.flatMap((entry) => {
-    if (typeof entry === 'object' && entry !== null) {
-      const { binding, database_name } = entry as Record<string, unknown>;
-      if (
-        typeof binding === 'string' &&
-        binding.length > 0 &&
-        typeof database_name === 'string' &&
-        database_name.length > 0
-      ) {
-        return [{ binding, database_name }];
-      }
-    }
+  return getD1Databases(parsed, () => {
     logger.warn(
       `[nx-cloudflare] Skipping a d1_databases entry in ${absConfigPath} that lacks a non-empty string \`binding\`/\`database_name\`.`
     );
-    return [];
   });
 }
 
@@ -213,7 +197,7 @@ function readD1Databases(
  */
 function buildD1Targets(
   options: NormalizedOptions,
-  databases: D1Database[]
+  databases: D1DatabaseBinding[]
 ): Record<string, TargetConfiguration> {
   if (databases.length === 0) {
     return {};

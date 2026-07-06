@@ -11,24 +11,22 @@ import * as devkit from '@nx/devkit';
 import { Tree, joinPathFragments, updateJson } from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { bindingGenerator } from './generator';
-import { runWranglerTypes } from '../../utils/run-wrangler-types';
+import { runWrangler } from '../../utils/run-wrangler';
 import { provisionResource } from '../../utils/provision';
 
 // Mock the side-effecting modules so unit tests never shell out. Mirrors the
 // create-cloudflare spec's run-c3 mock pattern. The callback returned by the
 // generator calls these post-flush on the real fs — in tests we assert the
 // callback was returned and invoke it to verify the mock was called.
-mock.module('../../utils/run-wrangler-types', () => ({
-  runWranglerTypes: mock(() => {}),
+mock.module('../../utils/run-wrangler', () => ({
+  runWrangler: mock(() => ({ success: true, stdout: '', reason: '' })),
 }));
 mock.module('../../utils/provision', () => ({
   provisionResource: mock(() => {}),
   PROVISION_SENTINEL: '__PENDING_CREATE__',
 }));
 
-const runWranglerTypesMock = runWranglerTypes as unknown as Mock<
-  typeof runWranglerTypes
->;
+const runWranglerMock = runWrangler as unknown as Mock<typeof runWrangler>;
 const provisionResourceMock = provisionResource as unknown as Mock<
   typeof provisionResource
 >;
@@ -69,7 +67,7 @@ describe('binding generator', () => {
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
-    runWranglerTypesMock.mockClear();
+    runWranglerMock.mockClear();
     provisionResourceMock.mockClear();
   });
 
@@ -726,7 +724,9 @@ export default class extends WorkerEntrypoint<Env> {
         id: 'abc',
       });
       await cb();
-      expect(runWranglerTypesMock).toHaveBeenCalledTimes(1);
+      expect(runWranglerMock).toHaveBeenCalledTimes(1);
+      // The seam receives the argv, so the spec can pin the exact subcommand.
+      expect(runWranglerMock.mock.calls[0][0]).toEqual(['types']);
     });
 
     it('skips typegen when --skipTypegen', async () => {
@@ -739,7 +739,7 @@ export default class extends WorkerEntrypoint<Env> {
         skipTypegen: true,
       });
       await cb();
-      expect(runWranglerTypesMock).not.toHaveBeenCalled();
+      expect(runWranglerMock).not.toHaveBeenCalled();
     });
 
     it('provisions the resource when --create is set', async () => {

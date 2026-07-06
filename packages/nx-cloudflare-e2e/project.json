@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "packages/nx-cloudflare-e2e/src",
-  "implicitDependencies": ["nx-cloudflare"],
+  "implicitDependencies": ["nx-cloudflare", "e2e-utils"],
   "targets": {
     "e2e": {
       "command": "bun test --preload ./tools/scripts/e2e-bun-setup.ts packages/nx-cloudflare-e2e/src",

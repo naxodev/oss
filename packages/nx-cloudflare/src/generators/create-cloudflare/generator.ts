@@ -8,10 +8,8 @@ import {
   joinPathFragments,
   logger,
   offsetFromRoot,
-  readNxJson,
   Tree,
   updateJson,
-  updateNxJson,
   writeJson,
 } from '@nx/devkit';
 import {
@@ -34,6 +32,7 @@ import {
   WRANGLER_CONFIG_FILES,
   wranglerSchemaPath,
 } from '../../utils/wrangler-config';
+import { ensurePluginRegistered } from '../../utils/inference-plugin';
 
 /**
  * Scaffolds a Cloudflare Worker application by delegating to Cloudflare's
@@ -72,7 +71,7 @@ export async function createCloudflareGenerator(
   updateProjectPackageJson(tree, options);
   retargetWranglerSchema(tree, options.projectRoot);
   applyProductionConfig(tree, options);
-  ensurePluginRegistered(tree, INFERENCE_PLUGIN);
+  ensurePluginRegistered(tree);
   ensureVitestTestTarget(tree, options.projectRoot);
   maybeWriteProjectJson(tree, options);
   warnIfNoWranglerConfig(tree, options.projectRoot);
@@ -181,26 +180,6 @@ function updateProjectPackageJson(tree: Tree, options: NormalizedSchema): void {
     }
     return json;
   });
-}
-
-const INFERENCE_PLUGIN = '@naxodev/nx-cloudflare/plugin';
-
-// A createNodes plugin only contributes targets if it's listed in nx.json;
-// installing the package doesn't register it. Add it (idempotently, matching
-// both the string and object plugin forms) or the inferred targets never appear.
-function ensurePluginRegistered(tree: Tree, plugin: string): void {
-  const nxJson = readNxJson(tree);
-  if (!nxJson) {
-    return;
-  }
-  const plugins = nxJson.plugins ?? [];
-  const isRegistered = plugins.some(
-    (p) => (typeof p === 'string' ? p : p.plugin) === plugin
-  );
-  if (!isRegistered) {
-    nxJson.plugins = [...plugins, plugin];
-    updateNxJson(tree, nxJson);
-  }
 }
 
 const VITEST_PLUGIN = '@nx/vitest';

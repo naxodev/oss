@@ -1,13 +1,14 @@
-import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { workspaceRoot } from '@nx/devkit';
+import { applyEdits, modify } from 'jsonc-parser';
+import { runWrangler } from './run-wrangler';
 import {
-  applyEdits,
-  modify,
-  parse,
-  type FormattingOptions,
-} from 'jsonc-parser';
+  FORMATTING,
+  findIndexInArray,
+  parseWranglerConfig,
+  readWranglerConfigTextFromFile,
+} from './wrangler-config';
 
 export type ProvisionableType = 'kv' | 'r2' | 'd1' | 'queue';
 
@@ -24,12 +25,6 @@ export interface ProvisionOptions {
 }
 
 export const PROVISION_SENTINEL = '__PENDING_CREATE__';
-
-const DEFAULT_FORMATTING: FormattingOptions = {
-  tabSize: 2,
-  insertSpaces: true,
-  insertFinalNewline: true,
-};
 
 // Where the provisioned id lives in the config, per type. Only KV and D1 carry
 // a remote-generated id (written as the PROVISION_SENTINEL until capture); R2
@@ -82,32 +77,22 @@ export function provisionResource(options: ProvisionOptions): void {
   const { command, args } = buildProvisionCommand(options);
   const cwd = join(workspaceRoot, options.projectRoot);
 
-  let stdout: string;
-  try {
-    stdout = execFileSync(command, args, {
-      cwd,
-      // Capture stderr too so wrangler's diagnostic is attached to the thrown
-      // error instead of only streaming to the terminal.
-      stdio: ['inherit', 'pipe', 'pipe'],
-      encoding: 'utf-8',
-    });
-  } catch (e) {
-    const stderr =
-      e && typeof e === 'object' && 'stderr' in e
-        ? String((e as { stderr?: unknown }).stderr ?? '').trim()
-        : '';
-    const reason = stderr || (e instanceof Error ? e.message : String(e));
+  // Capture stdout/stderr (rather than the default inherited stdio) so the
+  // created resource's id can be parsed out, and so wrangler's diagnostic is
+  // attached to the thrown error instead of only streaming to the terminal.
+  const result = runWrangler(args, cwd, { captureOutput: true });
+  if (!result.success) {
     throw new Error(
       `\`${command} ${args.join(' ')}\` failed. The binding was written to ` +
         `${options.configPath} but the resource was not provisioned` +
         (ID_LOCATION[options.type]
           ? ` (its id is still "${PROVISION_SENTINEL}")`
           : '') +
-        `. Reason: ${reason}`
+        `. Reason: ${result.reason}`
     );
   }
 
-  const { id } = parseProvisionOutput(options.type, stdout);
+  const { id } = parseProvisionOutput(options.type, result.stdout);
   if (id) {
     persistProvisionedId(options.configPath, options.type, options.binding, id);
   }
@@ -151,17 +136,14 @@ export function persistProvisionedId(
     return;
   }
   const abs = join(workspaceRoot, configPath);
-  const text = readFileSync(abs, 'utf-8');
-  const config = parse(text) as Record<string, unknown>;
-  const arr = config[location.arrayKey];
-  const index = Array.isArray(arr)
-    ? arr.findIndex(
-        (entry) =>
-          typeof entry === 'object' &&
-          entry !== null &&
-          (entry as Record<string, unknown>)['binding'] === binding
-      )
-    : -1;
+  const text = readWranglerConfigTextFromFile(abs);
+  const config = parseWranglerConfig(text);
+  const index = findIndexInArray(
+    config,
+    [location.arrayKey],
+    'binding',
+    binding
+  );
   if (index === -1) {
     throw new Error(
       `Provisioned ${type} resource (id "${id}") but could not find binding ` +
@@ -170,7 +152,7 @@ export function persistProvisionedId(
     );
   }
   const edits = modify(text, [location.arrayKey, index, location.idField], id, {
-    formattingOptions: DEFAULT_FORMATTING,
+    formattingOptions: FORMATTING,
   });
   writeFileSync(abs, applyEdits(text, edits));
 }

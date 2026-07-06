@@ -51,7 +51,7 @@ export default async function secretExecutor(
       success: runWrangler(
         buildSecretArgs(options),
         join(context.root, projectRoot)
-      ),
+      ).success,
     };
   } catch (e) {
     logger.error(e instanceof Error ? e.message : String(e));
