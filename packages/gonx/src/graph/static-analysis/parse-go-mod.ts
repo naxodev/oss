@@ -51,6 +51,19 @@ export async function parseGoMod(filePath: string): Promise<GoModInfo | null> {
     return null;
   }
 
+  return parseGoModContent(content);
+}
+
+/**
+ * Parses already-read go.mod content and extracts module information.
+ * Use this when the content comes from somewhere other than the real
+ * filesystem (e.g. an Nx virtual `Tree`), where `parseGoMod`'s own file read
+ * cannot be used.
+ *
+ * @param content - The raw contents of a go.mod file
+ * @returns GoModInfo object or null if parsing fails
+ */
+export function parseGoModContent(content: string): GoModInfo | null {
   // Remove comments (both // and /* */)
   const contentWithoutComments = removeComments(content);
 

@@ -2,15 +2,19 @@ import { describe, it, expect, mock } from 'bun:test';
 import { ExecutorContext } from '@nx/devkit';
 import * as path from 'path';
 import * as sharedFunctions from '../../utils';
-import { buildStringFlagIfValid } from '../../utils/execute-command';
+import {
+  buildStringFlagIfValid,
+  getRunPath,
+} from '../../utils/execute-command';
 import executor from './executor';
 import { BuildExecutorSchema } from './schema';
 
 mock.module('../../utils', () => {
   return {
     buildStringFlagIfValid,
+    getRunPath,
     executeCommand: mock().mockResolvedValue({ success: true }),
-    extractProjectRoot: mock(() => 'apps/project'),
+    getProjectRoot: mock(() => 'apps/project'),
     extractCWD: mock(
       (options: BuildExecutorSchema, context: ExecutorContext) => {
         if (options.main) {

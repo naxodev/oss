@@ -1,5 +1,5 @@
 import { ExecutorContext, logger } from '@nx/devkit';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileExists } from 'nx/src/utils/fileutils';
 import { BuildExecutorSchema } from '../executors/build/schema';
@@ -12,12 +12,35 @@ export type RunGoOptions = {
 };
 
 /**
- * Extract the project root from the executor context.
+ * Get the project root from the executor context, throwing a clear error
+ * instead of an opaque TypeError when the project name or its configuration
+ * is missing.
  *
  * @param context the executor context
  */
-export const extractProjectRoot = (context: ExecutorContext): string =>
-  context.projectsConfigurations.projects[context.projectName].root;
+export const getProjectRoot = (context: ExecutorContext): string => {
+  const projectName = context.projectName;
+  if (!projectName) {
+    throw new Error('Project name is not provided');
+  }
+
+  const projectRoot =
+    context.projectsConfigurations?.projects[projectName]?.root;
+  if (!projectRoot) {
+    throw new Error(`Cannot find project root for ${projectName}`);
+  }
+
+  return projectRoot;
+};
+
+/**
+ * Resolves the `go` run path: the current file when `main` is provided,
+ * otherwise every package in the project.
+ *
+ * @param options options carrying an optional `main` entry point
+ */
+export const getRunPath = (options: { main?: string }): string =>
+  options.main ? '.' : './...';
 
 /**
  * Execute and log a command, then return the result to executor.
@@ -31,13 +54,25 @@ export const executeCommand = async (
 ): Promise<{ success: boolean }> => {
   try {
     const { executable = 'go', cwd = null, env = {} } = options;
-    const command = [executable, ...parameters].join(' ');
+    // Merge into a fresh object rather than mutating process.env: this
+    // executor can run many times inside the long-lived Nx daemon, and a
+    // mutation would leak env vars from one run into the next.
+    const mergedEnv = { ...process.env, ...env };
 
-    logger.info(`Executing command: ${command}`);
+    logger.info(`Executing command: ${[executable, ...parameters].join(' ')}`);
 
-    execSync(command, {
+    // `executable` may be a multi-word string (e.g. the lint executor's
+    // `linter` option defaults to "go fmt"), so split it into the actual
+    // file to spawn plus any leading tokens, which get prepended to the
+    // parameters argv.
+    const [file, ...leadingArgs] = executable.split(/\s+/).filter(Boolean);
+
+    // execFileSync takes the executable and its arguments as a separate
+    // argv array (no shell involved), so option values are never subject to
+    // shell parsing/quoting/injection the way a joined command string would be.
+    execFileSync(file, [...leadingArgs, ...parameters], {
       cwd,
-      env: Object.assign(process.env, env),
+      env: mergedEnv,
       stdio: [0, 1, 2],
     });
 
@@ -81,7 +116,7 @@ export function extractCWD(
   options: BuildExecutorSchema | ServeExecutorSchema,
   context: ExecutorContext
 ) {
-  const projectRoot = extractProjectRoot(context);
+  const projectRoot = getProjectRoot(context);
   const projectName = context.projectName;
 
   if (options.main) {

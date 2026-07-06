@@ -9,7 +9,7 @@ import {
 } from 'bun:test';
 import { ExecutorContext, output, readJsonFile } from '@nx/devkit';
 import * as childProcess from 'node:child_process';
-import * as fs from 'node:fs';
+import * as fsPromises from 'fs/promises';
 import executor from './nx-release-publish';
 import { NxReleasePublishExecutorSchema } from './schema';
 
@@ -17,8 +17,8 @@ import { NxReleasePublishExecutorSchema } from './schema';
 mock.module('node:child_process', () => ({
   execSync: mock(),
 }));
-mock.module('node:fs', () => ({
-  readFileSync: mock(),
+mock.module('fs/promises', () => ({
+  readFile: mock(),
 }));
 mock.module('@nx/devkit', () => ({
   ...require('@nx/devkit'),
@@ -59,7 +59,9 @@ describe('nx-release-publish executor', () => {
     },
   } as unknown as ExecutorContext;
 
-  const mockFs = fs as unknown as { readFileSync: Mock<() => string> };
+  const mockFsPromises = fsPromises as unknown as {
+    readFile: Mock<() => Promise<string>>;
+  };
   const mockChildProcess = childProcess as unknown as {
     execSync: Mock<(cmd: string) => string>;
   };
@@ -71,7 +73,7 @@ describe('nx-release-publish executor', () => {
 
   // Setup before each test
   beforeEach(() => {
-    mockFs.readFileSync.mockClear();
+    mockFsPromises.readFile.mockClear();
     mockChildProcess.execSync.mockClear();
     mockReadJsonFile.mockClear();
     mockOutput.error.mockClear();
@@ -81,8 +83,8 @@ describe('nx-release-publish executor', () => {
     console.warn = mock() as unknown as typeof console.warn;
     console.error = mock() as unknown as typeof console.error;
 
-    // Mock fs.readFileSync to return our mock go.mod content
-    mockFs.readFileSync.mockReturnValue(mockGoModContent);
+    // Mock fs/promises.readFile to return our mock go.mod content
+    mockFsPromises.readFile.mockResolvedValue(mockGoModContent);
 
     // Mock execSync with a default success behavior
     mockChildProcess.execSync.mockImplementation((command: string) => {
@@ -274,7 +276,7 @@ describe('nx-release-publish executor', () => {
 
   it('should fail if module name cannot be found in go.mod', async () => {
     // Arrange
-    mockFs.readFileSync.mockReturnValue('invalid go.mod content');
+    mockFsPromises.readFile.mockResolvedValue('invalid go.mod content');
 
     // Act
     const result = await executor(options, mockContext);

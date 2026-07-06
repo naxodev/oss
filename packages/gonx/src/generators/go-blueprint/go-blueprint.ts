@@ -1,8 +1,8 @@
 import { Tree, logger, formatFiles, generateFiles } from '@nx/devkit';
 import { fork, spawn } from 'child_process';
 import { join } from 'path';
-import { mkdirSync, rmSync, existsSync } from 'fs';
-import { platform } from 'os';
+import { mkdtempSync, rmSync, existsSync } from 'fs';
+import { platform, tmpdir } from 'os';
 import { GoBlueprintGeneratorSchema } from './schema';
 import { normalizeOptions } from '../../utils/normalize-options';
 import { initGenerator } from '../init/generator';
@@ -124,16 +124,14 @@ export async function goBlueprintGenerator(
     .filter((segment) => segment.length > 0);
   const projectName = pathSegments[pathSegments.length - 1];
 
-  // Create temporary files directory
-  const filesDir = join(__dirname, 'files');
+  // Create a unique temporary directory to scaffold into. Using os.tmpdir()
+  // (rather than a path inside the installed plugin package) keeps concurrent
+  // generator runs from colliding and avoids leaving debris in node_modules
+  // if the process crashes before cleanup.
+  const filesDir = mkdtempSync(join(tmpdir(), 'gonx-go-blueprint-'));
   const tempProjectDir = join(filesDir, projectName);
 
   try {
-    // Create the files directory if it doesn't exist
-    if (!existsSync(filesDir)) {
-      mkdirSync(filesDir, { recursive: true });
-    }
-
     // Build and execute go-blueprint command in the files directory
     const args = buildGoBlueprintArgs(projectName, schema);
     await executeGoBlueprintCommand(args, filesDir);

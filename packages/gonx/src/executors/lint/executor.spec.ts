@@ -6,7 +6,7 @@ import { LintExecutorSchema } from './schema';
 
 mock.module('../../utils', () => ({
   executeCommand: mock().mockResolvedValue({ success: true }),
-  extractProjectRoot: mock(() => 'apps/project'),
+  getProjectRoot: mock(() => 'apps/project'),
 }));
 
 const options: LintExecutorSchema = {};

@@ -1,11 +1,12 @@
 import { describe, it, expect, mock, spyOn } from 'bun:test';
 import { ExecutorContext } from '@nx/devkit';
 import * as commonFunctions from '../../utils';
+import { getRunPath } from '../../utils/execute-command';
 import executor from './executor';
 
 mock.module('../../utils', () => ({
   executeCommand: mock().mockResolvedValue({ success: true }),
-  extractProjectRoot: mock(() => 'apps/project'),
+  getRunPath,
   extractCWD: mock((options: any) => {
     if (options.main) {
       return 'apps/project/cmd';

@@ -3,6 +3,7 @@ import { ProjectGraph, Tree } from '@nx/devkit';
 import { join } from 'node:path';
 import { VersionActions } from 'nx/release';
 import { NxReleaseVersionConfiguration } from 'nx/src/config/nx-json';
+import { parseGoModContent } from '../graph/static-analysis/parse-go-mod';
 
 type ProxyGolangOrgVersionResponse = {
   Version: string;
@@ -50,8 +51,7 @@ export default class GoVersionActions extends VersionActions {
         MANIFEST_FILENAME
       );
       const content = tree.read(manifestPath, 'utf-8');
-      const moduleNameMatch = content.match(/module\s+([^\s]+)/);
-      const moduleName = moduleNameMatch ? moduleNameMatch[1] : '';
+      const moduleName = parseGoModContent(content)?.modulePath ?? '';
 
       const result = await fetch(
         `https://proxy.golang.org/${encodeURIComponent(moduleName)}/@latest`

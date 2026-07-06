@@ -2,7 +2,7 @@ import { CreateNodesContext, ProjectConfiguration } from '@nx/devkit';
 import { dirname } from 'path';
 import { GoPluginOptions } from '../types/go-plugin-options';
 import { hasMainPackage } from './has-main-package';
-import { getTargetsByProjectType } from './targets/get-targets-by-project-type';
+import { getTargetsByProjectType } from './get-targets-by-project-type';
 
 export function createNodesInternal(
   configFilePath: string,
@@ -18,11 +18,13 @@ export function createNodesInternal(
   // This also supports Go's release tagging convention (projectRoot/vx.x.x)
   const projectName = projectRoot;
 
-  // Detect if this is an application or a library
+  // Detect if this is an application or a library. Computed once here and
+  // threaded through to getTargetsByProjectType, since hasMainPackage does
+  // filesystem I/O and must only run once per project.
   const isApplication = hasMainPackage(projectRoot);
   const projectType = isApplication ? 'application' : 'library';
 
-  const targets = getTargetsByProjectType(projectRoot, options);
+  const targets = getTargetsByProjectType(projectRoot, options, isApplication);
 
   // Create the project configuration
   const projectConfig: ProjectConfiguration & { root: string } = {
