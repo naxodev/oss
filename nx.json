@@ -94,7 +94,8 @@
     "version": {
       "useLegacyVersioning": false,
       "preVersionCommand": "bunx nx run-many -t build",
-      "conventionalCommits": true
+      "conventionalCommits": true,
+      "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"]
     },
     "git": {
       "commit": true,
