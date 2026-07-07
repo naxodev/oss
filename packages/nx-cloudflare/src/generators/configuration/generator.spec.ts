@@ -93,6 +93,11 @@ describe('configuration generator', () => {
     // Stub the graph fallback so it resolves to an empty graph instead of
     // building the real Nx project graph (and daemon) against the /virtual
     // test workspace — an unbounded call that otherwise times the spec out.
+    //
+    // Works only because `resolveProjectRootOrThrow` is nx-cloudflare's own
+    // ESM-imported `../../utils/project.ts` — won't intercept a require()
+    // call from precompiled @nx/js/@nx/eslint dist code (see
+    // library/generator.spec.ts's defineProperty stub instead).
     const graph = spyOn(devkit, 'createProjectGraphAsync').mockResolvedValue({
       nodes: {},
     } as unknown as Awaited<ReturnType<typeof devkit.createProjectGraphAsync>>);

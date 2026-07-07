@@ -4,6 +4,7 @@ import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import {
   applyProductionToggles,
   applyProductionTogglesToProject,
+  parseWranglerConfigStrict,
 } from './wrangler-config';
 
 const CONFIG = `{
@@ -122,5 +123,32 @@ describe('applyProductionTogglesToProject', () => {
         'worker-config'
       )
     ).toThrow('worker-config only supports wrangler.jsonc');
+  });
+});
+
+describe('parseWranglerConfigStrict', () => {
+  it('parses plain JSON via the native JSON.parse fast path', () => {
+    const result = parseWranglerConfigStrict(
+      '{"name": "worker", "main": "src/index.ts"}'
+    );
+    expect(result).toEqual({ name: 'worker', main: 'src/index.ts' });
+  });
+
+  it('falls back to jsonc-parser for comments and trailing commas', () => {
+    const result = parseWranglerConfigStrict(CONFIG);
+    expect(result).toEqual({ name: 'worker', main: 'src/index.ts' });
+
+    const withTrailingComma = '{"name": "worker", "main": "src/index.ts",}';
+    expect(parseWranglerConfigStrict(withTrailingComma)).toEqual({
+      name: 'worker',
+      main: 'src/index.ts',
+    });
+  });
+
+  it('throws the same error shape for malformed content on both paths', () => {
+    // Malformed as plain JSON (unquoted key) and as jsonc.
+    expect(() => parseWranglerConfigStrict('{name: "worker"}')).toThrow(
+      /at offset \d+/
+    );
   });
 });
