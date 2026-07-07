@@ -131,14 +131,17 @@
     "feature": {
       "description": "Advanced feature to use",
       "type": "array",
-      "enum": [
-        "react",
-        "htmx",
-        "githubaction",
-        "websocket",
-        "tailwind",
-        "docker"
-      ],
+      "items": {
+        "type": "string",
+        "enum": [
+          "react",
+          "htmx",
+          "githubaction",
+          "websocket",
+          "tailwind",
+          "docker"
+        ]
+      },
       "x-prompt": {
         "message": "Which advanced features would you like to include?",
         "type": "multiselect",
