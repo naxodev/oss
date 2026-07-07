@@ -1,4 +1,11 @@
-import { describe, it, expect, beforeEach, setDefaultTimeout } from 'bun:test';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  setDefaultTimeout,
+} from 'bun:test';
 import {
   getProjects,
   readJson,
@@ -10,8 +17,12 @@ import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { NxCloudflareLibraryGeneratorSchema } from './schema';
 import libraryGenerator from './generator';
 
+type CreateProjectGraphAsync =
+  typeof import('@nx/devkit').createProjectGraphAsync;
+
 describe('lib', () => {
   let tree: Tree;
+  let restoreCreateProjectGraphAsync: () => void;
   const defaultOptions: Omit<
     NxCloudflareLibraryGeneratorSchema,
     'name' | 'directory'
@@ -29,6 +40,49 @@ describe('lib', () => {
     tree = createTreeWithEmptyWorkspace();
     tree.write('/.gitignore', '');
     tree.write('/.gitignore', '');
+
+    // With `linter: 'eslint'` (the default here), the generator delegates to
+    // `@nx/js`'s library generator, whose `addLint` step (via `@nx/eslint`'s
+    // `lintInitGenerator`) unconditionally calls the real
+    // `createProjectGraphAsync`. That builds the *actual* Nx project graph
+    // (and can spin up the real daemon) for this real workspace — making the
+    // spec sensitive to unrelated workspace state and slow/flaky on cold
+    // caches.
+    //
+    // `@nx/eslint`'s generator gets `@nx/devkit` via a plain CommonJS
+    // `require(...)`, and `createProjectGraphAsync` is re-exported there as an
+    // accessor (getter) property, not a plain value — so neither an ESM
+    // `import * as devkit` + `spyOn` (which patches a separate namespace
+    // object bun creates for the import, not the shared CJS module) nor
+    // `spyOn` directly on the CJS export (bun's `spyOn` doesn't support
+    // accessor properties) actually intercepts this call. Reaching through
+    // `require('@nx/devkit')` and replacing the property descriptor directly
+    // is what's needed to stub the *same* module object every consumer in the
+    // process shares.
+    const devkitCjs: Record<string, unknown> = require('@nx/devkit');
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      devkitCjs,
+      'createProjectGraphAsync'
+    )!;
+    const stub: CreateProjectGraphAsync = (async () =>
+      ({ nodes: {} } as unknown as Awaited<
+        ReturnType<CreateProjectGraphAsync>
+      >)) as CreateProjectGraphAsync;
+    Object.defineProperty(devkitCjs, 'createProjectGraphAsync', {
+      configurable: true,
+      value: stub,
+    });
+    restoreCreateProjectGraphAsync = () => {
+      Object.defineProperty(
+        devkitCjs,
+        'createProjectGraphAsync',
+        originalDescriptor
+      );
+    };
+  });
+
+  afterEach(() => {
+    restoreCreateProjectGraphAsync();
   });
 
   describe('configs', () => {
