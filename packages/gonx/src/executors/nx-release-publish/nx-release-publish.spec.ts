@@ -288,6 +288,29 @@ describe('nx-release-publish executor', () => {
     });
   });
 
+  it('should surface the underlying error when go.mod cannot be read', async () => {
+    // Arrange
+    const readError = Object.assign(
+      new Error('EACCES: permission denied, open go.mod'),
+      { code: 'EACCES' }
+    );
+    mockFsPromises.readFile.mockRejectedValue(readError);
+
+    // Act
+    const result = await executor(options, mockContext);
+
+    // Assert
+    expect(result.success).toBeFalsy();
+    expect(output.error).toHaveBeenCalledWith({
+      title: expect.stringContaining('Could not read go.mod at'),
+      bodyLines: [expect.stringContaining('EACCES: permission denied')],
+    });
+    // Should not be mislabeled as a missing module name
+    expect(output.error).not.toHaveBeenCalledWith({
+      title: expect.stringContaining('Could not find module name in'),
+    });
+  });
+
   it('should fail if no valid tag is found', async () => {
     // Arrange
     mockChildProcess.execSync.mockImplementation((command: string) => {

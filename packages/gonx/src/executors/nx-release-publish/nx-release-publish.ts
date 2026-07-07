@@ -7,9 +7,10 @@ import {
 } from '@nx/devkit';
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
+import { readFile } from 'fs/promises';
 import { env as appendLocalEnv } from 'npm-run-path';
 import { NxReleasePublishExecutorSchema } from './schema';
-import { parseGoMod } from '../../graph/static-analysis/parse-go-mod';
+import { parseGoModContent } from '../../graph/static-analysis/parse-go-mod';
 import chalk = require('chalk');
 
 const LARGE_BUFFER = 1024 * 1000000;
@@ -132,7 +133,20 @@ export default async function runExecutor(
   );
 
   const goModPath = joinPathFragments(moduleRoot, 'go.mod');
-  const goModInfo = await parseGoMod(goModPath);
+
+  let goModContent: string;
+  try {
+    goModContent = await readFile(goModPath, 'utf-8');
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException)?.code;
+    output.error({
+      title: `Could not read go.mod at ${goModPath}`,
+      bodyLines: [code ? `${code}: ${(err as Error).message}` : `${err}`],
+    });
+    return { success: false };
+  }
+
+  const goModInfo = parseGoModContent(goModContent);
 
   if (!goModInfo) {
     output.error({ title: `Could not find module name in ${goModPath}` });
