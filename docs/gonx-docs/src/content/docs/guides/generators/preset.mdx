@@ -1,0 +1,43 @@
+---
+title: Preset generator
+description: Preset used by create-nx-workspace to scaffold a new Nx workspace with gonx pre-configured.
+---
+
+import SchemaOptionsTable from '@naxodev/docs-theme/components/SchemaOptionsTable.astro';
+import schema from '@naxodev/gonx/src/generators/preset/schema.json';
+
+Preset used by `create-nx-workspace` to scaffold a new Nx workspace with gonx pre-configured. Delegates to the application, library, or go-blueprint generator based on the selected `type`.
+
+## Usage
+
+```bash
+npx create-nx-workspace <workspace> --preset=@naxodev/gonx
+```
+
+## Options
+
+<SchemaOptionsTable
+  schema={schema}
+  omit={['framework', 'driver', 'git', 'feature']}
+/>
+
+### go-blueprint options
+
+When `type` is `go-blueprint`, the following options are also required:
+
+<SchemaOptionsTable
+  schema={schema}
+  only={['framework', 'driver', 'git', 'feature']}
+  requiredOverride={['framework', 'driver', 'git']}
+/>
+
+## Notes
+
+- `type=binary` delegates to the application generator; `type=library` delegates to the library generator; `type=go-blueprint` delegates to the go-blueprint generator.
+- When invoked programmatically without go-blueprint values, the preset applies `framework=gin`, `driver=none`, `git=skip`, `feature=[]`.
+
+## Next steps
+
+- [Application generator](/guides/generators/application)
+- [Library generator](/guides/generators/library)
+- [Go Blueprint generator](/guides/generators/go-blueprint)

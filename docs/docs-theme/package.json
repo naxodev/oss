@@ -1,0 +1,12 @@
+{
+  "name": "@naxodev/docs-theme",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./components/*": "./src/components/*",
+    "./lib/*": "./src/lib/*.ts",
+    "./styles/*": "./src/styles/*",
+    "./content.config": "./src/content.config.ts"
+  }
+}

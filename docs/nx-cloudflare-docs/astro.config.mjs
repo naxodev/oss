@@ -135,8 +135,8 @@ export default defineConfig({
         Header: './src/components/Header.astro',
         Sidebar: './src/components/Sidebar.astro',
         ThemeSelect: './src/components/ThemeSelect.astro',
-        Head: './src/components/Head.astro',
-        Pagination: './src/components/Pagination.astro',
+        Head: '@naxodev/docs-theme/components/Head.astro',
+        Pagination: '@naxodev/docs-theme/components/Pagination.astro',
       },
       sidebar: [
         {
@@ -158,6 +158,14 @@ export default defineConfig({
                 { slug: 'guides/generators-init' },
                 { slug: 'guides/generators-library' },
                 { slug: 'guides/generators-binding' },
+                { slug: 'guides/generators-worker-config' },
+              ],
+            },
+            {
+              label: 'Executors',
+              items: [
+                { slug: 'guides/executors-d1' },
+                { slug: 'guides/executors-secret' },
               ],
             },
             {

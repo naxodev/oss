@@ -1,0 +1,38 @@
+---
+title: Serve executor
+description: Runs a Go application using the go run command.
+---
+
+import SchemaOptionsTable from '@naxodev/docs-theme/components/SchemaOptionsTable.astro';
+import schema from '@naxodev/gonx/src/executors/serve/schema.json';
+
+The serve executor runs a Go application using `go run`.
+
+## Usage
+
+```bash
+nx serve my-go-app
+```
+
+## Options
+
+<SchemaOptionsTable schema={schema} />
+
+When `main` is set, the serve runs from the directory containing that main.go file. When omitted, the serve targets `./...`.
+
+## Inferred target
+
+Inferred for projects containing a `main` package (applications). The target is continuous and not cached:
+
+```json
+{
+  "executor": "@naxodev/gonx:serve",
+  "continuous": true,
+  "options": {}
+}
+```
+
+## Next steps
+
+- [Build executor](/guides/executors/build)
+- [Plugin options](/guides/generators/options)

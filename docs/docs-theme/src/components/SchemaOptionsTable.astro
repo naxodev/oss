@@ -1,0 +1,199 @@
+---
+// Renders an Nx generator/executor option table directly from its schema.json,
+// so the docs can't drift from the source of truth. Shared by both docs sites
+// via docs/docs-theme. Import the schema as a package specifier from the
+// consuming content file, e.g.:
+//   import schema from '@naxodev/gonx/src/generators/library/schema.json';
+interface JsonSchemaProperty {
+  type?: string | string[];
+  description?: string;
+  enum?: unknown[];
+  default?: unknown;
+  items?: { type?: string; enum?: unknown[] };
+  additionalProperties?: unknown;
+  'x-prompt'?: unknown;
+  'x-deprecated'?: string | boolean;
+  deprecated?: boolean;
+  $default?: { $source?: string; index?: number };
+}
+
+interface JsonSchema {
+  properties?: Record<string, JsonSchemaProperty>;
+  required?: string[];
+}
+
+interface Props {
+  schema: JsonSchema;
+  /** Only render these option names, in schema-declaration order. */
+  only?: string[];
+  /** Render every option except these names. */
+  omit?: string[];
+  /** Treat these names as required even though the schema doesn't (e.g. a conditional `if/then` branch). */
+  requiredOverride?: string[];
+}
+
+const { schema, only, omit = [], requiredOverride = [] } = Astro.props;
+
+const required = new Set([...(schema.required ?? []), ...requiredOverride]);
+const allEntries: [string, JsonSchemaProperty][] = Object.entries(schema.properties ?? {});
+const entries: [string, JsonSchemaProperty][] = only
+  ? only.flatMap((key): [string, JsonSchemaProperty][] => {
+      const prop = schema.properties?.[key];
+      return prop ? [[key, prop]] : [];
+    })
+  : allEntries.filter(([key]) => !omit.includes(key));
+
+function enumValues(prop: JsonSchemaProperty): unknown[] | undefined {
+  if (Array.isArray(prop.items?.enum)) return prop.items.enum;
+  if (Array.isArray(prop.enum)) return prop.enum;
+  return undefined;
+}
+
+function isArrayType(prop: JsonSchemaProperty): boolean {
+  return prop.type === 'array';
+}
+
+function plainType(prop: JsonSchemaProperty): string {
+  if (isArrayType(prop)) {
+    const itemType = prop.items?.type ?? 'string';
+    return `${itemType}[]`;
+  }
+  if (Array.isArray(prop.type)) return prop.type.join(' | ');
+  return prop.type ?? 'any';
+}
+
+interface DefaultLabel {
+  text: string;
+  code: boolean;
+  note?: string;
+}
+
+function defaultLabel(key: string, prop: JsonSchemaProperty): DefaultLabel {
+  // A default can live either on the property itself or nested inside an
+  // interactive x-prompt (used when the prompt is skipped) — a required
+  // option can still carry one, so check for a value before the required
+  // marker or the real default gets silently dropped.
+  const xPrompt = prop['x-prompt'];
+  const promptDefault =
+    typeof xPrompt === 'object' && xPrompt !== null && 'default' in xPrompt
+      ? (xPrompt as { default?: unknown }).default
+      : undefined;
+  const value = prop.default !== undefined ? prop.default : promptDefault;
+  const isRequired = required.has(key);
+
+  if (value !== undefined) {
+    const text = typeof value === 'string' ? value : JSON.stringify(value);
+    if (isRequired) return { text, code: true, note: '(required; default offered by the prompt)' };
+    if (prop.default === undefined) return { text, code: true, note: '(prompted)' };
+    return { text, code: true };
+  }
+  if (isRequired) return { text: '(required)', code: false };
+  if (xPrompt !== undefined) return { text: '(prompted)', code: false };
+  return { text: '-', code: false };
+}
+
+// Nx's `$default.$source` marks options whose value is derived when omitted:
+// 'argv' means it can be passed positionally, 'projectName' means Nx infers
+// it from the current working directory — information the hand-written
+// tables used to carry.
+function derivedNote(prop: JsonSchemaProperty): string | undefined {
+  const source = prop.$default?.$source;
+  if (source === 'argv') {
+    const index = prop.$default?.index ?? 0;
+    const ordinals = ['first', 'second', 'third'];
+    const ordinal = ordinals[index] ?? `${index + 1}th`;
+    return `Accepted as the ${ordinal} positional argument.`;
+  }
+  if (source === 'projectName') {
+    return 'Defaults to the project inferred from the current working directory.';
+  }
+  return undefined;
+}
+
+function deprecationNote(prop: JsonSchemaProperty): string | undefined {
+  if (typeof prop['x-deprecated'] === 'string') return prop['x-deprecated'];
+  if (prop['x-deprecated'] === true || prop.deprecated === true) return 'Deprecated.';
+  return undefined;
+}
+
+// Split a description on `code` spans so backticked identifiers render as
+// <code>, matching how these same strings look when hand-written in Markdown.
+function descriptionParts(description: string | undefined): { code: boolean; text: string }[] {
+  if (!description) return [];
+  const segments = description.split(/`([^`]+)`/g);
+  return segments
+    .map((segment, i) => ({ code: i % 2 === 1, text: segment }))
+    .filter((part) => part.text !== '');
+}
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      entries.map(([key, prop]) => {
+        const values = enumValues(prop);
+        const def = defaultLabel(key, prop);
+        const deprecated = deprecationNote(prop);
+        const positional = derivedNote(prop);
+        return (
+          <tr>
+            <td>
+              <code>{key}</code>
+            </td>
+            <td>
+              {values ? (
+                // Kept on one line: Astro (unlike JSX) emits whitespace-only
+                // text nodes between template expressions, which would render
+                // a stray space inside the `(a | b)[]` type.
+                // prettier-ignore
+                <>{isArrayType(prop) ? '(' : ''}{values.map((value, i) => (<>{i > 0 ? ' | ' : ''}<code>{String(value)}</code></>))}{isArrayType(prop) ? ')[]' : ''}</>
+              ) : (
+                plainType(prop)
+              )}
+            </td>
+            <td>
+              {def.code ? <code>{def.text}</code> : <em>{def.text}</em>}
+              {def.note ? (
+                <>
+                  {' '}
+                  <em>{def.note}</em>
+                </>
+              ) : (
+                ''
+              )}
+            </td>
+            <td>
+              {descriptionParts(prop.description).map((part) =>
+                part.code ? <code>{part.text}</code> : part.text
+              )}
+              {positional ? (
+                <>
+                  {' '}
+                  {positional}
+                </>
+              ) : (
+                ''
+              )}
+              {deprecated ? (
+                <>
+                  {' '}
+                  <strong>{deprecated}</strong>
+                </>
+              ) : (
+                ''
+              )}
+            </td>
+          </tr>
+        );
+      })
+    }
+  </tbody>
+</table>

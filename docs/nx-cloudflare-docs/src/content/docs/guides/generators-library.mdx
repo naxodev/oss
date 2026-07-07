@@ -1,0 +1,41 @@
+---
+title: library generator
+description: Generate a Cloudflare Worker library with Workers runtime types.
+---
+
+import SchemaOptionsTable from '@naxodev/docs-theme/components/SchemaOptionsTable.astro';
+import schema from '@naxodev/nx-cloudflare/src/generators/library/schema.json';
+
+The `library` generator creates a Cloudflare Worker library — a shareable package with Workers runtime types, suitable for shared logic, bindings, or utilities consumed by Worker applications.
+
+**Alias:** `lib`
+
+## Usage
+
+```bash
+bunx nx g @naxodev/nx-cloudflare:library my-worker-lib
+```
+
+## Options
+
+<SchemaOptionsTable schema={schema} />
+
+## Notes
+
+Publishable libraries require `importPath` and cannot use `bundler=none`. Non-publishable libraries have `bundler` forced to `none` (not buildable) regardless of the value passed.
+
+Worker libraries have no Wrangler config, so no inferred targets are generated (`serve`, `deploy`, `typegen`, etc. are not available). Workers runtime types come from `@cloudflare/workers-types` via `tsconfig.lib.json`, not a generated `worker-configuration.d.ts`.
+
+## Verify
+
+```bash
+bunx nx show project my-worker-lib
+```
+
+The library appears in the graph at the directory you generated it in.
+
+## Next steps
+
+- [application generator](/guides/generators-application) — scaffold a Worker application
+- [init generator](/guides/generators-init) — workspace-level setup
+- [Plugin options](/understanding/plugin-options) — inferred target names
