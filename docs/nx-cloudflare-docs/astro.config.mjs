@@ -153,12 +153,18 @@ export default defineConfig({
             {
               label: 'Generators',
               items: [
-                { slug: 'guides/generators-application' },
-                { slug: 'guides/generators-configuration' },
-                { slug: 'guides/generators-init' },
-                { slug: 'guides/generators-library' },
-                { slug: 'guides/generators-binding' },
-                { slug: 'guides/generators-worker-config' },
+                { label: 'Application', slug: 'guides/generators-application' },
+                {
+                  label: 'Configuration',
+                  slug: 'guides/generators-configuration',
+                },
+                { label: 'Init', slug: 'guides/generators-init' },
+                { label: 'Library', slug: 'guides/generators-library' },
+                { label: 'Binding', slug: 'guides/generators-binding' },
+                {
+                  label: 'Worker config',
+                  slug: 'guides/generators-worker-config',
+                },
               ],
             },
             {
