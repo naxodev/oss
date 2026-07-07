@@ -16,6 +16,11 @@ function seedProject(tree: Tree, root: string, name: string): void {
 describe('resolveProjectRootOrThrow', () => {
   let tree: Tree;
 
+  // The `spyOn(devkit, 'createProjectGraphAsync')` calls below work because
+  // `resolveProjectRootOrThrow` (this file's own subject) is ESM-imported
+  // straight from `@nx/devkit`, not require()'d — it would NOT intercept a
+  // require()-based call from precompiled dist code (see
+  // library/generator.spec.ts's defineProperty stub for that case).
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
   });

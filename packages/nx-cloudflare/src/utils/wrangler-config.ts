@@ -104,10 +104,20 @@ export function parseWranglerConfig(text: string): Record<string, unknown> {
  * errors, instead of silently salvaging a partial result. Used by the
  * inference plugin's validity gate, which must distinguish a genuinely broken
  * config (skip inference, warn) from a merely unusual one.
+ *
+ * Most wrangler configs are plain JSON, so try the native parser first (as
+ * @nx/devkit's own `parseJson` does) and only fall back to jsonc-parser for
+ * comments/trailing commas or a real syntax error.
  */
 export function parseWranglerConfigStrict(
   text: string
 ): Record<string, unknown> {
+  try {
+    return JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    // Not plain JSON — fall through to the jsonc-parser path below.
+  }
+
   const errors: ParseError[] = [];
   const result = parse(text, errors, { allowTrailingComma: true });
   if (errors.length > 0) {
