@@ -1,6 +1,6 @@
 {
   "name": "@naxodev/gonx",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "type": "commonjs",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
