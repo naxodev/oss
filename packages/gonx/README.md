@@ -11,7 +11,7 @@
 [![commitizen](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat-square)](https://github.com/commitizen/cz-cli)
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
 
 </div>
 
@@ -109,6 +109,13 @@ Thanks goes to these wonderful people
           <sub><b>Miguel</b></sub>
         </a><br />
         <a href="https://github.com/naxodev/oss/commits?author=mpsanchis" title="Code">💻</a>
+      </td>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/chadxz">
+          <img src="https://avatars.githubusercontent.com/u/309219?v=4?s=100" width="100px;" alt="Chad McElligott"/><br />
+          <sub><b>Chad McElligott</b></sub>
+        </a><br />
+        <a href="https://github.com/naxodev/oss/commits?author=chadxz" title="Code">💻</a>
       </td>
     </tr>
   </tbody>
