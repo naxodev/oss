@@ -1,6 +1,6 @@
 {
   "name": "@naxodev/nx-cloudflare",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "Nx plugin for Cloudflare",
   "homepage": "https://nx-cloudflare.naxo.dev/",
   "repository": {
