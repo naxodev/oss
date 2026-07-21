@@ -1,0 +1,342 @@
+name: Publish
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    tags:
+      - 'gonx@v*'
+      - 'nx-cloudflare@v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish, e.g. gonx@v5.0.0 or nx-cloudflare@v8.0.0'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write # required for npm OIDC trusted publishing
+
+jobs:
+  publish-preview:
+    name: Publish Preview Packages
+    # Skip forks (can't mint this repo's OIDC token) and unlabeled PRs.
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'publish-preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: publish-preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      # setup-node provides node + npm (used below for `npm pkg set`,
+      # `npm publish`, and the npm upgrade). No registry-url on purpose: it
+      # writes an .npmrc with //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN},
+      # and an empty/unresolved token there breaks OIDC trusted publishing.
+      # Tokenless OIDC needs no auth line in .npmrc.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - run: bun install --frozen-lockfile
+
+      - name: Upgrade npm for OIDC trusted publishing
+        # npm OIDC trusted publishing needs npm >= 11.5.1; Node 22 ships 10.x.
+        # Pinned to the 11 major for deterministic supply-chain behavior.
+        run: npm install -g npm@11
+        shell: bash
+
+      - name: Set preview version
+        id: version
+        run: |
+          # run_attempt makes re-runs of the same run get a fresh version —
+          # npm versions are immutable, so a re-run reusing the version would
+          # collide on any package already published in the prior attempt.
+          VERSION="0.0.0-pr.${{ github.event.pull_request.number }}.${{ github.run_number }}.${{ github.run_attempt }}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing version: $VERSION"
+        shell: bash
+
+      - name: Set preview version in package manifests
+        # Write the preview version straight into each source package.json. We
+        # don't use `nx release version` here: that subcommand rejects the
+        # repo's top-level `release.git` config in nx.json. An explicit version
+        # needs none of its conventional-commit machinery anyway — the build
+        # below copies the bumped manifest into dist/, which is what publish packs.
+        run: |
+          for project in gonx nx-cloudflare; do
+            (cd "packages/$project" && npm pkg set version="${{ steps.version.outputs.version }}")
+          done
+        shell: bash
+
+      - name: Build packages
+        run: bunx nx run-many -t build
+        shell: bash
+
+      - name: Publish packages
+        # Tokenless publish via npm OIDC trusted publishing (configured on npmjs
+        # for this workflow). We publish the built dist dirs directly with npm —
+        # the reference OIDC implementation — rather than `nx release publish`,
+        # which delegates to the workspace package manager (bun) whose OIDC
+        # exchange doesn't engage here (it falls through to "npm adduser"). No
+        # token: a static one hits the
+        # account's 2FA-on-writes rule; OIDC is exempt and emits provenance
+        # automatically. Relies on id-token: write (above).
+        run: |
+          for project in gonx nx-cloudflare; do
+            npm publish "dist/packages/$project" \
+              --tag "pr-${{ github.event.pull_request.number }}" \
+              --access public
+          done
+        shell: bash
+        env:
+          npm_config_registry: https://registry.npmjs.org
+
+      - name: Verify both packages published
+        # Don't claim success from a static comment — confirm the registry
+        # actually serves both packages at the new version, so a partial publish
+        # fails loudly instead of posting install instructions that 404.
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          for pkg in @naxodev/gonx @naxodev/nx-cloudflare; do
+            published=false
+            for attempt in 1 2 3 4 5; do
+              if npm view "$pkg@$VERSION" version >/dev/null 2>&1; then
+                echo "✓ $pkg@$VERSION is live"
+                published=true
+                break
+              fi
+              echo "… $pkg@$VERSION not visible yet (attempt $attempt/5), retrying"
+              sleep 5
+            done
+            if [ "$published" = false ]; then
+              echo "::error::$pkg@$VERSION not found on the registry after publish — partial publish?"
+              exit 1
+            fi
+          done
+        shell: bash
+
+      - name: Find previous preview comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- pr-preview-packages -->'
+          direction: last
+
+      - name: Minimize previous preview comment
+        if: steps.find-comment.outputs.comment-id != ''
+        # Cosmetic only, and it runs after a successful publish — never let a
+        # benign GitHub API hiccup turn a green publish red or suppress the
+        # install-instructions comment below. Surface failures as a warning.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMENT_NODE_ID: ${{ steps.find-comment.outputs.comment-node-id }}
+        run: |
+          # $id is a GraphQL variable, not a shell variable — it must stay
+          # unexpanded inside the single-quoted query (gh binds it via -f id=).
+          # shellcheck disable=SC2016
+          gh api graphql -f query='
+            mutation ($id: ID!) {
+              minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) {
+                minimizedComment { isMinimized }
+              }
+            }' -f id="$COMMENT_NODE_ID" \
+            || echo "::warning::Failed to minimize previous preview comment (non-fatal); continuing."
+        shell: bash
+
+      - name: Comment on PR
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- pr-preview-packages -->
+            **Preview packages published** for commit ${{ github.event.pull_request.head.sha }}
+
+            **Version:** `${{ steps.version.outputs.version }}`
+            **Tag:** `pr-${{ github.event.pull_request.number }}` (floats to the latest preview)
+
+            ```sh
+            npm i @naxodev/gonx@pr-${{ github.event.pull_request.number }}
+            npm i @naxodev/nx-cloudflare@pr-${{ github.event.pull_request.number }}
+            ```
+
+            Or pin the exact build from this commit:
+            ```sh
+            npm i @naxodev/gonx@${{ steps.version.outputs.version }}
+            npm i @naxodev/nx-cloudflare@${{ steps.version.outputs.version }}
+            ```
+
+  publish-production:
+    name: Publish Production Release
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    concurrency:
+      # One run per tag; never cancel a production publish mid-flight.
+      group: publish-production-${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+      cancel-in-progress: false
+    steps:
+      - name: Resolve release tag
+        id: meta
+        # Tag format is `<project>@v<version>` (nx.json releaseTag.pattern).
+        # Derives project, version, and dist-tag; rejects anything else so a
+        # stray tag or a typo'd dispatch input fails before touching the repo.
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="${{ inputs.tag }}"
+          fi
+          if [[ "$TAG" =~ ^(gonx|nx-cloudflare)@v(.+)$ ]]; then
+            PROJECT="${BASH_REMATCH[1]}"
+            VERSION="${BASH_REMATCH[2]}"
+          else
+            echo "::error::Unrecognized release tag '$TAG' (expected gonx@vX.Y.Z or nx-cloudflare@vX.Y.Z)"
+            exit 1
+          fi
+          # Prereleases (any version containing '-') go to the `next` dist-tag.
+          case "$VERSION" in
+            *-*) DIST_TAG="next" ;;
+            *)   DIST_TAG="latest" ;;
+          esac
+          {
+            echo "tag=$TAG"
+            echo "project=$PROJECT"
+            echo "version=$VERSION"
+            echo "dist_tag=$DIST_TAG"
+          } >> "$GITHUB_OUTPUT"
+          echo "Publishing $PROJECT@$VERSION under dist-tag $DIST_TAG"
+        shell: bash
+
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ steps.meta.outputs.tag }}
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      # Same rationale as the preview job: setup-node provides node + npm; no
+      # registry-url on purpose — it writes an .npmrc _authToken line and an
+      # empty/unresolved token there breaks OIDC trusted publishing.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - run: bun install --frozen-lockfile
+
+      - name: Upgrade npm for OIDC trusted publishing
+        # npm OIDC trusted publishing needs npm >= 11.5.1; Node 22 ships 10.x.
+        # Pinned to the 11 major for deterministic supply-chain behavior.
+        run: npm install -g npm@11
+        shell: bash
+
+      - name: Assert source manifest matches tag
+        # The release commit (created by `nx release --skip-publish`) is the
+        # tagged commit, so the source package.json must already carry the
+        # tag's version. A mismatch means we're about to publish the wrong bits.
+        run: |
+          MANIFEST_VERSION=$(node -p "require('./packages/${{ steps.meta.outputs.project }}/package.json').version")
+          if [ "$MANIFEST_VERSION" != "${{ steps.meta.outputs.version }}" ]; then
+            echo "::error::packages/${{ steps.meta.outputs.project }}/package.json is at $MANIFEST_VERSION but tag says ${{ steps.meta.outputs.version }}"
+            exit 1
+          fi
+        shell: bash
+
+      - name: Check whether version is already published
+        id: published
+        # npm versions are immutable. If this exact version is already live
+        # (e.g. a re-run after a green publish), skip the remaining steps and
+        # succeed — re-publishing would hard-fail, and there is nothing to do.
+        run: |
+          if npm view "@naxodev/${{ steps.meta.outputs.project }}@${{ steps.meta.outputs.version }}" version >/dev/null 2>&1; then
+            echo "::notice::@naxodev/${{ steps.meta.outputs.project }}@${{ steps.meta.outputs.version }} is already on the registry — nothing to publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+        shell: bash
+
+      - name: Build package
+        if: steps.published.outputs.skip != 'true'
+        run: bunx nx run ${{ steps.meta.outputs.project }}:build
+        shell: bash
+
+      - name: Assert dist manifest matches tag
+        if: steps.published.outputs.skip != 'true'
+        # Publish packs dist/. Guards the historical failure mode where a stale
+        # dist/ at the old version was silently re-tagged instead of published
+        # (see CONTRIBUTING.md's Releasing notes).
+        run: |
+          DIST_VERSION=$(node -p "require('./dist/packages/${{ steps.meta.outputs.project }}/package.json').version")
+          if [ "$DIST_VERSION" != "${{ steps.meta.outputs.version }}" ]; then
+            echo "::error::dist/packages/${{ steps.meta.outputs.project }} is at $DIST_VERSION but tag says ${{ steps.meta.outputs.version }}"
+            exit 1
+          fi
+        shell: bash
+
+      - name: Publish package
+        if: steps.published.outputs.skip != 'true'
+        # Tokenless publish via npm OIDC trusted publishing (configured on
+        # npmjs for this workflow file). Direct `npm publish` of the built dist
+        # dir — NOT `nx release publish`, which delegates to bun, whose OIDC
+        # exchange doesn't engage (falls through to "npm adduser"). No token:
+        # a static one hits the account's 2FA-on-writes rule; OIDC is exempt
+        # and emits provenance automatically. Relies on id-token: write.
+        run: |
+          npm publish "dist/packages/${{ steps.meta.outputs.project }}" \
+            --tag "${{ steps.meta.outputs.dist_tag }}" \
+            --access public
+        shell: bash
+        env:
+          npm_config_registry: https://registry.npmjs.org
+
+      - name: Verify package is live
+        if: steps.published.outputs.skip != 'true'
+        run: |
+          PKG="@naxodev/${{ steps.meta.outputs.project }}"
+          VERSION="${{ steps.meta.outputs.version }}"
+          for attempt in 1 2 3 4 5; do
+            if npm view "$PKG@$VERSION" version >/dev/null 2>&1; then
+              echo "✓ $PKG@$VERSION is live"
+              exit 0
+            fi
+            echo "… $PKG@$VERSION not visible yet (attempt $attempt/5), retrying"
+            sleep 5
+          done
+          echo "::error::$PKG@$VERSION not found on the registry after publish"
+          exit 1
+        shell: bash

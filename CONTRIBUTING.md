@@ -19,12 +19,12 @@ bunx nx e2e <project>
 
 ## Releasing
 
-Each package (`gonx`, `nx-cloudflare`) is released independently and **published manually from a maintainer's machine**. The npm account requires two-factor authentication for writes, so publishing needs a one-time password (OTP) — which is why it runs locally rather than in CI. There is no automated publish workflow; this is the only release path. (`publish-pr.yml` is separate — it publishes throwaway PR previews via OIDC.)
+Each package (`gonx`, `nx-cloudflare`) is released independently. **Versioning, changelog, tagging, and the GitHub release happen locally**; **publishing happens in CI** (`.github/workflows/publish.yml`) via npm OIDC trusted publishing, which emits provenance attestations automatically. There is no local production publish path anymore (see [Fallback](#fallback) if OIDC is unavailable).
 
 ### Before you start
 
 - Push access to `main` and a clean checkout with release tags available: `git fetch --tags`.
-- Logged in to npm with publish rights to the `@naxodev` scope, with your authenticator app to hand: `npm login`.
+- npm login is **not** required to release — only for one-off dist-tag maintenance (see [Dist-tag hygiene](#dist-tag-hygiene)).
 
 ### Steps
 
@@ -43,34 +43,55 @@ Each package (`gonx`, `nx-cloudflare`) is released independently and **published
 
    This bumps the version from your Conventional Commits, updates the changelog, commits, tags `<project>@vX.Y.Z`, pushes the commit and tag (`release.git.push` is enabled in `nx.json`), and creates the GitHub release. Use the top-level `nx release` — the `nx release version` subcommand is rejected by this repo's `release.git` config.
 
-3. Verify `dist/` carries the new version (publish packs `dist/`):
+   Note on versioning both manifests: `release.version.preVersionCommand` builds every project first, then `release.version.manifestRootsToUpdate` (`["{projectRoot}", "dist/{projectRoot}"]`) writes the bumped version into **both** the source and `dist/` `package.json`. Without that `manifestRootsToUpdate`, versioning updated only the source manifest, so publish packed a **stale `dist/` at the old version** — `npm` silently re-tagged the already-published version instead of erroring. CI re-builds from the tagged commit and re-asserts the dist version matches the tag, but the dual-manifest write still matters for local dry-runs and for understanding the historical failure mode.
 
-   ```bash
-   bunx nx build <project>   # optional safety net; step 2 already versioned dist/
-   ```
-
-   Step 2 already leaves `dist/` at the new version: `release.version.preVersionCommand` builds every project first, then `release.version.manifestRootsToUpdate` (`["{projectRoot}", "dist/{projectRoot}"]`) writes the bumped version into **both** the source and `dist/` `package.json`. Without that `manifestRootsToUpdate`, versioning updated only the source manifest, so publish packed a **stale `dist/` at the old version** — `npm` silently re-tagged the already-published version instead of erroring, so the release looked successful while the new version never reached the registry.
-
-4. Publish, entering a fresh OTP from your authenticator:
-
-   ```bash
-   bunx nx release publish --projects=<project> --otp=<code>
-   ```
+3. The pushed tag triggers the `publish-production` job in `.github/workflows/publish.yml`. Approve the `production` environment gate when GitHub prompts you. CI checks out the tag, builds the package, asserts both the source and dist manifests match the tag version, and publishes `dist/packages/<project>` tokenlessly via OIDC (provenance is automatic).
 
 ### Prereleases
 
-Publish under the `next` dist-tag instead of `latest`:
+Any version containing `-` (e.g. `5.0.0-beta.1`) is published under the `next` dist-tag automatically; stable versions go to `latest`. No extra flags are needed — CI derives the dist-tag from the version string.
+
+### Back-patch warning
+
+CI maps every non-prerelease to `latest` — publishing a patch of an **older major** (e.g. `gonx@4.0.3` after `5.0.0` shipped) will move `latest` backwards, so after a back-patch a maintainer must re-point it manually: `npm dist-tag add @naxodev/<package>@<newest-version> latest --otp=<code>`.
+
+### Re-running / manual publish of an existing tag
 
 ```bash
-bunx nx release publish --projects=<project> --tag next --otp=<code>
+gh workflow run publish.yml -f tag=<project>@vX.Y.Z
 ```
+
+Or use the Actions UI. The job is idempotent — if the version is already live it succeeds without republishing.
 
 ### Verify
 
 ```bash
 npm view @naxodev/<package> version          # latest release
 npm view @naxodev/<package> dist-tags        # all tags, including next
+npm view @naxodev/<package>@<version> --json | jq .dist.attestations
 ```
+
+Non-null attestations means provenance is present; the package page on npmjs.com also shows the provenance badge.
+
+### Trusted publisher (one-time npm setup)
+
+Each package's npmjs.com settings must point Trusted Publisher at repository `naxodev/oss`, workflow **`publish.yml`**, with the environment field **left blank** (the preview job runs without an environment; a single trusted-publisher entry covers both jobs). After this workflow lands, publishes fail loudly with an OIDC error until the Trusted Publisher entry is updated from the previous `publish-pr.yml` filename.
+
+Also create a GitHub Environment named `production` (repo Settings → Environments) and add yourself as a required reviewer to gate production publishes.
+
+### Dist-tag hygiene
+
+Stale `next` tags should be pruned after a stable release supersedes them:
+
+```bash
+npm dist-tag rm @naxodev/<package> next --otp=<code>
+```
+
+Never automate tag deletion in CI.
+
+### Fallback
+
+If OIDC publishing is unavailable, a local `bunx nx release publish --projects=<project> --otp=<code>` still works but ships **without provenance** — last resort only.
 
 ## <a name="rules"></a> Coding Rules
 
