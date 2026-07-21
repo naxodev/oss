@@ -63,5 +63,8 @@ vitest.config.*.timestamp*
 .nx/self-healing
 .nx/migrate-runs
 
+# Apnea orchestration state/artifacts (local agent runs)
+.apnea
+
 # TypeDoc auto-generated API reference
 **/src/content/docs/reference/

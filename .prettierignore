@@ -19,3 +19,6 @@ bun.lock
 # Astro generated + TypeDoc auto-generated reference
 .astro
 **/src/content/docs/reference/
+
+# Apnea orchestration state/artifacts (local agent runs)
+.apnea

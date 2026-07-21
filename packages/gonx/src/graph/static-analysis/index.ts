@@ -45,6 +45,12 @@ export async function createStaticAnalysisDependencies(
     return dependencies;
   }
 
+  // Projects backed by a real go.mod. Only these may use the findGoFiles
+  // disk-scan fallback: scanning a non-Go project's root (especially the
+  // workspace root project, root: ".") claims .go files owned by other
+  // projects and produces edges Nx rejects (#214).
+  const goModuleProjects = new Set(baseImportMap.values());
+
   // Process each project that has files to process
   const projectsToProcess = Object.keys(context.filesToProcess.projectFileMap);
 
@@ -68,7 +74,9 @@ export async function createStaticAnalysisDependencies(
 
         const goFiles = goFilesFromContext?.length
           ? goFilesFromContext.map((f) => join(workspaceRoot, f.file))
-          : await findGoFiles(projectRoot);
+          : goModuleProjects.has(projectName)
+          ? await findGoFiles(projectRoot)
+          : [];
 
         // Process each Go file
         for (const filePath of goFiles) {
