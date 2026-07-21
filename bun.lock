@@ -117,17 +117,19 @@
     },
     "packages/gonx": {
       "name": "@naxodev/gonx",
-      "version": "4.0.0",
+      "version": "4.0.2",
       "dependencies": {
         "@melkeydev/go-blueprint": "0.10.11",
-        "@nx/devkit": "^23.0.0",
         "chalk": "^4.1.2",
         "npm-run-path": "4.0.1",
-        "nx": "^23.0.0",
         "p-limit": "^6.2.0",
         "tree-sitter-go": "^0.25.0",
         "tslib": "^2.3.0",
         "web-tree-sitter": "0.26.3",
+      },
+      "peerDependencies": {
+        "@nx/devkit": "^23.0.0",
+        "nx": "^23.0.0",
       },
     },
     "packages/gonx-e2e": {
@@ -141,12 +143,12 @@
       "name": "@naxodev/nx-cloudflare",
       "version": "7.0.0",
       "dependencies": {
-        "@nx/devkit": "^23.0.0",
-        "@nx/js": "^23.0.0",
         "jsonc-parser": "^3.3.0",
         "tslib": "^2.3.0",
       },
       "peerDependencies": {
+        "@nx/devkit": "^23.0.0",
+        "@nx/js": "^23.0.0",
         "wrangler": "^4.0.0",
       },
     },
