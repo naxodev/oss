@@ -308,6 +308,103 @@ func main() {}
     ]);
   });
 
+  it('never scans the workspace for a non-Go root project (issue #214)', async () => {
+    // WHY: the workspace root project (root: ".") is often affected via
+    // package.json changes with zero .go files in filesToProcess. Before
+    // the guard, the findGoFiles fallback scanned the ENTIRE workspace
+    // from ".", claiming nested projects' .go files and emitting edges
+    // like { source: 'root', sourceFile: 'app/main.go' } — which Nx
+    // rejects: 'Source file "app/main.go" does not exist in the
+    // workspace' (it exists, but belongs to `app`, not `root`).
+    writeFile(workspaceRoot, 'package.json', '{ "name": "workspace-root" }\n');
+    writeFile(
+      workspaceRoot,
+      'lib/go.mod',
+      'module github.com/myorg/lib\n\ngo 1.21\n'
+    );
+    writeFile(workspaceRoot, 'lib/lib.go', 'package lib\n');
+    writeFile(
+      workspaceRoot,
+      'app/go.mod',
+      'module github.com/myorg/app\n\ngo 1.21\n'
+    );
+    writeFile(
+      workspaceRoot,
+      'app/main.go',
+      'package main\nimport "github.com/myorg/lib"\nfunc main() { _ = lib.X }\n'
+    );
+
+    const context = makeContext({
+      projects: {
+        root: { root: '.' } as any,
+        app: { root: 'app' } as any,
+        lib: { root: 'lib' } as any,
+      },
+      filesToProcess: {
+        projectFileMap: {
+          // root is "affected" but lists no .go files → pre-fix this
+          // triggered a whole-workspace findGoFiles('.') scan.
+          root: [{ file: 'package.json', hash: 'h' }],
+          app: [{ file: 'app/main.go', hash: 'h' }],
+        },
+        nonProjectFiles: [],
+      },
+    });
+
+    const result = await createStaticAnalysisDependencies(undefined, context);
+
+    // The root project must contribute nothing at all…
+    expect(result.some((d) => d.source === 'root')).toBe(false);
+    // …and the legitimate app → lib edge is the ONLY edge.
+    expect(result).toEqual([
+      {
+        type: DependencyType.static,
+        source: 'app',
+        target: 'lib',
+        sourceFile: 'app/main.go',
+      },
+    ]);
+  });
+
+  it('skips the fallback for any project without a go.mod, not just the root', async () => {
+    // WHY: the invariant is "not a Go module ⇒ no directory scan", not
+    // "not the root project ⇒ no scan". A JS/other-language project with
+    // no .go files in filesToProcess must not fall back to scanning its
+    // directory (which could contain vendored or generated .go files it
+    // does not own in the Nx graph).
+    writeFile(
+      workspaceRoot,
+      'lib/go.mod',
+      'module github.com/myorg/lib\n\ngo 1.21\n'
+    );
+    writeFile(workspaceRoot, 'lib/lib.go', 'package lib\n');
+    // `web` is a non-Go project whose directory nevertheless contains a
+    // .go file (e.g. vendored). No go.mod → no scan → no edges.
+    writeFile(
+      workspaceRoot,
+      'web/vendored/tool.go',
+      'package tool\nimport "github.com/myorg/lib"\nfunc T() { _ = lib.X }\n'
+    );
+    writeFile(workspaceRoot, 'web/project.json', '{ "name": "web" }\n');
+
+    const context = makeContext({
+      projects: {
+        web: { root: 'web' } as any,
+        lib: { root: 'lib' } as any,
+      },
+      filesToProcess: {
+        projectFileMap: {
+          web: [{ file: 'web/project.json', hash: 'h' }],
+        },
+        nonProjectFiles: [],
+      },
+    });
+
+    const result = await createStaticAnalysisDependencies(undefined, context);
+
+    expect(result).toEqual([]);
+  });
+
   it('skips projects missing from context.projects', async () => {
     // A `ghost` project appears in `filesToProcess` but not `projects`.
     // The orchestrator must silently skip it.
