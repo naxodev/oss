@@ -19,6 +19,19 @@
           "alwaysAddToPackageJson": false
         }
       }
+    },
+    "4.1.0": {
+      "version": "4.1.0",
+      "packages": {
+        "nx": {
+          "version": "^23.0.0",
+          "alwaysAddToPackageJson": true
+        },
+        "@nx/devkit": {
+          "version": "^23.0.0",
+          "alwaysAddToPackageJson": true
+        }
+      }
     }
   }
 }
