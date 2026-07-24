@@ -29,11 +29,7 @@ Inferred for projects containing a `main` package (applications). The plugin gen
   "executor": "@naxodev/gonx:build",
   "cache": true,
   "dependsOn": ["generate"],
-  "inputs": [
-    "{projectRoot}/go.mod",
-    "{projectRoot}/go.sum",
-    "{projectRoot}/**/*.{go}"
-  ],
+  "inputs": ["goSource", "^goSource"],
   "options": {
     "outputPath": "dist/{projectRoot}/"
   },
@@ -42,6 +38,8 @@ Inferred for projects containing a `main` package (applications). The plugin gen
 ```
 
 The default `outputPath` resolves to `dist/<projectRoot>/`. Override it via the `outputPath` option.
+
+See [caching and inputs](/guides/generators/add-go-to-existing-workspace#caching-and-inputs) for what `goSource` and `^goSource` hash.
 
 ## Next steps
 

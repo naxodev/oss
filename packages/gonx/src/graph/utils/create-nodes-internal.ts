@@ -2,7 +2,11 @@ import { CreateNodesContext, ProjectConfiguration } from '@nx/devkit';
 import { dirname } from 'path';
 import { GoPluginOptions } from '../types/go-plugin-options';
 import { hasMainPackage } from './has-main-package';
-import { getTargetsByProjectType } from './get-targets-by-project-type';
+import {
+  GO_SOURCE_FILE_PATTERNS,
+  GO_SOURCE_NAMED_INPUT,
+  getTargetsByProjectType,
+} from './get-targets-by-project-type';
 
 export function createNodesInternal(
   configFilePath: string,
@@ -33,6 +37,14 @@ export function createNodesInternal(
     sourceRoot: projectRoot,
     projectType,
     targets,
+    // Targets reference the dependency source of other projects via the
+    // `^goSource` named input (see get-targets-by-project-type.ts), which
+    // Nx resolves against each dependency's own namedInputs. Every
+    // gonx-inferred project must therefore define `goSource` itself, or
+    // hashing a project that depends on it would fail. Nx merges
+    // plugin-provided namedInputs into the final project config alongside
+    // any project.json-defined ones.
+    namedInputs: { [GO_SOURCE_NAMED_INPUT]: GO_SOURCE_FILE_PATTERNS },
     tags: options.tagName ? [options.tagName] : [],
     // Add release configuration for nx release
     release: {

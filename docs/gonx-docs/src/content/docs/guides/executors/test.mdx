@@ -27,15 +27,13 @@ Inferred for all Go projects (applications and libraries):
   "executor": "@naxodev/gonx:test",
   "cache": true,
   "dependsOn": ["generate", "^build"],
-  "inputs": [
-    "{projectRoot}/go.mod",
-    "{projectRoot}/go.sum",
-    "{projectRoot}/**/*.{go}"
-  ]
+  "inputs": ["goSource", "^goSource"]
 }
 ```
 
 The `^build` dependency means test targets run after upstream project build targets complete.
+
+See [caching and inputs](/guides/generators/add-go-to-existing-workspace#caching-and-inputs) for what `goSource` and `^goSource` hash.
 
 ## Next steps
 

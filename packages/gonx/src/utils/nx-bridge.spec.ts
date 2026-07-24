@@ -11,10 +11,12 @@ import type { NxJsonConfiguration, Tree } from '@nx/devkit';
 import * as nxDevkit from '@nx/devkit';
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { GO_MOD_FILE, GO_WORK_FILE, NX_PLUGIN_NAME } from '../constants';
+import { GO_SOURCE_FILE_PATTERNS } from '../graph/utils/get-targets-by-project-type';
 import * as goBridge from './go-bridge';
 import {
   addNxPlugin,
   ensureGoConfigInSharedGlobals,
+  ensureGoSourceNamedInput,
   isProjectUsingNxGo,
 } from './nx-bridge';
 
@@ -128,6 +130,67 @@ describe('Nx bridge', () => {
         expect(spyUpdateNxJson).toHaveBeenCalledTimes(updated ? 1 : 0);
       }
     );
+  });
+
+  describe('Method: ensureGoSourceNamedInput', () => {
+    it('should add the goSource named input when it is missing', () => {
+      const nxJson = { namedInputs: {} } as NxJsonConfiguration;
+      const spyUpdateNxJson = spyOn(nxDevkit, 'updateNxJson');
+      spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
+      ensureGoSourceNamedInput(tree);
+      expect(spyUpdateNxJson).toHaveBeenCalledTimes(1);
+      expect(spyUpdateNxJson).toHaveBeenCalledWith(
+        tree,
+        expect.objectContaining({
+          namedInputs: expect.objectContaining({
+            goSource: GO_SOURCE_FILE_PATTERNS,
+          }),
+        })
+      );
+    });
+
+    it('should add the goSource named input when namedInputs is entirely undefined', () => {
+      const nxJson = {} as NxJsonConfiguration;
+      const spyUpdateNxJson = spyOn(nxDevkit, 'updateNxJson');
+      spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
+      ensureGoSourceNamedInput(tree);
+      expect(spyUpdateNxJson).toHaveBeenCalledWith(
+        tree,
+        expect.objectContaining({
+          namedInputs: { goSource: GO_SOURCE_FILE_PATTERNS },
+        })
+      );
+    });
+
+    it('should not overwrite an existing user-defined goSource named input', () => {
+      const customGoSource = ['{projectRoot}/**/*.go'];
+      const nxJson = {
+        namedInputs: { goSource: customGoSource },
+      } as unknown as NxJsonConfiguration;
+      const spyUpdateNxJson = spyOn(nxDevkit, 'updateNxJson');
+      spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
+      ensureGoSourceNamedInput(tree);
+      expect(spyUpdateNxJson).not.toHaveBeenCalled();
+      expect(nxJson.namedInputs.goSource).toEqual(customGoSource);
+    });
+
+    it('should preserve other named inputs already defined in nx.json', () => {
+      const nxJson = {
+        namedInputs: { sharedGlobals: [`{workspaceRoot}/${GO_WORK_FILE}`] },
+      } as unknown as NxJsonConfiguration;
+      const spyUpdateNxJson = spyOn(nxDevkit, 'updateNxJson');
+      spyOn(nxDevkit, 'readNxJson').mockReturnValue(nxJson);
+      ensureGoSourceNamedInput(tree);
+      expect(spyUpdateNxJson).toHaveBeenCalledWith(
+        tree,
+        expect.objectContaining({
+          namedInputs: {
+            sharedGlobals: [`{workspaceRoot}/${GO_WORK_FILE}`],
+            goSource: GO_SOURCE_FILE_PATTERNS,
+          },
+        })
+      );
+    });
   });
 
   describe('Method: isProjectUsingNxGo', () => {

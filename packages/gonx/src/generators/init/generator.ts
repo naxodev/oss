@@ -3,6 +3,7 @@ import {
   addNxPlugin,
   createGoWork,
   ensureGoConfigInSharedGlobals,
+  ensureGoSourceNamedInput,
   supportsGoWorkspace,
 } from '../../utils';
 import { InitGeneratorSchema } from './schema';
@@ -17,6 +18,8 @@ export async function initGenerator(tree: Tree, options: InitGeneratorSchema) {
   if (options.addGoDotWork) {
     ensureGoConfigInSharedGlobals(tree);
   }
+
+  ensureGoSourceNamedInput(tree);
 
   if (!options.skipFormat) {
     await formatFiles(tree);

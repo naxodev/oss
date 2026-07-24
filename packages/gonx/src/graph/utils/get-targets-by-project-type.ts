@@ -2,16 +2,56 @@ import { TargetConfiguration } from '@nx/devkit';
 import { GoPluginOptions } from '../types/go-plugin-options';
 
 /**
- * Cache-relevant inputs shared by every target whose output depends on the
- * Go module's source (build, lint, tidy, test, generate). Kept as a single
- * constant so these targets can't drift out of sync with each other and
- * silently change cache hashes.
+ * Name of the Nx named input (defined per-project in
+ * `createNodesInternal`, and as a workspace-level fallback in nx.json by
+ * `ensureGoSourceNamedInput`) that resolves to `GO_SOURCE_FILE_PATTERNS`.
+ *
+ * Targets reference dependency source via the `^goSource` form of this
+ * name rather than inlining `GO_SOURCE_FILE_PATTERNS` with a `^` prefix,
+ * because Nx resolves `^goSource` against *each dependency's own*
+ * namedInputs (which may legitimately differ per project), not against the
+ * consuming project's file patterns.
  */
-const GO_SOURCE_INPUTS = [
+export const GO_SOURCE_NAMED_INPUT = 'goSource';
+
+/**
+ * File patterns that make up a Go project's compiled/analyzed source, for
+ * both the project-local named input (`goSource`) and the cache `inputs` on
+ * targets whose output depends on that source (build, lint, tidy, test,
+ * generate).
+ *
+ * Go compiles, vets, and resolves module dependencies against the *source*
+ * of every module it imports -- not just its own files. In a go.work or
+ * replace-directive monorepo, an app can depend on a local library whose
+ * source lives in another Nx project. If only the app's own files are
+ * hashed, editing the library produces a stale cache hit for the app's
+ * build/test/lint/tidy targets (see #217).
+ *
+ * `build`, `test`, `lint`, and `tidy` therefore hash `['goSource',
+ * '^goSource']`: `^goSource` walks the project's Nx dependency graph and
+ * hashes every dependency's `goSource` inputs too, transitively, so an
+ * app -> lib1 -> lib2 chain invalidates correctly however deep it goes.
+ *
+ * `go.work`/`go.work.sum` are included at the workspace root because they
+ * change module resolution for *every* Go project in the workspace, not
+ * just the one that owns them; when the workspace doesn't use a Go
+ * workspace file, these patterns simply match nothing.
+ *
+ * `generate` intentionally stays project-local (`['goSource']` only): its
+ * go:generate directives only read the local module, and correctness
+ * relative to dependencies is already handled by `dependsOn: ['^generate']`
+ * rather than by cache-input hashing.
+ */
+export const GO_SOURCE_FILE_PATTERNS = [
   '{projectRoot}/go.mod',
   '{projectRoot}/go.sum',
-  '{projectRoot}/**/*.{go}',
+  '{projectRoot}/**/*.go',
+  '{workspaceRoot}/go.work',
+  '{workspaceRoot}/go.work.sum',
 ];
+
+const GO_SOURCE_INPUTS = [GO_SOURCE_NAMED_INPUT, `^${GO_SOURCE_NAMED_INPUT}`];
+const GO_SOURCE_LOCAL_ONLY_INPUTS = [GO_SOURCE_NAMED_INPUT];
 
 function buildTarget(): TargetConfiguration {
   return {
@@ -64,7 +104,7 @@ function generateTarget(): TargetConfiguration {
     executor: '@naxodev/gonx:generate',
     cache: true,
     dependsOn: ['^generate'],
-    inputs: GO_SOURCE_INPUTS,
+    inputs: GO_SOURCE_LOCAL_ONLY_INPUTS,
   };
 }
 
