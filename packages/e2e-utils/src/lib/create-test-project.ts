@@ -119,9 +119,11 @@ export function installPlugin(pluginName: string) {
   //
   // `npm_config_registry` is only set in the registry-owner process, so a
   // non-owner project (e.g. `nx run-many -t e2e` without --parallel=1) falls
-  // back to the default port, matching the `local-registry` target in
-  // project.json.
-  const registry = process.env.npm_config_registry ?? 'http://localhost:4873';
+  // back to the default address, matching the `local-registry` target in
+  // project.json (pinned to the IPv4 loopback: verdaccio is forked from the
+  // bun-test preload, and bun's `listen('localhost', ...)` resolves to the
+  // IPv6 wildcard, which fails to bind in IPv6-less containers).
+  const registry = process.env.npm_config_registry ?? 'http://127.0.0.1:4873';
   appendFileSync(
     join(localTmpDir, '.npmrc'),
     `\n@naxodev:registry=${registry}\n`
