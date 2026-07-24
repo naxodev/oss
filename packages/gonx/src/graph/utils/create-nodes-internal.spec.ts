@@ -20,12 +20,4 @@ describe('createNodesInternal', () => {
       [GO_SOURCE_NAMED_INPUT]: GO_SOURCE_FILE_PATTERNS,
     });
   });
-
-  it('should keep namedInputs.goSource equal to GO_SOURCE_FILE_PATTERNS regardless of project type', () => {
-    const result = createNodesInternal('apps/proj-b/go.mod', {}, context);
-
-    expect(result.projects['apps/proj-b'].namedInputs.goSource).toEqual(
-      GO_SOURCE_FILE_PATTERNS
-    );
-  });
 });

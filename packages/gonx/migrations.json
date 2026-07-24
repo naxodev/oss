@@ -4,6 +4,11 @@
       "version": "2.0.0",
       "description": "Guide the v2.0.0 go.work / convert-to-one-mod consolidation and executor changes for workspaces upgrading from gonx 1.x.",
       "prompt": "./src/migrations/update-2-0-0/go-work-consolidation.md"
+    },
+    "update-4-1-1-ensure-go-source-named-input": {
+      "version": "4.1.1",
+      "description": "Add the workspace-level `goSource` named input to nx.json so the `^goSource` inputs on inferred build/test/lint/tidy targets resolve for Go projects that depend on non-Go projects.",
+      "implementation": "./src/migrations/update-4-1-1/ensure-go-source-named-input"
     }
   },
   "packageJsonUpdates": {

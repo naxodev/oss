@@ -8,7 +8,7 @@ import {
 } from '@naxodev/e2e-utils';
 import { join } from 'path';
 import { readFileSync, readdirSync, writeFileSync } from 'fs';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 // Regression coverage for https://github.com/naxodev/oss/issues/217: gonx's
 // inferred targets used to hash only project-local files, so in a Go
@@ -90,7 +90,11 @@ function runBuiltBinary(distDir: string): string {
   if (!binaryName) {
     throw new Error(`No binary found in ${distDir}`);
   }
-  return execSync(join(distDir, binaryName), { encoding: 'utf-8' });
+  // execFileSync (not execSync) so the binary is exec'd directly with no
+  // shell in between -- the file name comes from readdirSync, and passing it
+  // as a shell command string would let a name with spaces/metacharacters
+  // break or inject (CodeQL js/shell-command-injection-from-environment).
+  return execFileSync(join(distDir, binaryName), { encoding: 'utf-8' });
 }
 
 describe('Caching with dependency inputs (go.work workspace)', () => {

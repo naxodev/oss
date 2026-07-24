@@ -45,6 +45,12 @@ const LISTEN_ADDRESS = '127.0.0.1';
  */
 function startLocalRegistryUnderNode(): Promise<() => void> {
   return new Promise((resolve, reject) => {
+    // `detached` puts nx and the verdaccio it forks in their own process
+    // group so teardown can signal the whole tree at once (see the stop
+    // function below), rather than relying on nx forwarding SIGTERM to its
+    // grandchild. Windows has no POSIX process groups (and e2e is skipped
+    // there anyway), so keep the default there.
+    const useProcessGroup = process.platform !== 'win32';
     const child = spawn(
       'node',
       [
@@ -59,7 +65,7 @@ function startLocalRegistryUnderNode(): Promise<() => void> {
         '--storage',
         STORAGE_DIR,
       ],
-      { stdio: 'pipe' }
+      { stdio: 'pipe', detached: useProcessGroup }
     );
 
     let output = '';
@@ -67,13 +73,22 @@ function startLocalRegistryUnderNode(): Promise<() => void> {
 
     const listener = (data: Buffer) => {
       output += data.toString();
-      if (started || !data.toString().includes(`http://${LISTEN_ADDRESS}:`)) {
+      // Match against the accumulated `output`, not this single chunk: the
+      // "http://127.0.0.1:<port>" banner can arrive split across `data`
+      // events, which would otherwise yield a NaN port or never match at all
+      // (hanging setup until CI times out).
+      if (started || !output.includes(`http://${LISTEN_ADDRESS}:`)) {
         return;
       }
       const port = parseInt(
-        data.toString().match(new RegExp(`${LISTEN_ADDRESS}:(?<port>\\d+)`))
-          ?.groups?.port
+        output.match(new RegExp(`${LISTEN_ADDRESS}:(?<port>\\d+)`))?.groups
+          ?.port
       );
+      if (Number.isNaN(port)) {
+        // Address line seen but the port digits haven't fully arrived yet;
+        // wait for the next chunk to complete the match.
+        return;
+      }
       const registry = `http://${LISTEN_ADDRESS}:${port}`;
       const authToken = 'secretVerdaccioToken';
       started = true;
@@ -92,8 +107,20 @@ function startLocalRegistryUnderNode(): Promise<() => void> {
       process.env.YARN_NPM_REGISTRY_SERVER = registry;
       process.env.YARN_UNSAFE_HTTP_WHITELIST = LISTEN_ADDRESS;
       resolve(() => {
-        // The nx child's SIGTERM handler tears down its forked verdaccio.
-        child.kill();
+        // Tear down the whole process group (nx + the verdaccio it forked)
+        // rather than just the nx child. Signalling `-pid` reaches every
+        // process in the group, so verdaccio can't be orphaned holding the
+        // port when nx doesn't forward SIGTERM to it. Fall back to a direct
+        // kill if the group is already gone or process groups are unavailable.
+        try {
+          if (useProcessGroup && child.pid) {
+            process.kill(-child.pid, 'SIGTERM');
+          } else {
+            child.kill();
+          }
+        } catch {
+          child.kill();
+        }
         execSync(
           `npm config delete //${LISTEN_ADDRESS}:${port}/:_authToken --ws=false`,
           { windowsHide: true }
@@ -105,6 +132,11 @@ function startLocalRegistryUnderNode(): Promise<() => void> {
     child.stdout?.on('data', listener);
     child.stderr?.on('data', (data: Buffer) => {
       output += data.toString();
+      // Stream verdaccio's stderr through in real time (matching the upstream
+      // startLocalRegistry). Without this a crash after the address line
+      // prints produces zero output, surfacing much later as an opaque
+      // ConnectionRefused with the root-cause stderr swallowed.
+      process.stderr.write(data);
     });
     child.on('error', (err) => reject(err));
     child.on('exit', (code) => {
