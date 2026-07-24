@@ -22,6 +22,7 @@ mock.module('../../utils', () => ({
   addNxPlugin: mock(),
   createGoWork: mock(),
   ensureGoConfigInSharedGlobals: mock(),
+  ensureGoSourceNamedInput: mock(),
   getProjectScope: mock().mockReturnValue('proj'),
   supportsGoWorkspace: mock().mockReturnValue(true),
 }));
@@ -37,6 +38,7 @@ describe('init generator', () => {
     (
       shared.ensureGoConfigInSharedGlobals as ReturnType<typeof mock>
     ).mockClear();
+    (shared.ensureGoSourceNamedInput as ReturnType<typeof mock>).mockClear();
     (shared.supportsGoWorkspace as ReturnType<typeof mock>).mockClear();
     (nxDevkit.formatFiles as ReturnType<typeof mock>).mockClear();
   });
@@ -80,6 +82,17 @@ describe('init generator', () => {
     await initGenerator(tree, { ...options, addGoDotWork: true });
     expect(shared.createGoWork).not.toHaveBeenCalled();
     expect(shared.ensureGoConfigInSharedGlobals).toHaveBeenCalledWith(tree);
+  });
+
+  it('should ensure the goSource named input is defined in nx.json', async () => {
+    await initGenerator(tree, options);
+    expect(shared.ensureGoSourceNamedInput).toHaveBeenCalledWith(tree);
+  });
+
+  it('should ensure the goSource named input even when addGoDotWork is not set', async () => {
+    spyOn(shared, 'supportsGoWorkspace').mockReturnValueOnce(false);
+    await initGenerator(tree, { ...options, addGoDotWork: false });
+    expect(shared.ensureGoSourceNamedInput).toHaveBeenCalledWith(tree);
   });
 
   it('should format files', async () => {

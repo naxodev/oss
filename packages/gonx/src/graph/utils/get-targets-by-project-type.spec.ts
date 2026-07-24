@@ -2,15 +2,18 @@ import { describe, it, expect } from 'bun:test';
 import { getTargetsByProjectType } from './get-targets-by-project-type';
 import { GoPluginOptions } from '../types/go-plugin-options';
 
-// The exact `**/*.{go}` glob (kept verbatim rather than tidied to `**/*.go`)
-// is part of the cache key Nx hashes against. Any change to these literals
-// changes cache hashes for every consumer, so it is asserted precisely
-// rather than with a loose shape match.
-const GO_SOURCE_INPUTS = [
-  '{projectRoot}/go.mod',
-  '{projectRoot}/go.sum',
-  '{projectRoot}/**/*.{go}',
-];
+// The target `inputs` arrays ARE the cache key Nx hashes against, so they're
+// asserted as exact literals rather than with a loose shape match -- any
+// unintentional drift here silently changes cache hashes for every consumer.
+//
+// build/test/lint/tidy hash `['goSource', '^goSource']`: `^goSource` pulls
+// in each dependency's own `goSource` named input (transitively), so that
+// editing a local library in a go.work/replace-directive monorepo correctly
+// invalidates the cache for apps that compile its source (fix for #217).
+// `generate` stays project-local (`['goSource']`) since its go:generate
+// directives only read the local module.
+const GO_SOURCE_INPUTS = ['goSource', '^goSource'];
+const GO_SOURCE_LOCAL_ONLY_INPUTS = ['goSource'];
 
 describe('getTargetsByProjectType', () => {
   describe('library projects (isApplication: false)', () => {
@@ -36,7 +39,7 @@ describe('getTargetsByProjectType', () => {
         executor: '@naxodev/gonx:generate',
         cache: true,
         dependsOn: ['^generate'],
-        inputs: GO_SOURCE_INPUTS,
+        inputs: GO_SOURCE_LOCAL_ONLY_INPUTS,
       });
     });
 

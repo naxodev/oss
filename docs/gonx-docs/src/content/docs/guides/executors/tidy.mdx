@@ -26,13 +26,11 @@ Inferred for all Go projects (applications and libraries):
 {
   "executor": "@naxodev/gonx:tidy",
   "cache": true,
-  "inputs": [
-    "{projectRoot}/go.mod",
-    "{projectRoot}/go.sum",
-    "{projectRoot}/**/*.{go}"
-  ]
+  "inputs": ["goSource", "^goSource"]
 }
 ```
+
+See [caching and inputs](/guides/generators/add-go-to-existing-workspace#caching-and-inputs) for what `goSource` and `^goSource` hash.
 
 ## Next steps
 

@@ -29,15 +29,11 @@ Inferred for all Go projects (applications and libraries):
   "executor": "@naxodev/gonx:generate",
   "cache": true,
   "dependsOn": ["^generate"],
-  "inputs": [
-    "{projectRoot}/go.mod",
-    "{projectRoot}/go.sum",
-    "{projectRoot}/**/*.{go}"
-  ]
+  "inputs": ["goSource"]
 }
 ```
 
-The `^generate` dependency means generate targets run after upstream project generate targets complete.
+The `^generate` dependency means generate targets run after upstream project generate targets complete. Unlike build/test/lint/tidy, `generate` hashes only the project's own `goSource` (no `^goSource`) — `go:generate` directives only read the local module, and correctness relative to dependencies is already handled by the `^generate` ordering above. See [caching and inputs](/guides/generators/add-go-to-existing-workspace#caching-and-inputs) for details.
 
 ## Next steps
 

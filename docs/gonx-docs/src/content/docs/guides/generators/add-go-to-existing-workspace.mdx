@@ -63,6 +63,24 @@ Once a `go.mod` is present in a directory, the plugin infers the following targe
 
 Applications are detected by the presence of a `main.go` containing `package main` and `func main(`, or a `cmd/` directory.
 
+## Caching and inputs
+
+`build`, `test`, `lint`, and `tidy` are cacheable and hash `["goSource", "^goSource"]`. `goSource` is an Nx named input the plugin defines on every inferred Go project, resolving to:
+
+```
+{projectRoot}/go.mod
+{projectRoot}/go.sum
+{projectRoot}/**/*.go
+{workspaceRoot}/go.work
+{workspaceRoot}/go.work.sum
+```
+
+The `^goSource` entry pulls in the same named input from every project this one depends on, transitively. This matters because Go compiles, vets, and resolves module dependencies against the source of everything it imports, not just the project's own files — in a `go.work` or `replace`-directive monorepo, an app can depend on a local library whose source lives in another Nx project. Without `^goSource`, editing that library wouldn't invalidate the app's cached `build`/`test`/`lint`/`tidy` results. `go.work`/`go.work.sum` are included because they change module resolution for every Go project in the workspace, not just the one that owns them.
+
+`generate` hashes only `["goSource"]` (no `^goSource`) — its `go:generate` directives only read the local module, and correctness relative to dependencies is already handled by its `dependsOn: ["^generate"]`.
+
+`init` (and `nx add @naxodev/gonx`) also writes a workspace-level `goSource` fallback into `nx.json`'s `namedInputs` if one isn't already defined there — this only matters if you add a dependency edge from a Go project to a non-Go project (e.g. via `implicitDependencies`), since Nx needs every project reachable through `^goSource` to define that named input. It never overwrites a `goSource` you've already defined yourself.
+
 ## Verify
 
 ```bash
