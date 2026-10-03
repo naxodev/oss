@@ -30,7 +30,7 @@ env:
 
 jobs:
   main:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     # Backstop so a hung task (e.g. an e2e install blocked on a torn-down local
     # registry) fails fast instead of burning the 6h GitHub default.
     timeout-minutes: 40
