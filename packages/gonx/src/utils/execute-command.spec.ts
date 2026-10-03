@@ -22,6 +22,7 @@ import * as fileUtils from 'nx/src/utils/fileutils';
 
 mock.module('@nx/devkit', () => ({
   logger: { info: mock(), error: mock() },
+  workspaceRoot: path.resolve(path.sep, 'workspace'),
 }));
 mock.module('child_process', () => ({
   execFileSync: mock(),
@@ -105,7 +106,7 @@ describe('Execute command', () => {
     it('should execute a successfully command withh custom options', async () => {
       const result = await executeCommand(['build', '--flag1'], {
         executable: 'gow',
-        cwd: path.sep + 'root',
+        cwd: path.resolve(path.sep, 'root'),
         env: { hello: 'world' },
       });
       expect(result.success).toBeTruthy();
@@ -113,7 +114,7 @@ describe('Execute command', () => {
         'gow',
         ['build', '--flag1'],
         expect.objectContaining({
-          cwd: path.sep + 'root',
+          cwd: path.resolve(path.sep, 'root'),
           env: { ...process.env, hello: 'world' },
         })
       );
@@ -222,7 +223,7 @@ describe('Execute command', () => {
 
   describe('Method: extractCWD', () => {
     const context: ExecutorContext = {
-      root: path.sep + 'workspace',
+      root: path.resolve(path.sep, 'workspace'),
       isVerbose: false,
       projectName: 'my-project',
       projectsConfigurations: {
@@ -253,7 +254,14 @@ describe('Execute command', () => {
       );
       expect(result).toBe(path.join('apps', 'my-project', 'cmd', 'server'));
       expect(mockFileUtils.fileExists).toHaveBeenCalledWith(
-        path.join('apps', 'my-project', 'cmd', 'server', 'main.go')
+        path.join(
+          context.root,
+          'apps',
+          'my-project',
+          'cmd',
+          'server',
+          'main.go'
+        )
       );
     });
 
@@ -275,7 +283,7 @@ describe('Execute command', () => {
       const result = extractCWD({ main: 'main.go' }, context);
       expect(result).toBe(path.join('apps', 'my-project'));
       expect(mockFileUtils.fileExists).toHaveBeenCalledWith(
-        path.join('apps', 'my-project', 'main.go')
+        path.join(context.root, 'apps', 'my-project', 'main.go')
       );
     });
   });
