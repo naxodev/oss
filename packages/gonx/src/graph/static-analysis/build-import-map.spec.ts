@@ -3,6 +3,7 @@ import { ProjectConfiguration } from '@nx/devkit';
 import { buildImportMap } from './build-import-map';
 import { parseGoMod } from './parse-go-mod';
 import { GoModInfo } from '../types/go-mod-info';
+import { join, resolve, sep } from 'path';
 
 mock.module('./parse-go-mod', () => ({
   parseGoMod: mock(),
@@ -21,7 +22,7 @@ function goMod(
 }
 
 describe('buildImportMap', () => {
-  const workspaceRoot = '/workspace';
+  const workspaceRoot = resolve(sep, 'workspace');
 
   beforeEach(() => {
     mockParseGoMod.mockClear();
@@ -31,7 +32,7 @@ describe('buildImportMap', () => {
   describe('base import map', () => {
     it('should map module path to project name', async () => {
       mockParseGoMod.mockImplementation(async (filePath) => {
-        if (filePath === '/workspace/libs/shared/go.mod') {
+        if (filePath === join(workspaceRoot, 'libs/shared', 'go.mod')) {
           return goMod('github.com/myorg/shared');
         }
         return null;
@@ -50,13 +51,13 @@ describe('buildImportMap', () => {
 
     it('should map multiple projects', async () => {
       mockParseGoMod.mockImplementation(async (filePath) => {
-        if (filePath === '/workspace/apps/api/go.mod') {
+        if (filePath === join(workspaceRoot, 'apps/api', 'go.mod')) {
           return goMod('github.com/myorg/api');
         }
-        if (filePath === '/workspace/libs/shared/go.mod') {
+        if (filePath === join(workspaceRoot, 'libs/shared', 'go.mod')) {
           return goMod('github.com/myorg/shared');
         }
-        if (filePath === '/workspace/libs/utils/go.mod') {
+        if (filePath === join(workspaceRoot, 'libs/utils', 'go.mod')) {
           return goMod('github.com/myorg/utils');
         }
         return null;
@@ -82,7 +83,7 @@ describe('buildImportMap', () => {
 
     it('should skip projects without go.mod', async () => {
       mockParseGoMod.mockImplementation(async (filePath) => {
-        if (filePath === '/workspace/libs/shared/go.mod') {
+        if (filePath === join(workspaceRoot, 'libs/shared', 'go.mod')) {
           return goMod('github.com/myorg/shared');
         }
         return null;
@@ -105,12 +106,12 @@ describe('buildImportMap', () => {
   describe('replace directive handling', () => {
     it('should resolve replace directive to target module path', async () => {
       mockParseGoMod.mockImplementation(async (filePath) => {
-        if (filePath === '/workspace/apps/api/go.mod') {
+        if (filePath === join(workspaceRoot, 'apps/api', 'go.mod')) {
           return goMod('github.com/myorg/api', {
             'github.com/external/common': '../common',
           });
         }
-        if (filePath === '/workspace/apps/common/go.mod') {
+        if (filePath === join(workspaceRoot, 'apps/common', 'go.mod')) {
           return goMod('github.com/myorg/common');
         }
         return null;
@@ -133,7 +134,7 @@ describe('buildImportMap', () => {
 
     it('should set suppress for local path pointing to non-Nx directory', async () => {
       mockParseGoMod.mockImplementation(async (filePath) => {
-        if (filePath === '/workspace/apps/api/go.mod') {
+        if (filePath === join(workspaceRoot, 'apps/api', 'go.mod')) {
           return goMod('github.com/myorg/api', {
             'github.com/vendor/pkg': './vendor/pkg',
           });
@@ -156,7 +157,7 @@ describe('buildImportMap', () => {
 
     it('should handle module-to-module replacement', async () => {
       mockParseGoMod.mockImplementation(async (filePath) => {
-        if (filePath === '/workspace/apps/api/go.mod') {
+        if (filePath === join(workspaceRoot, 'apps/api', 'go.mod')) {
           return goMod('github.com/myorg/api', {
             'github.com/old/pkg': 'github.com/new/pkg',
           });
@@ -180,20 +181,20 @@ describe('buildImportMap', () => {
 
     it('should scope replace directives per project', async () => {
       mockParseGoMod.mockImplementation(async (filePath) => {
-        if (filePath === '/workspace/apps/api/go.mod') {
+        if (filePath === join(workspaceRoot, 'apps/api', 'go.mod')) {
           return goMod('github.com/myorg/api', {
             'github.com/myorg/common': '../common',
           });
         }
-        if (filePath === '/workspace/apps/web/go.mod') {
+        if (filePath === join(workspaceRoot, 'apps/web', 'go.mod')) {
           return goMod('github.com/myorg/web', {
             'github.com/myorg/common': '../../libs/common',
           });
         }
-        if (filePath === '/workspace/apps/common/go.mod') {
+        if (filePath === join(workspaceRoot, 'apps/common', 'go.mod')) {
           return goMod('github.com/myorg/apps-common');
         }
-        if (filePath === '/workspace/libs/common/go.mod') {
+        if (filePath === join(workspaceRoot, 'libs/common', 'go.mod')) {
           return goMod('github.com/myorg/libs-common');
         }
         return null;
