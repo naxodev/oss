@@ -50,6 +50,12 @@ jobs:
         with:
           node-version: 22
 
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.27.1'
+          # Tests create temporary modules; there is no root Go cache key.
+          cache: false
+
       # Cache the bun install cache across runs.
       - uses: actions/cache@v4
         with:
