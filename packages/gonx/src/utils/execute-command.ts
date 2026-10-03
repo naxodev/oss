@@ -1,6 +1,6 @@
-import { ExecutorContext, logger } from '@nx/devkit';
+import { ExecutorContext, logger, workspaceRoot } from '@nx/devkit';
 import { execFileSync } from 'child_process';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { fileExists } from 'nx/src/utils/fileutils';
 import { BuildExecutorSchema } from '../executors/build/schema';
 import { ServeExecutorSchema } from '../executors/serve/schema';
@@ -71,7 +71,7 @@ export const executeCommand = async (
     // argv array (no shell involved), so option values are never subject to
     // shell parsing/quoting/injection the way a joined command string would be.
     execFileSync(file, [...leadingArgs, ...parameters], {
-      cwd,
+      cwd: cwd === null ? null : resolve(workspaceRoot, cwd),
       env: mergedEnv,
       stdio: [0, 1, 2],
     });
@@ -121,7 +121,7 @@ export function extractCWD(
 
   if (options.main) {
     const mainFilePath = join(projectRoot, options.main);
-    if (!fileExists(mainFilePath)) {
+    if (!fileExists(resolve(context.root, mainFilePath))) {
       throw new Error(
         `Main file ${options.main} does not exist in project ${projectName}`
       );
