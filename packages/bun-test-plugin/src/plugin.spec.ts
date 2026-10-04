@@ -135,7 +135,9 @@ describe('bun-test createNodes', () => {
 
       expect(result.projects['packages/lib'].targets.test).toBeDefined();
       expect(warn).toHaveBeenCalledTimes(1);
-      expect(warn.mock.calls[0][0]).toContain('packages/lib/project.json');
+      expect(warn.mock.calls[0][0]).toContain(
+        join('packages', 'lib', 'project.json')
+      );
     } finally {
       warn.mockRestore();
     }

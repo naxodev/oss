@@ -2,6 +2,7 @@ import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import { Dirent } from 'fs';
 import { readdir } from 'fs/promises';
 import { findGoFiles } from './find-go-files';
+import { resolve } from 'path';
 
 mock.module('fs/promises', () => ({
   readdir: mock(),
@@ -20,7 +21,8 @@ function dirent(name: string, type: 'file' | 'directory'): Dirent {
 
 /**
  * Sets up mockReaddir to simulate a filesystem from a flat file map.
- * Keys are absolute file paths, values are ignored (only structure matters).
+ * Keys use POSIX fixture paths; the mock uses native filesystem paths.
+ * Values are ignored (only structure matters).
  */
 function setupFs(files: Record<string, string>): void {
   const dirs = new Map<string, Dirent[]>();
@@ -29,7 +31,7 @@ function setupFs(files: Record<string, string>): void {
     const segments = filePath.split('/').filter(Boolean);
 
     for (let i = 1; i <= segments.length; i++) {
-      const dirPath = '/' + segments.slice(0, i - 1).join('/') || '/';
+      const dirPath = resolve('/', ...segments.slice(0, i - 1));
       const entryName = segments[i - 1];
       const isFile = i === segments.length;
 
@@ -71,10 +73,10 @@ describe('findGoFiles', () => {
         '/project/utils.go': 'package main',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).toContain('/project/utils.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).toContain(resolve('/project/utils.go'));
       expect(files).toHaveLength(2);
     });
 
@@ -85,11 +87,11 @@ describe('findGoFiles', () => {
         '/project/internal/deep/nested.go': 'package deep',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).toContain('/project/internal/handler.go');
-      expect(files).toContain('/project/internal/deep/nested.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).toContain(resolve('/project/internal/handler.go'));
+      expect(files).toContain(resolve('/project/internal/deep/nested.go'));
       expect(files).toHaveLength(3);
     });
   });
@@ -103,12 +105,12 @@ describe('findGoFiles', () => {
         '/project/handler_test.go': 'package handler',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).toContain('/project/handler.go');
-      expect(files).toContain('/project/main_test.go');
-      expect(files).toContain('/project/handler_test.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).toContain(resolve('/project/handler.go'));
+      expect(files).toContain(resolve('/project/main_test.go'));
+      expect(files).toContain(resolve('/project/handler_test.go'));
       expect(files).toHaveLength(4);
     });
 
@@ -118,10 +120,12 @@ describe('findGoFiles', () => {
         '/project/vendor/github.com/pkg/pkg.go': 'package pkg',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).not.toContain('/project/vendor/github.com/pkg/pkg.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).not.toContain(
+        resolve('/project/vendor/github.com/pkg/pkg.go')
+      );
       expect(files).toHaveLength(1);
     });
 
@@ -131,10 +135,10 @@ describe('findGoFiles', () => {
         '/project/testdata/fixtures.go': 'package testdata',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).not.toContain('/project/testdata/fixtures.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).not.toContain(resolve('/project/testdata/fixtures.go'));
       expect(files).toHaveLength(1);
     });
 
@@ -145,11 +149,11 @@ describe('findGoFiles', () => {
         '/project/.hidden/secret.go': 'package hidden',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).not.toContain('/project/.git/hooks/pre-commit.go');
-      expect(files).not.toContain('/project/.hidden/secret.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).not.toContain(resolve('/project/.git/hooks/pre-commit.go'));
+      expect(files).not.toContain(resolve('/project/.hidden/secret.go'));
       expect(files).toHaveLength(1);
     });
 
@@ -159,10 +163,12 @@ describe('findGoFiles', () => {
         '/project/node_modules/some-pkg/index.go': 'package somepkg',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).not.toContain('/project/node_modules/some-pkg/index.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).not.toContain(
+        resolve('/project/node_modules/some-pkg/index.go')
+      );
       expect(files).toHaveLength(1);
     });
 
@@ -175,13 +181,13 @@ describe('findGoFiles', () => {
         '/project/bin/main.go': 'package main',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).not.toContain('/project/dist/main.go');
-      expect(files).not.toContain('/project/build/main.go');
-      expect(files).not.toContain('/project/out/main.go');
-      expect(files).not.toContain('/project/bin/main.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).not.toContain(resolve('/project/dist/main.go'));
+      expect(files).not.toContain(resolve('/project/build/main.go'));
+      expect(files).not.toContain(resolve('/project/out/main.go'));
+      expect(files).not.toContain(resolve('/project/bin/main.go'));
       expect(files).toHaveLength(1);
     });
 
@@ -192,11 +198,11 @@ describe('findGoFiles', () => {
         '/project/generated/types.go': 'package generated',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).not.toContain('/project/gen/models.go');
-      expect(files).not.toContain('/project/generated/types.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).not.toContain(resolve('/project/gen/models.go'));
+      expect(files).not.toContain(resolve('/project/generated/types.go'));
       expect(files).toHaveLength(1);
     });
 
@@ -207,18 +213,18 @@ describe('findGoFiles', () => {
         '/project/temp/scratch.go': 'package temp',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
-      expect(files).not.toContain('/project/tmp/scratch.go');
-      expect(files).not.toContain('/project/temp/scratch.go');
+      expect(files).toContain(resolve('/project/main.go'));
+      expect(files).not.toContain(resolve('/project/tmp/scratch.go'));
+      expect(files).not.toContain(resolve('/project/temp/scratch.go'));
       expect(files).toHaveLength(1);
     });
   });
 
   describe('edge cases', () => {
     it('should return empty array for non-existent directory', async () => {
-      const files = await findGoFiles('/nonexistent');
+      const files = await findGoFiles(resolve('/nonexistent'));
 
       expect(files).toEqual([]);
     });
@@ -229,7 +235,7 @@ describe('findGoFiles', () => {
         '/project/config.json': '{}',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
       expect(files).toEqual([]);
     });
@@ -242,9 +248,9 @@ describe('findGoFiles', () => {
         '/project/go.mod': 'module example.com/project',
       });
 
-      const files = await findGoFiles('/project');
+      const files = await findGoFiles(resolve('/project'));
 
-      expect(files).toContain('/project/main.go');
+      expect(files).toContain(resolve('/project/main.go'));
       expect(files).toHaveLength(1);
     });
   });
@@ -260,7 +266,7 @@ describe('findGoFiles', () => {
         })
       );
 
-      await expect(findGoFiles('/locked')).rejects.toMatchObject({
+      await expect(findGoFiles(resolve('/locked'))).rejects.toMatchObject({
         code: 'EACCES',
       });
     });
