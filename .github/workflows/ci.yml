@@ -66,6 +66,15 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
+      - name: Test npm registry verification
+        run: bun test tools/scripts/npm-registry.spec.ts
+
+      - name: Typecheck npm registry verification
+        run: bunx tsc --noEmit --strict --target es2022 --module nodenext --moduleResolution nodenext --types bun,node --skipLibCheck tools/scripts/npm-registry.ts tools/scripts/npm-registry.spec.ts tools/scripts/published-package.ts
+
+      - name: Lint npm registry verification
+        run: bunx eslint --no-ignore tools/scripts/npm-registry.ts tools/scripts/npm-registry.spec.ts tools/scripts/published-package.ts
+
       # Connect your workspace on nx.app and uncomment this to enable task distribution.
       # The "--stop-agents-after" is optional, but allows idle agents to shut down once the "build" targets have been requested
       # - run: bunx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"

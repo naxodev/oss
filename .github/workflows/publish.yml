@@ -117,25 +117,11 @@ jobs:
         # Don't claim success from a static comment — confirm the registry
         # actually serves both packages at the new version, so a partial publish
         # fails loudly instead of posting install instructions that 404.
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          for pkg in @naxodev/gonx @naxodev/nx-cloudflare; do
-            published=false
-            for attempt in 1 2 3 4 5; do
-              if npm view "$pkg@$VERSION" version >/dev/null 2>&1; then
-                echo "✓ $pkg@$VERSION is live"
-                published=true
-                break
-              fi
-              echo "… $pkg@$VERSION not visible yet (attempt $attempt/5), retrying"
-              sleep 5
-            done
-            if [ "$published" = false ]; then
-              echo "::error::$pkg@$VERSION not found on the registry after publish — partial publish?"
-              exit 1
-            fi
-          done
+        run: bun tools/scripts/published-package.ts verify
         shell: bash
+        env:
+          NPM_PACKAGE_NAMES: '@naxodev/gonx @naxodev/nx-cloudflare'
+          NPM_PACKAGE_VERSION: ${{ steps.version.outputs.version }}
 
       - name: Find previous preview comment
         uses: peter-evans/find-comment@v3
@@ -238,6 +224,18 @@ jobs:
         with:
           ref: refs/tags/${{ steps.meta.outputs.tag }}
 
+      - name: Checkout registry verification tools
+        # Dispatching an old tag still needs the verifier from this workflow revision.
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .publish-tools
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            tools/scripts/npm-registry.ts
+            tools/scripts/published-package.ts
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
@@ -281,14 +279,12 @@ jobs:
         # npm versions are immutable. If this exact version is already live
         # (e.g. a re-run after a green publish), skip the remaining steps and
         # succeed — re-publishing would hard-fail, and there is nothing to do.
-        run: |
-          if npm view "@naxodev/${{ steps.meta.outputs.project }}@${{ steps.meta.outputs.version }}" version >/dev/null 2>&1; then
-            echo "::notice::@naxodev/${{ steps.meta.outputs.project }}@${{ steps.meta.outputs.version }} is already on the registry — nothing to publish."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
+        # Only an exact-version 404 means unpublished; registry errors fail closed.
+        run: bun .publish-tools/tools/scripts/published-package.ts check
         shell: bash
+        env:
+          NPM_PACKAGE_NAMES: '@naxodev/${{ steps.meta.outputs.project }}'
+          NPM_PACKAGE_VERSION: ${{ steps.meta.outputs.version }}
 
       - name: Build package
         if: steps.published.outputs.skip != 'true'
@@ -325,18 +321,9 @@ jobs:
           npm_config_registry: https://registry.npmjs.org
 
       - name: Verify package is live
-        if: steps.published.outputs.skip != 'true'
-        run: |
-          PKG="@naxodev/${{ steps.meta.outputs.project }}"
-          VERSION="${{ steps.meta.outputs.version }}"
-          for attempt in 1 2 3 4 5; do
-            if npm view "$PKG@$VERSION" version >/dev/null 2>&1; then
-              echo "✓ $PKG@$VERSION is live"
-              exit 0
-            fi
-            echo "… $PKG@$VERSION not visible yet (attempt $attempt/5), retrying"
-            sleep 5
-          done
-          echo "::error::$PKG@$VERSION not found on the registry after publish"
-          exit 1
+        # Verify reruns too; skipping publication must not skip the success check.
+        run: bun .publish-tools/tools/scripts/published-package.ts verify
         shell: bash
+        env:
+          NPM_PACKAGE_NAMES: '@naxodev/${{ steps.meta.outputs.project }}'
+          NPM_PACKAGE_VERSION: ${{ steps.meta.outputs.version }}
