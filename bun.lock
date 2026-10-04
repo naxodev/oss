@@ -141,7 +141,7 @@
     },
     "packages/nx-cloudflare": {
       "name": "@naxodev/nx-cloudflare",
-      "version": "7.0.0",
+      "version": "7.1.1",
       "dependencies": {
         "jsonc-parser": "^3.3.0",
         "tslib": "^2.3.0",
