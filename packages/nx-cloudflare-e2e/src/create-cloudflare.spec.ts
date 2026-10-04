@@ -68,6 +68,17 @@ describe('create-cloudflare generator (C3 wrapper)', () => {
     expect(scripts['cf-typegen']).toBeUndefined();
     expect(scripts.test).toBeUndefined();
 
+    // A newer Nx plugin minor can use internal APIs absent from this workspace.
+    const workspacePackage = JSON.parse(
+      readFileSync(join(tmpProjPath(), 'package.json'), 'utf-8')
+    );
+    const installedNx = JSON.parse(
+      readFileSync(join(tmpProjPath(), 'node_modules/nx/package.json'), 'utf-8')
+    );
+    expect(workspacePackage.devDependencies['@nx/vitest']).toBe(
+      installedNx.version
+    );
+
     // The Wrangler $schema was retargeted to the workspace root.
     const wrangler = readFileSync(join(root, 'wrangler.jsonc'), 'utf-8');
     expect(wrangler).toContain(
