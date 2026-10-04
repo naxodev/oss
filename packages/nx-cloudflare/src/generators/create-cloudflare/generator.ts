@@ -20,7 +20,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { NormalizedSchema, Schema } from './schema';
-import { createCloudflareVersion, nxVitestVersion } from '../../utils/versions';
+import { createCloudflareVersion } from '../../utils/versions';
 import { runC3 } from '../../utils/run-c3';
 import { importDirectoryToTree } from '../../utils/import-tree';
 import {
@@ -33,6 +33,10 @@ import {
   wranglerSchemaPath,
 } from '../../utils/wrangler-config';
 import { ensurePluginRegistered } from '../../utils/inference-plugin';
+
+// Inference plugins must match the installed Nx core version.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const installedNxVersion: string = require('nx/package.json').version;
 
 /**
  * Scaffolds a Cloudflare Worker application by delegating to Cloudflare's
@@ -208,7 +212,20 @@ function ensureVitestTestTarget(tree: Tree, projectRoot: string): void {
     return;
   }
   ensurePluginRegistered(tree, VITEST_PLUGIN);
-  addDependenciesToPackageJson(tree, {}, { [VITEST_PLUGIN]: nxVitestVersion });
+  addDependenciesToPackageJson(
+    tree,
+    {},
+    { [VITEST_PLUGIN]: installedNxVersion }
+  );
+  // The helper retains existing ranges and newer versions instead of aligning them.
+  updateJson(tree, 'package.json', (json) => {
+    for (const group of [json.dependencies, json.devDependencies]) {
+      if (group && VITEST_PLUGIN in group) {
+        group[VITEST_PLUGIN] = installedNxVersion;
+      }
+    }
+    return json;
+  });
   dropVitestScript(tree, projectRoot);
 }
 

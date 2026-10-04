@@ -18,7 +18,9 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createCloudflareGenerator } from './generator';
 import { runC3 } from '../../utils/run-c3';
-import { nxVitestVersion } from '../../utils/versions';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const installedNxVersion: string = require('nx/package.json').version;
 
 // Simulate C3 by writing a minimal scaffold (including the install artifacts C3
 // always produces) into the temp dir it is handed, so unit tests never spawn a
@@ -383,16 +385,40 @@ describe('create-cloudflare generator', () => {
     expect(plugins.map(pluginName)).toContain('@nx/vitest');
   });
 
-  it('adds @nx/vitest as a devDependency so the inferred test target can resolve it', async () => {
+  it('pins @nx/vitest to the installed Nx version to prevent plugin version drift', async () => {
     await createCloudflareGenerator(tree, {
       directory: 'apps/w',
       type: 'hello-world',
     });
 
     expect(readJson(tree, 'package.json').devDependencies?.['@nx/vitest']).toBe(
-      nxVitestVersion
+      installedNxVersion
     );
   });
+
+  it.each([
+    ['devDependencies', '^23.0.0'],
+    ['devDependencies', '23.2.0'],
+    ['dependencies', '^23.0.0'],
+    ['dependencies', '23.2.0'],
+  ])(
+    'aligns an existing %s Vitest declaration of %s',
+    async (section, version) => {
+      devkit.updateJson(tree, 'package.json', (json) => {
+        json[section] = { ...json[section], '@nx/vitest': version };
+        return json;
+      });
+
+      await createCloudflareGenerator(tree, {
+        directory: 'apps/w',
+        type: 'hello-world',
+      });
+
+      expect(readJson(tree, 'package.json')[section]['@nx/vitest']).toBe(
+        installedNxVersion
+      );
+    }
+  );
 
   it('does not wire @nx/vitest when the scaffold ships no vitest config', async () => {
     runC3Mock.mockImplementationOnce((options) => {
