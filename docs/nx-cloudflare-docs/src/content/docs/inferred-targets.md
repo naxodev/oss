@@ -17,7 +17,7 @@ Runs `wrangler dev` from the project root, starting a continuous local developme
 
 - **Command:** `wrangler dev`
 - **Continuous:** yes
-- **Ready signal:** ready when Wrangler prints `Ready on http://...`, so dependent tasks wait for the server to be listening.
+- **Readiness:** `readyWhen: { logMatches: 'Ready on' }` at the target level. Tasks that request `waitFor: 'ready'` wait for Wrangler's listening message.
 
 The dev server port is set via `dev.port` in the Wrangler config and defaults to `8787`.
 
@@ -27,6 +27,38 @@ bunx nx run <my-worker>:serve -- --ip 0.0.0.0
 ```
 
 See the [`wrangler dev` CLI docs](https://developers.cloudflare.com/workers/wrangler/commands/workers/#dev).
+
+### Waiting for the server
+
+Add this dependency to an existing test target. Replace `my-worker` with the
+Worker's Nx project name:
+
+```json title="project.json of the test project"
+{
+  "targets": {
+    "e2e": {
+      "dependsOn": [{ "projects": "my-worker", "target": "serve", "waitFor": "ready" }]
+    }
+  }
+}
+```
+
+Use the configured target name instead of `serve` if you set `serveTargetName`.
+Nx keeps the Worker running while dependent tasks need it. A startup failure or
+readiness timeout prevents those tasks from running. Without `waitFor: 'ready'`,
+dependent tasks start once the server process starts.
+
+The default readiness timeout is ten minutes. Override it in the Worker's
+project configuration with `"readyWhen": { "...": true, "timeout": 30000 }`
+to retain the inferred check and wait at most 30 seconds.
+
+Wrangler log levels such as `warn`, `error`, or `none` can hide the listening
+message. If you suppress it, replace the target's `readyWhen` with a URL or port
+check that matches your server. Set it to `null` to disable the check. These are
+target-level fields, separate from `options` passed to Wrangler.
+
+See [Nx readiness checks](https://nx.dev/docs/reference/project-configuration#wait-for-a-continuous-task-to-be-ready)
+for the supported checks and override rules.
 
 ## deploy
 
