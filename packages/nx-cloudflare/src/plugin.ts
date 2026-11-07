@@ -103,10 +103,8 @@ function buildWorkerTargets(
   return {
     [options.serveTargetName]: run('wrangler dev', {
       continuous: true,
-      // `wrangler dev` prints "[wrangler:info] Ready on http://..." once the
-      // local server is actually listening. Gate dependent tasks on that,
-      // replacing the old serve executor's waitForPortOpen readiness check.
-      options: { readyWhen: 'Ready on' },
+      // Let tasks using waitFor: 'ready' wait for Wrangler's listening message.
+      readyWhen: { logMatches: 'Ready on' },
     }),
     [options.deployTargetName]: run('wrangler deploy'),
     [options.typegenTargetName]: run('wrangler types', {

@@ -3,6 +3,30 @@ import { promisify } from 'util';
 import treeKill from 'tree-kill';
 import { logError, logInfo, logSuccess } from './log-utils';
 import { check as portCheck } from 'tcp-port-used';
+import { createServer, type AddressInfo } from 'node:net';
+
+/** Find an unused loopback TCP port for a test server. */
+export function getAvailablePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const { port } = server.address() as AddressInfo;
+      server.close((error) => (error ? reject(error) : resolve(port)));
+    });
+  });
+}
+
+/** Check whether a fixture process still exists without sending it a signal. */
+export function isProcessRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ESRCH') return false;
+    throw error;
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 export const kill = require('kill-port');

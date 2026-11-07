@@ -86,9 +86,11 @@ describe('nx-cloudflare createNodes', () => {
     // wait for the port to actually be listening.
     expect(targets.serve).toMatchObject({
       command: 'wrangler dev',
-      options: { cwd: 'apps/worker', readyWhen: 'Ready on' },
+      options: { cwd: 'apps/worker' },
       continuous: true,
+      readyWhen: { logMatches: 'Ready on' },
     });
+    expect(targets.serve.options.readyWhen).toBeUndefined();
     // Why: tail streams logs indefinitely, so it is also continuous.
     expect(targets.tail).toMatchObject({
       command: 'wrangler tail',

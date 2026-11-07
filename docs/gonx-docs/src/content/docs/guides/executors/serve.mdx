@@ -32,6 +32,56 @@ Inferred for projects containing a `main` package (applications). The target is 
 }
 ```
 
+## Wait for a Go server
+
+gonx does not infer readiness: a Go application can be a server or a CLI, and
+the plugin cannot determine when it is ready. For a server, add a native Nx
+`readyWhen` check to its inferred `serve` target.
+
+For example, if `apps/api` serves a health endpoint at
+`http://127.0.0.1:8080/health`, merge this into its project configuration:
+
+```json title="apps/api/project.json"
+{
+  "targets": {
+    "serve": {
+      "readyWhen": {
+        "url": "http://127.0.0.1:8080/health",
+        "timeout": 30000
+      }
+    }
+  }
+}
+```
+
+The URL must match an endpoint your application already provides. This setting
+does not change the application's listening address or create a health endpoint.
+
+Add a dependency to an existing test target to wait for that check:
+
+```json title="project.json of the test project"
+{
+  "targets": {
+    "e2e": {
+      "dependsOn": [
+        { "projects": "apps/api", "target": "serve", "waitFor": "ready" }
+      ]
+    }
+  }
+}
+```
+
+Use the project's resolved Nx name and your configured `runTargetName` if it
+differs from `serve`. Nx keeps the server running while dependent tasks need it.
+If the server exits before readiness or the check times out, the waiting tasks
+do not run. Without a readiness check, `waitFor: 'ready'` only waits for the
+process to start.
+
+Nx also supports `port`, `logMatches`, and `command` checks. Set `readyWhen` on
+the target, not inside executor `options`. See the
+[Nx readiness reference](https://nx.dev/docs/reference/project-configuration#wait-for-a-continuous-task-to-be-ready)
+for details.
+
 ## Next steps
 
 - [Build executor](/guides/executors/build)
