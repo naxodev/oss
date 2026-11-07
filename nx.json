@@ -7,7 +7,7 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
-      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/eslint.config.mjs",
       "!{projectRoot}/eslint.config.js",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/tsconfig.spec.json",
@@ -18,21 +18,21 @@
     "sharedGlobals": []
   },
   "targetDefaults": {
-    "@nx/js:tsc": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
-    },
-    "@nx/eslint:lint": {
+    "lint": {
       "cache": true,
       "inputs": [
         "default",
         "^default",
-        "{workspaceRoot}/.eslintrc.json",
-        "{workspaceRoot}/.eslintignore",
-        "{workspaceRoot}/eslint.config.js",
-        "{workspaceRoot}/tools/eslint-rules/**/*"
+        "{workspaceRoot}/eslint.config.mjs",
+        "{workspaceRoot}/eslint.base.config.mjs",
+        "{workspaceRoot}/tools/eslint-rules/**/*",
+        { "externalDependencies": ["eslint"] }
       ]
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     },
     "@nx/jest:jest": {
       "cache": true,
@@ -56,10 +56,6 @@
       "options": {
         "packageRoot": "dist/{projectRoot}"
       }
-    },
-    "@nx/vitest:test": {
-      "cache": true,
-      "inputs": ["default", "^production"]
     }
   },
   "plugins": [
@@ -83,7 +79,9 @@
     },
     {
       "plugin": "@naxodev/bun-test",
-      "options": { "testTargetName": "test" }
+      "options": {
+        "testTargetName": "test"
+      }
     }
   ],
   "generators": {},
@@ -119,5 +117,8 @@
       "pattern": "{projectName}@v{version}"
     }
   },
-  "analytics": false
+  "analytics": false,
+  "affected": {
+    "legacy": true
+  }
 }

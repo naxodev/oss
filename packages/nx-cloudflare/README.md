@@ -124,7 +124,9 @@ Secret values are never passed as arguments — `secret:put`/`version-secret:put
 | 21.x       | 5.x                   |
 | 22.x       | 6.x                   |
 | 23.x       | 7.x                   |
+| 24.x       | 8.x                   |
 
+nx-cloudflare 8.x requires Nx 24.x. Use nx-cloudflare 7.x for Nx 23.
 Wrangler v4 is a required peer dependency.
 
 ## Migrating to 7.0.0

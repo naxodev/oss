@@ -5,7 +5,8 @@
     "tsBuildInfoFile": "../../dist/out-tsc/e2e-utils/lib/tsconfig.lib.tsbuildinfo",
     "declaration": true,
     "types": ["node", "bun"],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "rootDir": "."
   },
   "include": ["src/**/*.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]

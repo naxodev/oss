@@ -70,7 +70,7 @@ jobs:
         run: bun test tools/scripts/npm-registry.spec.ts
 
       - name: Typecheck npm registry verification
-        run: bunx tsc --noEmit --strict --target es2022 --module nodenext --moduleResolution nodenext --types bun,node --skipLibCheck tools/scripts/npm-registry.ts tools/scripts/npm-registry.spec.ts tools/scripts/published-package.ts
+        run: bunx tsc --ignoreConfig --noEmit --strict --target es2022 --module nodenext --moduleResolution nodenext --types bun,node --skipLibCheck tools/scripts/npm-registry.ts tools/scripts/npm-registry.spec.ts tools/scripts/published-package.ts
 
       - name: Lint npm registry verification
         run: bunx eslint --no-ignore tools/scripts/npm-registry.ts tools/scripts/npm-registry.spec.ts tools/scripts/published-package.ts

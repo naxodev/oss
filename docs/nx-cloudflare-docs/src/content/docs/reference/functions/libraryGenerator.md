@@ -7,7 +7,7 @@ title: "libraryGenerator"
 
 > **libraryGenerator**(`tree`, `schema`): `Promise`\<() => `Promise`\<`void`\>\>
 
-Defined in: [packages/nx-cloudflare/src/generators/library/generator.ts:38](https://github.com/naxodev/oss/blob/main/packages/nx-cloudflare/src/generators/library/generator.ts#L38)
+Defined in: [packages/nx-cloudflare/src/generators/library/generator.ts:37](https://github.com/naxodev/oss/blob/main/packages/nx-cloudflare/src/generators/library/generator.ts#L37)
 
 Generates a Cloudflare Workers library project, building on the `@nx/js`
 library generator and registering the plugin's required dependencies.

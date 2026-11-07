@@ -14,7 +14,10 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "esModuleInterop": true,
-    "customConditions": ["@naxodev/source"]
+    "customConditions": ["@naxodev/source"],
+    "strict": false,
+    "noUncheckedSideEffectImports": false,
+    "types": ["*"]
   },
   "exclude": ["node_modules", "tmp"]
 }
