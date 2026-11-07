@@ -23,7 +23,7 @@ projects with web frameworks and database drivers.
 
 gonx is for teams and individuals who already use Nx (or want to) and have Go
 projects in their workspace. It is a fork of
-[@nx-go/nx-go](https://github.com/nx-go/nx-go), modernized for Nx 23 with
+[@nx-go/nx-go](https://github.com/nx-go/nx-go), modernized for Nx 24 with
 inferred tasks and a tree-sitter-based project graph. If you are migrating from
 nx-go, see the [migration guide](/community/migration).
 

@@ -39,8 +39,8 @@ Nx plugin for using [Go](https://go.dev/) in an Nx workspace — generators, inf
 
 ## Getting started
 
-You need to have a [stable version of Go](https://go.dev/dl/)
-installed on your machine. And... you are ready!
+gonx 5.x requires Nx 24.x and a [stable version of Go](https://go.dev/dl/).
+Use gonx 4.x if your workspace still uses Nx 23.
 
 ### Generate a Nx workspace with Go support
 

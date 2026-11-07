@@ -1,50 +1,73 @@
 ---
 title: Migrate from nx-go to gonx
-description: How to migrate from nx-go or upgrade to @naxodev/gonx 4.x.
+description: How to migrate from nx-go or upgrade gonx 4 to gonx 5.
 ---
 
 import { Steps } from '@astrojs/starlight/components';
 
-gonx 4.x requires Nx 23 and infers Go targets from `go.mod` files instead of
-generating `project.json` targets. Adapt your workspace with the steps below.
+gonx 5.x requires Nx 24 and infers Go targets from `go.mod` files instead of
+generating `project.json` targets. Choose the route for your existing plugin.
 
 ## Before you start
 
-- **Nx 23.x** or later
+- An **Nx 23.x or 24.x** workspace
 - **Go** — a stable release (1.18+ for multi-module workspaces)
 - A backup of your workspace
 
-## Steps
+## Upgrade gonx 4 to gonx 5
+
+Generate the upgrade plan from the workspace root:
+
+```bash
+npx nx migrate @naxodev/gonx@5
+```
+
+gonx's package migration updates `nx` and `@nx/devkit` to `^24.0.0` and collects
+the required Nx migrations. Review `package.json` and `migrations.json`, then
+install the updated dependencies and apply the migrations:
+
+```bash
+npm install
+npx nx migrate --run-migrations
+```
+
+Complete any prompt-based migration steps, then follow [Verify](#verify).
+Use `nx migrate` for this upgrade: `nx add` installs and initializes a plugin,
+but does not apply its versioned migrations. If you must stay on Nx 23, keep
+gonx 4.x.
+
+## Migrate from nx-go
 
 <Steps>
 
-1. **Upgrade to Nx 23**
+1. **Remove nx-go**
 
-   ```bash
-   npx nx migrate latest
-   npx nx migrate --run-migrations
-   ```
-
-   gonx 4.x requires Nx 23.x. If you are already on 23, skip this step.
-
-2. **Remove nx-go and install gonx**
-   If migrating from [@nx-go/nx-go](https://github.com/nx-go/nx-go), uninstall it
-   first:
+   Uninstall [@nx-go/nx-go](https://github.com/nx-go/nx-go):
 
    ```bash
    npm uninstall @nx-go/nx-go
    ```
 
-   Then install gonx and apply its migrations:
+   Remove its entry from `nx.json`'s `plugins` array before running Nx again.
+
+2. **Upgrade to Nx 24**
 
    ```bash
-   npx nx add @naxodev/gonx
+   npx nx migrate nx@24
+   npm install
+   npx nx migrate --run-migrations
    ```
 
-   If you are upgrading from an earlier gonx release, `nx add` picks up the
-   migration prompts automatically.
+   Skip this step only if the workspace already uses Nx 24. Nx 23 does not
+   satisfy gonx 5's peer dependencies.
 
-3. **Register the gonx plugin in `nx.json`**
+3. **Install gonx 5 and register its plugin**
+
+   ```bash
+   npx nx add @naxodev/gonx@5
+   ```
+
+   Confirm `nx.json` contains the gonx entry alongside your other plugins:
 
    ```json
    {
@@ -52,8 +75,7 @@ generating `project.json` targets. Adapt your workspace with the steps below.
    }
    ```
 
-   Remove any nx-go plugin entry. gonx infers targets from `go.mod`, so no
-   per-project config is needed.
+   gonx infers targets from `go.mod`, so no per-project config is needed.
 
 4. **Delete hand-written Go targets**
    gonx infers `build`, `serve`, `test`, `lint`, `tidy`, and `generate` from each
@@ -97,6 +119,12 @@ generating `project.json` targets. Adapt your workspace with the steps below.
 </Steps>
 
 ## Verify
+
+Confirm `nx report` lists Nx 24 and gonx 5:
+
+```bash
+npx nx report
+```
 
 Confirm Nx detects your Go projects and infers their targets:
 

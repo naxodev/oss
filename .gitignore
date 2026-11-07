@@ -68,3 +68,4 @@ vitest.config.*.timestamp*
 
 # TypeDoc auto-generated API reference
 **/src/content/docs/reference/
+.vitest

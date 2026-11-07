@@ -65,6 +65,8 @@ export function runCommandUntil(
       // Use new versioning by default in e2e tests
       NX_INTERNAL_USE_LEGACY_VERSIONING: 'false',
       ...getStrippedEnvironmentVariables(),
+      // Readiness checks need live output before a continuous task finishes.
+      NX_DEFAULT_OUTPUT_STYLE: 'stream',
       ...opts.env,
       FORCE_COLOR: 'false',
       NX_NO_CLOUD: 'true',
@@ -125,6 +127,8 @@ export function runCLI(
         // Use new versioning by default in e2e tests
         NX_INTERNAL_USE_LEGACY_VERSIONING: 'false',
         ...getStrippedEnvironmentVariables(),
+        // Assertions inspect task logs and cache markers, which Nx 24 can hide.
+        NX_DEFAULT_OUTPUT_STYLE: 'static',
         ...opts.env,
         // getStrippedEnvironmentVariables() drops NX_* keys; force the
         // generated workspace's nx commands off Nx Cloud so they use the

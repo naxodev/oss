@@ -9,7 +9,6 @@ import initGenerator from '../init/generator';
 import {
   determineProjectNameAndRootOptions,
   ensureRootProjectName,
-  promptWhenInteractive,
 } from '@nx/devkit/internal';
 import {
   getImportPath,
@@ -49,6 +48,8 @@ export async function nxCloudflareWorkerLibraryGenerator(
 
   const libraryTask = await libraryGenerator(tree, {
     ...options,
+    // Map the public option to the field Nx 24 expects.
+    enableTypedLinting: options.setParserOptionsProject,
     // Use name as the directory if directory is not provided
     directory: options.directory || options.name,
   });
@@ -75,39 +76,8 @@ async function normalizeOptions(
   const hasPlugin = isUsingTypeScriptPlugin(tree);
   const isUsingTsSolutionConfig = isUsingTsSolutionSetup(tree);
 
-  if (isUsingTsSolutionConfig) {
-    options.unitTestRunner ??= await promptWhenInteractive<{
-      unitTestRunner: 'none' | 'vitest';
-    }>(
-      {
-        type: 'autocomplete',
-        name: 'unitTestRunner',
-        message: `Which unit test runner would you like to use?`,
-        choices: [{ name: 'none' }, { name: 'vitest' }, { name: 'jest' }],
-        initial: 0,
-      },
-      { unitTestRunner: 'none' }
-    ).then(({ unitTestRunner }) => unitTestRunner);
-  } else {
-    options.unitTestRunner ??= await promptWhenInteractive<{
-      unitTestRunner: 'none' | 'vitest';
-    }>(
-      {
-        type: 'autocomplete',
-        name: 'unitTestRunner',
-        message: `Which unit test runner would you like to use?`,
-        choices: [{ name: 'jest' }, { name: 'vitest' }, { name: 'none' }],
-        initial: 0,
-      },
-      { unitTestRunner: 'none' }
-    ).then(({ unitTestRunner }) => unitTestRunner);
-
-    if (!options.unitTestRunner && options.bundler === 'vite') {
-      options.unitTestRunner = 'vitest';
-    } else if (!options.unitTestRunner && options.config !== 'npm-scripts') {
-      options.unitTestRunner = 'vitest';
-    }
-  }
+  // The schema handles CLI prompts. Preserve the default for programmatic calls.
+  options.unitTestRunner ??= 'none';
 
   // ensure programmatic runs have an expected default
   if (!options.config) {

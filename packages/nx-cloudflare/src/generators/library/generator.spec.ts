@@ -37,7 +37,7 @@ describe('lib', () => {
   };
 
   beforeEach(() => {
-    tree = createTreeWithEmptyWorkspace();
+    tree = createTreeWithEmptyWorkspace({ formatter: 'prettier' });
     tree.write('/.gitignore', '');
     tree.write('/.gitignore', '');
 
@@ -86,6 +86,23 @@ describe('lib', () => {
   });
 
   describe('configs', () => {
+    it('keeps programmatic generation usable without an interactive test-runner prompt', async () => {
+      await libraryGenerator(tree, {
+        ...defaultOptions,
+        name: 'no-test-runner',
+        directory: 'no-test-runner',
+        unitTestRunner: undefined,
+      });
+
+      expect(tree.exists('no-test-runner/src/index.ts')).toBe(true);
+      expect(tree.exists('no-test-runner/src/lib/no-test-runner.spec.ts')).toBe(
+        false
+      );
+      expect(
+        readProjectConfiguration(tree, 'no-test-runner').targets?.test
+      ).toBeUndefined();
+    });
+
     it('should generate an empty ts lib using --config=npm-scripts', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,
@@ -304,7 +321,7 @@ describe('lib', () => {
         expect(tree.exists('my-dir/my-lib/src/index.ts')).toBeTruthy();
         expect(tree.exists('my-dir/my-lib/src/lib/my-lib.ts')).toBeTruthy();
         expect(tree.exists('my-dir/my-lib/src/index.ts')).toBeTruthy();
-        expect(tree.exists(`my-dir/my-lib/.eslintrc.json`)).toBeTruthy();
+        expect(tree.exists(`my-dir/my-lib/eslint.config.mjs`)).toBeTruthy();
         expect(tree.exists(`my-dir/my-lib/package.json`)).toBeTruthy();
       });
 
@@ -505,6 +522,19 @@ describe('lib', () => {
   });
 
   describe('--linter', () => {
+    it('preserves requested typed linting when Nx renames the underlying option', async () => {
+      await libraryGenerator(tree, {
+        ...defaultOptions,
+        name: 'typed-lib',
+        directory: 'typed-lib',
+        setParserOptionsProject: true,
+      });
+
+      const config = tree.read('typed-lib/eslint.config.mjs', 'utf-8');
+      expect(config).toContain('projectService: true');
+      expect(config).toContain('tsconfigRootDir:');
+    });
+
     it('should add eslint dependencies', async () => {
       await libraryGenerator(tree, {
         ...defaultOptions,
@@ -519,128 +549,32 @@ describe('lib', () => {
     });
 
     describe('not nested', () => {
-      it('should create a local .eslintrc.json', async () => {
+      it('should create a local eslint.config.mjs', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
           name: 'my-lib',
           directory: 'my-lib',
         });
 
-        const eslintJson = readJson(tree, 'my-lib/.eslintrc.json');
-        expect(eslintJson).toMatchInlineSnapshot(`
-          {
-            "extends": [
-              "../.eslintrc.json",
-            ],
-            "ignorePatterns": [
-              "!**/*",
-            ],
-            "overrides": [
-              {
-                "files": [
-                  "*.ts",
-                  "*.tsx",
-                  "*.js",
-                  "*.jsx",
-                ],
-                "rules": {},
-              },
-              {
-                "files": [
-                  "*.ts",
-                  "*.tsx",
-                ],
-                "rules": {},
-              },
-              {
-                "files": [
-                  "*.js",
-                  "*.jsx",
-                ],
-                "rules": {},
-              },
-              {
-                "files": [
-                  "*.json",
-                ],
-                "parser": "jsonc-eslint-parser",
-                "rules": {
-                  "@nx/dependency-checks": [
-                    "error",
-                    {
-                      "ignoredFiles": [
-                        "{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}",
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          }
-        `);
+        const config = tree.read('my-lib/eslint.config.mjs', 'utf-8');
+        expect(config).toContain('../eslint.config.mjs');
+        expect(config).toContain('@nx/dependency-checks');
+        expect(config).toContain('jsonc-eslint-parser');
       });
     });
 
     describe('nested', () => {
-      it('should create a local .eslintrc.json', async () => {
+      it('should create a local eslint.config.mjs', async () => {
         await libraryGenerator(tree, {
           ...defaultOptions,
           name: 'my-lib',
           directory: 'my-dir/my-lib',
         });
 
-        const eslintJson = readJson(tree, 'my-dir/my-lib/.eslintrc.json');
-        expect(eslintJson).toMatchInlineSnapshot(`
-          {
-            "extends": [
-              "../../.eslintrc.json",
-            ],
-            "ignorePatterns": [
-              "!**/*",
-            ],
-            "overrides": [
-              {
-                "files": [
-                  "*.ts",
-                  "*.tsx",
-                  "*.js",
-                  "*.jsx",
-                ],
-                "rules": {},
-              },
-              {
-                "files": [
-                  "*.ts",
-                  "*.tsx",
-                ],
-                "rules": {},
-              },
-              {
-                "files": [
-                  "*.js",
-                  "*.jsx",
-                ],
-                "rules": {},
-              },
-              {
-                "files": [
-                  "*.json",
-                ],
-                "parser": "jsonc-eslint-parser",
-                "rules": {
-                  "@nx/dependency-checks": [
-                    "error",
-                    {
-                      "ignoredFiles": [
-                        "{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}",
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          }
-        `);
+        const config = tree.read('my-dir/my-lib/eslint.config.mjs', 'utf-8');
+        expect(config).toContain('../../eslint.config.mjs');
+        expect(config).toContain('@nx/dependency-checks');
+        expect(config).toContain('jsonc-eslint-parser');
       });
     });
   });
@@ -658,13 +592,27 @@ describe('lib', () => {
       });
 
       const project = readProjectConfiguration(tree, 'my-lib');
-      expect(project.targets?.build).toMatchObject({
-        executor: '@nx/vite:build',
-      });
-      expect(project.targets?.test).toBeDefined();
+      const plugins = readJson(tree, 'nx.json').plugins;
+      expect(plugins).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            plugin: '@nx/vite/plugin',
+            options: expect.objectContaining({ buildTargetName: 'build' }),
+          }),
+          expect.objectContaining({
+            plugin: '@nx/vitest',
+            options: expect.objectContaining({ testTargetName: 'test' }),
+          }),
+        ])
+      );
+      expect(project.targets?.build?.executor).not.toBe('@nx/vite:build');
+      expect(tree.read('my-lib/vite.config.mts', 'utf-8')).toContain(
+        'src/index.ts'
+      );
+      expect(tree.read('my-lib/vite.config.mts', 'utf-8')).toContain('test:');
       expect(tree.read('my-lib/README.md', 'utf-8')).toMatchSnapshot();
       expect(tree.read('my-lib/tsconfig.lib.json', 'utf-8')).toMatchSnapshot();
-      expect(tree.read('my-lib/.eslintrc.json', 'utf-8')).toMatchSnapshot();
+      expect(tree.read('my-lib/eslint.config.mjs', 'utf-8')).toMatchSnapshot();
     });
   });
 
@@ -682,7 +630,7 @@ describe('lib', () => {
       expect(project.targets.build).toMatchObject({
         executor: '@nx/esbuild:esbuild',
       });
-      expect(tree.read('my-lib/.eslintrc.json', 'utf-8')).toMatchSnapshot();
+      expect(tree.read('my-lib/eslint.config.mjs', 'utf-8')).toMatchSnapshot();
     });
   });
 

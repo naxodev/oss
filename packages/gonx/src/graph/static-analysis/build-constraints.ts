@@ -66,7 +66,6 @@ const KNOWN_GOOSES_LIST = [
 type KnownGoOS = (typeof KNOWN_GOOSES_LIST)[number];
 
 /** Exported GOOS type with an escape hatch for unknown Node platforms. */
-// eslint-disable-next-line @typescript-eslint/ban-types
 export type GoOS = KnownGoOS | (string & {});
 
 // Construction-time generic enforces every element is a `KnownGoOS`; the
@@ -125,7 +124,6 @@ const KNOWN_GOARCHES_LIST = [
 
 type KnownGoArch = (typeof KNOWN_GOARCHES_LIST)[number];
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export type GoArch = KnownGoArch | (string & {});
 
 const KNOWN_GOARCHES: ReadonlySet<string> = new Set<KnownGoArch>(

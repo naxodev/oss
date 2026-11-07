@@ -4,7 +4,8 @@
     "outDir": "../../dist/out-tsc/bun-test-plugin/lib",
     "tsBuildInfoFile": "../../dist/out-tsc/bun-test-plugin/lib/tsconfig.lib.tsbuildinfo",
     "declaration": true,
-    "types": ["node"]
+    "types": ["node"],
+    "rootDir": "."
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]

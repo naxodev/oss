@@ -55,6 +55,23 @@
           "alwaysAddToPackageJson": true
         }
       }
+    },
+    "8.0.0": {
+      "version": "8.0.0",
+      "packages": {
+        "@nx/devkit": {
+          "version": "^24.0.0",
+          "alwaysAddToPackageJson": true
+        },
+        "@nx/js": {
+          "version": "^24.0.0",
+          "alwaysAddToPackageJson": true
+        },
+        "nx": {
+          "version": "^24.0.0",
+          "alwaysAddToPackageJson": true
+        }
+      }
     }
   }
 }

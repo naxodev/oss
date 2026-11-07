@@ -5,7 +5,8 @@
     "tsBuildInfoFile": "../../dist/out-tsc/gonx/lib/tsconfig.lib.tsbuildinfo",
     "declaration": true,
     "declarationMap": false,
-    "types": ["node"]
+    "types": ["node"],
+    "rootDir": "."
   },
   "include": ["src/**/*.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
