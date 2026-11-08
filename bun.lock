@@ -119,7 +119,7 @@
     },
     "packages/gonx": {
       "name": "@naxodev/gonx",
-      "version": "4.1.2",
+      "version": "5.0.0",
       "dependencies": {
         "@melkeydev/go-blueprint": "0.10.11",
         "chalk": "^4.1.2",
@@ -143,7 +143,7 @@
     },
     "packages/nx-cloudflare": {
       "name": "@naxodev/nx-cloudflare",
-      "version": "7.1.1",
+      "version": "8.0.0",
       "dependencies": {
         "jsonc-parser": "^3.3.0",
         "tslib": "^2.3.0",
