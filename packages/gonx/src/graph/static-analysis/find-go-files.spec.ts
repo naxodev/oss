@@ -222,6 +222,30 @@ describe('findGoFiles', () => {
     });
   });
 
+  describe('nested modules', () => {
+    // A subdirectory with its own go.mod is a separate module and project.
+    // Claiming its files makes Nx reject the edges (#230).
+    it('should skip subdirectories that hold their own go.mod', async () => {
+      setupFs({
+        '/outer/go.mod': 'module example.com/outer',
+        '/outer/main.go': 'package main',
+        '/outer/internal/handler.go': 'package internal',
+        '/outer/inner/go.mod': 'module example.com/outer/inner',
+        '/outer/inner/foo_test.go': 'package inner',
+        '/outer/inner/pkg/bar.go': 'package pkg',
+      });
+
+      const files = await findGoFiles(resolve('/outer'));
+
+      expect(files.sort()).toEqual(
+        [
+          resolve('/outer/internal/handler.go'),
+          resolve('/outer/main.go'),
+        ].sort()
+      );
+    });
+  });
+
   describe('edge cases', () => {
     it('should return empty array for non-existent directory', async () => {
       const files = await findGoFiles(resolve('/nonexistent'));
