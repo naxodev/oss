@@ -35,13 +35,28 @@ const EXCLUDED_DIRS = new Set([
  * - gen/, generated/ (generated code)
  * - tmp/, temp/ (temporary files)
  * - Hidden directories (starting with .)
+ * - Subdirectories with their own go.mod (nested modules)
  *
  * @param dir - The directory to search in
+ * @param isRoot - False for recursive calls; only the root may hold a go.mod
  * @returns Promise resolving to array of absolute file paths
  */
-export async function findGoFiles(dir: string): Promise<string[]> {
+export async function findGoFiles(
+  dir: string,
+  isRoot = true
+): Promise<string[]> {
   try {
     const entries = await readdir(dir, { withFileTypes: true });
+
+    // A go.mod below the scanned root starts another module (Go's own module
+    // boundary). Its files belong to that module's project; claiming them
+    // produces dependency edges Nx rejects (#230).
+    if (
+      !isRoot &&
+      entries.some((entry) => entry.isFile() && entry.name === 'go.mod')
+    ) {
+      return [];
+    }
 
     const results = await Promise.all(
       entries.map(async (entry) => {
@@ -51,7 +66,7 @@ export async function findGoFiles(dir: string): Promise<string[]> {
           if (EXCLUDED_DIRS.has(entry.name) || entry.name.startsWith('.')) {
             return [];
           }
-          return findGoFiles(fullPath);
+          return findGoFiles(fullPath, false);
         }
 
         if (entry.isFile() && entry.name.endsWith('.go')) {
