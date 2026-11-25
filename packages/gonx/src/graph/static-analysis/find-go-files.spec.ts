@@ -4,18 +4,21 @@ import { readdir } from 'fs/promises';
 import { findGoFiles } from './find-go-files';
 import { resolve } from 'path';
 
+const mockStat = mock<(path: string) => Promise<{ isFile(): boolean }>>();
 mock.module('fs/promises', () => ({
   readdir: mock(),
+  stat: mockStat,
 }));
 mock.module('@nx/devkit', () => ({ logger: { warn: mock() } }));
 
 const mockReaddir = readdir as unknown as Mock<typeof readdir>;
 
-function dirent(name: string, type: 'file' | 'directory'): Dirent {
+function dirent(name: string, type: 'file' | 'directory' | 'symlink'): Dirent {
   return {
     name,
     isFile: () => type === 'file',
     isDirectory: () => type === 'directory',
+    isSymbolicLink: () => type === 'symlink',
   } as Dirent;
 }
 
@@ -219,6 +222,57 @@ describe('findGoFiles', () => {
       expect(files).not.toContain(resolve('/project/tmp/scratch.go'));
       expect(files).not.toContain(resolve('/project/temp/scratch.go'));
       expect(files).toHaveLength(1);
+    });
+  });
+
+  describe('nested modules', () => {
+    it.each(['file', 'directory', 'missing'] as const)(
+      'determines module ownership when go.mod links to a %s target',
+      async (target) => {
+        const root = resolve('/outer');
+        const inner = resolve(root, 'inner');
+        mockReaddir.mockResolvedValueOnce([
+          dirent('inner', 'directory'),
+        ] as any);
+        mockReaddir.mockResolvedValueOnce([
+          dirent('go.mod', 'symlink'),
+          dirent('foo_test.go', 'file'),
+        ] as any);
+        if (target === 'missing') {
+          mockStat.mockRejectedValueOnce(
+            Object.assign(new Error('missing target'), { code: 'ENOENT' })
+          );
+        } else {
+          mockStat.mockResolvedValueOnce({ isFile: () => target === 'file' });
+        }
+
+        expect(await findGoFiles(root)).toEqual(
+          target === 'file' ? [] : [resolve(inner, 'foo_test.go')]
+        );
+        expect(mockStat).toHaveBeenCalledWith(resolve(inner, 'go.mod'));
+      }
+    );
+
+    // A subdirectory with its own go.mod is a separate module and project.
+    // Claiming its files makes Nx reject the edges (#230).
+    it('should skip subdirectories that hold their own go.mod', async () => {
+      setupFs({
+        '/outer/go.mod': 'module example.com/outer',
+        '/outer/main.go': 'package main',
+        '/outer/internal/handler.go': 'package internal',
+        '/outer/inner/go.mod': 'module example.com/outer/inner',
+        '/outer/inner/foo_test.go': 'package inner',
+        '/outer/inner/pkg/bar.go': 'package pkg',
+      });
+
+      const files = await findGoFiles(resolve('/outer'));
+
+      expect(files.sort()).toEqual(
+        [
+          resolve('/outer/internal/handler.go'),
+          resolve('/outer/main.go'),
+        ].sort()
+      );
     });
   });
 
