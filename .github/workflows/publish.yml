@@ -28,7 +28,8 @@ jobs:
       && github.event.pull_request.head.repo.full_name == github.repository
       && contains(github.event.pull_request.labels.*.name, 'publish-preview')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Two serial verification windows (5 minutes each), plus build and publish.
+    timeout-minutes: 21
     concurrency:
       group: publish-preview-${{ github.event.pull_request.number }}
       cancel-in-progress: true
