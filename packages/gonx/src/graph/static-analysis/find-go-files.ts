@@ -1,4 +1,4 @@
-import { readdir } from 'fs/promises';
+import { readdir, stat } from 'fs/promises';
 import { join } from 'path';
 import { logger } from '@nx/devkit';
 
@@ -24,6 +24,16 @@ const EXCLUDED_DIRS = new Set([
   'tmp',
   'temp',
 ]);
+
+async function linksToFile(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isFile();
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') return false;
+    throw error;
+  }
+}
 
 /**
  * Recursively finds all .go files in a directory.
@@ -51,11 +61,14 @@ export async function findGoFiles(
     // A go.mod below the scanned root starts another module (Go's own module
     // boundary). Its files belong to that module's project; claiming them
     // produces dependency edges Nx rejects (#230).
-    if (
-      !isRoot &&
-      entries.some((entry) => entry.isFile() && entry.name === 'go.mod')
-    ) {
-      return [];
+    if (!isRoot) {
+      const manifest = entries.find((entry) => entry.name === 'go.mod');
+      if (
+        manifest?.isFile() ||
+        (manifest?.isSymbolicLink() && (await linksToFile(join(dir, 'go.mod'))))
+      ) {
+        return [];
+      }
     }
 
     const results = await Promise.all(
