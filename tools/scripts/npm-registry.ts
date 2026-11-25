@@ -1,5 +1,8 @@
 import { valid } from 'semver';
 
+const MAX_METADATA_BYTES = 8 * 1024 * 1024;
+const MAX_RETRY_DELAY_MS = 30_000;
+
 export interface PackageVersion {
   packageName: string;
   version: string;
@@ -25,14 +28,19 @@ export async function isPackagePublished(
   expected: PackageVersion,
   options: RegistryOptions = {}
 ): Promise<boolean> {
-  return lookupVersion(expected, options, false);
+  return (await lookupVersion(expected, options)) === 'published';
 }
 
 async function lookupVersion(
   expected: PackageVersion,
   options: RegistryOptions,
-  checkPackageMetadata: boolean
-): Promise<boolean> {
+  verification?: { deadline: number }
+): Promise<
+  | 'published'
+  | 'version URL returned HTTP 404'
+  | 'version and package URLs returned HTTP 404'
+  | 'version URL returned HTTP 404; package document does not list the version'
+> {
   if (
     !/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/.test(
       expected.packageName
@@ -62,21 +70,31 @@ async function lookupVersion(
     );
   }
   const packageUrl = new URL(encodeURIComponent(expected.packageName), base);
-  const signal = AbortSignal.timeout(requestTimeoutMs);
+  function requestSignal(): AbortSignal {
+    const remaining = verification
+      ? Math.floor(verification.deadline - performance.now())
+      : requestTimeoutMs;
+    if (remaining <= 0)
+      throw new RegistryLookupError(
+        'Registry verification deadline reached',
+        true
+      );
+    return AbortSignal.timeout(Math.min(requestTimeoutMs, remaining));
+  }
   let metadata = await readMetadata(
     new URL(`${packageUrl.href}/${encodeURIComponent(expected.version)}`),
-    signal
+    requestSignal()
   );
   if (metadata === undefined) {
-    if (!checkPackageMetadata) return false;
+    if (!verification) return 'version URL returned HTTP 404';
     // The version URL can still serve the pre-publish 404 while the package
     // document already lists the release. Dist-tags alone do not prove identity.
     const pkg = await readMetadata(
       packageUrl,
-      signal,
+      requestSignal(),
       'application/vnd.npm.install-v1+json'
     );
-    if (pkg === undefined) return false;
+    if (pkg === undefined) return 'version and package URLs returned HTTP 404';
     if (
       !isRecord(pkg) ||
       pkg.name !== expected.packageName ||
@@ -87,7 +105,8 @@ async function lookupVersion(
         false
       );
     }
-    if (!Object.hasOwn(pkg.versions, expected.version)) return false;
+    if (!Object.hasOwn(pkg.versions, expected.version))
+      return 'version URL returned HTTP 404; package document does not list the version';
     metadata = pkg.versions[expected.version];
   }
   if (
@@ -100,7 +119,7 @@ async function lookupVersion(
       false
     );
   }
-  return true;
+  return 'published';
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -133,14 +152,35 @@ async function readMetadata(
       response.status === 429 || response.status >= 500
     );
   }
-  let body: string;
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+  let bytes = 0;
+  let body = '';
   try {
-    body = await response.text();
-  } catch {
+    if (reader) {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value.byteLength;
+        if (bytes > MAX_METADATA_BYTES) {
+          await reader.cancel();
+          throw new RegistryLookupError(
+            `Registry metadata exceeds ${MAX_METADATA_BYTES} bytes`,
+            false
+          );
+        }
+        body += decoder.decode(value, { stream: true });
+      }
+      body += decoder.decode();
+    }
+  } catch (error) {
+    if (error instanceof RegistryLookupError) throw error;
     throw new RegistryLookupError(
       'Registry request failed while reading metadata',
       true
     );
+  } finally {
+    reader?.releaseLock();
   }
   try {
     return JSON.parse(body);
@@ -171,28 +211,17 @@ export async function waitForPublishedPackage(
     throw new Error('Invalid registry retry budget');
   }
   const deadline = performance.now() + maxWaitMs;
-  let reason = 'version not visible (HTTP 404)';
+  retryDelayMs = Math.min(retryDelayMs, MAX_RETRY_DELAY_MS);
+  let reason = 'verification deadline reached';
   let attempts = 0;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const remaining = Math.floor(deadline - performance.now());
     if (remaining <= 0) break;
     attempts++;
     try {
-      if (
-        await lookupVersion(
-          expected,
-          {
-            ...options,
-            requestTimeoutMs: Math.min(
-              options.requestTimeoutMs ?? 10_000,
-              remaining
-            ),
-          },
-          true
-        )
-      )
-        return;
-      reason = 'version not visible in registry metadata';
+      const result = await lookupVersion(expected, options, { deadline });
+      if (result === 'published') return;
+      reason = result;
     } catch (error) {
       if (!(error instanceof RegistryLookupError) || !error.retryable)
         throw error;
@@ -204,11 +233,10 @@ export async function waitForPublishedPackage(
     if (attempt < maxAttempts) {
       const delay = Math.min(
         retryDelayMs,
-        30_000,
         Math.max(0, deadline - performance.now())
       );
       await Bun.sleep(delay);
-      retryDelayMs = Math.min(retryDelayMs * 2, 30_000);
+      retryDelayMs = Math.min(retryDelayMs * 2, MAX_RETRY_DELAY_MS);
     }
   }
   throw new Error(

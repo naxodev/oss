@@ -2,6 +2,32 @@ import { expect, it, spyOn } from 'bun:test';
 import { createServer } from 'node:net';
 import { isPackagePublished, waitForPublishedPackage } from './npm-registry';
 
+const release = { packageName: '@naxodev/gonx', version: '5.0.1' };
+const manifest = { name: release.packageName, version: release.version };
+const packagePath = '/%40naxodev%2Fgonx';
+const versionPath = `${packagePath}/${release.version}`;
+
+function fallbackRegistry(packageDocument: () => Response, delayMs = 0) {
+  const paths: string[] = [];
+  const server = Bun.serve({
+    hostname: '127.0.0.1',
+    port: 0,
+    async fetch(request) {
+      const path = new URL(request.url).pathname;
+      paths.push(path);
+      if (delayMs) await Bun.sleep(delayMs);
+      if (path === versionPath) return new Response(null, { status: 404 });
+      if (path === packagePath) return packageDocument();
+      return new Response('unexpected registry path', { status: 400 });
+    },
+  });
+  return {
+    server,
+    paths,
+    options: { registry: server.url.href, maxAttempts: 1 },
+  };
+}
+
 it('waits beyond five missing reads so a successful publish is not reported as failed', async () => {
   const expected = { packageName: '@naxodev/gonx', version: '4.1.2' };
   let reads = 0;
@@ -88,80 +114,137 @@ it('stops after a bounded retry budget and reports the last registry result', as
         }
       )
     ).rejects.toThrow(
-      'after 2 attempts: version not visible in registry metadata'
+      'after 2 attempts: version and package URLs returned HTTP 404'
     );
-    expect(diagnostics.at(-1)).toContain('version not visible');
+    expect(diagnostics.at(-1)).toContain('package URLs returned HTTP 404');
   } finally {
     registry.stop(true);
   }
 });
 
 it('verifies a published release even while the version URL serves a stale 404', async () => {
-  const expected = { packageName: '@naxodev/gonx', version: '5.0.1' };
-  const registry = Bun.serve({
-    hostname: '127.0.0.1',
-    port: 0,
-    fetch(request) {
-      return new URL(request.url).pathname.endsWith('/5.0.1')
-        ? new Response(null, { status: 404 })
-        : Response.json({
-            name: expected.packageName,
-            versions: {
-              '5.0.1': {
-                name: expected.packageName,
-                version: expected.version,
-              },
-            },
-          });
-    },
-  });
+  const { server, paths, options } = fallbackRegistry(() =>
+    Response.json({
+      name: release.packageName,
+      versions: { [release.version]: manifest },
+    })
+  );
   try {
-    const options = {
-      registry: `http://127.0.0.1:${registry.port}/`,
-      maxAttempts: 1,
-    };
-    expect(await isPackagePublished(expected, options)).toBe(false);
+    expect(await isPackagePublished(release, options)).toBe(false);
+    expect(paths.splice(0)).toEqual([versionPath]);
     await expect(
-      waitForPublishedPackage(expected, options)
+      waitForPublishedPackage(release, options)
     ).resolves.toBeUndefined();
+    expect(paths).toEqual([versionPath, packagePath]);
   } finally {
-    registry.stop(true);
+    server.stop(true);
+  }
+});
+
+it.each([
+  ['wrong document name', 'other', manifest, 'invalid package metadata'],
+  [
+    'wrong entry name',
+    release.packageName,
+    { ...manifest, name: 'other' },
+    'different package identity',
+  ],
+  [
+    'wrong entry version',
+    release.packageName,
+    { ...manifest, version: '5.0.0' },
+    'different package identity',
+  ],
+] as const)(
+  'rejects fallback metadata with %s',
+  async (_, name, entry, error) => {
+    const { server, options } = fallbackRegistry(() =>
+      Response.json({ name, versions: { [release.version]: entry } })
+    );
+    try {
+      await expect(waitForPublishedPackage(release, options)).rejects.toThrow(
+        error
+      );
+    } finally {
+      server.stop(true);
+    }
+  }
+);
+
+it('lets each slow read use its own timeout within the overall deadline', async () => {
+  const { server, options } = fallbackRegistry(
+    () =>
+      Response.json({
+        name: release.packageName,
+        versions: { [release.version]: manifest },
+      }),
+    300
+  );
+  try {
+    const lookup = (maxWaitMs: number) =>
+      waitForPublishedPackage(release, {
+        ...options,
+        requestTimeoutMs: 500,
+        maxWaitMs,
+      });
+    await expect(lookup(2_000)).resolves.toBeUndefined();
+    await expect(lookup(500)).rejects.toThrow();
+  } finally {
+    server.stop(true);
+  }
+});
+
+it('rejects an oversized package document even without a content-length header', async () => {
+  const { server, options } = fallbackRegistry(
+    () =>
+      new Response(
+        new ReadableStream({
+          start(controller) {
+            const chunk = new Uint8Array(1024 * 1024).fill(32);
+            for (let i = 0; i < 9; i++) controller.enqueue(chunk);
+            controller.close();
+          },
+        })
+      )
+  );
+  try {
+    await expect(waitForPublishedPackage(release, options)).rejects.toThrow(
+      'metadata exceeds'
+    );
+  } finally {
+    server.stop(true);
   }
 });
 
 it('backs off to 30 seconds while the package lists only the previous version', async () => {
   const name = '@naxodev/gonx';
-  const registry = Bun.serve({
-    hostname: '127.0.0.1',
-    port: 0,
-    fetch(request) {
-      return new URL(request.url).pathname.endsWith('/5.0.1')
-        ? new Response(null, { status: 404 })
-        : Response.json({
-            name,
-            'dist-tags': { latest: '5.0.1' },
-            versions: { '5.0.0': { name, version: '5.0.0' } },
-          });
-    },
-  });
+  const { server, options } = fallbackRegistry(() =>
+    Response.json({
+      name,
+      'dist-tags': { latest: '5.0.1' },
+      versions: { '5.0.0': { name, version: '5.0.0' } },
+    })
+  );
   const sleep = spyOn(Bun, 'sleep').mockResolvedValue(undefined);
   try {
     await expect(
       waitForPublishedPackage(
         { packageName: name, version: '5.0.1' },
         {
-          registry: `http://127.0.0.1:${registry.port}/`,
+          ...options,
           retryDelayMs: 10_000,
           maxAttempts: 5,
         }
       )
-    ).rejects.toThrow('after 5 attempts');
+    ).rejects.toThrow(
+      'after 5 attempts: version URL returned HTTP 404; package document does not list the version'
+    );
     expect(sleep.mock.calls.map(([delay]) => delay)).toEqual([
       10_000, 20_000, 30_000, 30_000,
     ]);
   } finally {
     sleep.mockRestore();
-    registry.stop(true);
+    server.stop(true);
   }
 });
 
