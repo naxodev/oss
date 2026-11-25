@@ -25,6 +25,14 @@ export async function isPackagePublished(
   expected: PackageVersion,
   options: RegistryOptions = {}
 ): Promise<boolean> {
+  return lookupVersion(expected, options, false);
+}
+
+async function lookupVersion(
+  expected: PackageVersion,
+  options: RegistryOptions,
+  checkPackageMetadata: boolean
+): Promise<boolean> {
   if (
     !/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/.test(
       expected.packageName
@@ -53,27 +61,72 @@ export async function isPackagePublished(
       'Registry must be public npm over HTTPS or a loopback test server, without credentials'
     );
   }
-  const url = new URL(
-    `${encodeURIComponent(expected.packageName)}/${encodeURIComponent(
-      expected.version
-    )}`,
-    base
+  const packageUrl = new URL(encodeURIComponent(expected.packageName), base);
+  const signal = AbortSignal.timeout(requestTimeoutMs);
+  let metadata = await readMetadata(
+    new URL(`${packageUrl.href}/${encodeURIComponent(expected.version)}`),
+    signal
   );
+  if (metadata === undefined) {
+    if (!checkPackageMetadata) return false;
+    // The version URL can still serve the pre-publish 404 while the package
+    // document already lists the release. Dist-tags alone do not prove identity.
+    const pkg = await readMetadata(
+      packageUrl,
+      signal,
+      'application/vnd.npm.install-v1+json'
+    );
+    if (pkg === undefined) return false;
+    if (
+      !isRecord(pkg) ||
+      pkg.name !== expected.packageName ||
+      !isRecord(pkg.versions)
+    ) {
+      throw new RegistryLookupError(
+        'Registry returned invalid package metadata',
+        false
+      );
+    }
+    if (!Object.hasOwn(pkg.versions, expected.version)) return false;
+    metadata = pkg.versions[expected.version];
+  }
+  if (
+    !isRecord(metadata) ||
+    metadata.name !== expected.packageName ||
+    metadata.version !== expected.version
+  ) {
+    throw new RegistryLookupError(
+      'Registry returned a different package identity',
+      false
+    );
+  }
+  return true;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+async function readMetadata(
+  url: URL,
+  signal: AbortSignal,
+  accept = 'application/json'
+): Promise<unknown> {
   let response: Response;
   try {
     response = await fetch(url, {
       cache: 'no-store',
       redirect: 'error',
-      headers: { accept: 'application/json', 'cache-control': 'no-cache' },
-      signal: AbortSignal.timeout(requestTimeoutMs),
+      headers: { accept, 'cache-control': 'no-cache' },
+      signal,
     });
   } catch {
     throw new RegistryLookupError(
-      `Registry request failed for ${expected.packageName}@${expected.version}`,
+      `Registry request failed for ${url.pathname}`,
       true
     );
   }
-  if (response.status === 404) return false;
+  if (response.status === 404) return undefined;
   if (!response.ok) {
     throw new RegistryLookupError(
       `Registry HTTP ${response.status}`,
@@ -89,29 +142,14 @@ export async function isPackagePublished(
       true
     );
   }
-  let metadata: unknown;
   try {
-    metadata = JSON.parse(body);
+    return JSON.parse(body);
   } catch {
     throw new RegistryLookupError(
       'Registry returned invalid JSON metadata',
       false
     );
   }
-  if (
-    typeof metadata !== 'object' ||
-    metadata === null ||
-    !('name' in metadata) ||
-    !('version' in metadata) ||
-    metadata.name !== expected.packageName ||
-    metadata.version !== expected.version
-  ) {
-    throw new RegistryLookupError(
-      'Registry returned a different package identity',
-      false
-    );
-  }
-  return true;
 }
 
 /** Wait for a published version to become visible. */
@@ -120,8 +158,8 @@ export async function waitForPublishedPackage(
   options: RegistryOptions = {}
 ): Promise<void> {
   const maxAttempts = options.maxAttempts ?? 24;
-  const retryDelayMs = options.retryDelayMs ?? 5_000;
-  const maxWaitMs = options.maxWaitMs ?? 120_000;
+  let retryDelayMs = options.retryDelayMs ?? 1_000;
+  const maxWaitMs = options.maxWaitMs ?? 300_000;
   if (
     !Number.isSafeInteger(maxAttempts) ||
     maxAttempts <= 0 ||
@@ -141,16 +179,20 @@ export async function waitForPublishedPackage(
     attempts++;
     try {
       if (
-        await isPackagePublished(expected, {
-          ...options,
-          requestTimeoutMs: Math.min(
-            options.requestTimeoutMs ?? 10_000,
-            remaining
-          ),
-        })
+        await lookupVersion(
+          expected,
+          {
+            ...options,
+            requestTimeoutMs: Math.min(
+              options.requestTimeoutMs ?? 10_000,
+              remaining
+            ),
+          },
+          true
+        )
       )
         return;
-      reason = 'version not visible (HTTP 404)';
+      reason = 'version not visible in registry metadata';
     } catch (error) {
       if (!(error instanceof RegistryLookupError) || !error.retryable)
         throw error;
@@ -162,9 +204,11 @@ export async function waitForPublishedPackage(
     if (attempt < maxAttempts) {
       const delay = Math.min(
         retryDelayMs,
+        30_000,
         Math.max(0, deadline - performance.now())
       );
       await Bun.sleep(delay);
+      retryDelayMs = Math.min(retryDelayMs * 2, 30_000);
     }
   }
   throw new Error(

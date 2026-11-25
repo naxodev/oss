@@ -1,4 +1,4 @@
-import { expect, it } from 'bun:test';
+import { expect, it, spyOn } from 'bun:test';
 import { createServer } from 'node:net';
 import { isPackagePublished, waitForPublishedPackage } from './npm-registry';
 
@@ -9,6 +9,8 @@ it('waits beyond five missing reads so a successful publish is not reported as f
     hostname: '127.0.0.1',
     port: 0,
     fetch(request) {
+      if (new URL(request.url).pathname === '/%40naxodev%2Fgonx')
+        return Response.json({ name: expected.packageName, versions: {} });
       expect(new URL(request.url).pathname).toBe('/%40naxodev%2Fgonx/4.1.2');
       reads++;
       return reads <= 5
@@ -85,9 +87,80 @@ it('stops after a bounded retry budget and reports the last registry result', as
           onRetry: (message) => diagnostics.push(message),
         }
       )
-    ).rejects.toThrow('after 2 attempts: version not visible (HTTP 404)');
-    expect(diagnostics.at(-1)).toContain('HTTP 404');
+    ).rejects.toThrow(
+      'after 2 attempts: version not visible in registry metadata'
+    );
+    expect(diagnostics.at(-1)).toContain('version not visible');
   } finally {
+    registry.stop(true);
+  }
+});
+
+it('verifies a published release even while the version URL serves a stale 404', async () => {
+  const expected = { packageName: '@naxodev/gonx', version: '5.0.1' };
+  const registry = Bun.serve({
+    hostname: '127.0.0.1',
+    port: 0,
+    fetch(request) {
+      return new URL(request.url).pathname.endsWith('/5.0.1')
+        ? new Response(null, { status: 404 })
+        : Response.json({
+            name: expected.packageName,
+            versions: {
+              '5.0.1': {
+                name: expected.packageName,
+                version: expected.version,
+              },
+            },
+          });
+    },
+  });
+  try {
+    const options = {
+      registry: `http://127.0.0.1:${registry.port}/`,
+      maxAttempts: 1,
+    };
+    expect(await isPackagePublished(expected, options)).toBe(false);
+    await expect(
+      waitForPublishedPackage(expected, options)
+    ).resolves.toBeUndefined();
+  } finally {
+    registry.stop(true);
+  }
+});
+
+it('backs off to 30 seconds while the package lists only the previous version', async () => {
+  const name = '@naxodev/gonx';
+  const registry = Bun.serve({
+    hostname: '127.0.0.1',
+    port: 0,
+    fetch(request) {
+      return new URL(request.url).pathname.endsWith('/5.0.1')
+        ? new Response(null, { status: 404 })
+        : Response.json({
+            name,
+            'dist-tags': { latest: '5.0.1' },
+            versions: { '5.0.0': { name, version: '5.0.0' } },
+          });
+    },
+  });
+  const sleep = spyOn(Bun, 'sleep').mockResolvedValue(undefined);
+  try {
+    await expect(
+      waitForPublishedPackage(
+        { packageName: name, version: '5.0.1' },
+        {
+          registry: `http://127.0.0.1:${registry.port}/`,
+          retryDelayMs: 10_000,
+          maxAttempts: 5,
+        }
+      )
+    ).rejects.toThrow('after 5 attempts');
+    expect(sleep.mock.calls.map(([delay]) => delay)).toEqual([
+      10_000, 20_000, 30_000, 30_000,
+    ]);
+  } finally {
+    sleep.mockRestore();
     registry.stop(true);
   }
 });
