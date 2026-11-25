@@ -2,6 +2,8 @@ import { valid } from 'semver';
 
 const MAX_METADATA_BYTES = 8 * 1024 * 1024;
 const MAX_RETRY_DELAY_MS = 30_000;
+const TOO_LARGE = Symbol('metadata size limit reached');
+const OVERSIZED_FALLBACK = `version URL returned HTTP 404; package metadata exceeds ${MAX_METADATA_BYTES} bytes`;
 
 export interface PackageVersion {
   packageName: string;
@@ -34,13 +36,8 @@ export async function isPackagePublished(
 async function lookupVersion(
   expected: PackageVersion,
   options: RegistryOptions,
-  verification?: { deadline: number }
-): Promise<
-  | 'published'
-  | 'version URL returned HTTP 404'
-  | 'version and package URLs returned HTTP 404'
-  | 'version URL returned HTTP 404; package document does not list the version'
-> {
+  verification?: { deadline: number; skipPackageDocument: boolean }
+) {
   if (
     !/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/.test(
       expected.packageName
@@ -85,8 +82,14 @@ async function lookupVersion(
     new URL(`${packageUrl.href}/${encodeURIComponent(expected.version)}`),
     requestSignal()
   );
+  if (metadata === TOO_LARGE)
+    throw new RegistryLookupError(
+      `Version metadata exceeds ${MAX_METADATA_BYTES} bytes`,
+      false
+    );
   if (metadata === undefined) {
     if (!verification) return 'version URL returned HTTP 404';
+    if (verification.skipPackageDocument) return OVERSIZED_FALLBACK;
     // The version URL can still serve the pre-publish 404 while the package
     // document already lists the release. Dist-tags alone do not prove identity.
     const pkg = await readMetadata(
@@ -94,6 +97,7 @@ async function lookupVersion(
       requestSignal(),
       'application/vnd.npm.install-v1+json'
     );
+    if (pkg === TOO_LARGE) return OVERSIZED_FALLBACK;
     if (pkg === undefined) return 'version and package URLs returned HTTP 404';
     if (
       !isRecord(pkg) ||
@@ -145,8 +149,9 @@ async function readMetadata(
       true
     );
   }
-  if (response.status === 404) return undefined;
   if (!response.ok) {
+    await response.body?.cancel().catch(() => undefined);
+    if (response.status === 404) return undefined;
     throw new RegistryLookupError(
       `Registry HTTP ${response.status}`,
       response.status === 429 || response.status >= 500
@@ -163,18 +168,14 @@ async function readMetadata(
         if (done) break;
         bytes += value.byteLength;
         if (bytes > MAX_METADATA_BYTES) {
-          await reader.cancel();
-          throw new RegistryLookupError(
-            `Registry metadata exceeds ${MAX_METADATA_BYTES} bytes`,
-            false
-          );
+          await reader.cancel().catch(() => undefined);
+          return TOO_LARGE;
         }
         body += decoder.decode(value, { stream: true });
       }
       body += decoder.decode();
     }
-  } catch (error) {
-    if (error instanceof RegistryLookupError) throw error;
+  } catch {
     throw new RegistryLookupError(
       'Registry request failed while reading metadata',
       true
@@ -211,6 +212,7 @@ export async function waitForPublishedPackage(
     throw new Error('Invalid registry retry budget');
   }
   const deadline = performance.now() + maxWaitMs;
+  let skipPackageDocument = false;
   retryDelayMs = Math.min(retryDelayMs, MAX_RETRY_DELAY_MS);
   let reason = 'verification deadline reached';
   let attempts = 0;
@@ -219,8 +221,12 @@ export async function waitForPublishedPackage(
     if (remaining <= 0) break;
     attempts++;
     try {
-      const result = await lookupVersion(expected, options, { deadline });
+      const result = await lookupVersion(expected, options, {
+        deadline,
+        skipPackageDocument,
+      });
       if (result === 'published') return;
+      if (result === OVERSIZED_FALLBACK) skipPackageDocument = true;
       reason = result;
     } catch (error) {
       if (!(error instanceof RegistryLookupError) || !error.retryable)

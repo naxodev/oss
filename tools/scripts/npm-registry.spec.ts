@@ -7,7 +7,10 @@ const manifest = { name: release.packageName, version: release.version };
 const packagePath = '/%40naxodev%2Fgonx';
 const versionPath = `${packagePath}/${release.version}`;
 
-function fallbackRegistry(packageDocument: () => Response, delayMs = 0) {
+function fallbackRegistry(
+  packageDocument: (request: Request) => Response | Promise<Response>,
+  delayMs = 0
+) {
   const paths: string[] = [];
   const server = Bun.serve({
     hostname: '127.0.0.1',
@@ -17,7 +20,7 @@ function fallbackRegistry(packageDocument: () => Response, delayMs = 0) {
       paths.push(path);
       if (delayMs) await Bun.sleep(delayMs);
       if (path === versionPath) return new Response(null, { status: 404 });
-      if (path === packagePath) return packageDocument();
+      if (path === packagePath) return packageDocument(request);
       return new Response('unexpected registry path', { status: 400 });
     },
   });
@@ -123,12 +126,15 @@ it('stops after a bounded retry budget and reports the last registry result', as
 });
 
 it('verifies a published release even while the version URL serves a stale 404', async () => {
-  const { server, paths, options } = fallbackRegistry(() =>
-    Response.json({
+  const { server, paths, options } = fallbackRegistry((request) => {
+    expect(request.headers.get('accept')).toBe(
+      'application/vnd.npm.install-v1+json'
+    );
+    return Response.json({
       name: release.packageName,
       versions: { [release.version]: manifest },
-    })
-  );
+    });
+  });
   try {
     expect(await isPackagePublished(release, options)).toBe(false);
     expect(paths.splice(0)).toEqual([versionPath]);
@@ -158,13 +164,18 @@ it.each([
 ] as const)(
   'rejects fallback metadata with %s',
   async (_, name, entry, error) => {
-    const { server, options } = fallbackRegistry(() =>
+    const { server, options, paths } = fallbackRegistry(() =>
       Response.json({ name, versions: { [release.version]: entry } })
     );
     try {
-      await expect(waitForPublishedPackage(release, options)).rejects.toThrow(
-        error
-      );
+      await expect(
+        waitForPublishedPackage(release, {
+          ...options,
+          maxAttempts: 2,
+          retryDelayMs: 0,
+        })
+      ).rejects.toThrow(error);
+      expect(paths).toEqual([versionPath, packagePath]);
     } finally {
       server.stop(true);
     }
@@ -211,6 +222,58 @@ it('rejects an oversized package document even without a content-length header',
     await expect(waitForPublishedPackage(release, options)).rejects.toThrow(
       'metadata exceeds'
     );
+  } finally {
+    server.stop(true);
+  }
+});
+
+it('continues polling the exact version without downloading oversized package history again', async () => {
+  const paths: string[] = [];
+  let reads = 0;
+  const server = Bun.serve({
+    hostname: '127.0.0.1',
+    port: 0,
+    fetch(request) {
+      const path = new URL(request.url).pathname;
+      paths.push(path);
+      if (path === versionPath)
+        return ++reads < 3
+          ? new Response(null, { status: 404 })
+          : Response.json(manifest);
+      if (path === packagePath)
+        return new Response(new Uint8Array(8 * 1024 * 1024 + 1));
+      return new Response(null, { status: 400 });
+    },
+  });
+  try {
+    await waitForPublishedPackage(release, {
+      registry: server.url.href,
+      maxAttempts: 3,
+      retryDelayMs: 0,
+    });
+    expect(paths).toEqual([versionPath, packagePath, versionPath, versionPath]);
+  } finally {
+    server.stop(true);
+  }
+});
+
+it('times out a stalled fallback before the overall deadline', async () => {
+  const { server, options, paths } = fallbackRegistry(async () => {
+    await Bun.sleep(500);
+    return Response.json({
+      name: manifest.name,
+      versions: { [release.version]: manifest },
+    });
+  });
+  try {
+    await expect(
+      waitForPublishedPackage(release, {
+        ...options,
+        requestTimeoutMs: 150,
+        maxWaitMs: 2000,
+      })
+    ).rejects.toThrow('request failed');
+    expect(paths).toEqual([versionPath, packagePath]);
   } finally {
     server.stop(true);
   }
