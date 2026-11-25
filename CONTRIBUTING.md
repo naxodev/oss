@@ -75,9 +75,13 @@ Non-null attestations means provenance is present; the package page on npmjs.com
 
 ### Trusted publisher (one-time npm setup)
 
-Each package's npmjs.com settings must point Trusted Publisher at repository `naxodev/oss`, workflow **`publish.yml`**, with the environment field **left blank** (the preview job runs without an environment; a single trusted-publisher entry covers both jobs). After this workflow lands, publishes fail loudly with an OIDC error until the Trusted Publisher entry is updated from the previous `publish-pr.yml` filename.
+For both `@naxodev/gonx` and `@naxodev/nx-cloudflare`, set the npm trusted publisher to GitHub Actions, repository `naxodev/oss`, workflow `publish.yml`, and environment **`production`**. If the existing publisher has a blank environment, update it on npm. The workflow file alone cannot enforce this restriction on npm's side.
 
-Also create a GitHub Environment named `production` (repo Settings → Environments) and add yourself as a required reviewer to gate production publishes.
+In GitHub Settings → Environments → `production`, require a release reviewer and restrict deployments to the default branch (for manual reruns) and the two release tag patterns (`gonx@v*`, `nx-cloudflare@v*`). Restrict creation and updates of those tags to release maintainers using tag rulesets. A tag author chooses the source that the production job builds.
+
+### Try a PR build
+
+Add the `publish-preview` label to a same-repository PR. Open its **Preview packages** Actions run and download the `preview-packages-pr-…` artifact. Unzip it and install the tarball you want in a test workspace, for example `npm install ./naxodev-gonx-0.0.0-pr.<pr>.<run>.<attempt>.tgz`. These artifacts expire after 14 days. Preview builds do not update npm versions or dist-tags.
 
 ### Dist-tag hygiene
 
