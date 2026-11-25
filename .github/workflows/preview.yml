@@ -1,0 +1,56 @@
+name: Preview packages
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'publish-preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: preview-packages-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: bun install --frozen-lockfile
+
+      - name: Build and pack both plugins
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          NX_NO_CLOUD: 'true'
+        run: |
+          version="0.0.0-pr.$PR_NUMBER.$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT"
+          for project in gonx nx-cloudflare; do
+            (cd "packages/$project" && npm pkg set "version=$version")
+          done
+          bunx nx run-many -t build -p gonx nx-cloudflare --skip-nx-cache
+          mkdir -p "$RUNNER_TEMP/preview"
+          for project in gonx nx-cloudflare; do
+            npm pack "./dist/packages/$project" --ignore-scripts --pack-destination "$RUNNER_TEMP/preview"
+          done
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: preview-packages-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/preview/*.tgz
+          if-no-files-found: error
+          retention-days: 14
